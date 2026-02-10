@@ -65,36 +65,59 @@ export default function ClientOrdersPage() {
           <p className="text-gray-400">Загрузка...</p>
         ) : orders.length > 0 ? (
           <div className="space-y-4">
-            {orders.map((order) => (
-              <div
-                key={order.id}
-                className="border border-gray-700 bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition cursor-pointer"
-                onClick={() => router.push(`/dashboard/client/orders/${order.id}`)}
-              >
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <p className="font-medium text-white">Заказ #{order.id.slice(0, 8)}</p>
-                    <p className="text-sm text-gray-300 mt-1">
-                      {order.pickup_address} → {order.delivery_address}
-                    </p>
-                    <p className="text-sm text-gray-400 mt-2">
-                      Статус: {getStatusLabel(order.status)}
-                    </p>
-                    {order.description && (
-                      <p className="text-sm text-gray-400 mt-1">
-                        {order.description}
+            {orders.map((order) => {
+              // Проверяем, можно ли редактировать заказ
+              const canEdit = order.status === 'searching_courier' && !order.executor_user_id
+              
+              return (
+                <div
+                  key={order.id}
+                  className="border border-gray-700 bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition"
+                >
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <p className="font-medium text-white">Заказ #{order.id.slice(0, 8)}</p>
+                      <p className="text-sm text-gray-300 mt-1">
+                        {order.pickup_address} → {order.delivery_address}
                       </p>
-                    )}
+                      <p className="text-sm text-gray-400 mt-2">
+                        Статус: {getStatusLabel(order.status)}
+                      </p>
+                      {order.description && (
+                        <p className="text-sm text-gray-400 mt-1">
+                          {order.description}
+                        </p>
+                      )}
+                    </div>
+                    <div className="text-right ml-4">
+                      <p className="font-semibold text-lg text-white">{order.final_price} BYN</p>
+                      <p className="text-xs text-gray-400 mt-1">
+                        {new Date(order.created_at).toLocaleDateString('ru-RU')}
+                      </p>
+                    </div>
                   </div>
-                  <div className="text-right ml-4">
-                    <p className="font-semibold text-lg text-white">{order.final_price} BYN</p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      {new Date(order.created_at).toLocaleDateString('ru-RU')}
-                    </p>
+                  <div className="flex gap-2 mt-3">
+                    {canEdit && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          router.push(`/dashboard/client/orders/${order.id}/edit`)
+                        }}
+                        className="flex-1 bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700 transition"
+                      >
+                        Редактировать
+                      </button>
+                    )}
+                    <button
+                      onClick={() => router.push(`/dashboard/client/orders/${order.id}`)}
+                      className={`${canEdit ? 'flex-1' : 'w-full'} bg-gray-600 text-white px-4 py-2 rounded text-sm hover:bg-gray-500 transition`}
+                    >
+                      Детали
+                    </button>
                   </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         ) : (
           <p className="text-gray-400">У вас пока нет заказов</p>
