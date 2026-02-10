@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { formatDistanceToNow } from 'date-fns'
+import { ru } from 'date-fns/locale'
 
 interface Order {
   id: string
@@ -11,6 +13,7 @@ interface Order {
   final_price: number
   item_type: 'documents' | 'parcel' | 'flowers' | 'food' | 'other' | null
   description: string | null
+  created_at: string
 }
 
 interface AvailableOrdersListProps {
@@ -87,6 +90,24 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId }: Ava
               </p>
               <p className="text-sm text-gray-400 mt-1">
                 Тип груза: <span className="text-gray-300">{getItemTypeLabel(order.item_type)}</span>
+              </p>
+              <p className="text-sm text-gray-400 mt-1">
+                Создан: <span className="text-gray-300">
+                  {new Date(order.created_at).toLocaleString('ru-RU', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </span>
+                {' • '}
+                <span className="text-gray-300">
+                  {formatDistanceToNow(new Date(order.created_at), {
+                    addSuffix: true,
+                    locale: ru
+                  })}
+                </span>
               </p>
               {order.description && (
                 <p className="text-sm text-gray-400 mt-2 italic">
