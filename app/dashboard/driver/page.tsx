@@ -73,15 +73,15 @@ export default async function DriverDashboard() {
     console.error('Ошибка загрузки всех заказов водителя:', allOrdersError)
   }
 
-  // Также проверяем заказы через driver_id (для обратной совместимости)
-  const { data: ordersByDriverId, error: driverIdError } = await supabase
+  // Проверяем все заказы с executor_user_id (без фильтра по статусу) для отладки
+  const { data: allOrdersDebug, error: debugError } = await supabase
     .from('orders')
-    .select('id, driver_id, executor_user_id, status')
-    .not('driver_id', 'is', null)
+    .select('id, executor_user_id, status, created_at')
+    .eq('executor_user_id', user.id)
     .order('created_at', { ascending: false })
     .limit(10)
   
-  console.log('Driver Dashboard - Orders by driver_id (for debugging):', ordersByDriverId?.length || 0)
+  console.log('Driver Dashboard - All orders with executor_user_id (for debugging):', allOrdersDebug?.length || 0)
 
   // Фильтруем только активные заказы, которые водитель выполняет
   // Статусы: courier_coming (едет за посылкой) и courier_delivering (доставляет заказ)
