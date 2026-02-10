@@ -98,7 +98,13 @@ export default async function AdminOrdersPage() {
                     {order.final_price} BYN
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
-                    {new Date(order.created_at).toLocaleDateString('ru-RU')}
+                    {new Date(order.created_at).toLocaleString('ru-RU', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
                   </td>
                 </tr>
               ))

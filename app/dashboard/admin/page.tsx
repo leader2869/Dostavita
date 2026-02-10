@@ -73,6 +73,30 @@ export default async function AdminDashboard() {
     error: statsError?.message
   })
 
+  // Получаем активные заказы (статусы: searching_courier, courier_coming, courier_delivering)
+  // Сортируем по времени создания (старые сверху)
+  let { data: activeOrders, error: activeOrdersError } = await supabase
+    .from('orders')
+    .select('*')
+    .in('status', ['searching_courier', 'courier_coming', 'courier_delivering'])
+    .order('created_at', { ascending: true })
+    .limit(20)
+  
+  // Fallback, если прямой запрос не работает
+  if (activeOrdersError || !activeOrders) {
+    console.log('AdminDashboard - Прямой запрос активных заказов не сработал, пробуем RPC...')
+    const { data: allOrders } = await supabase
+      .rpc('get_all_orders_for_admin', { limit_count: 100 })
+    
+    if (allOrders) {
+      activeOrders = allOrders.filter((order: any) => 
+        ['searching_courier', 'courier_coming', 'courier_delivering'].includes(order.status)
+      ).sort((a: any, b: any) => 
+        new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      ).slice(0, 20)
+    }
+  }
+
   return (
     <div>
       <h1 className="text-3xl font-bold mb-6 text-white">
@@ -94,6 +118,49 @@ export default async function AdminDashboard() {
           <h2 className="text-lg font-semibold mb-2 text-white">Водителей</h2>
           <p className="text-3xl font-bold text-white">{driversCount || 0}</p>
         </div>
+      </div>
+
+      {/* Активные заказы */}
+      <div className="bg-gray-800 rounded-lg shadow p-6 mb-6">
+        <h2 className="text-xl font-semibold mb-4 text-white">Активные заказы</h2>
+        {activeOrders && activeOrders.length > 0 ? (
+          <div className="space-y-3">
+            {activeOrders.map((order: any) => (
+              <div key={order.id} className="border border-gray-700 rounded-lg p-4 bg-gray-700">
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <p className="font-medium text-white">Заказ #{order.id.slice(0, 8)}</p>
+                    <p className="text-sm text-gray-300 mt-1">
+                      {order.pickup_address} → {order.delivery_address}
+                    </p>
+                    <p className="text-sm text-gray-400 mt-1">
+                      Статус: {
+                        order.status === 'searching_courier' ? 'Ищем курьера' :
+                        order.status === 'courier_coming' ? 'Курьер едет' :
+                        order.status === 'courier_delivering' ? 'Доставляется' :
+                        order.status
+                      }
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Создан: {new Date(order.created_at).toLocaleString('ru-RU', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </p>
+                  </div>
+                  <div className="text-right ml-4">
+                    <p className="font-semibold text-white">{order.final_price} BYN</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-400">Нет активных заказов</p>
+        )}
       </div>
 
       {/* Навигация */}
