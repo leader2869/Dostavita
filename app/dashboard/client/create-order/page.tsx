@@ -43,6 +43,13 @@ export default function CreateOrderPage() {
     setError(null)
 
     try {
+      // Валидация: проверяем, что регион выбран
+      if (!selectedRegion || selectedRegion === '') {
+        setError('Пожалуйста, выберите регион')
+        setLoading(false)
+        return
+      }
+
       // Получаем текущего пользователя
       const { data: { user } } = await supabase.auth.getUser()
       
@@ -59,7 +66,14 @@ export default function CreateOrderPage() {
 
       // Получаем базовую цену региона
       const selectedRegionData = regions.find(r => r.id === selectedRegion)
-      const basePrice = selectedRegionData?.base_price || 10.00
+      
+      if (!selectedRegionData) {
+        setError('Выбранный регион не найден')
+        setLoading(false)
+        return
+      }
+
+      const basePrice = selectedRegionData.base_price
 
       // Создаем заказ
       const { data: order, error: orderError } = await supabase
