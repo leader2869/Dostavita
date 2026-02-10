@@ -56,11 +56,12 @@ export default function DriverMyOrdersPage() {
 
       // Получаем только выполняемые заказы водителя (где executor_user_id равен ID текущего пользователя)
       // Фильтруем только активные статусы: courier_coming и courier_delivering
+      // ВАЖНО: также включаем searching_courier, если executor_user_id установлен (временная мера для исправления)
       const { data: ordersData, error } = await supabase
         .from('orders')
         .select('*')
         .eq('executor_user_id', user.id)
-        .in('status', ['courier_coming', 'courier_delivering'])
+        .in('status', ['courier_coming', 'courier_delivering', 'searching_courier'])
         .order('created_at', { ascending: false })
 
       console.log('=== Active orders query result ===')
@@ -86,15 +87,19 @@ export default function DriverMyOrdersPage() {
         setOrders([])
       } else {
         // Дополнительная фильтрация на клиенте для безопасности
+        // Включаем searching_courier, если executor_user_id установлен (временная мера)
         const activeOrders = (ordersData || []).filter((order: any) => 
-          order.status === 'courier_coming' || order.status === 'courier_delivering'
+          order.status === 'courier_coming' || 
+          order.status === 'courier_delivering' ||
+          (order.status === 'searching_courier' && order.executor_user_id) // Временная мера
         )
         console.log('=== Final filtered active orders ===')
         console.log('Count:', activeOrders.length)
         if (activeOrders.length > 0) {
           console.log('Orders to display:', activeOrders.map((o: any) => ({
             id: o.id?.slice(0, 8),
-            status: o.status
+            status: o.status,
+            executor_user_id: o.executor_user_id ? 'set' : 'null'
           })))
         }
         setOrders(activeOrders)
