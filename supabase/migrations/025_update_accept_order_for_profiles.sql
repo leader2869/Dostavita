@@ -1,5 +1,9 @@
 -- Миграция 025: Обновление функции accept_order для работы с profiles вместо drivers
 
+-- Удаляем старую функцию
+DROP FUNCTION IF EXISTS public.accept_order(UUID, UUID);
+
+-- Создаем новую функцию с обновленными параметрами
 CREATE OR REPLACE FUNCTION public.accept_order(order_uuid UUID, driver_user_uuid UUID)
 RETURNS BOOLEAN AS $$
 DECLARE
