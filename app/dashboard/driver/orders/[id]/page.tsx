@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import type { Order } from '@/lib/types'
@@ -17,11 +17,7 @@ export default function OrderDetailsPage() {
   const [processing, setProcessing] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    loadOrder()
-  }, [orderId])
-
-  const loadOrder = async () => {
+  const loadOrder = useCallback(async () => {
     try {
       const { data, error: fetchError } = await supabase
         .from('orders')
@@ -36,7 +32,11 @@ export default function OrderDetailsPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [orderId, supabase])
+
+  useEffect(() => {
+    loadOrder()
+  }, [loadOrder])
 
   const handlePickup = async () => {
     setProcessing(true)

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import type { Region } from '@/lib/types'
@@ -20,11 +20,7 @@ export default function CreateOrderPage() {
   const [selectedRegion, setSelectedRegion] = useState('')
   const [itemType, setItemType] = useState<'documents' | 'parcel' | 'flowers' | 'food'>('parcel')
 
-  useEffect(() => {
-    loadRegions()
-  }, [])
-
-  const loadRegions = async () => {
+  const loadRegions = useCallback(async () => {
     const { data } = await supabase
       .from('regions')
       .select('*')
@@ -37,7 +33,11 @@ export default function CreateOrderPage() {
         setSelectedRegion(data[0].id)
       }
     }
-  }
+  }, [supabase])
+
+  useEffect(() => {
+    loadRegions()
+  }, [loadRegions])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

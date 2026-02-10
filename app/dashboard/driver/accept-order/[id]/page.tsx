@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import type { Order, Driver } from '@/lib/types'
@@ -18,11 +18,7 @@ export default function AcceptOrderPage() {
   const [accepting, setAccepting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    loadData()
-  }, [orderId])
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       // Загружаем заказ
       const { data: orderData, error: orderError } = await supabase
@@ -51,7 +47,11 @@ export default function AcceptOrderPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [orderId, supabase])
+
+  useEffect(() => {
+    loadData()
+  }, [loadData])
 
   const handleAccept = async () => {
     if (!driver) {

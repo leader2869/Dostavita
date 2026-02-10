@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import type { Driver } from '@/lib/types'
@@ -19,11 +19,7 @@ export default function DriverProfilePage() {
   const [vehicleNumber, setVehicleNumber] = useState('')
   const [licenseNumber, setLicenseNumber] = useState('')
 
-  useEffect(() => {
-    loadDriver()
-  }, [])
-
-  const loadDriver = async () => {
+  const loadDriver = useCallback(async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
@@ -52,7 +48,11 @@ export default function DriverProfilePage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [supabase, router])
+
+  useEffect(() => {
+    loadDriver()
+  }, [loadDriver])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
