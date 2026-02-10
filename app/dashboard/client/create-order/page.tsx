@@ -29,9 +29,7 @@ export default function CreateOrderPage() {
 
     if (data) {
       setRegions(data)
-      if (data.length > 0) {
-        setSelectedRegion(data[0].id)
-      }
+      // Не устанавливаем автоматически, пусть пользователь выберет
     }
   }, [supabase])
 
