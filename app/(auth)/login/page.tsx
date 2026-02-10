@@ -50,10 +50,10 @@ export default function LoginPage() {
         }
 
         console.log('Аутентификация успешна, переходим в дашборд...')
+        console.log('User ID:', verifiedUser.id)
         
-        // Редиректим сразу после успешной аутентификации
-        router.push('/dashboard')
-        router.refresh()
+        // Используем window.location для полной перезагрузки страницы
+        window.location.href = '/dashboard'
       } else {
         console.error('Пользователь не найден в data')
         setError('Пользователь не найден')
