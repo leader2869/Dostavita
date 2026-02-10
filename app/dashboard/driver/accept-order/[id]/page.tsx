@@ -112,13 +112,24 @@ export default function AcceptOrderPage() {
         .eq('id', orderId)
         .single()
       
-      console.log('Order AFTER accept:')
-      console.log('  - Updated order:', updatedOrder)
-      console.log('  - Check error:', checkError)
+      console.log('=== Order AFTER accept ===')
+      console.log('Updated order:', updatedOrder)
+      console.log('Check error:', checkError)
       if (updatedOrder) {
-        console.log('  - executor_user_id:', updatedOrder.executor_user_id)
-        console.log('  - status:', updatedOrder.status)
-        console.log('  - Matches user ID?', updatedOrder.executor_user_id === user.id)
+        console.log('executor_user_id:', updatedOrder.executor_user_id)
+        console.log('status:', updatedOrder.status)
+        console.log('Matches user ID?', updatedOrder.executor_user_id === user.id)
+        console.log('Expected status: courier_coming')
+        console.log('Actual status:', updatedOrder.status)
+        if (updatedOrder.status !== 'courier_coming') {
+          console.error('⚠️ ПРОБЛЕМА: Статус не изменился на courier_coming!')
+          console.error('Возможно, миграция 025 не применена или функция работает неправильно')
+        }
+        if (updatedOrder.executor_user_id !== user.id) {
+          console.error('⚠️ ПРОБЛЕМА: executor_user_id не установлен!')
+        }
+      } else {
+        console.error('❌ Заказ не найден после принятия!')
       }
 
       // Переходим на страницу "Мои заказы" после принятия заказа
