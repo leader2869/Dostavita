@@ -40,7 +40,7 @@ export default async function DriverDashboard() {
   // Получаем доступные заказы (все заказы со статусом "ищем курьера")
   const { data: availableOrders } = await supabase
     .from('orders')
-    .select('*')
+    .select('id, pickup_address, delivery_address, final_price, item_type, description')
     .eq('status', 'searching_courier')
     .order('created_at', { ascending: false })
     .limit(10)

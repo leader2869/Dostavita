@@ -9,11 +9,30 @@ interface Order {
   pickup_address: string
   delivery_address: string
   final_price: number
+  item_type: 'documents' | 'parcel' | 'flowers' | 'food' | 'other' | null
+  description: string | null
 }
 
 interface AvailableOrdersListProps {
   orders: Order[]
   driverUserId: string
+}
+
+const getItemTypeLabel = (itemType: string | null): string => {
+  switch (itemType) {
+    case 'documents':
+      return 'Документы'
+    case 'parcel':
+      return 'Посылка'
+    case 'flowers':
+      return 'Цветы'
+    case 'food':
+      return 'Еда'
+    case 'other':
+      return 'Другое'
+    default:
+      return 'Не указан'
+  }
 }
 
 export function AvailableOrdersList({ orders: initialOrders, driverUserId }: AvailableOrdersListProps) {
@@ -61,15 +80,23 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId }: Ava
       {orders.map((order) => (
         <div key={order.id} className="border border-gray-700 rounded-lg p-4">
           <div className="flex justify-between items-start mb-3">
-            <div>
+            <div className="flex-1">
               <p className="font-medium text-white">Заказ #{order.id.slice(0, 8)}</p>
-              <p className="text-sm text-gray-300">
+              <p className="text-sm text-gray-300 mt-1">
                 {order.pickup_address} → {order.delivery_address}
               </p>
+              <p className="text-sm text-gray-400 mt-1">
+                Тип груза: <span className="text-gray-300">{getItemTypeLabel(order.item_type)}</span>
+              </p>
+              {order.description && (
+                <p className="text-sm text-gray-400 mt-2 italic">
+                  {order.description}
+                </p>
+              )}
             </div>
-            <p className="font-semibold text-white">{order.final_price} BYN</p>
+            <p className="font-semibold text-white ml-4">{order.final_price} BYN</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 mt-3">
             <a
               href={`/dashboard/driver/accept-order/${order.id}`}
               className="flex-1 text-center bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700 transition"
