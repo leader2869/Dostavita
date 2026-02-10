@@ -143,9 +143,6 @@ export default async function DashboardLayout({
               <span className="text-sm text-gray-300">
                 {(profile as User).full_name || (profile as User).email}
               </span>
-              <span className="text-xs text-gray-400">
-                ({(profile as User).role})
-              </span>
               <form action="/auth/signout" method="post">
                 <button
                   type="submit"
