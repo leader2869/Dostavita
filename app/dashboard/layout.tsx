@@ -71,8 +71,8 @@ export default async function DashboardLayout({
 
   console.log('Dashboard Layout - Результат загрузки профиля:', {
     hasProfile: !!profile,
-    profileId: profile?.id,
-    profileRole: profile?.role,
+    profileId: (profile as User | null)?.id,
+    profileRole: (profile as User | null)?.role,
     error: profileError?.message
   })
 
@@ -115,7 +115,7 @@ export default async function DashboardLayout({
     }
 
     profile = newProfile
-    console.log('✅ Dashboard Layout - Профиль создан автоматически:', profile?.role)
+    console.log('✅ Dashboard Layout - Профиль создан автоматически:', (profile as User | null)?.role)
   } else if (profileError) {
     console.error('❌ Dashboard Layout - Ошибка загрузки профиля:', profileError)
     console.log('Редирект на /login из-за ошибки загрузки профиля')
@@ -128,7 +128,7 @@ export default async function DashboardLayout({
     redirect('/login')
   }
 
-  console.log('✅ Dashboard Layout - Профиль загружен успешно:', profile.role)
+  console.log('✅ Dashboard Layout - Профиль загружен успешно:', (profile as User).role)
   console.log('========================================')
 
   return (
