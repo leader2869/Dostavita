@@ -65,7 +65,7 @@ export default async function AdminTariffsPage() {
   return (
     <div>
       <BackButton />
-      <h1 className="text-3xl font-bold mb-6">Управление тарифами</h1>
+      <h1 className="text-3xl font-bold mb-6 text-white">Управление тарифами</h1>
 
       <div className="bg-gray-800 rounded-lg shadow overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">

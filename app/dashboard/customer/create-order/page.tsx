@@ -97,7 +97,7 @@ export default function CreateOrderPage() {
   return (
     <div className="max-w-2xl mx-auto">
       <BackButton />
-      <h1 className="text-3xl font-bold mb-6">Создать заказ</h1>
+      <h1 className="text-3xl font-bold mb-6 text-white">Создать заказ</h1>
 
       <form onSubmit={handleSubmit} className="bg-gray-800 rounded-lg shadow p-6 space-y-4">
         <div>

@@ -55,12 +55,12 @@ export default async function DriverFinancePage() {
   return (
     <div>
       <BackButton />
-      <h1 className="text-3xl font-bold mb-6">Финансы</h1>
+      <h1 className="text-3xl font-bold mb-6 text-white">Финансы</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Баланс */}
         <div className="bg-gray-800 rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold mb-4">Баланс</h2>
+          <h2 className="text-xl font-semibold mb-4 text-white">Баланс</h2>
           <p className="text-3xl font-bold text-green-600">
             {balance?.amount || 0} {balance?.currency || 'BYN'}
           </p>
@@ -68,14 +68,14 @@ export default async function DriverFinancePage() {
 
         {/* Статистика */}
         <div className="bg-gray-800 rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold mb-4">Статистика</h2>
+          <h2 className="text-xl font-semibold mb-4 text-white">Статистика</h2>
           <p className="text-gray-300">Всего транзакций: {transactions?.length || 0}</p>
         </div>
       </div>
 
       {/* Транзакции */}
       <div className="bg-gray-800 rounded-lg shadow p-6 mt-6">
-        <h2 className="text-xl font-semibold mb-4">История транзакций</h2>
+        <h2 className="text-xl font-semibold mb-4 text-white">История транзакций</h2>
         {transactions && transactions.length > 0 ? (
           <div className="space-y-2">
             {transactions.map((transaction: any) => (

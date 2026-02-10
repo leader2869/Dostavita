@@ -70,7 +70,7 @@ export default async function AdminUsersPage() {
   return (
     <div>
       <BackButton />
-      <h1 className="text-3xl font-bold mb-6">Управление пользователями</h1>
+      <h1 className="text-3xl font-bold mb-6 text-white">Управление пользователями</h1>
 
       <div className="bg-gray-800 rounded-lg shadow overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">

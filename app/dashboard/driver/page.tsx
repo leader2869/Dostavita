@@ -56,7 +56,7 @@ export default async function DriverDashboard() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-6">Панель исполнителя</h1>
+      <h1 className="text-3xl font-bold mb-6 text-white">Панель исполнителя</h1>
       
       {/* Навигация */}
       <div className="mb-6 flex gap-4">
@@ -77,7 +77,7 @@ export default async function DriverDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Доступные заказы */}
         <div className="bg-gray-800 rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold mb-4">Доступные заказы</h2>
+          <h2 className="text-xl font-semibold mb-4 text-white">Доступные заказы</h2>
           {availableOrders && availableOrders.length > 0 ? (
             <div className="space-y-4">
               {availableOrders.map((order: any) => (
@@ -107,7 +107,7 @@ export default async function DriverDashboard() {
 
         {/* Мои заказы */}
         <div className="bg-gray-800 rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold mb-4">Мои заказы</h2>
+          <h2 className="text-xl font-semibold mb-4 text-white">Мои заказы</h2>
           {myOrders && myOrders.length > 0 ? (
             <div className="space-y-4">
               {myOrders.map((order: any) => (

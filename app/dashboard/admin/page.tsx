@@ -75,7 +75,7 @@ export default async function AdminDashboard() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-6">
+      <h1 className="text-3xl font-bold mb-6 text-white">
         Панель администратора
         {(profile as User).role === 'superadmin' && ' (Суперадмин)'}
       </h1>
@@ -83,15 +83,15 @@ export default async function AdminDashboard() {
       {/* Статистика */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <div className="bg-gray-800 rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold mb-2">Всего заказов</h2>
+          <h2 className="text-lg font-semibold mb-2 text-white">Всего заказов</h2>
           <p className="text-3xl font-bold">{ordersCount || 0}</p>
         </div>
         <div className="bg-gray-800 rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold mb-2">Пользователей</h2>
+          <h2 className="text-lg font-semibold mb-2 text-white">Пользователей</h2>
           <p className="text-3xl font-bold">{usersCount || 0}</p>
         </div>
         <div className="bg-gray-800 rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold mb-2">Водителей</h2>
+          <h2 className="text-lg font-semibold mb-2 text-white">Водителей</h2>
           <p className="text-3xl font-bold">{driversCount || 0}</p>
         </div>
       </div>
@@ -102,7 +102,7 @@ export default async function AdminDashboard() {
           href="/dashboard/admin/orders"
           className="bg-gray-800 rounded-lg shadow p-6 hover:shadow-lg transition"
         >
-          <h3 className="font-semibold mb-2">Управление заказами</h3>
+          <h3 className="font-semibold mb-2 text-white">Управление заказами</h3>
           <p className="text-sm text-gray-300">Просмотр и управление всеми заказами</p>
         </a>
 
@@ -110,7 +110,7 @@ export default async function AdminDashboard() {
           href="/dashboard/admin/users"
           className="bg-gray-800 rounded-lg shadow p-6 hover:shadow-lg transition"
         >
-          <h3 className="font-semibold mb-2">Управление пользователями</h3>
+          <h3 className="font-semibold mb-2 text-white">Управление пользователями</h3>
           <p className="text-sm text-gray-300">Просмотр и редактирование пользователей</p>
         </a>
 
@@ -118,7 +118,7 @@ export default async function AdminDashboard() {
           href="/dashboard/admin/personnel"
           className="bg-gray-800 rounded-lg shadow p-6 hover:shadow-lg transition"
         >
-          <h3 className="font-semibold mb-2">Управление персоналом</h3>
+          <h3 className="font-semibold mb-2 text-white">Управление персоналом</h3>
           <p className="text-sm text-gray-300">Управление водителями и автопарками</p>
         </a>
 
@@ -127,7 +127,7 @@ export default async function AdminDashboard() {
             href="/dashboard/admin/tariffs"
             className="bg-gray-800 rounded-lg shadow p-6 hover:shadow-lg transition"
           >
-            <h3 className="font-semibold mb-2">Управление тарифами</h3>
+            <h3 className="font-semibold mb-2 text-white">Управление тарифами</h3>
             <p className="text-sm text-gray-300">Настройка регионов и цен</p>
           </a>
         )}

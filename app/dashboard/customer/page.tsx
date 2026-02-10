@@ -46,10 +46,10 @@ export default async function CustomerDashboard() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-6">Панель организации</h1>
+      <h1 className="text-3xl font-bold mb-6 text-white">Панель организации</h1>
       
       <div className="bg-gray-800 rounded-lg shadow p-6 mb-6">
-        <h2 className="text-xl font-semibold mb-4">Мои заказы</h2>
+        <h2 className="text-xl font-semibold mb-4 text-white">Мои заказы</h2>
         {orders && orders.length > 0 ? (
           <div className="space-y-4">
             {orders.map((order: any) => (

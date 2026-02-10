@@ -58,7 +58,7 @@ export default function ClientOrdersPage() {
 
   return (
     <div className="pb-20">
-      <h1 className="text-3xl font-bold mb-6">Мои заказы</h1>
+      <h1 className="text-3xl font-bold mb-6 text-white">Мои заказы</h1>
 
       <div className="bg-gray-800 rounded-lg shadow p-6">
         {loading ? (

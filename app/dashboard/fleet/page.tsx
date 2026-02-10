@@ -59,11 +59,11 @@ export default async function FleetDashboard() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-6">Панель автопарка</h1>
+      <h1 className="text-3xl font-bold mb-6 text-white">Панель автопарка</h1>
 
       {fleet && (
         <div className="bg-gray-800 rounded-lg shadow p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4">{fleet.name}</h2>
+          <h2 className="text-xl font-semibold mb-4 text-white">{fleet.name}</h2>
           <p className="text-gray-300 mb-2">{fleet.description || 'Нет описания'}</p>
           <div className="grid grid-cols-3 gap-4 mt-4">
             <div>
@@ -83,7 +83,7 @@ export default async function FleetDashboard() {
       )}
 
       <div className="bg-gray-800 rounded-lg shadow p-6">
-        <h2 className="text-xl font-semibold mb-4">Водители автопарка</h2>
+        <h2 className="text-xl font-semibold mb-4 text-white">Водители автопарка</h2>
         {drivers && drivers.length > 0 ? (
           <div className="space-y-4">
             {drivers.map((driver: any) => (
