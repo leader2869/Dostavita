@@ -68,12 +68,12 @@ export default function ClientOrdersPage() {
             {orders.map((order) => (
               <div
                 key={order.id}
-                className="border rounded-lg p-4 hover:shadow-md transition"
+                className="border border-gray-700 bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition cursor-pointer"
                 onClick={() => router.push(`/dashboard/client/orders/${order.id}`)}
               >
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
-                    <p className="font-medium">Заказ #{order.id.slice(0, 8)}</p>
+                    <p className="font-medium text-white">Заказ #{order.id.slice(0, 8)}</p>
                     <p className="text-sm text-gray-300 mt-1">
                       {order.pickup_address} → {order.delivery_address}
                     </p>
@@ -87,7 +87,7 @@ export default function ClientOrdersPage() {
                     )}
                   </div>
                   <div className="text-right ml-4">
-                    <p className="font-semibold text-lg">{order.final_price} BYN</p>
+                    <p className="font-semibold text-lg text-white">{order.final_price} BYN</p>
                     <p className="text-xs text-gray-400 mt-1">
                       {new Date(order.created_at).toLocaleDateString('ru-RU')}
                     </p>

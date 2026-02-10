@@ -142,7 +142,7 @@ export default function ClientProfilePage() {
             type="text"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
+            className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
             placeholder="Введите ваше ФИО"
           />
         </div>
@@ -156,13 +156,13 @@ export default function ClientProfilePage() {
             type="tel"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
+            className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
             placeholder="+375 (XX) XXX-XX-XX"
           />
         </div>
 
         {error && (
-          <div className="text-red-600 text-sm bg-red-50 p-3 rounded">{error}</div>
+          <div className="text-red-400 text-sm bg-red-900 bg-opacity-30 p-3 rounded border border-red-800">{error}</div>
         )}
 
         <div className="flex gap-4">
