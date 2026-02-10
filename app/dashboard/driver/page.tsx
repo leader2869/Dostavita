@@ -36,13 +36,11 @@ export default async function DriverDashboard() {
     redirect('/dashboard')
   }
 
-  // Получаем доступные заказы (публичные, статус "ищем курьера")
+  // Получаем доступные заказы (все заказы со статусом "ищем курьера")
   const { data: availableOrders } = await supabase
     .from('orders')
     .select('*')
     .eq('status', 'searching_courier')
-    .eq('visibility', 'public')
-    .is('driver_id', null)
     .order('created_at', { ascending: false })
     .limit(10)
 
