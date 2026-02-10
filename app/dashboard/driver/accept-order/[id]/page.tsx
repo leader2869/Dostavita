@@ -77,7 +77,7 @@ export default function AcceptOrderPage() {
       // Сначала проверяем заказ до принятия
       const { data: orderBefore, error: orderBeforeError } = await supabase
         .from('orders')
-        .select('id, status, executor_user_id, driver_id')
+        .select('id, status, executor_user_id')
         .eq('id', orderId)
         .single()
       
@@ -115,7 +115,7 @@ export default function AcceptOrderPage() {
       // Проверяем, что заказ был обновлен
       const { data: updatedOrder, error: checkError } = await supabase
         .from('orders')
-        .select('id, executor_user_id, status, driver_id, accepted_at')
+        .select('id, executor_user_id, status, accepted_at')
         .eq('id', orderId)
         .single()
       
