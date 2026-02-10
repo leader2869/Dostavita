@@ -70,16 +70,32 @@ export default function AcceptOrderPage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Не авторизован')
 
+      console.log('Accepting order:', { orderId, userId: user.id })
+      
       const { data, error: rpcError } = await supabase.rpc('accept_order', {
         order_uuid: orderId,
         driver_user_uuid: user.id,
       })
 
-      if (rpcError) throw rpcError
+      console.log('Accept order result:', { data, error: rpcError })
+
+      if (rpcError) {
+        console.error('RPC Error:', rpcError)
+        throw rpcError
+      }
 
       if (data === false) {
         throw new Error('Не удалось принять заказ. Убедитесь, что вы на линии и заказ доступен.')
       }
+
+      // Проверяем, что заказ был обновлен
+      const { data: updatedOrder, error: checkError } = await supabase
+        .from('orders')
+        .select('id, executor_user_id, status')
+        .eq('id', orderId)
+        .single()
+      
+      console.log('Order after accept:', { updatedOrder, checkError })
 
       router.push('/dashboard/driver')
     } catch (err: any) {

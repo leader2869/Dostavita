@@ -56,13 +56,34 @@ export default async function DriverDashboard() {
   const filteredOrders = availableOrders?.filter(order => !rejectedOrderIds.has(order.id)) || []
 
   // Получаем активные заказы водителя (где executor_user_id равен ID текущего пользователя)
-  const { data: myOrders } = await supabase
+  // Пробуем сначала без фильтра по статусу, чтобы увидеть все заказы
+  const { data: allMyOrders, error: allOrdersError } = await supabase
+    .from('orders')
+    .select('id, executor_user_id, status, created_at')
+    .eq('executor_user_id', user.id)
+    .order('created_at', { ascending: false })
+    .limit(20)
+
+  console.log('Driver Dashboard - User ID:', user.id)
+  console.log('Driver Dashboard - All My Orders (no status filter):', allMyOrders?.length || 0, allMyOrders)
+  if (allOrdersError) {
+    console.error('Ошибка загрузки всех заказов водителя:', allOrdersError)
+  }
+
+  // Фильтруем только активные заказы
+  const { data: myOrders, error: myOrdersError } = await supabase
     .from('orders')
     .select('*')
     .eq('executor_user_id', user.id)
     .in('status', ['courier_coming', 'courier_delivering', 'searching_courier'])
     .order('created_at', { ascending: false })
     .limit(10)
+
+  // Логирование для отладки
+  if (myOrdersError) {
+    console.error('Ошибка загрузки активных заказов водителя:', myOrdersError)
+  }
+  console.log('Driver Dashboard - Active Orders:', myOrders?.length || 0, myOrders)
 
   return (
     <div>
