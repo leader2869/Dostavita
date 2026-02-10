@@ -138,10 +138,27 @@ export default function AcceptOrderPage() {
             {accepting ? 'Принятие...' : 'Принять заказ'}
           </button>
           <button
-            onClick={() => router.back()}
-            className="px-6 py-2 border border-gray-600 rounded-md hover:bg-gray-900"
+            onClick={async () => {
+              try {
+                const response = await fetch('/api/driver/reject-order', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ orderId: order.id }),
+                })
+                const data = await response.json()
+                if (response.ok) {
+                  router.push('/dashboard/driver')
+                } else {
+                  setError(data.error || 'Ошибка при отклонении заказа')
+                }
+              } catch (err: any) {
+                setError(err.message || 'Ошибка при отклонении заказа')
+              }
+            }}
+            disabled={accepting || !driver}
+            className="flex-1 bg-red-600 text-white px-6 py-2 rounded-md hover:bg-red-700 disabled:opacity-50"
           >
-            Отмена
+            Отказаться
           </button>
         </div>
       </div>

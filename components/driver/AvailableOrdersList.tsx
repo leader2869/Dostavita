@@ -1,0 +1,92 @@
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
+
+interface Order {
+  id: string
+  pickup_address: string
+  delivery_address: string
+  final_price: number
+}
+
+interface AvailableOrdersListProps {
+  orders: Order[]
+  driverUserId: string
+}
+
+export function AvailableOrdersList({ orders: initialOrders, driverUserId }: AvailableOrdersListProps) {
+  const router = useRouter()
+  const supabase = createClient()
+  const [orders, setOrders] = useState(initialOrders)
+  const [rejecting, setRejecting] = useState<string | null>(null)
+
+  const handleReject = async (orderId: string) => {
+    setRejecting(orderId)
+    
+    try {
+      const response = await fetch('/api/driver/reject-order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ orderId }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        alert(data.error || 'Ошибка при отклонении заказа')
+        setRejecting(null)
+        return
+      }
+
+      // Удаляем заказ из списка
+      setOrders(orders.filter(order => order.id !== orderId))
+    } catch (error: any) {
+      console.error('Ошибка при отклонении заказа:', error)
+      alert('Ошибка при отклонении заказа')
+    } finally {
+      setRejecting(null)
+    }
+  }
+
+  if (orders.length === 0) {
+    return <p className="text-gray-400">Нет доступных заказов</p>
+  }
+
+  return (
+    <div className="space-y-4">
+      {orders.map((order) => (
+        <div key={order.id} className="border border-gray-700 rounded-lg p-4">
+          <div className="flex justify-between items-start mb-3">
+            <div>
+              <p className="font-medium text-white">Заказ #{order.id.slice(0, 8)}</p>
+              <p className="text-sm text-gray-300">
+                {order.pickup_address} → {order.delivery_address}
+              </p>
+            </div>
+            <p className="font-semibold text-white">{order.final_price} BYN</p>
+          </div>
+          <div className="flex gap-2">
+            <a
+              href={`/dashboard/driver/accept-order/${order.id}`}
+              className="flex-1 text-center bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700 transition"
+            >
+              Принять заказ
+            </a>
+            <button
+              onClick={() => handleReject(order.id)}
+              disabled={rejecting === order.id}
+              className="flex-1 bg-red-600 text-white px-4 py-2 rounded text-sm hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {rejecting === order.id ? 'Отклонение...' : 'Отказаться'}
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+

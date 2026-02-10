@@ -1,6 +1,7 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import type { User } from '@/lib/types'
+import { AvailableOrdersList } from '@/components/driver/AvailableOrdersList'
 
 export default async function DriverDashboard() {
   const supabase = createServerSupabaseClient()
@@ -44,6 +45,16 @@ export default async function DriverDashboard() {
     .order('created_at', { ascending: false })
     .limit(10)
 
+  // Получаем отказы водителя, чтобы исключить их из списка
+  const { data: rejections } = await supabase
+    .from('order_rejections')
+    .select('order_id')
+    .eq('driver_user_id', user.id)
+
+  // Фильтруем заказы, исключая те, от которых водитель отказался
+  const rejectedOrderIds = new Set(rejections?.map(r => r.order_id) || [])
+  const filteredOrders = availableOrders?.filter(order => !rejectedOrderIds.has(order.id)) || []
+
   // Получаем заказы водителя
   const { data: myOrders } = await supabase
     .from('orders')
@@ -76,31 +87,7 @@ export default async function DriverDashboard() {
         {/* Доступные заказы */}
         <div className="bg-gray-800 rounded-lg shadow p-6">
           <h2 className="text-xl font-semibold mb-4 text-white">Доступные заказы</h2>
-          {availableOrders && availableOrders.length > 0 ? (
-            <div className="space-y-4">
-              {availableOrders.map((order: any) => (
-                <div key={order.id} className="border rounded-lg p-4">
-                  <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <p className="font-medium">Заказ #{order.id.slice(0, 8)}</p>
-                      <p className="text-sm text-gray-300">
-                        {order.pickup_address} → {order.delivery_address}
-                      </p>
-                    </div>
-                    <p className="font-semibold">{order.final_price} BYN</p>
-                  </div>
-                  <a
-                    href={`/dashboard/driver/accept-order/${order.id}`}
-                    className="inline-block bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700"
-                  >
-                    Принять заказ
-                  </a>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-gray-400">Нет доступных заказов</p>
-          )}
+          <AvailableOrdersList orders={filteredOrders} driverUserId={user.id} />
         </div>
 
         {/* Мои заказы */}
