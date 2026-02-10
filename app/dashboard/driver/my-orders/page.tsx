@@ -20,28 +20,33 @@ export default function DriverMyOrdersPage() {
         return
       }
 
-      console.log('Driver My Orders - Loading orders for user:', user.id)
+      console.log('=== Driver My Orders - Loading orders ===')
+      console.log('User ID:', user.id)
 
       // Сначала проверяем все заказы с executor_user_id (без фильтра по статусу) для отладки
       const { data: allOrdersData, error: allOrdersError } = await supabase
         .from('orders')
-        .select('id, executor_user_id, status, created_at')
+        .select('id, executor_user_id, status, created_at, accepted_at')
         .eq('executor_user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(20)
 
-      console.log('Driver My Orders - All orders with executor_user_id:')
-      console.log('  - Count:', allOrdersData?.length || 0)
-      console.log('  - Error:', allOrdersError)
+      console.log('=== All orders with executor_user_id ===')
+      console.log('Count:', allOrdersData?.length || 0)
+      console.log('Error:', allOrdersError)
       if (allOrdersData && allOrdersData.length > 0) {
-        console.log('  - Orders:', allOrdersData.map((o: any) => ({
+        console.log('Orders:', allOrdersData.map((o: any) => ({
           id: o.id?.slice(0, 8),
           status: o.status,
           executor_user_id: o.executor_user_id,
-          created_at: o.created_at
+          created_at: o.created_at,
+          accepted_at: o.accepted_at
         })))
       } else {
-        console.log('  - No orders found with executor_user_id')
+        console.log('❌ No orders found with executor_user_id =', user.id)
+        if (allOrdersError) {
+          console.error('Error details:', JSON.stringify(allOrdersError, null, 2))
+        }
       }
 
       // Получаем только выполняемые заказы водителя (где executor_user_id равен ID текущего пользователя)
@@ -53,22 +58,25 @@ export default function DriverMyOrdersPage() {
         .in('status', ['courier_coming', 'courier_delivering'])
         .order('created_at', { ascending: false })
 
-      console.log('Driver My Orders - Query result (active orders only):')
-      console.log('  - Orders count:', ordersData?.length || 0)
-      console.log('  - Error:', error)
+      console.log('=== Active orders query result ===')
+      console.log('Orders count:', ordersData?.length || 0)
+      console.log('Error:', error)
       if (ordersData && ordersData.length > 0) {
-        console.log('  - Orders:', ordersData.map((o: any) => ({
+        console.log('Orders:', ordersData.map((o: any) => ({
           id: o.id?.slice(0, 8),
           status: o.status,
           executor_user_id: o.executor_user_id,
           created_at: o.created_at
         })))
       } else {
-        console.log('  - No active orders found')
+        console.log('❌ No active orders found (status: courier_coming or courier_delivering)')
+        if (error) {
+          console.error('Error details:', JSON.stringify(error, null, 2))
+        }
       }
 
       if (error) {
-        console.error('Ошибка загрузки заказов:', error)
+        console.error('❌ Ошибка загрузки заказов:', error)
         console.error('Error details:', JSON.stringify(error, null, 2))
         setOrders([])
       } else {
@@ -76,7 +84,14 @@ export default function DriverMyOrdersPage() {
         const activeOrders = (ordersData || []).filter((order: any) => 
           order.status === 'courier_coming' || order.status === 'courier_delivering'
         )
-        console.log('Driver My Orders - Filtered active orders:', activeOrders.length)
+        console.log('=== Final filtered active orders ===')
+        console.log('Count:', activeOrders.length)
+        if (activeOrders.length > 0) {
+          console.log('Orders to display:', activeOrders.map((o: any) => ({
+            id: o.id?.slice(0, 8),
+            status: o.status
+          })))
+        }
         setOrders(activeOrders)
       }
       
