@@ -91,7 +91,6 @@ export default function ClientProfilePage() {
     return (
       <div className="pb-20">
         <p className="text-gray-500">Загрузка...</p>
-        <ClientBottomNavigation />
       </div>
     )
   }

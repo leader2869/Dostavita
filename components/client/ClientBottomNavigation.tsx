@@ -1,20 +1,10 @@
 'use client'
 
 import { usePathname, useRouter } from 'next/navigation'
-import { useEffect, useRef } from 'react'
-import { createClient } from '@/lib/supabase/client'
 
 export function ClientBottomNavigation() {
   const pathname = usePathname()
   const router = useRouter()
-  const supabaseRef = useRef<ReturnType<typeof createClient> | null>(null)
-
-  // Ленивая инициализация Supabase клиента
-  useEffect(() => {
-    if (typeof window !== 'undefined' && !supabaseRef.current) {
-      supabaseRef.current = createClient()
-    }
-  }, [])
 
   const isActive = (path: string) => {
     if (path === '/dashboard/client') {
