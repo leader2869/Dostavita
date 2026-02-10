@@ -11,6 +11,7 @@ export default function OrderDetailsPage() {
   const orderId = params.id as string
   const supabase = createClient()
   const [order, setOrder] = useState<any>(null)
+  const [driver, setDriver] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -43,6 +44,19 @@ export default function OrderDetailsPage() {
       }
 
       setOrder(orderData)
+
+      // Если заказ принят водителем, загружаем информацию о водителе
+      if (orderData.executor_user_id) {
+        const { data: driverData, error: driverError } = await supabase
+          .from('profiles')
+          .select('id, full_name, phone, vehicle_type, vehicle_number')
+          .eq('id', orderData.executor_user_id)
+          .single()
+
+        if (!driverError && driverData) {
+          setDriver(driverData)
+        }
+      }
     } catch (err: any) {
       console.error('Ошибка загрузки заказа:', err)
       setError(err.message || 'Ошибка загрузки заказа')
@@ -179,6 +193,53 @@ export default function OrderDetailsPage() {
             </div>
           </div>
         </div>
+
+        {/* Информация о водителе (если заказ принят) */}
+        {order.executor_user_id && driver && (
+          <div className="border-t border-gray-700 pt-4">
+            <h2 className="text-xl font-semibold mb-4 text-white">Информация о водителе</h2>
+            
+            <div className="space-y-3 bg-gray-700 rounded-lg p-4">
+              {driver.full_name && (
+                <div>
+                  <p className="text-sm text-gray-400">Имя водителя</p>
+                  <p className="text-white font-medium">{driver.full_name}</p>
+                </div>
+              )}
+
+              {driver.phone && (
+                <div>
+                  <p className="text-sm text-gray-400">Телефон</p>
+                  <p className="text-white">
+                    <a href={`tel:${driver.phone}`} className="text-green-500 hover:text-green-400">
+                      {driver.phone}
+                    </a>
+                  </p>
+                </div>
+              )}
+
+              {driver.vehicle_type && (
+                <div>
+                  <p className="text-sm text-gray-400">Тип транспорта</p>
+                  <p className="text-white">
+                    {driver.vehicle_type === 'car' ? 'Легковой автомобиль' :
+                     driver.vehicle_type === 'motorcycle' ? 'Мотоцикл' :
+                     driver.vehicle_type === 'bicycle' ? 'Велосипед' :
+                     driver.vehicle_type === 'walking' ? 'Пешком' :
+                     driver.vehicle_type}
+                  </p>
+                </div>
+              )}
+
+              {driver.vehicle_number && (
+                <div>
+                  <p className="text-sm text-gray-400">Номер транспорта</p>
+                  <p className="text-white font-medium">{driver.vehicle_number}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         <div className="flex gap-2 pt-4 border-t border-gray-700">
           {canEdit && (
