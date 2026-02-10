@@ -84,15 +84,15 @@ export default async function AdminDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <div className="bg-gray-800 rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold mb-2 text-white">Всего заказов</h2>
-          <p className="text-3xl font-bold">{ordersCount || 0}</p>
+          <p className="text-3xl font-bold text-white">{ordersCount || 0}</p>
         </div>
         <div className="bg-gray-800 rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold mb-2 text-white">Пользователей</h2>
-          <p className="text-3xl font-bold">{usersCount || 0}</p>
+          <p className="text-3xl font-bold text-white">{usersCount || 0}</p>
         </div>
         <div className="bg-gray-800 rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold mb-2 text-white">Водителей</h2>
-          <p className="text-3xl font-bold">{driversCount || 0}</p>
+          <p className="text-3xl font-bold text-white">{driversCount || 0}</p>
         </div>
       </div>
 

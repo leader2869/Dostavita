@@ -73,7 +73,7 @@ export default async function AdminUsersPage() {
       <h1 className="text-3xl font-bold mb-6 text-white">Управление пользователями</h1>
 
       <div className="bg-gray-800 rounded-lg shadow overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
+        <table className="min-w-full divide-y divide-gray-700">
           <thead className="bg-gray-900">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Email</th>
@@ -83,11 +83,11 @@ export default async function AdminUsersPage() {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Дата регистрации</th>
             </tr>
           </thead>
-          <tbody className="bg-gray-800 divide-y divide-gray-200">
+          <tbody className="bg-gray-800 divide-y divide-gray-700">
             {users && users.length > 0 ? (
               users.map((user: any) => (
                 <tr key={user.id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
                     {user.email}
                   </td>
                   <td className="px-6 py-4 text-sm text-white">
@@ -96,7 +96,7 @@ export default async function AdminUsersPage() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                     {user.phone || '-'}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
                     {roleLabels[user.role] || user.role}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">

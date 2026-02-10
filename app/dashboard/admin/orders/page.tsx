@@ -63,7 +63,7 @@ export default async function AdminOrdersPage() {
       <h1 className="text-3xl font-bold mb-6 text-white">Управление заказами</h1>
 
       <div className="bg-gray-800 rounded-lg shadow overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
+        <table className="min-w-full divide-y divide-gray-700">
           <thead className="bg-gray-900">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">ID</th>
@@ -74,11 +74,11 @@ export default async function AdminOrdersPage() {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Дата</th>
             </tr>
           </thead>
-          <tbody className="bg-gray-800 divide-y divide-gray-200">
+          <tbody className="bg-gray-800 divide-y divide-gray-700">
             {orders && orders.length > 0 ? (
               orders.map((order: any) => (
                 <tr key={order.id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
                     {order.id.slice(0, 8)}
                   </td>
                   <td className="px-6 py-4 text-sm text-white">
@@ -87,14 +87,14 @@ export default async function AdminOrdersPage() {
                   <td className="px-6 py-4 text-sm text-white">
                     {order.delivery_address}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
                     {order.status === 'searching_courier' && 'Ищем курьера'}
                     {order.status === 'courier_coming' && 'Курьер едет'}
                     {order.status === 'courier_delivering' && 'Доставляется'}
                     {order.status === 'completed' && 'Завершен'}
                     {order.status === 'cancelled' && 'Отменен'}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-white">
                     {order.final_price} BYN
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">

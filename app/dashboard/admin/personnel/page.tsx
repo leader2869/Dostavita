@@ -85,7 +85,7 @@ export default async function AdminPersonnelPage() {
       <h1 className="text-3xl font-bold mb-6 text-white">Управление персоналом</h1>
 
       <div className="bg-gray-800 rounded-lg shadow overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
+        <table className="min-w-full divide-y divide-gray-700">
           <thead className="bg-gray-900">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Водитель</th>
@@ -96,17 +96,17 @@ export default async function AdminPersonnelPage() {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Рейтинг</th>
             </tr>
           </thead>
-          <tbody className="bg-gray-800 divide-y divide-gray-200">
+          <tbody className="bg-gray-800 divide-y divide-gray-700">
             {drivers && drivers.length > 0 ? (
               drivers.map((driver: any) => (
                 <tr key={driver.id}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <div>
-                      <p className="font-medium">{driver.profiles?.full_name || driver.profiles?.email}</p>
+                      <p className="font-medium text-white">{driver.profiles?.full_name || driver.profiles?.email}</p>
                       <p className="text-xs text-gray-400">{driver.profiles?.phone || '-'}</p>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
                     {driver.vehicle_type === 'car' && 'Автомобиль'}
                     {driver.vehicle_type === 'motorcycle' && 'Мотоцикл'}
                     {driver.vehicle_type === 'bicycle' && 'Велосипед'}
@@ -117,9 +117,9 @@ export default async function AdminPersonnelPage() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <span className={`px-2 py-1 rounded text-xs ${
-                      driver.shift_status === 'online' ? 'bg-green-100 text-green-800' :
-                      driver.shift_status === 'offline' ? 'bg-gray-700 text-gray-200' :
-                      'bg-yellow-100 text-yellow-800'
+                      driver.shift_status === 'online' ? 'bg-green-600 text-white' :
+                      driver.shift_status === 'offline' ? 'bg-gray-700 text-white' :
+                      'bg-yellow-600 text-white'
                     }`}>
                       {driver.shift_status === 'online' && 'Онлайн'}
                       {driver.shift_status === 'offline' && 'Офлайн'}
@@ -127,10 +127,10 @@ export default async function AdminPersonnelPage() {
                       {driver.shift_status === 'shift_closed' && 'Смена закрыта'}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
                     {driver.total_orders}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
                     {driver.rating.toFixed(2)}
                   </td>
                 </tr>

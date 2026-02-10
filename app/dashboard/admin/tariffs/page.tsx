@@ -68,7 +68,7 @@ export default async function AdminTariffsPage() {
       <h1 className="text-3xl font-bold mb-6 text-white">Управление тарифами</h1>
 
       <div className="bg-gray-800 rounded-lg shadow overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
+        <table className="min-w-full divide-y divide-gray-700">
           <thead className="bg-gray-900">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Регион</th>
@@ -77,19 +77,19 @@ export default async function AdminTariffsPage() {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Действия</th>
             </tr>
           </thead>
-          <tbody className="bg-gray-800 divide-y divide-gray-200">
+          <tbody className="bg-gray-800 divide-y divide-gray-700">
             {regions && regions.length > 0 ? (
               regions.map((region: any) => (
                 <tr key={region.id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
                     {region.name}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
                     {region.base_price} BYN
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <span className={`px-2 py-1 rounded text-xs ${
-                      region.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      region.is_active ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
                     }`}>
                       {region.is_active ? 'Активен' : 'Неактивен'}
                     </span>
