@@ -43,21 +43,8 @@ export async function POST(request: Request) {
       )
     }
 
-    // Создаем bucket для аватаров, если его нет
-    const { data: buckets } = await supabase.storage.listBuckets()
-    const avatarsBucket = buckets?.find(b => b.name === 'avatars')
-
-    if (!avatarsBucket) {
-      const { error: createBucketError } = await supabase.storage.createBucket('avatars', {
-        public: true,
-        fileSizeLimit: 5242880, // 5MB
-        allowedMimeTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
-      })
-
-      if (createBucketError) {
-        console.error('Ошибка создания bucket:', createBucketError)
-      }
-    }
+    // Bucket должен быть создан вручную в Supabase Dashboard
+    // Storage -> Create bucket: название "avatars", публичный: Да
 
     // Генерируем уникальное имя файла
     const fileExt = file.name.split('.').pop()
