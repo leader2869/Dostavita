@@ -30,14 +30,23 @@ export default function DriverMyOrdersPage() {
         .in('status', ['courier_coming', 'courier_delivering'])
         .order('created_at', { ascending: false })
 
-      console.log('Driver My Orders - Query result:', {
-        ordersCount: ordersData?.length || 0,
-        orders: ordersData,
-        error: error
-      })
+      console.log('Driver My Orders - Query result:')
+      console.log('  - Orders count:', ordersData?.length || 0)
+      console.log('  - Error:', error)
+      if (ordersData && ordersData.length > 0) {
+        console.log('  - Orders:', ordersData.map((o: any) => ({
+          id: o.id?.slice(0, 8),
+          status: o.status,
+          executor_user_id: o.executor_user_id,
+          created_at: o.created_at
+        })))
+      } else {
+        console.log('  - No orders found')
+      }
 
       if (error) {
         console.error('Ошибка загрузки заказов:', error)
+        console.error('Error details:', JSON.stringify(error, null, 2))
       } else {
         setOrders(ordersData || [])
       }
@@ -50,11 +59,19 @@ export default function DriverMyOrdersPage() {
         .order('created_at', { ascending: false })
         .limit(20)
 
-      console.log('Driver My Orders - All orders with executor_user_id:', {
-        count: allOrdersData?.length || 0,
-        orders: allOrdersData,
-        error: allOrdersError
-      })
+      console.log('Driver My Orders - All orders with executor_user_id:')
+      console.log('  - Count:', allOrdersData?.length || 0)
+      console.log('  - Error:', allOrdersError)
+      if (allOrdersData && allOrdersData.length > 0) {
+        console.log('  - Orders:', allOrdersData.map((o: any) => ({
+          id: o.id?.slice(0, 8),
+          status: o.status,
+          executor_user_id: o.executor_user_id,
+          created_at: o.created_at
+        })))
+      } else {
+        console.log('  - No orders found with executor_user_id')
+      }
       
       setLoading(false)
     }
