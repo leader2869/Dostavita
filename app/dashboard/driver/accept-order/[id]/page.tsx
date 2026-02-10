@@ -140,7 +140,9 @@ export default function AcceptOrderPage() {
       }
 
       // Переходим на страницу "Мои заказы" после принятия заказа
-      window.location.href = '/dashboard/driver/my-orders'
+      // Используем router.push вместо window.location.href, чтобы сохранить логи в консоли
+      console.log('✅ Заказ принят успешно, переходим на страницу "Мои заказы"')
+      router.push('/dashboard/driver/my-orders')
     } catch (err: any) {
       setError(err.message)
       setAccepting(false)
