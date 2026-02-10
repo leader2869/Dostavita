@@ -100,7 +100,7 @@ export default function OrderDetailsPage() {
       <BackButton />
       <h1 className="text-3xl font-bold mb-6">Детали заказа</h1>
 
-      <div className="bg-white rounded-lg shadow p-6 space-y-4">
+      <div className="bg-gray-800 rounded-lg shadow p-6 space-y-4">
         <div>
           <h2 className="font-semibold mb-2">Статус</h2>
           <p className="text-lg">
@@ -141,7 +141,7 @@ export default function OrderDetailsPage() {
             <button
               onClick={handlePickup}
               disabled={processing}
-              className="flex-1 bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50"
+              className="flex-1 bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 disabled:opacity-50"
             >
               {processing ? 'Обработка...' : 'Забрал заказ'}
             </button>
@@ -165,7 +165,7 @@ export default function OrderDetailsPage() {
 
           <button
             onClick={() => router.back()}
-            className="px-6 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
+            className="px-6 py-2 border border-gray-600 rounded-md hover:bg-gray-900"
           >
             Назад
           </button>

@@ -82,15 +82,15 @@ export default async function AdminDashboard() {
 
       {/* Статистика */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-gray-800 rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold mb-2">Всего заказов</h2>
           <p className="text-3xl font-bold">{ordersCount || 0}</p>
         </div>
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-gray-800 rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold mb-2">Пользователей</h2>
           <p className="text-3xl font-bold">{usersCount || 0}</p>
         </div>
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-gray-800 rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold mb-2">Водителей</h2>
           <p className="text-3xl font-bold">{driversCount || 0}</p>
         </div>
@@ -100,35 +100,35 @@ export default async function AdminDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <a
           href="/dashboard/admin/orders"
-          className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition"
+          className="bg-gray-800 rounded-lg shadow p-6 hover:shadow-lg transition"
         >
           <h3 className="font-semibold mb-2">Управление заказами</h3>
-          <p className="text-sm text-gray-600">Просмотр и управление всеми заказами</p>
+          <p className="text-sm text-gray-300">Просмотр и управление всеми заказами</p>
         </a>
 
         <a
           href="/dashboard/admin/users"
-          className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition"
+          className="bg-gray-800 rounded-lg shadow p-6 hover:shadow-lg transition"
         >
           <h3 className="font-semibold mb-2">Управление пользователями</h3>
-          <p className="text-sm text-gray-600">Просмотр и редактирование пользователей</p>
+          <p className="text-sm text-gray-300">Просмотр и редактирование пользователей</p>
         </a>
 
         <a
           href="/dashboard/admin/personnel"
-          className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition"
+          className="bg-gray-800 rounded-lg shadow p-6 hover:shadow-lg transition"
         >
           <h3 className="font-semibold mb-2">Управление персоналом</h3>
-          <p className="text-sm text-gray-600">Управление водителями и автопарками</p>
+          <p className="text-sm text-gray-300">Управление водителями и автопарками</p>
         </a>
 
         {(profile as User).role === 'superadmin' && (
           <a
             href="/dashboard/admin/tariffs"
-            className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition"
+            className="bg-gray-800 rounded-lg shadow p-6 hover:shadow-lg transition"
           >
             <h3 className="font-semibold mb-2">Управление тарифами</h3>
-            <p className="text-sm text-gray-600">Настройка регионов и цен</p>
+            <p className="text-sm text-gray-300">Настройка регионов и цен</p>
           </a>
         )}
       </div>

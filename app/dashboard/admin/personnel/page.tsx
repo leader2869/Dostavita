@@ -84,26 +84,26 @@ export default async function AdminPersonnelPage() {
       <BackButton />
       <h1 className="text-3xl font-bold mb-6">Управление персоналом</h1>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="bg-gray-800 rounded-lg shadow overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+          <thead className="bg-gray-900">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Водитель</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Транспорт</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Номер</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Статус</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Заказов</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Рейтинг</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Водитель</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Транспорт</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Номер</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Статус</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Заказов</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Рейтинг</th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-gray-800 divide-y divide-gray-200">
             {drivers && drivers.length > 0 ? (
               drivers.map((driver: any) => (
                 <tr key={driver.id}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <div>
                       <p className="font-medium">{driver.profiles?.full_name || driver.profiles?.email}</p>
-                      <p className="text-xs text-gray-500">{driver.profiles?.phone || '-'}</p>
+                      <p className="text-xs text-gray-400">{driver.profiles?.phone || '-'}</p>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
@@ -112,7 +112,7 @@ export default async function AdminPersonnelPage() {
                     {driver.vehicle_type === 'bicycle' && 'Велосипед'}
                     {driver.vehicle_type === 'walking' && 'Пешком'}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                     {driver.vehicle_number || '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
@@ -137,7 +137,7 @@ export default async function AdminPersonnelPage() {
               ))
             ) : (
               <tr>
-                <td colSpan={6} className="px-6 py-4 text-center text-gray-500">
+                <td colSpan={6} className="px-6 py-4 text-center text-gray-400">
                   Нет водителей
                 </td>
               </tr>

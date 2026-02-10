@@ -72,18 +72,18 @@ export default async function AdminUsersPage() {
       <BackButton />
       <h1 className="text-3xl font-bold mb-6">Управление пользователями</h1>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="bg-gray-800 rounded-lg shadow overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+          <thead className="bg-gray-900">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ФИО</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Телефон</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Роль</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Дата регистрации</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Email</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">ФИО</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Телефон</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Роль</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Дата регистрации</th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-gray-800 divide-y divide-gray-200">
             {users && users.length > 0 ? (
               users.map((user: any) => (
                 <tr key={user.id}>
@@ -93,20 +93,20 @@ export default async function AdminUsersPage() {
                   <td className="px-6 py-4 text-sm text-gray-900">
                     {user.full_name || '-'}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                     {user.phone || '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     {roleLabels[user.role] || user.role}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                     {new Date(user.created_at).toLocaleDateString('ru-RU')}
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={5} className="px-6 py-4 text-center text-gray-500">
+                <td colSpan={5} className="px-6 py-4 text-center text-gray-400">
                   Нет пользователей
                 </td>
               </tr>

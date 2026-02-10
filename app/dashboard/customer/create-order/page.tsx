@@ -99,7 +99,7 @@ export default function CreateOrderPage() {
       <BackButton />
       <h1 className="text-3xl font-bold mb-6">Создать заказ</h1>
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-6 space-y-4">
+      <form onSubmit={handleSubmit} className="bg-gray-800 rounded-lg shadow p-6 space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Адрес отправления
@@ -109,7 +109,7 @@ export default function CreateOrderPage() {
             value={pickupAddress}
             onChange={(e) => setPickupAddress(e.target.value)}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            className="w-full px-3 py-2 border border-gray-600 rounded-md"
             placeholder="г. Минск, ул. Примерная, д. 1"
           />
         </div>
@@ -123,7 +123,7 @@ export default function CreateOrderPage() {
             value={deliveryAddress}
             onChange={(e) => setDeliveryAddress(e.target.value)}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            className="w-full px-3 py-2 border border-gray-600 rounded-md"
             placeholder="г. Минск, ул. Примерная, д. 2"
           />
         </div>
@@ -136,7 +136,7 @@ export default function CreateOrderPage() {
             value={selectedRegion}
             onChange={(e) => setSelectedRegion(e.target.value)}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            className="w-full px-3 py-2 border border-gray-600 rounded-md"
           >
             {regions.map((region) => (
               <option key={region.id} value={region.id}>
@@ -153,7 +153,7 @@ export default function CreateOrderPage() {
           <select
             value={itemType}
             onChange={(e) => setItemType(e.target.value as any)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            className="w-full px-3 py-2 border border-gray-600 rounded-md"
           >
             <option value="documents">Документы</option>
             <option value="parcel">Посылка</option>
@@ -169,7 +169,7 @@ export default function CreateOrderPage() {
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            className="w-full px-3 py-2 border border-gray-600 rounded-md"
             rows={3}
             placeholder="Дополнительная информация о заказе"
           />
@@ -183,14 +183,14 @@ export default function CreateOrderPage() {
           <button
             type="submit"
             disabled={loading}
-            className="flex-1 bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50"
+            className="flex-1 bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 disabled:opacity-50"
           >
             {loading ? 'Создание...' : 'Создать заказ'}
           </button>
           <button
             type="button"
             onClick={() => router.back()}
-            className="px-6 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
+            className="px-6 py-2 border border-gray-600 rounded-md hover:bg-gray-900"
           >
             Отмена
           </button>

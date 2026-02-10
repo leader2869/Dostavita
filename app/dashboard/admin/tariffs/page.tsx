@@ -67,17 +67,17 @@ export default async function AdminTariffsPage() {
       <BackButton />
       <h1 className="text-3xl font-bold mb-6">Управление тарифами</h1>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="bg-gray-800 rounded-lg shadow overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+          <thead className="bg-gray-900">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Регион</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Базовая цена</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Статус</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Действия</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Регион</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Базовая цена</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Статус</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Действия</th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-gray-800 divide-y divide-gray-200">
             {regions && regions.length > 0 ? (
               regions.map((region: any) => (
                 <tr key={region.id}>
@@ -97,7 +97,7 @@ export default async function AdminTariffsPage() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <a
                       href={`/dashboard/admin/tariffs/edit/${region.id}`}
-                      className="text-blue-600 hover:text-blue-700"
+                      className="text-green-500 hover:text-green-600"
                     >
                       Редактировать
                     </a>
@@ -106,7 +106,7 @@ export default async function AdminTariffsPage() {
               ))
             ) : (
               <tr>
-                <td colSpan={4} className="px-6 py-4 text-center text-gray-500">
+                <td colSpan={4} className="px-6 py-4 text-center text-gray-400">
                   Нет регионов
                 </td>
               </tr>

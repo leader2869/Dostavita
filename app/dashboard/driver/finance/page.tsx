@@ -59,7 +59,7 @@ export default async function DriverFinancePage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Баланс */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-gray-800 rounded-lg shadow p-6">
           <h2 className="text-xl font-semibold mb-4">Баланс</h2>
           <p className="text-3xl font-bold text-green-600">
             {balance?.amount || 0} {balance?.currency || 'BYN'}
@@ -67,14 +67,14 @@ export default async function DriverFinancePage() {
         </div>
 
         {/* Статистика */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-gray-800 rounded-lg shadow p-6">
           <h2 className="text-xl font-semibold mb-4">Статистика</h2>
-          <p className="text-gray-600">Всего транзакций: {transactions?.length || 0}</p>
+          <p className="text-gray-300">Всего транзакций: {transactions?.length || 0}</p>
         </div>
       </div>
 
       {/* Транзакции */}
-      <div className="bg-white rounded-lg shadow p-6 mt-6">
+      <div className="bg-gray-800 rounded-lg shadow p-6 mt-6">
         <h2 className="text-xl font-semibold mb-4">История транзакций</h2>
         {transactions && transactions.length > 0 ? (
           <div className="space-y-2">
@@ -83,7 +83,7 @@ export default async function DriverFinancePage() {
                 <div className="flex justify-between items-center">
                   <div>
                     <p className="font-medium">{transaction.description}</p>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-400">
                       {new Date(transaction.created_at).toLocaleString('ru-RU')}
                     </p>
                   </div>
@@ -97,7 +97,7 @@ export default async function DriverFinancePage() {
             ))}
           </div>
         ) : (
-          <p className="text-gray-500">Нет транзакций</p>
+          <p className="text-gray-400">Нет транзакций</p>
         )}
       </div>
     </div>

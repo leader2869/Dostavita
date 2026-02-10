@@ -60,9 +60,9 @@ export default function ClientOrdersPage() {
     <div className="pb-20">
       <h1 className="text-3xl font-bold mb-6">Мои заказы</h1>
 
-      <div className="bg-white rounded-lg shadow p-6">
+      <div className="bg-gray-800 rounded-lg shadow p-6">
         {loading ? (
-          <p className="text-gray-500">Загрузка...</p>
+          <p className="text-gray-400">Загрузка...</p>
         ) : orders.length > 0 ? (
           <div className="space-y-4">
             {orders.map((order) => (
@@ -74,21 +74,21 @@ export default function ClientOrdersPage() {
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <p className="font-medium">Заказ #{order.id.slice(0, 8)}</p>
-                    <p className="text-sm text-gray-600 mt-1">
+                    <p className="text-sm text-gray-300 mt-1">
                       {order.pickup_address} → {order.delivery_address}
                     </p>
-                    <p className="text-sm text-gray-500 mt-2">
+                    <p className="text-sm text-gray-400 mt-2">
                       Статус: {getStatusLabel(order.status)}
                     </p>
                     {order.description && (
-                      <p className="text-sm text-gray-500 mt-1">
+                      <p className="text-sm text-gray-400 mt-1">
                         {order.description}
                       </p>
                     )}
                   </div>
                   <div className="text-right ml-4">
                     <p className="font-semibold text-lg">{order.final_price} BYN</p>
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-gray-400 mt-1">
                       {new Date(order.created_at).toLocaleDateString('ru-RU')}
                     </p>
                   </div>
@@ -97,7 +97,7 @@ export default function ClientOrdersPage() {
             ))}
           </div>
         ) : (
-          <p className="text-gray-500">У вас пока нет заказов</p>
+          <p className="text-gray-400">У вас пока нет заказов</p>
         )}
       </div>
 

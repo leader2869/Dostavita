@@ -62,19 +62,19 @@ export default async function AdminOrdersPage() {
       <BackButton />
       <h1 className="text-3xl font-bold mb-6">Управление заказами</h1>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="bg-gray-800 rounded-lg shadow overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+          <thead className="bg-gray-900">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Откуда</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Куда</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Статус</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Стоимость</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Дата</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">ID</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Откуда</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Куда</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Статус</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Стоимость</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Дата</th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-gray-800 divide-y divide-gray-200">
             {orders && orders.length > 0 ? (
               orders.map((order: any) => (
                 <tr key={order.id}>
@@ -97,14 +97,14 @@ export default async function AdminOrdersPage() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold">
                     {order.final_price} BYN
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                     {new Date(order.created_at).toLocaleDateString('ru-RU')}
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={6} className="px-6 py-4 text-center text-gray-500">
+                <td colSpan={6} className="px-6 py-4 text-center text-gray-400">
                   Нет заказов
                 </td>
               </tr>

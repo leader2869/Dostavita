@@ -132,18 +132,18 @@ export default async function DashboardLayout({
   console.log('========================================')
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm">
+    <div className="min-h-screen bg-gray-900">
+      <nav className="bg-gray-800 shadow-sm border-b border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
-              <h1 className="text-xl font-bold">Dostavita</h1>
+              <h1 className="text-xl font-bold text-white">Dostavita</h1>
             </div>
             <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-gray-300">
                 {(profile as User).full_name || (profile as User).email}
               </span>
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-gray-400">
                 ({(profile as User).role})
               </span>
               <form action="/auth/signout" method="post">

@@ -61,10 +61,10 @@ export default function ClientDashboard() {
     <div className="pb-20">
       <h1 className="text-3xl font-bold mb-6">Главная</h1>
 
-      <div className="bg-white rounded-lg shadow p-6 mb-6">
+      <div className="bg-gray-800 rounded-lg shadow p-6 mb-6">
         <h2 className="text-xl font-semibold mb-4">Мои заказы</h2>
         {loading ? (
-          <p className="text-gray-500">Загрузка...</p>
+          <p className="text-gray-400">Загрузка...</p>
         ) : orders.length > 0 ? (
           <div className="space-y-4">
             {orders.map((order: any) => (
@@ -72,10 +72,10 @@ export default function ClientDashboard() {
                 <div className="flex justify-between items-start">
                   <div>
                     <p className="font-medium">Заказ #{order.id.slice(0, 8)}</p>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-gray-300">
                       {order.pickup_address} → {order.delivery_address}
                     </p>
-                    <p className="text-sm text-gray-500 mt-1">
+                    <p className="text-sm text-gray-400 mt-1">
                       Статус: {getStatusLabel(order.status)}
                     </p>
                   </div>
@@ -87,16 +87,16 @@ export default function ClientDashboard() {
             ))}
           </div>
         ) : (
-          <p className="text-gray-500">У вас пока нет заказов</p>
+          <p className="text-gray-400">У вас пока нет заказов</p>
         )}
       </div>
 
-      <div className="bg-white rounded-lg shadow p-6">
+      <div className="bg-gray-800 rounded-lg shadow p-6">
         <h2 className="text-xl font-semibold mb-4">Быстрые действия</h2>
         <div className="grid grid-cols-2 gap-4">
           <a
             href="/dashboard/client/create-order"
-            className="bg-blue-600 text-white p-4 rounded-lg text-center hover:bg-blue-700 transition"
+            className="bg-green-600 text-white p-4 rounded-lg text-center hover:bg-green-700 transition"
           >
             Создать заказ
           </a>

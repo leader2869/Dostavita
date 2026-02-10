@@ -62,27 +62,27 @@ export default async function FleetDashboard() {
       <h1 className="text-3xl font-bold mb-6">Панель автопарка</h1>
 
       {fleet && (
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
+        <div className="bg-gray-800 rounded-lg shadow p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">{fleet.name}</h2>
-          <p className="text-gray-600 mb-2">{fleet.description || 'Нет описания'}</p>
+          <p className="text-gray-300 mb-2">{fleet.description || 'Нет описания'}</p>
           <div className="grid grid-cols-3 gap-4 mt-4">
             <div>
-              <p className="text-sm text-gray-500">Водителей</p>
+              <p className="text-sm text-gray-400">Водителей</p>
               <p className="text-2xl font-bold">{fleet.total_drivers}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-500">Заказов</p>
+              <p className="text-sm text-gray-400">Заказов</p>
               <p className="text-2xl font-bold">{fleet.total_orders}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-500">Рейтинг</p>
+              <p className="text-sm text-gray-400">Рейтинг</p>
               <p className="text-2xl font-bold">{fleet.rating.toFixed(2)}</p>
             </div>
           </div>
         </div>
       )}
 
-      <div className="bg-white rounded-lg shadow p-6">
+      <div className="bg-gray-800 rounded-lg shadow p-6">
         <h2 className="text-xl font-semibold mb-4">Водители автопарка</h2>
         {drivers && drivers.length > 0 ? (
           <div className="space-y-4">
@@ -91,21 +91,21 @@ export default async function FleetDashboard() {
                 <div className="flex justify-between items-start">
                   <div>
                     <p className="font-medium">{driver.profiles?.full_name || driver.profiles?.email}</p>
-                    <p className="text-sm text-gray-600">{driver.profiles?.phone || '-'}</p>
-                    <p className="text-sm text-gray-500 mt-1">
+                    <p className="text-sm text-gray-300">{driver.profiles?.phone || '-'}</p>
+                    <p className="text-sm text-gray-400 mt-1">
                       {driver.vehicle_type} {driver.vehicle_number ? `- ${driver.vehicle_number}` : ''}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm text-gray-500">Заказов: {driver.total_orders}</p>
-                    <p className="text-sm text-gray-500">Рейтинг: {driver.rating.toFixed(2)}</p>
+                    <p className="text-sm text-gray-400">Заказов: {driver.total_orders}</p>
+                    <p className="text-sm text-gray-400">Рейтинг: {driver.rating.toFixed(2)}</p>
                   </div>
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <p className="text-gray-500">Нет водителей в автопарке</p>
+          <p className="text-gray-400">Нет водителей в автопарке</p>
         )}
       </div>
     </div>

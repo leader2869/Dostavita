@@ -468,13 +468,13 @@ export default function IconSelectorPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className="min-h-screen bg-gray-900 p-8">
       <div className="max-w-7xl mx-auto">
         <h1 className="text-3xl font-bold mb-6">Выбор иконки машинки</h1>
         
         {selectedIcon && (
-          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-sm text-blue-800">
+          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <p className="text-sm text-green-800">
               Выбрана иконка #{selectedIcon}: {carIcons.find(i => i.id === selectedIcon)?.name}
             </p>
           </div>
@@ -485,17 +485,17 @@ export default function IconSelectorPage() {
             <button
               key={icon.id}
               onClick={() => handleSelect(icon.id)}
-              className={`p-4 bg-white rounded-lg shadow hover:shadow-lg transition-all border-2 ${
+              className={`p-4 bg-gray-800 rounded-lg shadow hover:shadow-lg transition-all border-2 ${
                 selectedIcon === icon.id
-                  ? 'border-blue-500 bg-blue-50'
-                  : 'border-gray-200 hover:border-gray-300'
+                  ? 'border-green-500 bg-green-50'
+                  : 'border-gray-700 hover:border-gray-600'
               }`}
             >
               <div className="flex flex-col items-center justify-center space-y-2">
-                <div className={`${selectedIcon === icon.id ? 'text-blue-600' : 'text-gray-600'}`}>
+                <div className={`${selectedIcon === icon.id ? 'text-green-500' : 'text-gray-300'}`}>
                   {icon.svg}
                 </div>
-                <span className="text-xs text-center text-gray-600">
+                <span className="text-xs text-center text-gray-300">
                   #{icon.id}
                 </span>
               </div>
@@ -504,7 +504,7 @@ export default function IconSelectorPage() {
         </div>
 
         {selectedIcon && (
-          <div className="mt-8 p-6 bg-white rounded-lg shadow">
+          <div className="mt-8 p-6 bg-gray-800 rounded-lg shadow">
             <h2 className="text-xl font-semibold mb-4">
               Выбранная иконка: {carIcons.find(i => i.id === selectedIcon)?.name}
             </h2>

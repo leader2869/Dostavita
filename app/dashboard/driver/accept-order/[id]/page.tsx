@@ -94,7 +94,7 @@ export default function AcceptOrderPage() {
       <BackButton />
       <h1 className="text-3xl font-bold mb-6">Принять заказ</h1>
 
-      <div className="bg-white rounded-lg shadow p-6 space-y-4">
+      <div className="bg-gray-800 rounded-lg shadow p-6 space-y-4">
         <div>
           <h2 className="font-semibold mb-2">Детали заказа</h2>
           <p><strong>Откуда:</strong> {order.pickup_address}</p>
@@ -118,7 +118,7 @@ export default function AcceptOrderPage() {
             </p>
             <a
               href="/dashboard/driver/profile"
-              className="text-blue-600 hover:text-blue-700 underline"
+              className="text-green-500 hover:text-green-600 underline"
             >
               Создать профиль водителя
             </a>
@@ -139,7 +139,7 @@ export default function AcceptOrderPage() {
           </button>
           <button
             onClick={() => router.back()}
-            className="px-6 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
+            className="px-6 py-2 border border-gray-600 rounded-md hover:bg-gray-900"
           >
             Отмена
           </button>

@@ -48,7 +48,7 @@ export default async function CustomerDashboard() {
     <div>
       <h1 className="text-3xl font-bold mb-6">Панель организации</h1>
       
-      <div className="bg-white rounded-lg shadow p-6 mb-6">
+      <div className="bg-gray-800 rounded-lg shadow p-6 mb-6">
         <h2 className="text-xl font-semibold mb-4">Мои заказы</h2>
         {orders && orders.length > 0 ? (
           <div className="space-y-4">
@@ -57,10 +57,10 @@ export default async function CustomerDashboard() {
                 <div className="flex justify-between items-start">
                   <div>
                     <p className="font-medium">Заказ #{order.id.slice(0, 8)}</p>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-gray-300">
                       {order.pickup_address} → {order.delivery_address}
                     </p>
-                    <p className="text-sm text-gray-500 mt-1">
+                    <p className="text-sm text-gray-400 mt-1">
                       Статус: {order.status === 'searching_courier' ? 'Ищем курьера' :
                                order.status === 'courier_coming' ? 'Курьер едет к вам' :
                                order.status === 'courier_delivering' ? 'Курьер доставляет заказ' :
@@ -75,13 +75,13 @@ export default async function CustomerDashboard() {
             ))}
           </div>
         ) : (
-          <p className="text-gray-500">У вас пока нет заказов</p>
+          <p className="text-gray-400">У вас пока нет заказов</p>
         )}
       </div>
 
       <a
         href="/dashboard/customer/create-order"
-        className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700"
+        className="inline-block bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700"
       >
         Создать новый заказ
       </a>

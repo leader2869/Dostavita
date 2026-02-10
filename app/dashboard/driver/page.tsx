@@ -62,13 +62,13 @@ export default async function DriverDashboard() {
       <div className="mb-6 flex gap-4">
         <a
           href="/dashboard/driver/profile"
-          className="bg-white px-4 py-2 rounded-lg shadow hover:shadow-lg transition"
+          className="bg-gray-800 px-4 py-2 rounded-lg shadow hover:shadow-lg transition"
         >
           Профиль
         </a>
         <a
           href="/dashboard/driver/finance"
-          className="bg-white px-4 py-2 rounded-lg shadow hover:shadow-lg transition"
+          className="bg-gray-800 px-4 py-2 rounded-lg shadow hover:shadow-lg transition"
         >
           Финансы
         </a>
@@ -76,7 +76,7 @@ export default async function DriverDashboard() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Доступные заказы */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-gray-800 rounded-lg shadow p-6">
           <h2 className="text-xl font-semibold mb-4">Доступные заказы</h2>
           {availableOrders && availableOrders.length > 0 ? (
             <div className="space-y-4">
@@ -85,7 +85,7 @@ export default async function DriverDashboard() {
                   <div className="flex justify-between items-start mb-2">
                     <div>
                       <p className="font-medium">Заказ #{order.id.slice(0, 8)}</p>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-gray-300">
                         {order.pickup_address} → {order.delivery_address}
                       </p>
                     </div>
@@ -101,12 +101,12 @@ export default async function DriverDashboard() {
               ))}
             </div>
           ) : (
-            <p className="text-gray-500">Нет доступных заказов</p>
+            <p className="text-gray-400">Нет доступных заказов</p>
           )}
         </div>
 
         {/* Мои заказы */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-gray-800 rounded-lg shadow p-6">
           <h2 className="text-xl font-semibold mb-4">Мои заказы</h2>
           {myOrders && myOrders.length > 0 ? (
             <div className="space-y-4">
@@ -115,10 +115,10 @@ export default async function DriverDashboard() {
                   <div className="flex justify-between items-start">
                     <div>
                       <p className="font-medium">Заказ #{order.id.slice(0, 8)}</p>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-gray-300">
                         {order.pickup_address} → {order.delivery_address}
                       </p>
-                      <p className="text-sm text-gray-500 mt-1">
+                      <p className="text-sm text-gray-400 mt-1">
                         Статус: {order.status === 'courier_coming' ? 'Курьер едет к вам' :
                                  order.status === 'courier_delivering' ? 'Курьер доставляет заказ' :
                                  order.status === 'completed' ? 'Заказ завершен' : order.status}
@@ -128,7 +128,7 @@ export default async function DriverDashboard() {
                       <p className="font-semibold">{order.final_price} BYN</p>
                       <a
                         href={`/dashboard/driver/orders/${order.id}`}
-                        className="text-sm text-blue-600 hover:text-blue-700"
+                        className="text-sm text-green-500 hover:text-green-600"
                       >
                         Детали
                       </a>
@@ -138,7 +138,7 @@ export default async function DriverDashboard() {
               ))}
             </div>
           ) : (
-            <p className="text-gray-500">У вас пока нет заказов</p>
+            <p className="text-gray-400">У вас пока нет заказов</p>
           )}
         </div>
       </div>

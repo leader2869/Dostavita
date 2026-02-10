@@ -105,7 +105,7 @@ export default function DriverProfilePage() {
       <BackButton />
       <h1 className="text-3xl font-bold mb-6">Профиль водителя</h1>
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-6 space-y-4">
+      <form onSubmit={handleSubmit} className="bg-gray-800 rounded-lg shadow p-6 space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Тип транспорта *
@@ -114,7 +114,7 @@ export default function DriverProfilePage() {
             value={vehicleType}
             onChange={(e) => setVehicleType(e.target.value)}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            className="w-full px-3 py-2 border border-gray-600 rounded-md"
           >
             <option value="">Выберите тип</option>
             <option value="car">Легковой автомобиль</option>
@@ -132,7 +132,7 @@ export default function DriverProfilePage() {
             type="text"
             value={vehicleNumber}
             onChange={(e) => setVehicleNumber(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            className="w-full px-3 py-2 border border-gray-600 rounded-md"
             placeholder="1234 AB-7"
           />
         </div>
@@ -146,7 +146,7 @@ export default function DriverProfilePage() {
             value={licenseNumber}
             onChange={(e) => setLicenseNumber(e.target.value)}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            className="w-full px-3 py-2 border border-gray-600 rounded-md"
             placeholder="AB1234567"
           />
         </div>
@@ -159,14 +159,14 @@ export default function DriverProfilePage() {
           <button
             type="submit"
             disabled={saving}
-            className="flex-1 bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50"
+            className="flex-1 bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 disabled:opacity-50"
           >
             {saving ? 'Сохранение...' : 'Сохранить'}
           </button>
           <button
             type="button"
             onClick={() => router.back()}
-            className="px-6 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
+            className="px-6 py-2 border border-gray-600 rounded-md hover:bg-gray-900"
           >
             Отмена
           </button>
