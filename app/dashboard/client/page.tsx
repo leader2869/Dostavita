@@ -59,19 +59,19 @@ export default function ClientDashboard() {
 
   return (
     <div className="pb-20">
-      <h1 className="text-3xl font-bold mb-6">Главная</h1>
+      <h1 className="text-3xl font-bold mb-6 text-white">Главная</h1>
 
       <div className="bg-gray-800 rounded-lg shadow p-6 mb-6">
-        <h2 className="text-xl font-semibold mb-4">Мои заказы</h2>
+        <h2 className="text-xl font-semibold mb-4 text-white">Мои заказы</h2>
         {loading ? (
           <p className="text-gray-400">Загрузка...</p>
         ) : orders.length > 0 ? (
           <div className="space-y-4">
             {orders.map((order: any) => (
-              <div key={order.id} className="border rounded-lg p-4">
+              <div key={order.id} className="border border-gray-700 rounded-lg p-4 bg-gray-700">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="font-medium">Заказ #{order.id.slice(0, 8)}</p>
+                    <p className="font-medium text-white">Заказ #{order.id.slice(0, 8)}</p>
                     <p className="text-sm text-gray-300">
                       {order.pickup_address} → {order.delivery_address}
                     </p>
@@ -80,7 +80,7 @@ export default function ClientDashboard() {
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="font-semibold">{order.final_price} BYN</p>
+                    <p className="font-semibold text-white">{order.final_price} BYN</p>
                   </div>
                 </div>
               </div>
@@ -92,7 +92,7 @@ export default function ClientDashboard() {
       </div>
 
       <div className="bg-gray-800 rounded-lg shadow p-6">
-        <h2 className="text-xl font-semibold mb-4">Быстрые действия</h2>
+        <h2 className="text-xl font-semibold mb-4 text-white">Быстрые действия</h2>
         <div className="grid grid-cols-2 gap-4">
           <a
             href="/dashboard/client/create-order"
