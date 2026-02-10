@@ -97,7 +97,8 @@ export default function AcceptOrderPage() {
       
       console.log('Order after accept:', { updatedOrder, checkError })
 
-      router.push('/dashboard/driver')
+      // Используем window.location для полной перезагрузки страницы, чтобы обновить данные
+      window.location.href = '/dashboard/driver'
     } catch (err: any) {
       setError(err.message)
       setAccepting(false)

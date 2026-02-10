@@ -3,6 +3,9 @@ import { redirect } from 'next/navigation'
 import type { User } from '@/lib/types'
 import { AvailableOrdersList } from '@/components/driver/AvailableOrdersList'
 
+// Отключаем кеширование, чтобы данные всегда были актуальными
+export const dynamic = 'force-dynamic'
+
 export default async function DriverDashboard() {
   const supabase = createServerSupabaseClient()
   
@@ -93,7 +96,14 @@ export default async function DriverDashboard() {
   if (myOrdersError) {
     console.error('Ошибка загрузки активных заказов водителя:', myOrdersError)
   }
-  console.log('Driver Dashboard - Active Orders:', myOrders?.length || 0, myOrders)
+  console.log('Driver Dashboard - User ID:', user.id)
+  console.log('Driver Dashboard - Active Orders count:', myOrders?.length || 0)
+  console.log('Driver Dashboard - Active Orders:', myOrders?.map((o: any) => ({
+    id: o.id?.slice(0, 8),
+    status: o.status,
+    executor_user_id: o.executor_user_id,
+    created_at: o.created_at
+  })))
 
   return (
     <div>
