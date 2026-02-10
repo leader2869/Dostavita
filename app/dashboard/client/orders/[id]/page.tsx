@@ -47,14 +47,22 @@ export default function OrderDetailsPage() {
 
       // Если заказ принят водителем, загружаем информацию о водителе
       if (orderData.executor_user_id) {
-        const { data: driverData, error: driverError } = await supabase
-          .from('profiles')
-          .select('id, full_name, phone, vehicle_type, vehicle_number')
-          .eq('id', orderData.executor_user_id)
-          .single()
+        try {
+          const { data: driverData, error: driverError } = await supabase
+            .from('profiles')
+            .select('id, full_name, phone, vehicle_type, vehicle_number')
+            .eq('id', orderData.executor_user_id)
+            .maybeSingle()
 
-        if (!driverError && driverData) {
-          setDriver(driverData)
+          if (!driverError && driverData) {
+            setDriver(driverData)
+          } else if (driverError) {
+            console.warn('Ошибка загрузки профиля водителя:', driverError)
+            // Не показываем ошибку пользователю, просто не отображаем информацию о водителе
+          }
+        } catch (driverErr: any) {
+          console.warn('Ошибка при загрузке данных водителя:', driverErr)
+          // Продолжаем работу без информации о водителе
         }
       }
     } catch (err: any) {
