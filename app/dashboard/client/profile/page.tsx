@@ -42,6 +42,30 @@ export default function ClientProfilePage() {
           setFullName(data.full_name || '')
           setPhone(data.phone || '')
           setEmail(data.email || user.email || '')
+        } else {
+          // Профиль не найден, создаем его
+          const { data: newProfile, error: createError } = await supabase
+            .from('profiles')
+            .insert({
+              id: user.id,
+              email: user.email || '',
+              full_name: null,
+              phone: null,
+              role: 'client',
+            })
+            .select()
+            .single()
+
+          if (createError) {
+            throw createError
+          }
+
+          if (newProfile) {
+            setProfile(newProfile)
+            setFullName(newProfile.full_name || '')
+            setPhone(newProfile.phone || '')
+            setEmail(newProfile.email || user.email || '')
+          }
         }
       } catch (err: any) {
         setError(err.message)
