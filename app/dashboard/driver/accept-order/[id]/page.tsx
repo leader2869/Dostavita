@@ -113,11 +113,25 @@ export default function AcceptOrderPage() {
       console.log('✅ Order should be accepted now')
 
       // Проверяем, что заказ был обновлен
+      // Используем RPC функцию для обхода RLS, если обычный запрос не работает
+      console.log('Проверяем заказ после принятия...')
       const { data: updatedOrder, error: checkError } = await supabase
         .from('orders')
         .select('id, executor_user_id, status, accepted_at')
         .eq('id', orderId)
+        .eq('executor_user_id', user.id) // Добавляем фильтр по executor_user_id для RLS
         .single()
+      
+      // Если не получилось через обычный запрос, пробуем через RPC
+      if (checkError && checkError.code === 'PGRST116') {
+        console.log('Обычный запрос не сработал, пробуем через RPC...')
+        const { data: orderViaRpc, error: rpcCheckError } = await supabase.rpc('get_order_by_id', {
+          order_id: orderId
+        })
+        if (!rpcCheckError && orderViaRpc) {
+          console.log('Заказ получен через RPC:', orderViaRpc)
+        }
+      }
       
       console.log('=== Order AFTER accept ===')
       console.log('Updated order:', updatedOrder)
