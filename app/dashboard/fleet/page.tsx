@@ -1,5 +1,6 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import type { User } from '@/lib/types'
 
 export default async function FleetDashboard() {
   const supabase = createServerSupabaseClient()
@@ -27,11 +28,11 @@ export default async function FleetDashboard() {
       .maybeSingle()
     
     if (directProfile) {
-      profile = directProfile
+      profile = directProfile as User
     }
   }
 
-  if (!profile || profile.role !== 'fleet') {
+  if (!profile || (profile as User).role !== 'fleet') {
     redirect('/dashboard')
   }
 

@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
+import type { User } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
 
@@ -39,16 +40,18 @@ export default async function DashboardPage() {
     }
   }
 
-  console.log('Dashboard Page - Профиль:', { hasProfile: !!profile, role: profile?.role, error: profileError?.message })
+  console.log('Dashboard Page - Профиль:', { hasProfile: !!profile, role: (profile as User | null)?.role, error: profileError?.message })
 
   if (profileError || !profile) {
     console.log('Dashboard Page - Редирект на /login (нет профиля)')
     redirect('/login')
   }
 
+  const userProfile = profile as User
+
   // Редиректим в зависимости от роли
   // Все возможные роли: customer, client, driver, fleet, admin, superadmin
-  console.log('Dashboard Page - Редирект на:', `/dashboard/${profile.role}`)
+  console.log('Dashboard Page - Редирект на:', `/dashboard/${userProfile.role}`)
   
   const roleRoutes: Record<string, string> = {
     customer: '/dashboard/customer',
@@ -59,13 +62,13 @@ export default async function DashboardPage() {
     superadmin: '/dashboard/admin',
   }
   
-  const route = roleRoutes[profile.role]
+  const route = roleRoutes[userProfile.role]
   
   if (route) {
     redirect(route)
   } else {
     // Если роль неизвестна, логируем и редиректим на customer по умолчанию
-    console.warn(`Dashboard Page - Неизвестная роль: ${profile.role}, редирект на /dashboard/customer`)
+    console.warn(`Dashboard Page - Неизвестная роль: ${userProfile.role}, редирект на /dashboard/customer`)
     redirect('/dashboard/customer')
   }
 }

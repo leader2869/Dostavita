@@ -1,6 +1,7 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { BackButton } from '@/components/ui/BackButton'
+import type { User } from '@/lib/types'
 
 export default async function DriverFinancePage() {
   const supabase = createServerSupabaseClient()
@@ -28,11 +29,11 @@ export default async function DriverFinancePage() {
       .maybeSingle()
     
     if (directProfile) {
-      profile = directProfile
+      profile = directProfile as User
     }
   }
 
-  if (!profile || profile.role !== 'driver') {
+  if (!profile || (profile as User).role !== 'driver') {
     redirect('/dashboard')
   }
 

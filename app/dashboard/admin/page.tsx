@@ -1,5 +1,6 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import type { User } from '@/lib/types'
 
 export default async function AdminDashboard() {
   const supabase = createServerSupabaseClient()
@@ -27,11 +28,11 @@ export default async function AdminDashboard() {
       .maybeSingle()
     
     if (directProfile) {
-      profile = directProfile
+      profile = directProfile as User
     }
   }
 
-  if (!profile || (profile.role !== 'admin' && profile.role !== 'superadmin')) {
+  if (!profile || ((profile as User).role !== 'admin' && (profile as User).role !== 'superadmin')) {
     redirect('/dashboard')
   }
 
@@ -52,7 +53,7 @@ export default async function AdminDashboard() {
     <div>
       <h1 className="text-3xl font-bold mb-6">
         Панель администратора
-        {profile.role === 'superadmin' && ' (Суперадмин)'}
+        {(profile as User).role === 'superadmin' && ' (Суперадмин)'}
       </h1>
 
       {/* Статистика */}
@@ -97,7 +98,7 @@ export default async function AdminDashboard() {
           <p className="text-sm text-gray-600">Управление водителями и автопарками</p>
         </a>
 
-        {profile.role === 'superadmin' && (
+        {(profile as User).role === 'superadmin' && (
           <a
             href="/dashboard/admin/tariffs"
             className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition"

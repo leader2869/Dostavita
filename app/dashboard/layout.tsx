@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
+import type { User } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
 
@@ -140,10 +141,10 @@ export default async function DashboardLayout({
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-600">
-                {profile.full_name || profile.email}
+                {(profile as User).full_name || (profile as User).email}
               </span>
               <span className="text-xs text-gray-500">
-                ({profile.role})
+                ({(profile as User).role})
               </span>
               <form action="/auth/signout" method="post">
                 <button
