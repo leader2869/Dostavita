@@ -43,22 +43,17 @@ export default function ClientProfilePage() {
           setPhone(data.phone || '')
           setEmail(data.email || user.email || '')
         } else {
-          // Профиль не найден, создаем его
-          const { data: newProfile, error: createError } = await supabase
-            .from('profiles')
-            .insert({
-              id: user.id,
-              email: user.email || '',
-              full_name: null,
-              phone: null,
-              role: 'client',
-            })
-            .select()
-            .single()
+          // Профиль не найден, создаем его через API route (обходит RLS)
+          const response = await fetch('/api/profile/create', {
+            method: 'POST',
+          })
 
-          if (createError) {
-            throw createError
+          if (!response.ok) {
+            const errorData = await response.json()
+            throw new Error(errorData.error || 'Ошибка создания профиля')
           }
+
+          const { profile: newProfile } = await response.json()
 
           if (newProfile) {
             setProfile(newProfile)
