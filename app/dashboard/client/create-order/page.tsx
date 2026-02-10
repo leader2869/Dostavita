@@ -113,7 +113,7 @@ export default function CreateOrderPage() {
             value={pickupAddress}
             onChange={(e) => setPickupAddress(e.target.value)}
             required
-            className="w-full px-3 py-2 border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
+            className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
             placeholder="Введите адрес отправления"
           />
         </div>
@@ -128,7 +128,7 @@ export default function CreateOrderPage() {
             value={deliveryAddress}
             onChange={(e) => setDeliveryAddress(e.target.value)}
             required
-            className="w-full px-3 py-2 border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
+            className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
             placeholder="Введите адрес доставки"
           />
         </div>
@@ -142,10 +142,10 @@ export default function CreateOrderPage() {
             value={selectedRegion}
             onChange={(e) => setSelectedRegion(e.target.value)}
             required
-            className="w-full px-3 py-2 border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
+            className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
           >
             {regions.map((region) => (
-              <option key={region.id} value={region.id}>
+              <option key={region.id} value={region.id} className="bg-gray-700">
                 {region.name} - {region.base_price} BYN
               </option>
             ))}
@@ -160,12 +160,12 @@ export default function CreateOrderPage() {
             id="itemType"
             value={itemType}
             onChange={(e) => setItemType(e.target.value as any)}
-            className="w-full px-3 py-2 border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
+            className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
           >
-            <option value="parcel">Посылка</option>
-            <option value="documents">Документы</option>
-            <option value="flowers">Цветы</option>
-            <option value="food">Еда</option>
+            <option value="parcel" className="bg-gray-700">Посылка</option>
+            <option value="documents" className="bg-gray-700">Документы</option>
+            <option value="flowers" className="bg-gray-700">Цветы</option>
+            <option value="food" className="bg-gray-700">Еда</option>
           </select>
         </div>
 
@@ -178,13 +178,13 @@ export default function CreateOrderPage() {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
-            className="w-full px-3 py-2 border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
+            className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
             placeholder="Дополнительная информация о заказе"
           />
         </div>
 
         {error && (
-          <div className="text-red-600 text-sm bg-red-50 p-3 rounded">{error}</div>
+          <div className="text-red-400 text-sm bg-red-900 bg-opacity-30 p-3 rounded border border-red-800">{error}</div>
         )}
 
         <button
