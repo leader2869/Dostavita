@@ -46,7 +46,7 @@ export default async function ClientDashboard() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-6">Мои заказы (как получатель)</h1>
+      <h1 className="text-3xl font-bold mb-6">Мои заказы</h1>
 
       <div className="bg-white rounded-lg shadow p-6">
         {orders && orders.length > 0 ? (
