@@ -37,12 +37,25 @@ export default async function AdminOrdersPage() {
     redirect('/dashboard')
   }
 
-  // Получаем все заказы
-  const { data: orders } = await supabase
-    .from('orders')
-    .select('*')
-    .order('created_at', { ascending: false })
-    .limit(100)
+  // Получаем все заказы через RPC функцию (обходит RLS)
+  let { data: orders, error: ordersError } = await supabase
+    .rpc('get_all_orders_for_admin', { limit_count: 100 })
+  
+  // Fallback на прямой запрос, если RPC не работает
+  if (ordersError || !orders) {
+    console.log('AdminOrdersPage - RPC не сработал, пробуем прямой запрос...')
+    const { data: directOrders } = await supabase
+      .from('orders')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(100)
+    
+    if (directOrders) {
+      orders = directOrders
+    }
+  }
+  
+  console.log('AdminOrdersPage - Заказов загружено:', orders?.length || 0)
 
   return (
     <div>
