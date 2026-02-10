@@ -94,6 +94,29 @@ export default async function AdminDashboard() {
     .select('*', { count: 'exact', head: true })
     .in('status', ['courier_coming', 'courier_delivering'])
 
+  // Получаем настройки доставки
+  let { data: deliverySettings } = await supabase
+    .rpc('get_delivery_settings')
+  
+  // Fallback на прямой запрос
+  if (!deliverySettings || deliverySettings.length === 0) {
+    const { data: directSettings } = await supabase
+      .from('delivery_settings')
+      .select('*')
+    
+    if (directSettings) {
+      deliverySettings = directSettings
+    }
+  }
+
+  // Создаем объект для быстрого доступа к настройкам
+  const settingsMap: Record<string, number> = {}
+  if (deliverySettings) {
+    deliverySettings.forEach((setting: any) => {
+      settingsMap[setting.setting_key] = setting.setting_value
+    })
+  }
+
   // Получаем активные заказы для отображения списка (статусы: searching_courier, courier_coming, courier_delivering)
   // Сортируем по времени создания (старые сверху)
   let { data: activeOrders, error: activeOrdersError } = await supabase
@@ -173,8 +196,31 @@ export default async function AdminDashboard() {
                 locale: ru
               }) : ''
 
+              // Вычисляем время в минутах с момента изменения статуса
+              const minutesElapsed = statusTime ? Math.floor((Date.now() - statusTime.getTime()) / 60000) : 0
+              
+              // Определяем лимит для текущего статуса
+              let maxMinutes = 0
+              if (order.status === 'searching_courier') {
+                maxMinutes = settingsMap['max_searching_courier_minutes'] || 5
+              } else if (order.status === 'courier_coming') {
+                maxMinutes = settingsMap['max_courier_coming_minutes'] || 30
+              } else if (order.status === 'courier_delivering') {
+                maxMinutes = settingsMap['max_courier_delivering_minutes'] || 60
+              }
+
+              // Проверяем, превышен ли лимит
+              const isOverdue = minutesElapsed > maxMinutes
+
               return (
-                <div key={order.id} className="border border-gray-700 rounded-lg p-4 bg-gray-700">
+                <div 
+                  key={order.id} 
+                  className={`border rounded-lg p-4 ${
+                    isOverdue 
+                      ? 'border-red-600 bg-red-900 bg-opacity-20' 
+                      : 'border-gray-700 bg-gray-700'
+                  }`}
+                >
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
                       <p className="font-medium text-white">Заказ #{order.id.slice(0, 8)}</p>
@@ -232,12 +278,20 @@ export default async function AdminDashboard() {
         </a>
 
         {(profile as User).role === 'superadmin' && (
-          <a
-            href="/dashboard/admin/tariffs"
-            className="bg-gray-800 rounded-lg shadow p-6 hover:shadow-lg transition"
-          >
-            <h3 className="font-semibold text-white">Управление тарифами</h3>
-          </a>
+          <>
+            <a
+              href="/dashboard/admin/tariffs"
+              className="bg-gray-800 rounded-lg shadow p-6 hover:shadow-lg transition"
+            >
+              <h3 className="font-semibold text-white">Управление тарифами</h3>
+            </a>
+            <a
+              href="/dashboard/admin/delivery-settings"
+              className="bg-gray-800 rounded-lg shadow p-6 hover:shadow-lg transition"
+            >
+              <h3 className="font-semibold text-white">Настройки доставки</h3>
+            </a>
+          </>
         )}
       </div>
     </div>
