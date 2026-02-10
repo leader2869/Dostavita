@@ -10,7 +10,7 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState('')
   const [phone, setPhone] = useState('')
-  const [role, setRole] = useState<'customer' | 'driver'>('customer')
+  const [role, setRole] = useState<'client' | 'customer' | 'driver'>('client')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -186,10 +186,11 @@ export default function RegisterPage() {
           <select
             id="role"
             value={role}
-            onChange={(e) => setRole(e.target.value as 'customer' | 'driver')}
+            onChange={(e) => setRole(e.target.value as 'client' | 'customer' | 'driver')}
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           >
-            <option value="customer">Заказчик</option>
+            <option value="client">Клиент (может быть отправителем или получателем)</option>
+            <option value="customer">Заказчик (бизнес-клиент: бары, рестораны, магазины)</option>
             <option value="driver">Исполнитель (Водитель)</option>
           </select>
         </div>
