@@ -38,6 +38,28 @@ DROP TABLE IF EXISTS public.fleets CASCADE;
 DROP TABLE IF EXISTS public.regions CASCADE;
 DROP TABLE IF EXISTS public.profiles CASCADE;
 
+-- Удаляем таблицы PostGIS (если остались)
+-- Эти таблицы могут быть в разных схемах, удаляем из всех возможных
+DROP TABLE IF EXISTS public.geography_columns CASCADE;
+DROP TABLE IF EXISTS public.geometry_columns CASCADE;
+DROP TABLE IF EXISTS public.spatial_ref_sys CASCADE;
+
+-- Также пытаемся удалить из других возможных схем
+DO $$
+DECLARE
+    schema_name TEXT;
+BEGIN
+    -- Удаляем из всех схем, где они могут быть
+    FOR schema_name IN 
+        SELECT nspname FROM pg_namespace 
+        WHERE nspname NOT IN ('pg_catalog', 'information_schema', 'pg_toast')
+    LOOP
+        EXECUTE format('DROP TABLE IF EXISTS %I.geography_columns CASCADE', schema_name);
+        EXECUTE format('DROP TABLE IF EXISTS %I.geometry_columns CASCADE', schema_name);
+        EXECUTE format('DROP TABLE IF EXISTS %I.spatial_ref_sys CASCADE', schema_name);
+    END LOOP;
+END $$;
+
 -- ============================================
 -- УДАЛЕНИЕ ИНДЕКСОВ (если остались)
 -- ============================================
@@ -60,6 +82,16 @@ DROP INDEX IF EXISTS public.idx_orders_created_at;
 DROP INDEX IF EXISTS public.idx_orders_executor_user_id;
 DROP INDEX IF EXISTS public.idx_transactions_user_id;
 DROP INDEX IF EXISTS public.idx_transactions_order_id;
+
+-- ============================================
+-- УДАЛЕНИЕ РАСШИРЕНИЯ POSTGIS (опционально)
+-- ============================================
+
+-- Если нужно полностью удалить PostGIS, раскомментируйте следующую строку:
+-- DROP EXTENSION IF EXISTS postgis CASCADE;
+
+-- Внимание: Удаление расширения PostGIS также удалит все связанные таблицы и функции
+-- Если вы планируете использовать PostGIS в будущем, не удаляйте расширение
 
 -- ============================================
 -- УДАЛЕНИЕ STORAGE BUCKETS (если есть)
@@ -102,12 +134,13 @@ BEGIN
     SELECT COUNT(*) INTO table_count
     FROM information_schema.tables
     WHERE table_schema = 'public'
-    AND table_name IN ('profiles', 'drivers', 'fleets', 'orders', 'regions', 'balances', 'transactions');
+    AND table_name IN ('profiles', 'drivers', 'fleets', 'orders', 'regions', 'balances', 'transactions', 
+                       'geography_columns', 'geometry_columns', 'spatial_ref_sys');
     
     IF table_count > 0 THEN
         RAISE NOTICE '⚠️ ВНИМАНИЕ: Осталось % таблиц в схеме public', table_count;
     ELSE
-        RAISE NOTICE '✅ Все таблицы успешно удалены';
+        RAISE NOTICE '✅ Все таблицы успешно удалены (включая PostGIS таблицы)';
     END IF;
 END $$;
 
