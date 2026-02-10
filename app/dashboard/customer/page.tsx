@@ -36,7 +36,7 @@ export default async function CustomerDashboard() {
     redirect('/dashboard')
   }
 
-  // Получаем заказы заказчика
+  // Получаем заказы организации
   const { data: orders } = await supabase
     .from('orders')
     .select('*')
@@ -46,7 +46,7 @@ export default async function CustomerDashboard() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-6">Панель заказчика</h1>
+      <h1 className="text-3xl font-bold mb-6">Панель организации</h1>
       
       <div className="bg-white rounded-lg shadow p-6 mb-6">
         <h2 className="text-xl font-semibold mb-4">Мои заказы</h2>

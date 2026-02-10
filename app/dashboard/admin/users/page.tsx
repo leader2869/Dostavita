@@ -58,14 +58,14 @@ export default async function AdminUsersPage() {
   
   console.log('AdminUsersPage - Пользователей загружено:', users?.length || 0)
 
-  const roleLabels: Record<string, string> = {
-    customer: 'Заказчик',
-    client: 'Клиент',
-    driver: 'Исполнитель',
-    fleet: 'Автопарк',
-    admin: 'Администратор',
-    superadmin: 'Суперадмин',
-  }
+      const roleLabels: Record<string, string> = {
+        customer: 'Организация',
+        client: 'Клиент',
+        driver: 'Исполнитель',
+        fleet: 'Автопарк',
+        admin: 'Администратор',
+        superadmin: 'Суперадмин',
+      }
 
   return (
     <div>

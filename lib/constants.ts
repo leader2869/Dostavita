@@ -9,7 +9,7 @@ export const ORDER_STATUS_LABELS = {
 } as const
 
 export const ROLE_LABELS = {
-  customer: 'Заказчик',
+  customer: 'Организация',
   client: 'Клиент',
   driver: 'Исполнитель',
   fleet: 'Автопарк',

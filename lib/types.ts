@@ -1,7 +1,7 @@
 // Типы для приложения Dostavita
 
 export type UserRole =
-  | 'customer' // Заказчик
+  | 'customer' // Организация
   | 'client' // Клиент-получатель
   | 'driver' // Исполнитель (водитель)
   | 'fleet' // Автопарк
