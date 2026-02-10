@@ -68,7 +68,11 @@ export default function ClientDashboard() {
         ) : orders.length > 0 ? (
           <div className="space-y-4">
             {orders.map((order: any) => (
-              <div key={order.id} className="border border-gray-700 rounded-lg p-4 bg-gray-700">
+              <div
+                key={order.id}
+                className="border border-gray-700 rounded-lg p-4 bg-gray-700 hover:bg-gray-600 transition cursor-pointer"
+                onClick={() => router.push(`/dashboard/client/orders/${order.id}`)}
+              >
                 <div className="flex justify-between items-start">
                   <div>
                     <p className="font-medium text-white">Заказ #{order.id.slice(0, 8)}</p>
