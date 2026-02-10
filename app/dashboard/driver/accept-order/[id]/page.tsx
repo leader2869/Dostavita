@@ -70,14 +70,30 @@ export default function AcceptOrderPage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Не авторизован')
 
-      console.log('Accepting order:', { orderId, userId: user.id })
+      console.log('=== Accepting order ===')
+      console.log('Order ID:', orderId)
+      console.log('User ID:', user.id)
+      
+      // Сначала проверяем заказ до принятия
+      const { data: orderBefore, error: orderBeforeError } = await supabase
+        .from('orders')
+        .select('id, status, executor_user_id, driver_id')
+        .eq('id', orderId)
+        .single()
+      
+      console.log('Order BEFORE accept:', { orderBefore, orderBeforeError })
       
       const { data, error: rpcError } = await supabase.rpc('accept_order', {
         order_uuid: orderId,
         driver_user_uuid: user.id,
       })
 
-      console.log('Accept order result:', { data, error: rpcError })
+      console.log('Accept order RPC result:')
+      console.log('  - Success:', data)
+      console.log('  - Error:', rpcError)
+      if (rpcError) {
+        console.error('RPC Error details:', JSON.stringify(rpcError, null, 2))
+      }
 
       if (rpcError) {
         console.error('RPC Error:', rpcError)
@@ -85,17 +101,25 @@ export default function AcceptOrderPage() {
       }
 
       if (data === false) {
-        throw new Error('Не удалось принять заказ. Убедитесь, что вы на линии и заказ доступен.')
+        console.error('Function returned false - order was not accepted')
+        throw new Error('Не удалось принять заказ. Убедитесь, что заказ доступен и у вас заполнен профиль водителя (тип транспорта и номер водительского удостоверения).')
       }
 
       // Проверяем, что заказ был обновлен
       const { data: updatedOrder, error: checkError } = await supabase
         .from('orders')
-        .select('id, executor_user_id, status')
+        .select('id, executor_user_id, status, driver_id, accepted_at')
         .eq('id', orderId)
         .single()
       
-      console.log('Order after accept:', { updatedOrder, checkError })
+      console.log('Order AFTER accept:')
+      console.log('  - Updated order:', updatedOrder)
+      console.log('  - Check error:', checkError)
+      if (updatedOrder) {
+        console.log('  - executor_user_id:', updatedOrder.executor_user_id)
+        console.log('  - status:', updatedOrder.status)
+        console.log('  - Matches user ID?', updatedOrder.executor_user_id === user.id)
+      }
 
       // Переходим на страницу "Мои заказы" после принятия заказа
       window.location.href = '/dashboard/driver/my-orders'
