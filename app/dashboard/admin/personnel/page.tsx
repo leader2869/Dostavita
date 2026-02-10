@@ -37,19 +37,47 @@ export default async function AdminPersonnelPage() {
     redirect('/dashboard')
   }
 
-  // Получаем всех водителей
-  const { data: drivers } = await supabase
-    .from('drivers')
-    .select(`
-      *,
-      profiles:user_id (
-        email,
-        full_name,
-        phone
-      )
-    `)
-    .order('created_at', { ascending: false })
+  // Получаем всех водителей через RPC функцию (обходит RLS)
+  let { data: drivers, error: driversError } = await supabase
+    .rpc('get_all_drivers')
     .limit(100)
+  
+  // Преобразуем данные из RPC функции в формат с вложенным profiles
+  const driversWithProfiles = drivers?.map((d: any) => ({
+    ...d,
+    profiles: {
+      email: d.profile_email,
+      full_name: d.profile_full_name,
+      phone: d.profile_phone
+    }
+  }))
+  
+  // Fallback на прямой запрос, если RPC не работает
+  if (driversError || !drivers) {
+    console.log('AdminPersonnelPage - RPC не сработал, пробуем прямой запрос...')
+    const { data: directDrivers } = await supabase
+      .from('drivers')
+      .select(`
+        *,
+        profiles:user_id (
+          email,
+          full_name,
+          phone
+        )
+      `)
+      .order('created_at', { ascending: false })
+      .limit(100)
+    
+    if (directDrivers) {
+      drivers = directDrivers
+    } else {
+      drivers = driversWithProfiles
+    }
+  } else {
+    drivers = driversWithProfiles
+  }
+  
+  console.log('AdminPersonnelPage - Водителей загружено:', drivers?.length || 0)
 
   return (
     <div>

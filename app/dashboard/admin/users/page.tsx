@@ -37,12 +37,26 @@ export default async function AdminUsersPage() {
     redirect('/dashboard')
   }
 
-  // Получаем всех пользователей
-  const { data: users } = await supabase
-    .from('profiles')
-    .select('*')
-    .order('created_at', { ascending: false })
+  // Получаем всех пользователей через RPC функцию (обходит RLS)
+  let { data: users, error: usersError } = await supabase
+    .rpc('get_all_users')
     .limit(100)
+  
+  // Fallback на прямой запрос, если RPC не работает
+  if (usersError || !users) {
+    console.log('AdminUsersPage - RPC не сработал, пробуем прямой запрос...')
+    const { data: directUsers } = await supabase
+      .from('profiles')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(100)
+    
+    if (directUsers) {
+      users = directUsers
+    }
+  }
+  
+  console.log('AdminUsersPage - Пользователей загружено:', users?.length || 0)
 
   const roleLabels: Record<string, string> = {
     customer: 'Заказчик',
