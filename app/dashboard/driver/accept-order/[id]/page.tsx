@@ -96,7 +96,7 @@ export default function AcceptOrderPage() {
 
       <div className="bg-gray-800 rounded-lg shadow p-6 space-y-4">
         <div>
-          <h2 className="font-semibold mb-2">Детали заказа</h2>
+          <h2 className="font-semibold mb-2 text-white">Детали заказа</h2>
           <p><strong>Откуда:</strong> {order.pickup_address}</p>
           <p><strong>Куда:</strong> {order.delivery_address}</p>
           <p><strong>Тип груза:</strong> {

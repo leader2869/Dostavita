@@ -102,7 +102,7 @@ export default function OrderDetailsPage() {
 
       <div className="bg-gray-800 rounded-lg shadow p-6 space-y-4">
         <div>
-          <h2 className="font-semibold mb-2">Статус</h2>
+          <h2 className="font-semibold mb-2 text-white">Статус</h2>
           <p className="text-lg">
             {order.status === 'searching_courier' && 'Ищем курьера'}
             {order.status === 'courier_coming' && 'Курьер едет к вам'}
@@ -113,13 +113,13 @@ export default function OrderDetailsPage() {
         </div>
 
         <div>
-          <h2 className="font-semibold mb-2">Адреса</h2>
+          <h2 className="font-semibold mb-2 text-white">Адреса</h2>
           <p><strong>Откуда:</strong> {order.pickup_address}</p>
           <p><strong>Куда:</strong> {order.delivery_address}</p>
         </div>
 
         <div>
-          <h2 className="font-semibold mb-2">Информация о заказе</h2>
+          <h2 className="font-semibold mb-2 text-white">Информация о заказе</h2>
           <p><strong>Тип груза:</strong> {
             order.item_type === 'documents' ? 'Документы' :
             order.item_type === 'parcel' ? 'Посылка' :
