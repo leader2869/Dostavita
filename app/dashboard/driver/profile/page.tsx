@@ -63,20 +63,24 @@ export default function DriverProfilePage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Не авторизован')
 
-      // Используем upsert для создания или обновления профиля
-      // Это предотвращает ошибку при попытке создать дубликат
-      const { error: upsertError } = await supabase
-        .from('drivers')
-        .upsert({
-          user_id: user.id,
+      // Используем API route для создания/обновления профиля (обходит RLS)
+      const response = await fetch('/api/driver/profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           vehicle_type: vehicleType,
           vehicle_number: vehicleNumber,
           license_number: licenseNumber,
-        }, {
-          onConflict: 'user_id'
-        })
+        }),
+      })
 
-      if (upsertError) throw upsertError
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Ошибка сохранения профиля')
+      }
 
       router.push('/dashboard/driver')
     } catch (err: any) {
