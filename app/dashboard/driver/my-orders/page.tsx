@@ -20,6 +20,8 @@ export default function DriverMyOrdersPage() {
         return
       }
 
+      console.log('Driver My Orders - Loading orders for user:', user.id)
+
       // Получаем только выполняемые заказы водителя (где executor_user_id равен ID текущего пользователя)
       const { data: ordersData, error } = await supabase
         .from('orders')
@@ -28,11 +30,31 @@ export default function DriverMyOrdersPage() {
         .in('status', ['courier_coming', 'courier_delivering'])
         .order('created_at', { ascending: false })
 
+      console.log('Driver My Orders - Query result:', {
+        ordersCount: ordersData?.length || 0,
+        orders: ordersData,
+        error: error
+      })
+
       if (error) {
         console.error('Ошибка загрузки заказов:', error)
       } else {
         setOrders(ordersData || [])
       }
+
+      // Также проверяем все заказы с executor_user_id (без фильтра по статусу) для отладки
+      const { data: allOrdersData, error: allOrdersError } = await supabase
+        .from('orders')
+        .select('id, executor_user_id, status, created_at')
+        .eq('executor_user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(20)
+
+      console.log('Driver My Orders - All orders with executor_user_id:', {
+        count: allOrdersData?.length || 0,
+        orders: allOrdersData,
+        error: allOrdersError
+      })
       
       setLoading(false)
     }
