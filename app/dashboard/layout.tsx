@@ -143,7 +143,7 @@ export default async function DashboardLayout({
               <div className="flex items-center space-x-3">
                 {(profile as User).avatar_url ? (
                   <img
-                    src={(profile as User).avatar_url}
+                    src={(profile as User).avatar_url || ''}
                     alt="Аватар"
                     className="w-8 h-8 rounded-full object-cover border border-gray-600"
                   />
