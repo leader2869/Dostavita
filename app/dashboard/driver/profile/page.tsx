@@ -63,31 +63,20 @@ export default function DriverProfilePage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Не авторизован')
 
-      if (driver) {
-        // Обновляем существующий профиль
-        const { error: updateError } = await supabase
-          .from('drivers')
-          .update({
-            vehicle_type: vehicleType,
-            vehicle_number: vehicleNumber,
-            license_number: licenseNumber,
-          })
-          .eq('id', driver.id)
+      // Используем upsert для создания или обновления профиля
+      // Это предотвращает ошибку при попытке создать дубликат
+      const { error: upsertError } = await supabase
+        .from('drivers')
+        .upsert({
+          user_id: user.id,
+          vehicle_type: vehicleType,
+          vehicle_number: vehicleNumber,
+          license_number: licenseNumber,
+        }, {
+          onConflict: 'user_id'
+        })
 
-        if (updateError) throw updateError
-      } else {
-        // Создаем новый профиль
-        const { error: insertError } = await supabase
-          .from('drivers')
-          .insert({
-            user_id: user.id,
-            vehicle_type: vehicleType,
-            vehicle_number: vehicleNumber,
-            license_number: licenseNumber,
-          })
-
-        if (insertError) throw insertError
-      }
+      if (upsertError) throw upsertError
 
       router.push('/dashboard/driver')
     } catch (err: any) {
