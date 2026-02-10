@@ -19,10 +19,18 @@ export default function OrderDetailsPage() {
 
   const loadOrder = useCallback(async () => {
     try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        router.push('/login')
+        return
+      }
+
+      // Загружаем заказ и проверяем, что он принадлежит текущему водителю
       const { data, error: fetchError } = await supabase
         .from('orders')
         .select('*')
         .eq('id', orderId)
+        .eq('executor_user_id', user.id)
         .single()
 
       if (fetchError) throw fetchError
@@ -32,7 +40,7 @@ export default function OrderDetailsPage() {
     } finally {
       setLoading(false)
     }
-  }, [orderId, supabase])
+  }, [orderId, supabase, router])
 
   useEffect(() => {
     loadOrder()

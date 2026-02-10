@@ -55,11 +55,12 @@ export default async function DriverDashboard() {
   const rejectedOrderIds = new Set(rejections?.map(r => r.order_id) || [])
   const filteredOrders = availableOrders?.filter(order => !rejectedOrderIds.has(order.id)) || []
 
-  // Получаем заказы водителя
+  // Получаем активные заказы водителя (где executor_user_id равен ID текущего пользователя)
   const { data: myOrders } = await supabase
     .from('orders')
     .select('*')
     .eq('executor_user_id', user.id)
+    .in('status', ['courier_coming', 'courier_delivering', 'searching_courier'])
     .order('created_at', { ascending: false })
     .limit(10)
 
