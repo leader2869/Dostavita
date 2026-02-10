@@ -83,12 +83,14 @@ export default async function DriverDashboard() {
   
   console.log('Driver Dashboard - Orders by driver_id (for debugging):', ordersByDriverId?.length || 0)
 
-  // Фильтруем только активные заказы
+  // Фильтруем только активные заказы, которые водитель выполняет
+  // Статусы: courier_coming (едет за посылкой) и courier_delivering (доставляет заказ)
+  // НЕ включаем searching_courier - это статус для доступных заказов, а не для выполняемых
   const { data: myOrders, error: myOrdersError } = await supabase
     .from('orders')
     .select('*')
     .eq('executor_user_id', user.id)
-    .in('status', ['courier_coming', 'courier_delivering', 'searching_courier'])
+    .in('status', ['courier_coming', 'courier_delivering'])
     .order('created_at', { ascending: false })
     .limit(10)
 
