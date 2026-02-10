@@ -508,7 +508,7 @@ export default function IconSelectorPage() {
             <h2 className="text-xl font-semibold mb-4">
               Выбранная иконка: {carIcons.find(i => i.id === selectedIcon)?.name}
             </h2>
-            <div className="bg-gray-100 p-4 rounded">
+            <div className="bg-gray-700 p-4 rounded">
               <pre className="text-xs overflow-x-auto">
                 {JSON.stringify(carIcons.find(i => i.id === selectedIcon)?.svg, null, 2)}
               </pre>

@@ -90,7 +90,7 @@ export default async function AdminUsersPage() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     {user.email}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">
+                  <td className="px-6 py-4 text-sm text-white">
                     {user.full_name || '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">

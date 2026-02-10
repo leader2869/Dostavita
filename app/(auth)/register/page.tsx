@@ -123,7 +123,7 @@ export default function RegisterPage() {
       
       <form onSubmit={handleRegister} className="space-y-4">
         <div>
-          <label htmlFor="fullName" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="fullName" className="block text-sm font-medium text-gray-300">
             ФИО
           </label>
           <input
@@ -137,7 +137,7 @@ export default function RegisterPage() {
         </div>
 
         <div>
-          <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="phone" className="block text-sm font-medium text-gray-300">
             Телефон
           </label>
           <input
@@ -151,7 +151,7 @@ export default function RegisterPage() {
         </div>
 
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="email" className="block text-sm font-medium text-gray-300">
             Email
           </label>
           <input
@@ -165,7 +165,7 @@ export default function RegisterPage() {
         </div>
 
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="password" className="block text-sm font-medium text-gray-300">
             Пароль
           </label>
           <input
@@ -180,7 +180,7 @@ export default function RegisterPage() {
         </div>
 
         <div>
-          <label htmlFor="role" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="role" className="block text-sm font-medium text-gray-300">
             Роль
           </label>
           <select

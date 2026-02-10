@@ -120,7 +120,7 @@ export default function ClientProfilePage() {
 
       <form onSubmit={handleSubmit} className="bg-gray-800 rounded-lg shadow p-6 space-y-4">
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-1">
             Email
           </label>
           <input
@@ -134,7 +134,7 @@ export default function ClientProfilePage() {
         </div>
 
         <div>
-          <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="fullName" className="block text-sm font-medium text-gray-300 mb-1">
             ФИО
           </label>
           <input
@@ -148,7 +148,7 @@ export default function ClientProfilePage() {
         </div>
 
         <div>
-          <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="phone" className="block text-sm font-medium text-gray-300 mb-1">
             Телефон
           </label>
           <input

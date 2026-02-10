@@ -102,7 +102,7 @@ export default function ClientDashboard() {
           </a>
           <a
             href="/dashboard/client/orders"
-            className="bg-gray-100 text-gray-700 p-4 rounded-lg text-center hover:bg-gray-200 transition"
+            className="bg-gray-700 text-gray-300 p-4 rounded-lg text-center hover:bg-gray-600 transition"
           >
             Все заказы
           </a>

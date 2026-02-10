@@ -118,7 +118,7 @@ export default async function AdminPersonnelPage() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <span className={`px-2 py-1 rounded text-xs ${
                       driver.shift_status === 'online' ? 'bg-green-100 text-green-800' :
-                      driver.shift_status === 'offline' ? 'bg-gray-100 text-gray-800' :
+                      driver.shift_status === 'offline' ? 'bg-gray-700 text-gray-200' :
                       'bg-yellow-100 text-yellow-800'
                     }`}>
                       {driver.shift_status === 'online' && 'Онлайн'}

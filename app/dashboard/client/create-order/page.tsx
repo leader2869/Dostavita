@@ -104,7 +104,7 @@ export default function CreateOrderPage() {
 
       <form onSubmit={handleSubmit} className="bg-gray-800 rounded-lg shadow p-6 space-y-4">
         <div>
-          <label htmlFor="pickupAddress" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="pickupAddress" className="block text-sm font-medium text-gray-300 mb-1">
             Адрес отправления
           </label>
           <input
@@ -119,7 +119,7 @@ export default function CreateOrderPage() {
         </div>
 
         <div>
-          <label htmlFor="deliveryAddress" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="deliveryAddress" className="block text-sm font-medium text-gray-300 mb-1">
             Адрес доставки
           </label>
           <input
@@ -134,7 +134,7 @@ export default function CreateOrderPage() {
         </div>
 
         <div>
-          <label htmlFor="region" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="region" className="block text-sm font-medium text-gray-300 mb-1">
             Регион
           </label>
           <select
@@ -153,7 +153,7 @@ export default function CreateOrderPage() {
         </div>
 
         <div>
-          <label htmlFor="itemType" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="itemType" className="block text-sm font-medium text-gray-300 mb-1">
             Тип отправления
           </label>
           <select
@@ -170,7 +170,7 @@ export default function CreateOrderPage() {
         </div>
 
         <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="description" className="block text-sm font-medium text-gray-300 mb-1">
             Описание
           </label>
           <textarea
