@@ -42,9 +42,9 @@ export default async function AdminDashboard() {
     .single()
   
   // Fallback на прямые запросы, если RPC не работает
-  let usersCount = stats?.users_count || 0
-  let driversCount = stats?.drivers_count || 0
-  let ordersCount = stats?.orders_count || 0
+  let usersCount = (stats as { users_count?: number } | null)?.users_count || 0
+  let driversCount = (stats as { drivers_count?: number } | null)?.drivers_count || 0
+  let ordersCount = (stats as { orders_count?: number } | null)?.orders_count || 0
   
   if (statsError || !stats) {
     console.log('AdminDashboard - RPC не сработал, пробуем прямые запросы...')
