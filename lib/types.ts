@@ -77,7 +77,7 @@ export interface Order {
   description: string | null
   weight: number | null
   volume: number | null
-  item_type: 'documents' | 'parcel' | 'flowers' | 'food' | null
+  item_type: 'documents' | 'parcel' | 'flowers' | 'food' | 'other' | null
   courier_comment: string | null
   base_price: number
   region_id: string

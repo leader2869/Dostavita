@@ -18,7 +18,7 @@ export default function CreateOrderPage() {
   const [deliveryAddress, setDeliveryAddress] = useState('')
   const [description, setDescription] = useState('')
   const [selectedRegion, setSelectedRegion] = useState('')
-  const [itemType, setItemType] = useState<'documents' | 'parcel' | 'flowers' | 'food'>('parcel')
+  const [itemType, setItemType] = useState<'documents' | 'parcel' | 'flowers' | 'food' | 'other'>('flowers')
 
   const loadRegions = useCallback(async () => {
     const { data } = await supabase
@@ -142,13 +142,21 @@ export default function CreateOrderPage() {
             value={selectedRegion}
             onChange={(e) => setSelectedRegion(e.target.value)}
             required
-            className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
+            disabled={regions.length === 0}
+            className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {regions.map((region) => (
-              <option key={region.id} value={region.id} className="bg-gray-700">
-                {region.name} - {region.base_price} BYN
-              </option>
-            ))}
+            {regions.length === 0 ? (
+              <option value="" className="bg-gray-700">Загрузка регионов...</option>
+            ) : (
+              <>
+                <option value="" className="bg-gray-700">Выберите регион</option>
+                {regions.map((region) => (
+                  <option key={region.id} value={region.id} className="bg-gray-700">
+                    {region.name} - {region.base_price} BYN
+                  </option>
+                ))}
+              </>
+            )}
           </select>
         </div>
 
@@ -162,10 +170,11 @@ export default function CreateOrderPage() {
             onChange={(e) => setItemType(e.target.value as any)}
             className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
           >
+            <option value="flowers" className="bg-gray-700">Цветы</option>
             <option value="parcel" className="bg-gray-700">Посылка</option>
             <option value="documents" className="bg-gray-700">Документы</option>
-            <option value="flowers" className="bg-gray-700">Цветы</option>
             <option value="food" className="bg-gray-700">Еда</option>
+            <option value="other" className="bg-gray-700">Другое</option>
           </select>
         </div>
 
