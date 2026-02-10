@@ -146,8 +146,8 @@ export default async function DriverDashboard() {
                         {order.pickup_address} → {order.delivery_address}
                       </p>
                       <p className="text-sm text-gray-400 mt-1">
-                        Статус: {order.status === 'courier_coming' ? 'Курьер едет к вам' :
-                                 order.status === 'courier_delivering' ? 'Курьер доставляет заказ' :
+                        Статус: {order.status === 'courier_coming' ? 'Еду за посылкой' :
+                                 order.status === 'courier_delivering' ? 'Доставляю заказ' :
                                  order.status === 'completed' ? 'Заказ завершен' : order.status}
                       </p>
                     </div>
