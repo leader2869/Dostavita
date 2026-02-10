@@ -28,7 +28,7 @@ export function ClientBottomNavigation() {
       path: '/dashboard/client/create-order',
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13a2 2 0 100-4 2 2 0 000 4zM19 13a2 2 0 100-4 2 2 0 000 4zM5 13V9a2 2 0 012-2h10a2 2 0 012 2v4M5 13h14" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
         </svg>
       ),
     },
