@@ -17,6 +17,8 @@ export default function ClientProfilePage() {
   const [fullName, setFullName] = useState('')
   const [phone, setPhone] = useState('')
   const [email, setEmail] = useState('')
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
+  const [uploadingAvatar, setUploadingAvatar] = useState(false)
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -42,6 +44,7 @@ export default function ClientProfilePage() {
           setFullName(data.full_name || '')
           setPhone(data.phone || '')
           setEmail(data.email || user.email || '')
+          setAvatarUrl(data.avatar_url || null)
         } else {
           // Профиль не найден, создаем его через API route (обходит RLS)
           const response = await fetch('/api/profile/create', {
@@ -60,6 +63,7 @@ export default function ClientProfilePage() {
             setFullName(newProfile.full_name || '')
             setPhone(newProfile.phone || '')
             setEmail(newProfile.email || user.email || '')
+            setAvatarUrl(newProfile.avatar_url || null)
           }
         }
       } catch (err: any) {
@@ -106,6 +110,38 @@ export default function ClientProfilePage() {
     router.push('/login')
   }
 
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setUploadingAvatar(true)
+    setError(null)
+
+    try {
+      const formData = new FormData()
+      formData.append('avatar', file)
+
+      const response = await fetch('/api/profile/upload-avatar', {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Ошибка загрузки аватара')
+      }
+
+      const { avatar_url } = await response.json()
+      setAvatarUrl(avatar_url)
+      setProfile({ ...profile, avatar_url })
+      alert('Аватар успешно загружен')
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setUploadingAvatar(false)
+    }
+  }
+
   if (loading) {
     return (
       <div className="pb-20">
@@ -119,6 +155,43 @@ export default function ClientProfilePage() {
       <h1 className="text-3xl font-bold mb-6 text-white">Профиль</h1>
 
       <form onSubmit={handleSubmit} className="bg-gray-800 rounded-lg shadow p-6 space-y-4">
+        {/* Аватар */}
+        <div className="flex flex-col items-center mb-6">
+          <div className="relative">
+            {avatarUrl ? (
+              <img
+                src={avatarUrl}
+                alt="Аватар"
+                className="w-24 h-24 rounded-full object-cover border-2 border-gray-600"
+              />
+            ) : (
+              <div className="w-24 h-24 rounded-full bg-gray-700 border-2 border-gray-600 flex items-center justify-center">
+                <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </div>
+            )}
+            <label
+              htmlFor="avatar-upload"
+              className="absolute bottom-0 right-0 bg-green-600 text-white rounded-full p-2 cursor-pointer hover:bg-green-700 transition"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <input
+                id="avatar-upload"
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarUpload}
+                className="hidden"
+                disabled={uploadingAvatar}
+              />
+            </label>
+          </div>
+          {uploadingAvatar && (
+            <p className="text-sm text-gray-400 mt-2">Загрузка...</p>
+          )}
+        </div>
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-1">
             Email
