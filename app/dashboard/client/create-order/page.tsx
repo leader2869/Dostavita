@@ -11,6 +11,7 @@ export default function CreateOrderPage() {
   const supabase = createClient()
   const [regions, setRegions] = useState<Region[]>([])
   const [loading, setLoading] = useState(false)
+  const [loadingRegions, setLoadingRegions] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   // Форма заказа
@@ -21,15 +22,48 @@ export default function CreateOrderPage() {
   const [itemType, setItemType] = useState<'documents' | 'parcel' | 'flowers' | 'food' | 'other'>('flowers')
 
   const loadRegions = useCallback(async () => {
-    const { data } = await supabase
-      .from('regions')
-      .select('*')
-      .eq('is_active', true)
-      .order('name')
+    setLoadingRegions(true)
+    setError(null)
+    
+    try {
+      // Пробуем использовать RPC функцию (обходит RLS)
+      let { data, error } = await supabase
+        .rpc('get_all_regions')
 
-    if (data) {
-      setRegions(data)
-      // Не устанавливаем автоматически, пусть пользователь выберет
+      // Если RPC не работает, пробуем прямой запрос
+      if (error || !data) {
+        console.log('RPC не сработал, пробуем прямой запрос регионов...')
+        const result = await supabase
+          .from('regions')
+          .select('*')
+          .eq('is_active', true)
+          .order('name')
+        
+        data = result.data
+        error = result.error
+      }
+
+      if (error) {
+        console.error('Ошибка загрузки регионов:', error)
+        setError(`Ошибка загрузки регионов: ${error.message}`)
+        setLoadingRegions(false)
+        return
+      }
+
+      if (data) {
+        // Фильтруем только активные регионы, если использовали RPC
+        const activeRegions = data.filter((r: Region) => r.is_active !== false)
+        setRegions(activeRegions)
+        console.log('Загружено регионов:', activeRegions.length)
+      } else {
+        console.warn('Регионы не загружены: data is null')
+        setError('Не удалось загрузить регионы')
+      }
+    } catch (err: any) {
+      console.error('Исключение при загрузке регионов:', err)
+      setError(`Ошибка: ${err.message}`)
+    } finally {
+      setLoadingRegions(false)
     }
   }, [supabase])
 
@@ -152,13 +186,18 @@ export default function CreateOrderPage() {
           <select
             id="region"
             value={selectedRegion}
-            onChange={(e) => setSelectedRegion(e.target.value)}
+            onChange={(e) => {
+              console.log('Выбран регион:', e.target.value)
+              setSelectedRegion(e.target.value)
+            }}
             required
-            disabled={regions.length === 0}
+            disabled={loadingRegions || regions.length === 0}
             className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {regions.length === 0 ? (
+            {loadingRegions ? (
               <option value="" className="bg-gray-700">Загрузка регионов...</option>
+            ) : regions.length === 0 ? (
+              <option value="" className="bg-gray-700">Регионы не найдены</option>
             ) : (
               <>
                 <option value="" className="bg-gray-700">Выберите регион</option>
