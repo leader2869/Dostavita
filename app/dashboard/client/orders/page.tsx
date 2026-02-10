@@ -5,14 +5,14 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { ClientBottomNavigation } from '@/components/client/ClientBottomNavigation'
 
-export default function ClientDashboard() {
+export default function ClientOrdersPage() {
   const router = useRouter()
   const supabase = createClient()
   const [orders, setOrders] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const loadData = async () => {
+    const loadOrders = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       
       if (!user) {
@@ -20,13 +20,12 @@ export default function ClientDashboard() {
         return
       }
 
-      // Получаем заказы, где пользователь указан как получатель
+      // Получаем все заказы, где пользователь является отправителем или получателем
       const { data: ordersData, error } = await supabase
         .from('orders')
         .select('*')
         .or(`customer_id.eq.${user.id},client_id.eq.${user.id}`)
         .order('created_at', { ascending: false })
-        .limit(5)
 
       if (error) {
         console.error('Ошибка загрузки заказов:', error)
@@ -37,7 +36,7 @@ export default function ClientDashboard() {
       setLoading(false)
     }
 
-    loadData()
+    loadOrders()
   }, [supabase, router])
 
   const getStatusLabel = (status: string) => {
@@ -59,28 +58,39 @@ export default function ClientDashboard() {
 
   return (
     <div className="pb-20">
-      <h1 className="text-3xl font-bold mb-6">Главная</h1>
+      <h1 className="text-3xl font-bold mb-6">Мои заказы</h1>
 
-      <div className="bg-white rounded-lg shadow p-6 mb-6">
-        <h2 className="text-xl font-semibold mb-4">Мои заказы</h2>
+      <div className="bg-white rounded-lg shadow p-6">
         {loading ? (
           <p className="text-gray-500">Загрузка...</p>
         ) : orders.length > 0 ? (
           <div className="space-y-4">
-            {orders.map((order: any) => (
-              <div key={order.id} className="border rounded-lg p-4">
+            {orders.map((order) => (
+              <div
+                key={order.id}
+                className="border rounded-lg p-4 hover:shadow-md transition"
+                onClick={() => router.push(`/dashboard/client/orders/${order.id}`)}
+              >
                 <div className="flex justify-between items-start">
-                  <div>
+                  <div className="flex-1">
                     <p className="font-medium">Заказ #{order.id.slice(0, 8)}</p>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-gray-600 mt-1">
                       {order.pickup_address} → {order.delivery_address}
                     </p>
-                    <p className="text-sm text-gray-500 mt-1">
+                    <p className="text-sm text-gray-500 mt-2">
                       Статус: {getStatusLabel(order.status)}
                     </p>
+                    {order.description && (
+                      <p className="text-sm text-gray-500 mt-1">
+                        {order.description}
+                      </p>
+                    )}
                   </div>
-                  <div className="text-right">
-                    <p className="font-semibold">{order.final_price} BYN</p>
+                  <div className="text-right ml-4">
+                    <p className="font-semibold text-lg">{order.final_price} BYN</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {new Date(order.created_at).toLocaleDateString('ru-RU')}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -91,25 +101,8 @@ export default function ClientDashboard() {
         )}
       </div>
 
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-xl font-semibold mb-4">Быстрые действия</h2>
-        <div className="grid grid-cols-2 gap-4">
-          <a
-            href="/dashboard/client/create-order"
-            className="bg-blue-600 text-white p-4 rounded-lg text-center hover:bg-blue-700 transition"
-          >
-            Создать заказ
-          </a>
-          <a
-            href="/dashboard/client/orders"
-            className="bg-gray-100 text-gray-700 p-4 rounded-lg text-center hover:bg-gray-200 transition"
-          >
-            Все заказы
-          </a>
-        </div>
-      </div>
-
       <ClientBottomNavigation />
     </div>
   )
 }
+
