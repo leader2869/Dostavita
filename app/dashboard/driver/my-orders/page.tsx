@@ -35,13 +35,18 @@ export default function DriverMyOrdersPage() {
       console.log('Count:', allOrdersData?.length || 0)
       console.log('Error:', allOrdersError)
       if (allOrdersData && allOrdersData.length > 0) {
-        console.log('Orders:', allOrdersData.map((o: any) => ({
-          id: o.id?.slice(0, 8),
-          status: o.status,
-          executor_user_id: o.executor_user_id,
-          created_at: o.created_at,
-          accepted_at: o.accepted_at
-        })))
+        allOrdersData.forEach((o: any, index: number) => {
+          console.log(`Order ${index + 1}:`, {
+            id: o.id?.slice(0, 8),
+            status: o.status,
+            executor_user_id: o.executor_user_id,
+            created_at: o.created_at,
+            accepted_at: o.accepted_at
+          })
+          console.log(`  Status is courier_coming? ${o.status === 'courier_coming'}`)
+          console.log(`  Status is courier_delivering? ${o.status === 'courier_delivering'}`)
+          console.log(`  Status in filter? ${['courier_coming', 'courier_delivering'].includes(o.status)}`)
+        })
       } else {
         console.log('❌ No orders found with executor_user_id =', user.id)
         if (allOrdersError) {
