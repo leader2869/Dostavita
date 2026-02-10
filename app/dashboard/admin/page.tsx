@@ -36,18 +36,42 @@ export default async function AdminDashboard() {
     redirect('/dashboard')
   }
 
-  // Получаем статистику
-  const { count: ordersCount } = await supabase
-    .from('orders')
-    .select('*', { count: 'exact', head: true })
-
-  const { count: usersCount } = await supabase
-    .from('profiles')
-    .select('*', { count: 'exact', head: true })
-
-  const { count: driversCount } = await supabase
-    .from('drivers')
-    .select('*', { count: 'exact', head: true })
+  // Получаем статистику через RPC функцию (обходит RLS)
+  const { data: stats, error: statsError } = await supabase
+    .rpc('get_admin_stats')
+    .single()
+  
+  // Fallback на прямые запросы, если RPC не работает
+  let usersCount = stats?.users_count || 0
+  let driversCount = stats?.drivers_count || 0
+  let ordersCount = stats?.orders_count || 0
+  
+  if (statsError || !stats) {
+    console.log('AdminDashboard - RPC не сработал, пробуем прямые запросы...')
+    
+    const { count: ordersCountDirect } = await supabase
+      .from('orders')
+      .select('*', { count: 'exact', head: true })
+    
+    const { count: usersCountDirect } = await supabase
+      .from('profiles')
+      .select('*', { count: 'exact', head: true })
+    
+    const { count: driversCountDirect } = await supabase
+      .from('drivers')
+      .select('*', { count: 'exact', head: true })
+    
+    if (ordersCountDirect !== null) ordersCount = ordersCountDirect
+    if (usersCountDirect !== null) usersCount = usersCountDirect
+    if (driversCountDirect !== null) driversCount = driversCountDirect
+  }
+  
+  console.log('AdminDashboard - Статистика:', {
+    users: usersCount,
+    drivers: driversCount,
+    orders: ordersCount,
+    error: statsError?.message
+  })
 
   return (
     <div>
