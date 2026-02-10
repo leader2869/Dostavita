@@ -20,10 +20,38 @@ export default function DeliverySettingsPage() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const [isSuperadmin, setIsSuperadmin] = useState(false)
 
   useEffect(() => {
+    checkRole()
     loadSettings()
   }, [])
+
+  const checkRole = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        router.push('/login')
+        return
+      }
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+      if (profile?.role !== 'superadmin') {
+        router.push('/dashboard')
+        return
+      }
+
+      setIsSuperadmin(true)
+    } catch (err) {
+      console.error('Ошибка проверки роли:', err)
+      router.push('/dashboard')
+    }
+  }
 
   const loadSettings = async () => {
     try {
@@ -98,7 +126,7 @@ export default function DeliverySettingsPage() {
     }
   }
 
-  if (loading) {
+  if (loading || !isSuperadmin) {
     return (
       <div>
         <BackButton />
