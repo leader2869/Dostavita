@@ -73,7 +73,26 @@ export default async function AdminDashboard() {
     error: statsError?.message
   })
 
-  // Получаем активные заказы (статусы: searching_courier, courier_coming, courier_delivering)
+  // Получаем счетчики заказов
+  // 1. Активные заказы (searching_courier, courier_coming, courier_delivering)
+  const { count: activeOrdersCount } = await supabase
+    .from('orders')
+    .select('*', { count: 'exact', head: true })
+    .in('status', ['searching_courier', 'courier_coming', 'courier_delivering'])
+  
+  // 2. Заказы где ищем курьера (searching_courier)
+  const { count: searchingCourierCount } = await supabase
+    .from('orders')
+    .select('*', { count: 'exact', head: true })
+    .eq('status', 'searching_courier')
+  
+  // 3. Заказы которые выполняются (courier_coming, courier_delivering)
+  const { count: inProgressCount } = await supabase
+    .from('orders')
+    .select('*', { count: 'exact', head: true })
+    .in('status', ['courier_coming', 'courier_delivering'])
+
+  // Получаем активные заказы для отображения списка (статусы: searching_courier, courier_coming, courier_delivering)
   // Сортируем по времени создания (старые сверху)
   let { data: activeOrders, error: activeOrdersError } = await supabase
     .from('orders')
@@ -104,19 +123,22 @@ export default async function AdminDashboard() {
         {(profile as User).role === 'superadmin' && ' (Суперадмин)'}
       </h1>
 
-      {/* Статистика */}
+      {/* Статистика заказов */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <div className="bg-gray-800 rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold mb-2 text-white">Всего заказов</h2>
-          <p className="text-3xl font-bold text-white">{ordersCount || 0}</p>
+          <h2 className="text-lg font-semibold mb-2 text-white">Активные заказы</h2>
+          <p className="text-3xl font-bold text-white">{activeOrdersCount || 0}</p>
+          <p className="text-sm text-gray-400 mt-1">Ищем курьера, в пути, доставляется</p>
         </div>
         <div className="bg-gray-800 rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold mb-2 text-white">Пользователей</h2>
-          <p className="text-3xl font-bold text-white">{usersCount || 0}</p>
+          <h2 className="text-lg font-semibold mb-2 text-white">Ищем курьера</h2>
+          <p className="text-3xl font-bold text-white">{searchingCourierCount || 0}</p>
+          <p className="text-sm text-gray-400 mt-1">Ожидают принятия водителем</p>
         </div>
         <div className="bg-gray-800 rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold mb-2 text-white">Водителей</h2>
-          <p className="text-3xl font-bold text-white">{driversCount || 0}</p>
+          <h2 className="text-lg font-semibold mb-2 text-white">Выполняются</h2>
+          <p className="text-3xl font-bold text-white">{inProgressCount || 0}</p>
+          <p className="text-sm text-gray-400 mt-1">Курьер едет, доставляется</p>
         </div>
       </div>
 
