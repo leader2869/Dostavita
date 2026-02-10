@@ -24,6 +24,9 @@ export interface User {
   phone: string | null
   role: UserRole
   avatar_url: string | null
+  vehicle_type: string | null
+  vehicle_number: string | null
+  license_number: string | null
   created_at: string
   updated_at: string
 }

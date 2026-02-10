@@ -26,30 +26,28 @@ export async function POST(request: Request) {
       )
     }
 
-    // Используем upsert для создания или обновления профиля водителя
+    // Обновляем профиль пользователя, добавляя информацию об автомобиле
     // Серверный клиент обходит RLS
-    const { data: driver, error: upsertError } = await supabase
-      .from('drivers')
-      .upsert({
-        user_id: user.id,
+    const { data: updatedProfile, error: updateError } = await supabase
+      .from('profiles')
+      .update({
         vehicle_type,
         vehicle_number: vehicle_number || null,
         license_number,
-      }, {
-        onConflict: 'user_id'
       })
+      .eq('id', user.id)
       .select()
       .single()
 
-    if (upsertError) {
-      console.error('Ошибка создания/обновления профиля водителя:', upsertError)
+    if (updateError) {
+      console.error('Ошибка обновления профиля водителя:', updateError)
       return NextResponse.json(
-        { error: upsertError.message },
+        { error: updateError.message },
         { status: 500 }
       )
     }
 
-    return NextResponse.json({ driver })
+    return NextResponse.json({ profile: updatedProfile })
   } catch (error: any) {
     console.error('Ошибка API:', error)
     return NextResponse.json(

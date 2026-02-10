@@ -3,14 +3,14 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import type { Driver } from '@/lib/types'
+import type { User } from '@/lib/types'
 import { BackButton } from '@/components/ui/BackButton'
 
 export default function DriverProfilePage() {
   const router = useRouter()
   const supabase = createClient()
   
-  const [driver, setDriver] = useState<Driver | null>(null)
+  const [profile, setProfile] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -19,7 +19,7 @@ export default function DriverProfilePage() {
   const [vehicleNumber, setVehicleNumber] = useState('')
   const [licenseNumber, setLicenseNumber] = useState('')
 
-  const loadDriver = useCallback(async () => {
+  const loadProfile = useCallback(async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
@@ -28,20 +28,20 @@ export default function DriverProfilePage() {
       }
 
       const { data, error: fetchError } = await supabase
-        .from('drivers')
+        .from('profiles')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('id', user.id)
         .single()
 
-      if (fetchError && fetchError.code !== 'PGRST116') {
+      if (fetchError) {
         throw fetchError
       }
 
       if (data) {
-        setDriver(data)
-        setVehicleType(data.vehicle_type)
+        setProfile(data as User)
+        setVehicleType(data.vehicle_type || '')
         setVehicleNumber(data.vehicle_number || '')
-        setLicenseNumber(data.license_number)
+        setLicenseNumber(data.license_number || '')
       }
     } catch (err: any) {
       setError(err.message)
@@ -51,8 +51,8 @@ export default function DriverProfilePage() {
   }, [supabase, router])
 
   useEffect(() => {
-    loadDriver()
-  }, [loadDriver])
+    loadProfile()
+  }, [loadProfile])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
