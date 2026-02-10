@@ -97,8 +97,8 @@ export default function AcceptOrderPage() {
       
       console.log('Order after accept:', { updatedOrder, checkError })
 
-      // Используем window.location для полной перезагрузки страницы, чтобы обновить данные
-      window.location.href = '/dashboard/driver'
+      // Переходим на страницу "Мои заказы" после принятия заказа
+      window.location.href = '/dashboard/driver/my-orders'
     } catch (err: any) {
       setError(err.message)
       setAccepting(false)

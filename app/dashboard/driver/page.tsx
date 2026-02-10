@@ -159,6 +159,12 @@ export default async function DriverDashboard() {
                       >
                         Детали
                       </a>
+                      <a
+                        href="/dashboard/driver/my-orders"
+                        className="text-sm text-green-500 hover:text-green-600 block mt-1"
+                      >
+                        Все мои заказы →
+                      </a>
                     </div>
                   </div>
                 </div>
