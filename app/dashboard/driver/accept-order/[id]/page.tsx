@@ -34,14 +34,18 @@ export default function AcceptOrderPage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Не авторизован')
 
-      const { data: driverData, error: driverError } = await supabase
-        .from('drivers')
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('id', user.id)
         .single()
 
-      if (driverError && driverError.code !== 'PGRST116') throw driverError
-      setDriver(driverData)
+      if (profileError) throw profileError
+      
+      // Проверяем, что у водителя заполнена информация об автомобиле
+      if (profileData && profileData.vehicle_type && profileData.license_number) {
+        setDriver(profileData as any)
+      }
     } catch (err: any) {
       setError(err.message)
     } finally {
@@ -63,9 +67,12 @@ export default function AcceptOrderPage() {
     setError(null)
 
     try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Не авторизован')
+
       const { data, error: rpcError } = await supabase.rpc('accept_order', {
         order_uuid: orderId,
-        driver_uuid: driver.id,
+        driver_user_uuid: user.id,
       })
 
       if (rpcError) throw rpcError
