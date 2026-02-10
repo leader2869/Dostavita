@@ -100,10 +100,17 @@ export default function AcceptOrderPage() {
         throw rpcError
       }
 
-      if (data === false) {
-        console.error('Function returned false - order was not accepted')
+      if (data === false || data === null) {
+        console.error('Function returned false/null - order was not accepted')
+        console.error('Possible reasons:')
+        console.error('  1. Order status is not searching_courier')
+        console.error('  2. Driver profile missing vehicle_type or license_number')
+        console.error('  3. Function accept_order not found or wrong signature')
         throw new Error('Не удалось принять заказ. Убедитесь, что заказ доступен и у вас заполнен профиль водителя (тип транспорта и номер водительского удостоверения).')
       }
+      
+      console.log('✅ Function returned:', data)
+      console.log('✅ Order should be accepted now')
 
       // Проверяем, что заказ был обновлен
       const { data: updatedOrder, error: checkError } = await supabase
