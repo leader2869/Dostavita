@@ -9,10 +9,21 @@ export default async function DashboardPage() {
   
   console.log('Dashboard Page - Начало проверки...')
   
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser()
+  let user, authError
+  try {
+    const result = await supabase.auth.getUser()
+    user = result.data.user
+    authError = result.error
+  } catch (err: any) {
+    console.error('❌ Dashboard Page - Исключение при getUser():', err)
+    if (err.message?.includes('fetch failed') || err.message?.includes('timeout')) {
+      console.log('⚠️ Dashboard Page - Ошибка сети при подключении к Supabase')
+      console.log('Проверьте переменные окружения NEXT_PUBLIC_SUPABASE_URL и NEXT_PUBLIC_SUPABASE_ANON_KEY')
+      authError = err
+    } else {
+      throw err
+    }
+  }
 
   console.log('Dashboard Page - getUser():', { hasUser: !!user, userId: user?.id, error: authError?.message })
 

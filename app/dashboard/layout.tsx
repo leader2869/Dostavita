@@ -15,10 +15,23 @@ export default async function DashboardLayout({
   console.log('Dashboard Layout - Начало проверки аутентификации')
   console.log('========================================')
   
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser()
+  let user, authError
+  try {
+    const result = await supabase.auth.getUser()
+    user = result.data.user
+    authError = result.error
+  } catch (err: any) {
+    console.error('❌ Dashboard Layout - Исключение при getUser():', err)
+    // Если это ошибка сети, пробуем получить сессию из cookies
+    if (err.message?.includes('fetch failed') || err.message?.includes('timeout')) {
+      console.log('⚠️ Dashboard Layout - Ошибка сети при подключении к Supabase')
+      console.log('Проверьте переменные окружения NEXT_PUBLIC_SUPABASE_URL и NEXT_PUBLIC_SUPABASE_ANON_KEY')
+      console.log('Текущий URL:', process.env.NEXT_PUBLIC_SUPABASE_URL)
+      authError = err
+    } else {
+      throw err
+    }
+  }
 
   console.log('Dashboard Layout - Результат getUser():', { 
     hasUser: !!user, 
@@ -30,6 +43,11 @@ export default async function DashboardLayout({
 
   if (authError) {
     console.error('❌ Dashboard Layout - Ошибка getUser():', authError)
+    // Если это ошибка сети, не редиректим сразу - даем пользователю шанс
+    if (authError.message?.includes('fetch failed') || authError.message?.includes('timeout')) {
+      console.log('⚠️ Dashboard Layout - Проблема с подключением к Supabase')
+      console.log('Проверьте интернет-соединение и настройки Supabase')
+    }
     console.log('Редирект на /login из-за ошибки аутентификации')
     redirect('/login')
   }
