@@ -144,8 +144,15 @@ export default function AcceptOrderPage() {
       console.log('✅ Заказ принят успешно, переходим на страницу "Мои заказы"')
       router.push('/dashboard/driver/my-orders')
     } catch (err: any) {
-      setError(err.message)
+      console.error('❌ ОШИБКА при принятии заказа:', err)
+      console.error('Error message:', err.message)
+      console.error('Error details:', JSON.stringify(err, null, 2))
+      if (err.stack) {
+        console.error('Error stack:', err.stack)
+      }
+      setError(err.message || 'Не удалось принять заказ')
       setAccepting(false)
+      // НЕ делаем редирект при ошибке, чтобы пользователь мог увидеть ошибку
     }
   }
 
