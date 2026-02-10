@@ -34,8 +34,7 @@
     "postcss": "^8.4.32",
     "tailwindcss": "^3.4.0",
     "eslint": "^8.56.0",
-    "eslint-config-next": "14.0.4",
-    "@supabase/cli": "^1.151.0"
+    "eslint-config-next": "14.0.4"
   }
 }
 
