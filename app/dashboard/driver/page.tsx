@@ -59,7 +59,7 @@ export default async function DriverDashboard() {
   // Пробуем сначала без фильтра по статусу, чтобы увидеть все заказы
   const { data: allMyOrders, error: allOrdersError } = await supabase
     .from('orders')
-    .select('id, executor_user_id, status, created_at')
+    .select('id, executor_user_id, status, created_at, customer_id, client_id')
     .eq('executor_user_id', user.id)
     .order('created_at', { ascending: false })
     .limit(20)
@@ -69,6 +69,16 @@ export default async function DriverDashboard() {
   if (allOrdersError) {
     console.error('Ошибка загрузки всех заказов водителя:', allOrdersError)
   }
+
+  // Также проверяем заказы через driver_id (для обратной совместимости)
+  const { data: ordersByDriverId, error: driverIdError } = await supabase
+    .from('orders')
+    .select('id, driver_id, executor_user_id, status')
+    .not('driver_id', 'is', null)
+    .order('created_at', { ascending: false })
+    .limit(10)
+  
+  console.log('Driver Dashboard - Orders by driver_id (for debugging):', ordersByDriverId?.length || 0)
 
   // Фильтруем только активные заказы
   const { data: myOrders, error: myOrdersError } = await supabase
