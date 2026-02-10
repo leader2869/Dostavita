@@ -102,7 +102,7 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId }: Ava
                   })}
                 </span>
                 {' • '}
-                <span className="text-gray-300">
+                <span className="text-purple-400 font-medium animate-blink">
                   {formatDistanceToNow(new Date(order.created_at), {
                     addSuffix: true,
                     locale: ru
