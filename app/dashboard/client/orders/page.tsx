@@ -56,6 +56,28 @@ export default function ClientOrdersPage() {
     }
   }
 
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'searching_courier':
+        return 'text-yellow-400 bg-yellow-400/20 border-yellow-400/50'
+      case 'courier_coming':
+        return 'text-blue-400 bg-blue-400/20 border-blue-400/50'
+      case 'courier_delivering':
+        return 'text-purple-400 bg-purple-400/20 border-purple-400/50'
+      case 'completed':
+        return 'text-green-400 bg-green-400/20 border-green-400/50'
+      case 'cancelled':
+        return 'text-red-400 bg-red-400/20 border-red-400/50'
+      default:
+        return 'text-gray-400 bg-gray-400/20 border-gray-400/50'
+    }
+  }
+
+  const shouldBlink = (status: string) => {
+    // Мигают только активные статусы
+    return status === 'searching_courier' || status === 'courier_coming' || status === 'courier_delivering'
+  }
+
   // Разделяем заказы на активные и завершенные
   const activeOrders = orders.filter(order => 
     order.status !== 'completed' && order.status !== 'cancelled'
@@ -79,9 +101,16 @@ export default function ClientOrdersPage() {
             <p className="text-sm text-gray-300 mt-1">
               {order.pickup_address} → {order.delivery_address}
             </p>
-            <p className="text-sm text-gray-400 mt-2">
-              Статус: {getStatusLabel(order.status)}
-            </p>
+            <div className="mt-2">
+              <span className="text-sm text-gray-400">Статус: </span>
+              <span
+                className={`inline-block px-3 py-1 rounded-full text-xs font-semibold border ${
+                  getStatusColor(order.status)
+                } ${shouldBlink(order.status) ? 'animate-blink' : ''}`}
+              >
+                {getStatusLabel(order.status)}
+              </span>
+            </div>
             {order.description && (
               <p className="text-sm text-gray-400 mt-1">
                 {order.description}
