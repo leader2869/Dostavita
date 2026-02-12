@@ -118,9 +118,9 @@ export default async function DriverDashboard() {
           <AvailableOrdersList orders={filteredOrders} driverUserId={user.id} />
         </div>
 
-        {/* Мои заказы */}
+        {/* Активные заказы */}
         <div className="bg-gray-800 rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold mb-4 text-white">Мои заказы</h2>
+          <h2 className="text-xl font-semibold mb-4 text-white">Активные заказы</h2>
           {myOrders && myOrders.length > 0 ? (
             <div className="space-y-4">
               {myOrders.map((order: any) => (
