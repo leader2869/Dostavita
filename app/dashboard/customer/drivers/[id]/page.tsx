@@ -22,7 +22,7 @@ export default async function DriverDetailsPage({ params }: { params: { id: stri
     .rpc('get_user_profile', { user_id: user.id })
     .single()
 
-  if (!profile || profile.role !== 'customer') {
+  if (!profile || (profile as any).role !== 'customer') {
     redirect('/dashboard')
   }
 
