@@ -2,9 +2,9 @@
 
 -- Функция для создания запроса на привязку водителя
 CREATE OR REPLACE FUNCTION public.create_driver_organization_request(
-  driver_user_id UUID,
-  organization_user_id UUID,
-  request_message TEXT DEFAULT NULL
+  p_driver_user_id UUID,
+  p_organization_user_id UUID,
+  p_request_message TEXT DEFAULT NULL
 )
 RETURNS UUID
 LANGUAGE plpgsql
@@ -16,13 +16,7 @@ DECLARE
   driver_role TEXT;
   driver_org_id UUID;
   existing_request_id UUID;
-  p_driver_user_id UUID;
-  p_organization_user_id UUID;
 BEGIN
-  -- Сохраняем параметры в локальные переменные для избежания неоднозначности
-  p_driver_user_id := create_driver_organization_request.driver_user_id;
-  p_organization_user_id := create_driver_organization_request.organization_user_id;
-  
   -- Проверяем, что водитель существует и имеет роль driver
   SELECT profiles.role, profiles.organization_id INTO driver_role, driver_org_id
   FROM public.profiles
@@ -58,7 +52,7 @@ BEGIN
   VALUES (
     p_driver_user_id,
     p_organization_user_id,
-    request_message,
+    p_request_message,
     'pending'
   )
   RETURNING id INTO request_id;
