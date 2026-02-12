@@ -106,7 +106,7 @@ export default function CustomerDriversPage() {
     }
   }
 
-  const handleAttachDriver = async (driverId: string) => {
+  const handleAttachDriver = async (driverId: string, message?: string) => {
     setAttaching(driverId)
     setError(null)
 
@@ -116,13 +116,13 @@ export default function CustomerDriversPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ driver_user_id: driverId }),
+        body: JSON.stringify({ driver_user_id: driverId, message }),
       })
 
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Ошибка привязки водителя')
+        throw new Error(data.error || 'Ошибка отправки запроса')
       }
 
       // Обновляем список водителей
@@ -130,11 +130,61 @@ export default function CustomerDriversPage() {
       setShowAddModal(false)
       setSearchQuery('')
       setSearchResults([])
-      alert('Водитель успешно привязан к организации')
+      alert('Запрос на привязку водителя успешно отправлен. Водитель получит уведомление.')
     } catch (err: any) {
       setError(err.message)
     } finally {
       setAttaching(null)
+    }
+  }
+
+  const handleCreateDriver = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setCreating(true)
+    setError(null)
+
+    try {
+      const response = await fetch('/api/customer/create-driver', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: newDriverEmail,
+          password: newDriverPassword,
+          full_name: newDriverFullName,
+          phone: newDriverPhone,
+          vehicle_type: newDriverVehicleType,
+          vehicle_number: newDriverVehicleNumber,
+          license_number: newDriverLicenseNumber,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        if (data.requires_manual_registration) {
+          alert('Создание пользователей через API недоступно. Попросите водителя зарегистрироваться самостоятельно, а затем отправьте ему запрос на привязку.')
+        }
+        throw new Error(data.error || 'Ошибка создания водителя')
+      }
+
+      // Обновляем список водителей
+      await loadDrivers()
+      setShowCreateModal(false)
+      // Очищаем форму
+      setNewDriverEmail('')
+      setNewDriverPassword('')
+      setNewDriverFullName('')
+      setNewDriverPhone('')
+      setNewDriverVehicleType('')
+      setNewDriverVehicleNumber('')
+      setNewDriverLicenseNumber('')
+      alert('Аккаунт водителя успешно создан и привязан к организации')
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setCreating(false)
     }
   }
 
