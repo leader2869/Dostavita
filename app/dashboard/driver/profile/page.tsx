@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import type { User } from '@/lib/types'
 import { BackButton } from '@/components/ui/BackButton'
+import { DriverBottomNavigation } from '@/components/driver/DriverBottomNavigation'
 
 export default function DriverProfilePage() {
   const router = useRouter()
@@ -21,6 +22,8 @@ export default function DriverProfilePage() {
   const [licenseNumber, setLicenseNumber] = useState('')
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
+  const [organization, setOrganization] = useState<any>(null)
+  const [pendingRequestsCount, setPendingRequestsCount] = useState(0)
 
   const loadProfile = useCallback(async () => {
     try {
@@ -47,6 +50,25 @@ export default function DriverProfilePage() {
         setVehicleNumber(data.vehicle_number || '')
         setLicenseNumber(data.license_number || '')
         setAvatarUrl(data.avatar_url || null)
+
+        // Если водитель привязан к организации, получаем информацию об организации
+        if (data.organization_id) {
+          const { data: orgData, error: orgError } = await supabase
+            .rpc('get_driver_organization_info', { driver_user_id: user.id })
+            .single()
+          
+          if (!orgError && orgData) {
+            setOrganization(orgData)
+          }
+        }
+
+        // Получаем количество непрочитанных запросов
+        const { data: requestsData, error: requestsError } = await supabase
+          .rpc('get_driver_requests', { driver_user_id: user.id })
+        
+        if (!requestsError && requestsData) {
+          setPendingRequestsCount(requestsData.length || 0)
+        }
       }
     } catch (err: any) {
       setError(err.message)

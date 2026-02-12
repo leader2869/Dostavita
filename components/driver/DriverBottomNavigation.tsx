@@ -1,10 +1,14 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 
 export function DriverBottomNavigation() {
   const pathname = usePathname()
+  const supabase = createClient()
+  const [pendingRequestsCount, setPendingRequestsCount] = useState(0)
 
   const isActive = (path: string) => {
     if (path === '/dashboard/driver') {
@@ -12,6 +16,30 @@ export function DriverBottomNavigation() {
     }
     return pathname?.startsWith(path)
   }
+
+  useEffect(() => {
+    const loadRequestsCount = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return
+
+        const { data: requestsData, error: requestsError } = await supabase
+          .rpc('get_driver_requests', { driver_user_id: user.id })
+        
+        if (!requestsError && requestsData) {
+          setPendingRequestsCount(requestsData.length || 0)
+        }
+      } catch (err) {
+        console.error('Ошибка загрузки количества запросов:', err)
+      }
+    }
+
+    loadRequestsCount()
+    
+    // Обновляем каждые 30 секунд
+    const interval = setInterval(loadRequestsCount, 30000)
+    return () => clearInterval(interval)
+  }, [supabase])
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-gray-800 border-t border-gray-700 z-50">
@@ -106,23 +134,30 @@ export function DriverBottomNavigation() {
 
         <Link
           href="/dashboard/driver/profile"
-          className={`flex flex-col items-center justify-center flex-1 h-full ${
+          className={`flex flex-col items-center justify-center flex-1 h-full relative ${
             isActive('/dashboard/driver/profile') ? 'text-green-400' : 'text-gray-400'
           } hover:text-green-400 transition`}
         >
-          <svg
-            className="w-6 h-6 mb-1"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-            />
-          </svg>
+          <div className="relative">
+            <svg
+              className="w-6 h-6 mb-1"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+              />
+            </svg>
+            {pendingRequestsCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                {pendingRequestsCount > 9 ? '9+' : pendingRequestsCount}
+              </span>
+            )}
+          </div>
           <span className="text-xs">Профиль</span>
         </Link>
       </div>
