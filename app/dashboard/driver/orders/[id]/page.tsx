@@ -111,7 +111,7 @@ export default function OrderDetailsPage() {
       <div className="bg-gray-800 rounded-lg shadow p-6 space-y-4">
         <div>
           <h2 className="font-semibold mb-2 text-white">Статус</h2>
-          <p className="text-lg">
+          <p className="text-lg text-white">
             {order.status === 'searching_courier' && 'Ищем курьера'}
             {order.status === 'courier_coming' && 'Курьер едет к вам'}
             {order.status === 'courier_delivering' && 'Курьер доставляет заказ'}
@@ -122,22 +122,22 @@ export default function OrderDetailsPage() {
 
         <div>
           <h2 className="font-semibold mb-2 text-white">Адреса</h2>
-          <p><strong>Откуда:</strong> {order.pickup_address}</p>
-          <p><strong>Куда:</strong> {order.delivery_address}</p>
+          <p className="text-white"><strong className="text-white">Откуда:</strong> {order.pickup_address}</p>
+          <p className="text-white"><strong className="text-white">Куда:</strong> {order.delivery_address}</p>
         </div>
 
         <div>
           <h2 className="font-semibold mb-2 text-white">Информация о заказе</h2>
-          <p><strong>Тип груза:</strong> {
+          <p className="text-white"><strong className="text-white">Тип груза:</strong> {
             order.item_type === 'documents' ? 'Документы' :
             order.item_type === 'parcel' ? 'Посылка' :
             order.item_type === 'flowers' ? 'Цветы' :
             order.item_type === 'food' ? 'Еда' : 'Не указан'
           }</p>
           {order.description && (
-            <p><strong>Описание:</strong> {order.description}</p>
+            <p className="text-white"><strong className="text-white">Описание:</strong> {order.description}</p>
           )}
-          <p className="text-xl font-bold mt-4">Стоимость: {order.final_price} BYN</p>
+          <p className="text-xl font-bold mt-4 text-white">Стоимость: {order.final_price} BYN</p>
         </div>
 
         {error && (
@@ -166,14 +166,14 @@ export default function OrderDetailsPage() {
           )}
 
           {order.status === 'completed' && (
-            <div className="flex-1 bg-green-50 border border-green-200 rounded p-4 text-center">
-              <p className="text-green-800 font-semibold">Заказ завершен</p>
+            <div className="flex-1 bg-green-600/20 border border-green-500 rounded p-4 text-center">
+              <p className="text-green-400 font-semibold">Заказ завершен</p>
             </div>
           )}
 
           <button
             onClick={() => router.back()}
-            className="px-6 py-2 border border-gray-600 rounded-md hover:bg-gray-900"
+            className="px-6 py-2 border border-gray-600 rounded-md hover:bg-gray-900 text-white"
           >
             Назад
           </button>
