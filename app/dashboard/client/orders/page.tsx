@@ -131,14 +131,14 @@ export default function ClientOrdersPage() {
                 e.stopPropagation()
                 router.push(`/dashboard/client/orders/${order.id}/edit`)
               }}
-              className="flex-1 bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700 transition"
+              className="flex-1 bg-green-600 text-white px-3 py-1.5 rounded text-xs hover:bg-green-700 transition"
             >
               Редактировать
             </button>
           )}
           <button
             onClick={() => router.push(`/dashboard/client/orders/${order.id}`)}
-            className={`${canEdit ? 'flex-1' : 'w-full'} bg-gray-600 text-white px-4 py-2 rounded text-sm hover:bg-gray-500 transition`}
+            className={`${canEdit ? 'flex-1' : 'w-full'} bg-blue-600 text-white px-3 py-1.5 rounded text-xs hover:bg-blue-700 transition`}
           >
             Детали
           </button>
