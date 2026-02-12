@@ -27,7 +27,8 @@ export function DriverBottomNavigation() {
           .rpc('get_driver_requests', { driver_user_id: user.id })
         
         if (!requestsError && requestsData) {
-          setPendingRequestsCount(requestsData.length || 0)
+          const pendingCount = requestsData.filter((r: any) => r.status === 'pending').length
+          setPendingRequestsCount(pendingCount)
         }
       } catch (err) {
         console.error('Ошибка загрузки количества запросов:', err)
