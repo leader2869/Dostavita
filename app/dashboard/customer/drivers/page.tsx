@@ -8,29 +8,164 @@ import { BackButton } from '@/components/ui/BackButton'
 export default function CustomerDriversPage() {
   const router = useRouter()
   const supabase = createClient()
-  const supabase = createServerSupabaseClient()
   
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser()
+  const [user, setUser] = useState<any>(null)
+  const [drivers, setDrivers] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [showAddModal, setShowAddModal] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState<any[]>([])
+  const [searching, setSearching] = useState(false)
+  const [attaching, setAttaching] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
-  if (authError || !user) {
-    redirect('/login')
+  const loadDrivers = useCallback(async () => {
+    try {
+      const { data: { user: currentUser } } = await supabase.auth.getUser()
+      
+      if (!currentUser) {
+        router.push('/login')
+        return
+      }
+
+      setUser(currentUser)
+
+      // Проверяем роль
+      const { data: profile } = await supabase
+        .rpc('get_user_profile', { user_id: currentUser.id })
+        .single()
+
+      if (!profile || (profile as any).role !== 'customer') {
+        router.push('/dashboard')
+        return
+      }
+
+      // Получаем водителей организации
+      const { data: driversData, error: driversError } = await supabase
+        .rpc('get_organization_drivers', { organization_user_id: currentUser.id })
+
+      if (driversError) {
+        console.error('Ошибка загрузки водителей:', driversError)
+        setDrivers([])
+      } else {
+        setDrivers(driversData || [])
+      }
+    } catch (err: any) {
+      console.error('Ошибка загрузки данных:', err)
+      setDrivers([])
+    } finally {
+      setLoading(false)
+    }
+  }, [supabase, router])
+
+  useEffect(() => {
+    loadDrivers()
+  }, [loadDrivers])
+
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) {
+      setSearchResults([])
+      return
+    }
+
+    setSearching(true)
+    setError(null)
+
+    try {
+      const response = await fetch('/api/customer/search-drivers', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ search: searchQuery }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Ошибка поиска')
+      }
+
+      setSearchResults(data.drivers || [])
+    } catch (err: any) {
+      setError(err.message)
+      setSearchResults([])
+    } finally {
+      setSearching(false)
+    }
   }
 
-  // Проверяем роль
-  const { data: profile } = await supabase
-    .rpc('get_user_profile', { user_id: user.id })
-    .single()
+  const handleAttachDriver = async (driverId: string) => {
+    setAttaching(driverId)
+    setError(null)
 
-  if (!profile || profile.role !== 'customer') {
-    redirect('/dashboard')
+    try {
+      const response = await fetch('/api/customer/attach-driver', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ driver_user_id: driverId }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Ошибка привязки водителя')
+      }
+
+      // Обновляем список водителей
+      await loadDrivers()
+      setShowAddModal(false)
+      setSearchQuery('')
+      setSearchResults([])
+      alert('Водитель успешно привязан к организации')
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setAttaching(null)
+    }
   }
 
-  // Получаем водителей организации
-  const { data: drivers, error: driversError } = await supabase
-    .rpc('get_organization_drivers', { organization_user_id: user.id })
+  const handleDetachDriver = async (driverId: string) => {
+    if (!confirm('Вы уверены, что хотите отвязать этого водителя от организации?')) {
+      return
+    }
+
+    setError(null)
+
+    try {
+      const response = await fetch('/api/customer/detach-driver', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ driver_user_id: driverId }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Ошибка отвязки водителя')
+      }
+
+      // Обновляем список водителей
+      await loadDrivers()
+      alert('Водитель успешно отвязан от организации')
+    } catch (err: any) {
+      setError(err.message)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="pb-20">
+        <BackButton />
+        <h1 className="text-3xl font-bold mb-6 text-white">Управление водителями</h1>
+        <div className="text-center py-8 text-gray-400">Загрузка...</div>
+      </div>
+    )
+  }
 
   return (
     <div className="pb-20">
