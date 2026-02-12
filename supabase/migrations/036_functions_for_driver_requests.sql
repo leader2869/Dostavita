@@ -50,8 +50,8 @@ BEGIN
     status
   )
   VALUES (
-    driver_user_id,
-    organization_user_id,
+    create_driver_organization_request.driver_user_id,
+    create_driver_organization_request.organization_user_id,
     request_message,
     'pending'
   )
