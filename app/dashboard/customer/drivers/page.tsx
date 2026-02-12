@@ -420,11 +420,14 @@ export default function CustomerDriversPage() {
                             )}
                           </div>
                           <button
-                            onClick={() => handleAttachDriver(driver.id)}
+                            onClick={() => {
+                              const message = prompt('Введите сообщение для водителя (необязательно):')
+                              handleAttachDriver(driver.id, message || undefined)
+                            }}
                             disabled={attaching === driver.id}
                             className="ml-4 bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700 disabled:opacity-50 transition"
                           >
-                            {attaching === driver.id ? 'Привязка...' : 'Привязать'}
+                            {attaching === driver.id ? 'Отправка...' : 'Отправить запрос'}
                           </button>
                         </div>
                       </div>
@@ -444,6 +447,173 @@ export default function CustomerDriversPage() {
                   Введите данные для поиска водителя (email, имя или телефон)
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Модальное окно для создания водителя */}
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-bold text-white">Создать аккаунт водителя</h2>
+                <button
+                  onClick={() => {
+                    setShowCreateModal(false)
+                    setError(null)
+                    setNewDriverEmail('')
+                    setNewDriverPassword('')
+                    setNewDriverFullName('')
+                    setNewDriverPhone('')
+                    setNewDriverVehicleType('')
+                    setNewDriverVehicleNumber('')
+                    setNewDriverLicenseNumber('')
+                  }}
+                  className="text-gray-400 hover:text-white transition"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {error && (
+                <div className="mb-4 p-3 bg-red-900/50 border border-red-500 rounded text-red-200 text-sm">
+                  {error}
+                </div>
+              )}
+
+              <form onSubmit={handleCreateDriver} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                    Email *
+                  </label>
+                  <input
+                    type="email"
+                    value={newDriverEmail}
+                    onChange={(e) => setNewDriverEmail(e.target.value)}
+                    required
+                    className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white"
+                    placeholder="driver@example.com"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                    Пароль *
+                  </label>
+                  <input
+                    type="password"
+                    value={newDriverPassword}
+                    onChange={(e) => setNewDriverPassword(e.target.value)}
+                    required
+                    minLength={6}
+                    className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white"
+                    placeholder="Минимум 6 символов"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                    Полное имя *
+                  </label>
+                  <input
+                    type="text"
+                    value={newDriverFullName}
+                    onChange={(e) => setNewDriverFullName(e.target.value)}
+                    required
+                    className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white"
+                    placeholder="Иванов Иван Иванович"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                    Телефон
+                  </label>
+                  <input
+                    type="tel"
+                    value={newDriverPhone}
+                    onChange={(e) => setNewDriverPhone(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white"
+                    placeholder="+375291234567"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                    Тип транспорта *
+                  </label>
+                  <select
+                    value={newDriverVehicleType}
+                    onChange={(e) => setNewDriverVehicleType(e.target.value)}
+                    required
+                    className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white"
+                  >
+                    <option value="">Выберите тип</option>
+                    <option value="car">Автомобиль</option>
+                    <option value="motorcycle">Мотоцикл</option>
+                    <option value="bicycle">Велосипед</option>
+                    <option value="walking">Пешком</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                    Номер транспорта
+                  </label>
+                  <input
+                    type="text"
+                    value={newDriverVehicleNumber}
+                    onChange={(e) => setNewDriverVehicleNumber(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white"
+                    placeholder="1234 AB-7"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                    Номер водительского удостоверения *
+                  </label>
+                  <input
+                    type="text"
+                    value={newDriverLicenseNumber}
+                    onChange={(e) => setNewDriverLicenseNumber(e.target.value)}
+                    required
+                    className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white"
+                    placeholder="AB1234567"
+                  />
+                </div>
+
+                <div className="flex gap-2 pt-4">
+                  <button
+                    type="submit"
+                    disabled={creating}
+                    className="flex-1 bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 disabled:opacity-50 transition"
+                  >
+                    {creating ? 'Создание...' : 'Создать водителя'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowCreateModal(false)
+                      setError(null)
+                      setNewDriverEmail('')
+                      setNewDriverPassword('')
+                      setNewDriverFullName('')
+                      setNewDriverPhone('')
+                      setNewDriverVehicleType('')
+                      setNewDriverVehicleNumber('')
+                      setNewDriverLicenseNumber('')
+                    }}
+                    className="px-6 py-2 border border-gray-600 rounded-md hover:bg-gray-700 text-white transition"
+                  >
+                    Отмена
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         </div>
