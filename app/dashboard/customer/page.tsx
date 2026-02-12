@@ -1,6 +1,7 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import type { User } from '@/lib/types'
+import Link from 'next/link'
 
 export default async function CustomerDashboard() {
   const supabase = createServerSupabaseClient()
@@ -188,9 +189,10 @@ export default async function CustomerDashboard() {
                 }
                 
                 return (
-                  <div 
-                    key={order.id} 
-                    className={`border ${borderColor} rounded-lg p-4 ${bgColor} hover:opacity-80 transition`}
+                  <Link
+                    key={order.id}
+                    href={`/dashboard/customer/orders/${order.id}`}
+                    className={`block border ${borderColor} rounded-lg p-4 ${bgColor} hover:opacity-80 transition cursor-pointer`}
                   >
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
@@ -225,7 +227,7 @@ export default async function CustomerDashboard() {
                         <p className="font-semibold text-white">{order.final_price} BYN</p>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 )
               })}
           </div>
