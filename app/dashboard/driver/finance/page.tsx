@@ -1,72 +1,167 @@
-import { createServerSupabaseClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
+'use client'
+
+import { useState, useEffect, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 import { BackButton } from '@/components/ui/BackButton'
-import type { User } from '@/lib/types'
 
-export default async function DriverFinancePage() {
-  const supabase = createServerSupabaseClient()
+type Period = 'today' | 'week' | 'month' | 'all'
+
+export default function DriverFinancePage() {
+  const router = useRouter()
+  const supabase = createClient()
   
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser()
+  const [user, setUser] = useState<any>(null)
+  const [balance, setBalance] = useState<any>(null)
+  const [transactions, setTransactions] = useState<any[]>([])
+  const [completedOrders, setCompletedOrders] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [period, setPeriod] = useState<Period>('all')
 
-  if (authError || !user) {
-    redirect('/login')
-  }
-
-  // Используем RPC функцию для получения профиля (обходит RLS)
-  let { data: profile, error: profileError } = await supabase
-    .rpc('get_user_profile', { user_id: user.id })
-    .single()
-  
-  // Fallback на прямой запрос
-  if (profileError || !profile) {
-    const { data: directProfile } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .maybeSingle()
-    
-    if (directProfile) {
-      profile = directProfile as User
+  const getDateFilter = (period: Period) => {
+    const now = new Date()
+    switch (period) {
+      case 'today':
+        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+        return todayStart.toISOString()
+      case 'week':
+        const weekStart = new Date(now)
+        weekStart.setDate(now.getDate() - 7)
+        return weekStart.toISOString()
+      case 'month':
+        const monthStart = new Date(now)
+        monthStart.setMonth(now.getMonth() - 1)
+        return monthStart.toISOString()
+      case 'all':
+      default:
+        return null
     }
   }
 
-  if (!profile || (profile as User).role !== 'driver') {
-    redirect('/dashboard')
-  }
+  const loadData = useCallback(async () => {
+    try {
+      const { data: { user: currentUser } } = await supabase.auth.getUser()
+      
+      if (!currentUser) {
+        router.push('/login')
+        return
+      }
 
-  // Получаем баланс
-  const { data: balance } = await supabase
-    .from('balances')
-    .select('*')
-    .eq('user_id', user.id)
-    .single()
+      setUser(currentUser)
 
-  // Получаем транзакции
-  const { data: transactions } = await supabase
-    .from('transactions')
-    .select('*')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false })
-    .limit(50)
+      // Получаем баланс
+      const { data: balanceData } = await supabase
+        .from('balances')
+        .select('*')
+        .eq('user_id', currentUser.id)
+        .single()
+      
+      setBalance(balanceData)
 
-  // Получаем завершенные заказы водителя
-  const { data: completedOrders } = await supabase
-    .from('orders')
-    .select('id, final_price')
-    .eq('executor_user_id', user.id)
-    .eq('status', 'completed')
+      // Получаем транзакции с фильтром по периоду
+      const dateFilter = getDateFilter(period)
+      let transactionsQuery = supabase
+        .from('transactions')
+        .select('*')
+        .eq('user_id', currentUser.id)
+        .order('created_at', { ascending: false })
+        .limit(50)
+
+      if (dateFilter) {
+        transactionsQuery = transactionsQuery.gte('created_at', dateFilter)
+      }
+
+      const { data: transactionsData } = await transactionsQuery
+      setTransactions(transactionsData || [])
+
+      // Получаем завершенные заказы с фильтром по периоду
+      let ordersQuery = supabase
+        .from('orders')
+        .select('id, final_price, completed_at')
+        .eq('executor_user_id', currentUser.id)
+        .eq('status', 'completed')
+
+      if (dateFilter) {
+        ordersQuery = ordersQuery.gte('completed_at', dateFilter)
+      }
+
+      const { data: ordersData } = await ordersQuery
+      setCompletedOrders(ordersData || [])
+    } catch (err: any) {
+      console.error('Ошибка загрузки данных:', err)
+    } finally {
+      setLoading(false)
+    }
+  }, [supabase, router, period])
+
+  useEffect(() => {
+    loadData()
+  }, [loadData])
 
   // Подсчитываем статистику
   const completedOrdersCount = completedOrders?.length || 0
   const totalEarnings = completedOrders?.reduce((sum, order) => sum + (parseFloat(order.final_price) || 0), 0) || 0
 
+  if (loading) {
+    return (
+      <div className="pb-20">
+        <BackButton />
+        <h1 className="text-3xl font-bold mb-6 text-white">Финансы</h1>
+        <div className="text-center py-8 text-gray-400">Загрузка...</div>
+      </div>
+    )
+  }
+
   return (
     <div className="pb-20">
       <BackButton />
       <h1 className="text-3xl font-bold mb-6 text-white">Финансы</h1>
+
+      {/* Выбор периода */}
+      <div className="bg-gray-800 rounded-lg shadow p-4 mb-6">
+        <div className="flex gap-2 flex-wrap">
+          <button
+            onClick={() => setPeriod('today')}
+            className={`px-4 py-2 rounded-md transition ${
+              period === 'today'
+                ? 'bg-green-600 text-white'
+                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+            }`}
+          >
+            Сегодня
+          </button>
+          <button
+            onClick={() => setPeriod('week')}
+            className={`px-4 py-2 rounded-md transition ${
+              period === 'week'
+                ? 'bg-green-600 text-white'
+                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+            }`}
+          >
+            Неделя
+          </button>
+          <button
+            onClick={() => setPeriod('month')}
+            className={`px-4 py-2 rounded-md transition ${
+              period === 'month'
+                ? 'bg-green-600 text-white'
+                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+            }`}
+          >
+            Месяц
+          </button>
+          <button
+            onClick={() => setPeriod('all')}
+            className={`px-4 py-2 rounded-md transition ${
+              period === 'all'
+                ? 'bg-green-600 text-white'
+                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+            }`}
+          >
+            Все время
+          </button>
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Баланс */}
@@ -100,16 +195,16 @@ export default async function DriverFinancePage() {
         {transactions && transactions.length > 0 ? (
           <div className="space-y-2">
             {transactions.map((transaction: any) => (
-              <div key={transaction.id} className="border-b pb-2">
+              <div key={transaction.id} className="border-b border-gray-700 pb-2">
                 <div className="flex justify-between items-center">
                   <div>
-                    <p className="font-medium">{transaction.description}</p>
+                    <p className="font-medium text-white">{transaction.description}</p>
                     <p className="text-sm text-gray-400">
                       {new Date(transaction.created_at).toLocaleString('ru-RU')}
                     </p>
                   </div>
                   <p className={`font-semibold ${
-                    transaction.type === 'credit' ? 'text-green-600' : 'text-red-600'
+                    transaction.type === 'credit' ? 'text-green-400' : 'text-red-400'
                   }`}>
                     {transaction.type === 'credit' ? '+' : '-'}{transaction.amount} BYN
                   </p>
