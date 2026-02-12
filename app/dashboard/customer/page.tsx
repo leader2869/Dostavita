@@ -44,6 +44,15 @@ export default async function CustomerDashboard() {
   const { data: organizationOrders } = await supabase
     .rpc('get_organization_orders', { organization_user_id: user.id })
 
+  // Получаем информацию об отказах для заказов
+  const orderIds = organizationOrders?.map((o: any) => o.id) || []
+  const { data: rejections } = orderIds.length > 0 ? await supabase
+    .from('order_rejections')
+    .select('order_id')
+    .in('order_id', orderIds) : { data: null }
+  
+  const rejectedOrderIds = new Set(rejections?.map((r: any) => r.order_id) || [])
+
   // Подсчитываем статистику
   const activeOrdersCount = organizationOrders?.filter((o: any) => 
     o.status !== 'completed' && o.status !== 'cancelled'
@@ -150,32 +159,75 @@ export default async function CustomerDashboard() {
         </div>
         {organizationOrders && organizationOrders.length > 0 ? (
           <div className="space-y-4">
-            {organizationOrders.slice(0, 5).map((order: any) => (
-              <div key={order.id} className="border border-gray-700 rounded-lg p-4 bg-gray-700 hover:bg-gray-600 transition">
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <p className="font-medium text-white">Заказ #{order.id.slice(0, 8)}</p>
-                    <p className="text-sm text-gray-300 mt-1">
-                      {order.pickup_address} → {order.delivery_address}
-                    </p>
-                    <p className="text-sm text-gray-400 mt-1">
-                      Статус: {order.status === 'searching_courier' ? 'Ищем курьера' :
-                               order.status === 'courier_coming' ? 'Курьер едет к вам' :
-                               order.status === 'courier_delivering' ? 'Курьер доставляет заказ' :
-                               order.status === 'completed' ? 'Заказ завершен' : order.status}
-                    </p>
-                    {order.driver_full_name && (
-                      <p className="text-sm text-gray-400 mt-1">
-                        Водитель: {order.driver_full_name}
-                      </p>
-                    )}
+            {organizationOrders
+              .sort((a: any, b: any) => 
+                new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+              )
+              .slice(0, 10)
+              .map((order: any) => {
+                const isActive = order.status !== 'completed' && order.status !== 'cancelled'
+                const isCompleted = order.status === 'completed'
+                const hasRejections = rejectedOrderIds.has(order.id)
+                
+                // Определяем цвет подсветки
+                let borderColor = 'border-gray-700'
+                let bgColor = 'bg-gray-700'
+                
+                if (hasRejections) {
+                  // Заказы с отказами - красным
+                  borderColor = 'border-red-500'
+                  bgColor = 'bg-red-900/30'
+                } else if (isCompleted) {
+                  // Выполненные заказы - красным
+                  borderColor = 'border-red-500'
+                  bgColor = 'bg-red-900/30'
+                } else if (isActive) {
+                  // Активные заказы - желтым
+                  borderColor = 'border-yellow-500'
+                  bgColor = 'bg-yellow-900/30'
+                }
+                
+                return (
+                  <div 
+                    key={order.id} 
+                    className={`border ${borderColor} rounded-lg p-4 ${bgColor} hover:opacity-80 transition`}
+                  >
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <p className="font-medium text-white">Заказ #{order.id.slice(0, 8)}</p>
+                          {hasRejections && (
+                            <span className="px-2 py-1 bg-red-500 text-white text-xs rounded">
+                              Есть отказы
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-sm text-gray-300 mt-1">
+                          {order.pickup_address} → {order.delivery_address}
+                        </p>
+                        <p className="text-sm text-gray-400 mt-1">
+                          Статус: {order.status === 'searching_courier' ? 'Ищем курьера' :
+                                   order.status === 'courier_coming' ? 'Курьер едет к вам' :
+                                   order.status === 'courier_delivering' ? 'Курьер доставляет заказ' :
+                                   order.status === 'completed' ? 'Заказ завершен' : 
+                                   order.status === 'cancelled' ? 'Отменен' : order.status}
+                        </p>
+                        {order.driver_full_name && (
+                          <p className="text-sm text-gray-400 mt-1">
+                            Водитель: {order.driver_full_name}
+                          </p>
+                        )}
+                        <p className="text-xs text-gray-500 mt-1">
+                          Создан: {new Date(order.created_at).toLocaleString('ru-RU')}
+                        </p>
+                      </div>
+                      <div className="text-right ml-4">
+                        <p className="font-semibold text-white">{order.final_price} BYN</p>
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-right ml-4">
-                    <p className="font-semibold text-white">{order.final_price} BYN</p>
-                  </div>
-                </div>
-              </div>
-            ))}
+                )
+              })}
           </div>
         ) : (
           <p className="text-gray-400">Пока нет заказов</p>
