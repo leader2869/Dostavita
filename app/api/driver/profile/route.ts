@@ -5,7 +5,7 @@ export async function POST(request: Request) {
   try {
     const supabase = createServerSupabaseClient()
     const body = await request.json()
-    const { vehicle_type, vehicle_number, license_number } = body
+    const { full_name, vehicle_type, vehicle_number, license_number } = body
 
     if (!vehicle_type || !license_number) {
       return NextResponse.json(
@@ -31,6 +31,7 @@ export async function POST(request: Request) {
     const { data: updatedProfile, error: updateError } = await supabase
       .from('profiles')
       .update({
+        full_name: full_name || null,
         vehicle_type,
         vehicle_number: vehicle_number || null,
         license_number,
