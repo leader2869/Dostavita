@@ -110,22 +110,6 @@ export default async function DriverDashboard() {
   return (
     <div className="pb-20">
       <h1 className="text-3xl font-bold mb-6 text-white">Панель исполнителя</h1>
-      
-      {/* Навигация */}
-      <div className="mb-6 flex gap-4">
-        <a
-          href="/dashboard/driver/profile"
-          className="bg-gray-800 px-4 py-2 rounded-lg shadow hover:shadow-lg transition"
-        >
-          Профиль
-        </a>
-        <a
-          href="/dashboard/driver/finance"
-          className="bg-gray-800 px-4 py-2 rounded-lg shadow hover:shadow-lg transition"
-        >
-          Финансы
-        </a>
-      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Доступные заказы */}
