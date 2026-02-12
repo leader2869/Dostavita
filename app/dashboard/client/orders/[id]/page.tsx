@@ -253,7 +253,7 @@ export default function OrderDetailsPage() {
           {canEdit && (
             <button
               onClick={() => router.push(`/dashboard/client/orders/${order.id}/edit`)}
-              className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+              className="flex-1 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition"
             >
               Редактировать
             </button>
