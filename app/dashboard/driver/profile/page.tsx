@@ -24,6 +24,8 @@ export default function DriverProfilePage() {
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
   const [organization, setOrganization] = useState<any>(null)
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0)
+  const [requests, setRequests] = useState<any[]>([])
+  const [responding, setResponding] = useState<string | null>(null)
 
   const loadProfile = useCallback(async () => {
     try {
@@ -62,11 +64,12 @@ export default function DriverProfilePage() {
           }
         }
 
-        // Получаем количество непрочитанных запросов (только pending)
+        // Получаем запросы на присоединение к организации
         const { data: requestsData, error: requestsError } = await supabase
           .rpc('get_driver_requests', { driver_user_id: user.id })
         
         if (!requestsError && requestsData) {
+          setRequests(requestsData || [])
           const pendingCount = requestsData.filter((r: any) => r.status === 'pending').length
           setPendingRequestsCount(pendingCount)
         }
@@ -149,6 +152,40 @@ export default function DriverProfilePage() {
       setError(err.message)
     } finally {
       setUploadingAvatar(false)
+    }
+  }
+
+  const handleRespondToRequest = async (requestId: string, response: 'accepted' | 'rejected') => {
+    if (!confirm(response === 'accepted' 
+      ? 'Вы уверены, что хотите принять запрос и привязаться к этой организации?'
+      : 'Вы уверены, что хотите отклонить запрос?')) {
+      return
+    }
+
+    setResponding(requestId)
+    setError(null)
+
+    try {
+      const fetchResponse = await fetch(`/api/driver/requests/${requestId}/respond`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ response }),
+      })
+
+      const data = await fetchResponse.json()
+
+      if (!fetchResponse.ok) {
+        throw new Error(data.error || 'Ошибка обработки запроса')
+      }
+
+      alert(data.message)
+      await loadProfile() // Обновляем профиль и запросы
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setResponding(null)
     }
   }
 
@@ -247,7 +284,7 @@ export default function DriverProfilePage() {
         {!organization && profile && !(profile as any).organization_id && (
           <div className="bg-blue-900/30 border border-blue-500/50 rounded-lg p-4">
             <p className="text-blue-300 text-sm">
-              Вы не привязаны к организации. Ожидайте запросы от организаций в разделе "Запросы".
+              Вы не привязаны к организации. Ниже вы можете увидеть запросы от организаций.
             </p>
           </div>
         )}
@@ -319,6 +356,84 @@ export default function DriverProfilePage() {
           </button>
         </div>
       </form>
+
+      {/* Запросы на присоединение к организации */}
+      {requests && requests.length > 0 && (
+        <div className="bg-gray-800 rounded-lg shadow p-6 mt-6">
+          <h2 className="text-xl font-semibold mb-4 text-white">
+            Запросы на присоединение к организации
+            {pendingRequestsCount > 0 && (
+              <span className="ml-2 bg-red-500 text-white text-xs font-bold rounded-full px-2 py-1">
+                {pendingRequestsCount}
+              </span>
+            )}
+          </h2>
+          <div className="space-y-4">
+            {requests.map((request: any) => (
+              <div
+                key={request.id}
+                className={`border rounded-lg p-4 ${
+                  request.status === 'pending'
+                    ? 'border-yellow-500/50 bg-yellow-900/20'
+                    : request.status === 'accepted'
+                    ? 'border-green-500/50 bg-green-900/20'
+                    : 'border-gray-700 bg-gray-700'
+                }`}
+              >
+                <div className="flex justify-between items-start mb-2">
+                  <div className="flex-1">
+                    <p className="font-medium text-white">
+                      {request.organization_name || 'Организация'}
+                    </p>
+                    <p className="text-sm text-gray-400">{request.organization_email}</p>
+                    {request.message && (
+                      <p className="text-sm text-gray-300 mt-2">{request.message}</p>
+                    )}
+                    <p className="text-xs text-gray-500 mt-2">
+                      Получен: {new Date(request.created_at).toLocaleString('ru-RU')}
+                    </p>
+                    {request.status === 'pending' && (
+                      <p className="text-xs text-yellow-400 mt-1">Ожидает вашего ответа</p>
+                    )}
+                    {request.status === 'accepted' && (
+                      <p className="text-xs text-green-400 mt-1">Принят</p>
+                    )}
+                    {request.status === 'rejected' && (
+                      <p className="text-xs text-red-400 mt-1">Отклонен</p>
+                    )}
+                  </div>
+                  {request.status === 'pending' && (
+                    <div className="flex gap-2 ml-4">
+                      <button
+                        onClick={() => handleRespondToRequest(request.id, 'accepted')}
+                        disabled={responding === request.id}
+                        className="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700 disabled:opacity-50 transition"
+                      >
+                        {responding === request.id ? 'Обработка...' : 'Принять'}
+                      </button>
+                      <button
+                        onClick={() => handleRespondToRequest(request.id, 'rejected')}
+                        disabled={responding === request.id}
+                        className="bg-red-600 text-white px-4 py-2 rounded text-sm hover:bg-red-700 disabled:opacity-50 transition"
+                      >
+                        {responding === request.id ? 'Обработка...' : 'Отклонить'}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {requests && requests.length === 0 && !organization && (
+        <div className="bg-gray-800 rounded-lg shadow p-6 mt-6">
+          <p className="text-gray-400 text-center">
+            У вас пока нет запросов от организаций
+          </p>
+        </div>
+      )}
       
       <DriverBottomNavigation />
     </div>
