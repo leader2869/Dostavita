@@ -56,73 +56,110 @@ export default function ClientOrdersPage() {
     }
   }
 
+  // Разделяем заказы на активные и завершенные
+  const activeOrders = orders.filter(order => 
+    order.status !== 'completed' && order.status !== 'cancelled'
+  )
+  const completedOrders = orders.filter(order => 
+    order.status === 'completed' || order.status === 'cancelled'
+  )
+
+  const renderOrderCard = (order: any) => {
+    // Проверяем, можно ли редактировать заказ
+    const canEdit = order.status === 'searching_courier' && !order.executor_user_id
+    
+    return (
+      <div
+        key={order.id}
+        className="border border-gray-700 bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition"
+      >
+        <div className="flex justify-between items-start">
+          <div className="flex-1">
+            <p className="font-medium text-white">Заказ #{order.id.slice(0, 8)}</p>
+            <p className="text-sm text-gray-300 mt-1">
+              {order.pickup_address} → {order.delivery_address}
+            </p>
+            <p className="text-sm text-gray-400 mt-2">
+              Статус: {getStatusLabel(order.status)}
+            </p>
+            {order.description && (
+              <p className="text-sm text-gray-400 mt-1">
+                {order.description}
+              </p>
+            )}
+          </div>
+          <div className="text-right ml-4">
+            <p className="font-semibold text-lg text-white">{order.final_price} BYN</p>
+            <p className="text-xs text-gray-400 mt-1">
+              {new Date(order.created_at).toLocaleDateString('ru-RU')}
+            </p>
+          </div>
+        </div>
+        <div className="flex gap-2 mt-3">
+          {canEdit && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                router.push(`/dashboard/client/orders/${order.id}/edit`)
+              }}
+              className="flex-1 bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700 transition"
+            >
+              Редактировать
+            </button>
+          )}
+          <button
+            onClick={() => router.push(`/dashboard/client/orders/${order.id}`)}
+            className={`${canEdit ? 'flex-1' : 'w-full'} bg-gray-600 text-white px-4 py-2 rounded text-sm hover:bg-gray-500 transition`}
+          >
+            Детали
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="pb-20">
       <h1 className="text-3xl font-bold mb-6 text-white">Мои заказы</h1>
 
-      <div className="bg-gray-800 rounded-lg shadow p-6">
-        {loading ? (
+      {loading ? (
+        <div className="bg-gray-800 rounded-lg shadow p-6">
           <p className="text-gray-400">Загрузка...</p>
-        ) : orders.length > 0 ? (
-          <div className="space-y-4">
-            {orders.map((order) => {
-              // Проверяем, можно ли редактировать заказ
-              const canEdit = order.status === 'searching_courier' && !order.executor_user_id
-              
-              return (
-                <div
-                  key={order.id}
-                  className="border border-gray-700 bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition"
-                >
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <p className="font-medium text-white">Заказ #{order.id.slice(0, 8)}</p>
-                      <p className="text-sm text-gray-300 mt-1">
-                        {order.pickup_address} → {order.delivery_address}
-                      </p>
-                      <p className="text-sm text-gray-400 mt-2">
-                        Статус: {getStatusLabel(order.status)}
-                      </p>
-                      {order.description && (
-                        <p className="text-sm text-gray-400 mt-1">
-                          {order.description}
-                        </p>
-                      )}
-                    </div>
-                    <div className="text-right ml-4">
-                      <p className="font-semibold text-lg text-white">{order.final_price} BYN</p>
-                      <p className="text-xs text-gray-400 mt-1">
-                        {new Date(order.created_at).toLocaleDateString('ru-RU')}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex gap-2 mt-3">
-                    {canEdit && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          router.push(`/dashboard/client/orders/${order.id}/edit`)
-                        }}
-                        className="flex-1 bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700 transition"
-                      >
-                        Редактировать
-                      </button>
-                    )}
-                    <button
-                      onClick={() => router.push(`/dashboard/client/orders/${order.id}`)}
-                      className={`${canEdit ? 'flex-1' : 'w-full'} bg-gray-600 text-white px-4 py-2 rounded text-sm hover:bg-gray-500 transition`}
-                    >
-                      Детали
-                    </button>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        ) : (
-          <p className="text-gray-400">У вас пока нет заказов</p>
-        )}
-      </div>
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {/* Активные заказы */}
+          {activeOrders.length > 0 && (
+            <div className="bg-gray-800 rounded-lg shadow p-6">
+              <h2 className="text-xl font-semibold text-white mb-4 pb-2 border-b border-gray-700">
+                Активные заказы ({activeOrders.length})
+              </h2>
+              <div className="space-y-4">
+                {activeOrders.map(renderOrderCard)}
+              </div>
+            </div>
+          )}
+
+          {/* Завершенные заказы */}
+          {completedOrders.length > 0 && (
+            <div className="bg-gray-800 rounded-lg shadow p-6">
+              <h2 className="text-xl font-semibold text-white mb-4 pb-2 border-b border-gray-700">
+                Завершенные заказы ({completedOrders.length})
+              </h2>
+              <div className="space-y-4">
+                {completedOrders.map(renderOrderCard)}
+              </div>
+            </div>
+          )}
+
+          {/* Если нет заказов вообще */}
+          {orders.length === 0 && (
+            <div className="bg-gray-800 rounded-lg shadow p-6">
+              <p className="text-gray-400">У вас пока нет заказов</p>
+            </div>
+          )}
+        </div>
+      )}
 
       <ClientBottomNavigation />
     </div>
