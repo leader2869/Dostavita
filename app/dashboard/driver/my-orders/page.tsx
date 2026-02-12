@@ -5,8 +5,6 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { BackButton } from '@/components/ui/BackButton'
 
-'use client'
-
 export default function DriverMyOrdersPage() {
   const router = useRouter()
   const supabase = createClient()
