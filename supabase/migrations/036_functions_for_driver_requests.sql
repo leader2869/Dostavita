@@ -2,9 +2,9 @@
 
 -- Функция для создания запроса на привязку водителя
 CREATE OR REPLACE FUNCTION public.create_driver_organization_request(
-  p_driver_user_id UUID,
-  p_organization_user_id UUID,
-  p_request_message TEXT DEFAULT NULL
+  driver_user_id UUID,
+  organization_user_id UUID,
+  request_message TEXT DEFAULT NULL
 )
 RETURNS UUID
 LANGUAGE plpgsql
@@ -16,11 +16,17 @@ DECLARE
   driver_role TEXT;
   driver_org_id UUID;
   existing_request_id UUID;
+  v_driver_id UUID;
+  v_org_id UUID;
 BEGIN
+  -- Сохраняем параметры в локальные переменные для избежания неоднозначности
+  v_driver_id := create_driver_organization_request.driver_user_id;
+  v_org_id := create_driver_organization_request.organization_user_id;
+  
   -- Проверяем, что водитель существует и имеет роль driver
-  SELECT profiles.role, profiles.organization_id INTO driver_role, driver_org_id
-  FROM public.profiles
-  WHERE profiles.id = p_driver_user_id;
+  SELECT p.role, p.organization_id INTO driver_role, driver_org_id
+  FROM public.profiles p
+  WHERE p.id = v_driver_id;
 
   IF NOT FOUND OR driver_role != 'driver' THEN
     RAISE EXCEPTION 'Водитель не найден';
@@ -32,11 +38,11 @@ BEGIN
   END IF;
 
   -- Проверяем, нет ли активного запроса
-  SELECT driver_organization_requests.id INTO existing_request_id
-  FROM public.driver_organization_requests
-  WHERE driver_organization_requests.driver_user_id = p_driver_user_id
-    AND driver_organization_requests.organization_user_id = p_organization_user_id
-    AND driver_organization_requests.status = 'pending';
+  SELECT r.id INTO existing_request_id
+  FROM public.driver_organization_requests r
+  WHERE r.driver_user_id = v_driver_id
+    AND r.organization_user_id = v_org_id
+    AND r.status = 'pending';
 
   IF existing_request_id IS NOT NULL THEN
     RAISE EXCEPTION 'Запрос уже существует';
@@ -50,9 +56,9 @@ BEGIN
     status
   )
   VALUES (
-    p_driver_user_id,
-    p_organization_user_id,
-    p_request_message,
+    v_driver_id,
+    v_org_id,
+    request_message,
     'pending'
   )
   RETURNING id INTO request_id;

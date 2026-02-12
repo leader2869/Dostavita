@@ -41,9 +41,9 @@ export async function POST(request: Request) {
     // Создаем запрос на привязку через RPC функцию
     const { data: requestId, error: requestError } = await supabase
       .rpc('create_driver_organization_request', {
-        p_driver_user_id: driver_user_id,
-        p_organization_user_id: user.id,
-        p_request_message: message || null,
+        driver_user_id,
+        organization_user_id: user.id,
+        request_message: message || null,
       })
 
     if (requestError) {
