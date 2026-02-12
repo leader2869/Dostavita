@@ -201,7 +201,7 @@ export default function DriverMyOrdersPage() {
   return (
     <div className="pb-20">
       <BackButton />
-      <h1 className="text-3xl font-bold mb-6 text-white">Активные заказы</h1>
+      <h1 className="text-3xl font-bold mb-6 text-white">Мои заказы</h1>
 
       {loading ? (
         <div className="bg-gray-800 rounded-lg shadow p-6">
