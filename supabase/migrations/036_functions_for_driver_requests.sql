@@ -16,11 +16,17 @@ DECLARE
   driver_role TEXT;
   driver_org_id UUID;
   existing_request_id UUID;
+  p_driver_user_id UUID;
+  p_organization_user_id UUID;
 BEGIN
+  -- Сохраняем параметры в локальные переменные для избежания неоднозначности
+  p_driver_user_id := create_driver_organization_request.driver_user_id;
+  p_organization_user_id := create_driver_organization_request.organization_user_id;
+  
   -- Проверяем, что водитель существует и имеет роль driver
   SELECT profiles.role, profiles.organization_id INTO driver_role, driver_org_id
   FROM public.profiles
-  WHERE profiles.id = create_driver_organization_request.driver_user_id;
+  WHERE profiles.id = p_driver_user_id;
 
   IF NOT FOUND OR driver_role != 'driver' THEN
     RAISE EXCEPTION 'Водитель не найден';
@@ -34,8 +40,8 @@ BEGIN
   -- Проверяем, нет ли активного запроса
   SELECT driver_organization_requests.id INTO existing_request_id
   FROM public.driver_organization_requests
-  WHERE driver_organization_requests.driver_user_id = create_driver_organization_request.driver_user_id
-    AND driver_organization_requests.organization_user_id = create_driver_organization_request.organization_user_id
+  WHERE driver_organization_requests.driver_user_id = p_driver_user_id
+    AND driver_organization_requests.organization_user_id = p_organization_user_id
     AND driver_organization_requests.status = 'pending';
 
   IF existing_request_id IS NOT NULL THEN
@@ -50,8 +56,8 @@ BEGIN
     status
   )
   VALUES (
-    create_driver_organization_request.driver_user_id,
-    create_driver_organization_request.organization_user_id,
+    p_driver_user_id,
+    p_organization_user_id,
     request_message,
     'pending'
   )
