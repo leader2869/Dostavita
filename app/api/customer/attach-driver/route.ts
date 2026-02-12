@@ -5,7 +5,7 @@ export async function POST(request: Request) {
   try {
     const supabase = createServerSupabaseClient()
     const body = await request.json()
-    const { driver_user_id } = body
+    const { driver_user_id, message } = body
 
     if (!driver_user_id) {
       return NextResponse.json(
@@ -33,78 +33,38 @@ export async function POST(request: Request) {
 
     if (!profile || (profile as any).role !== 'customer') {
       return NextResponse.json(
-        { error: 'Доступ запрещен. Только организации могут привязывать водителей' },
+        { error: 'Доступ запрещен. Только организации могут отправлять запросы водителям' },
         { status: 403 }
       )
     }
 
-    // Проверяем, что водитель существует и имеет роль driver через RPC функцию (обходит RLS)
-    const { data: driverProfileData, error: driverError } = await supabase
-      .rpc('get_driver_profile_for_organization', { driver_user_id })
-      .single()
-
-    if (driverError || !driverProfileData) {
-      return NextResponse.json(
-        { error: 'Водитель не найден' },
-        { status: 404 }
-      )
-    }
-
-    const driverProfile = driverProfileData as any
-
-    if (driverProfile.role !== 'driver') {
-      return NextResponse.json(
-        { error: 'Пользователь не является водителем' },
-        { status: 400 }
-      )
-    }
-
-    if (driverProfile.organization_id === user.id) {
-      return NextResponse.json(
-        { error: 'Водитель уже привязан к вашей организации' },
-        { status: 400 }
-      )
-    }
-
-    if (driverProfile.organization_id) {
-      return NextResponse.json(
-        { error: 'Водитель уже привязан к другой организации' },
-        { status: 400 }
-      )
-    }
-
-    // Привязываем водителя к организации через RPC функцию (обходит RLS)
-    const { data: success, error: updateError } = await supabase
-      .rpc('update_driver_organization', {
+    // Создаем запрос на привязку через RPC функцию
+    const { data: requestId, error: requestError } = await supabase
+      .rpc('create_driver_organization_request', {
         driver_user_id,
         organization_user_id: user.id,
-        action: 'attach'
+        request_message: message || null,
       })
 
-    if (updateError) {
-      console.error('Ошибка привязки водителя:', updateError)
+    if (requestError) {
+      console.error('Ошибка создания запроса:', requestError)
       return NextResponse.json(
-        { error: updateError.message },
+        { error: requestError.message || 'Ошибка создания запроса' },
         { status: 500 }
       )
     }
 
-    if (!success) {
+    if (!requestId) {
       return NextResponse.json(
-        { error: 'Не удалось привязать водителя. Возможно, он уже привязан к другой организации.' },
+        { error: 'Не удалось создать запрос. Возможно, водитель уже привязан или запрос уже существует.' },
         { status: 400 }
       )
     }
 
-    // Получаем обновленный профиль через RPC функцию
-    const { data: updatedProfile } = await supabase
-      .rpc('get_driver_profile_for_organization', { driver_user_id })
-      .single()
-
     return NextResponse.json({ 
       success: true, 
-      driver: updatedProfile,
-      message: 'Водитель успешно привязан к организации'
+      request_id: requestId,
+      message: 'Запрос на привязку водителя успешно отправлен. Водитель получит уведомление.'
     })
   } catch (error: any) {
     console.error('Ошибка API:', error)
