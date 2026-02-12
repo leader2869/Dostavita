@@ -24,7 +24,7 @@ export async function POST(request: Request) {
       .rpc('get_user_profile', { user_id: user.id })
       .single()
 
-    if (!profile || profile.role !== 'customer') {
+    if (!profile || (profile as any).role !== 'customer') {
       return NextResponse.json(
         { error: 'Доступ запрещен' },
         { status: 403 }
