@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { BackButton } from '@/components/ui/BackButton'
 
-type Period = 'today' | 'week' | 'month' | 'all'
+type Period = 'today' | 'week' | 'month' | 'all' | 'custom'
 
 export default function DriverFinancePage() {
   const router = useRouter()
@@ -17,24 +17,35 @@ export default function DriverFinancePage() {
   const [completedOrders, setCompletedOrders] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [period, setPeriod] = useState<Period>('all')
+  const [customStartDate, setCustomStartDate] = useState<string>('')
+  const [customEndDate, setCustomEndDate] = useState<string>('')
 
   const getDateFilter = (period: Period) => {
     const now = new Date()
     switch (period) {
       case 'today':
         const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-        return todayStart.toISOString()
+        return { start: todayStart.toISOString(), end: null }
       case 'week':
         const weekStart = new Date(now)
         weekStart.setDate(now.getDate() - 7)
-        return weekStart.toISOString()
+        return { start: weekStart.toISOString(), end: null }
       case 'month':
         const monthStart = new Date(now)
         monthStart.setMonth(now.getMonth() - 1)
-        return monthStart.toISOString()
+        return { start: monthStart.toISOString(), end: null }
+      case 'custom':
+        if (customStartDate && customEndDate) {
+          const start = new Date(customStartDate)
+          start.setHours(0, 0, 0, 0)
+          const end = new Date(customEndDate)
+          end.setHours(23, 59, 59, 999)
+          return { start: start.toISOString(), end: end.toISOString() }
+        }
+        return { start: null, end: null }
       case 'all':
       default:
-        return null
+        return { start: null, end: null }
     }
   }
 
@@ -67,8 +78,11 @@ export default function DriverFinancePage() {
         .order('created_at', { ascending: false })
         .limit(50)
 
-      if (dateFilter) {
-        transactionsQuery = transactionsQuery.gte('created_at', dateFilter)
+      if (dateFilter.start) {
+        transactionsQuery = transactionsQuery.gte('created_at', dateFilter.start)
+      }
+      if (dateFilter.end) {
+        transactionsQuery = transactionsQuery.lte('created_at', dateFilter.end)
       }
 
       const { data: transactionsData } = await transactionsQuery
@@ -81,8 +95,11 @@ export default function DriverFinancePage() {
         .eq('executor_user_id', currentUser.id)
         .eq('status', 'completed')
 
-      if (dateFilter) {
-        ordersQuery = ordersQuery.gte('completed_at', dateFilter)
+      if (dateFilter.start) {
+        ordersQuery = ordersQuery.gte('completed_at', dateFilter.start)
+      }
+      if (dateFilter.end) {
+        ordersQuery = ordersQuery.lte('completed_at', dateFilter.end)
       }
 
       const { data: ordersData } = await ordersQuery
@@ -119,7 +136,7 @@ export default function DriverFinancePage() {
 
       {/* Выбор периода */}
       <div className="bg-gray-800 rounded-lg shadow p-4 mb-6">
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-2 flex-wrap mb-4">
           <button
             onClick={() => setPeriod('today')}
             className={`px-4 py-2 rounded-md transition ${
@@ -160,7 +177,56 @@ export default function DriverFinancePage() {
           >
             Все время
           </button>
+          <button
+            onClick={() => setPeriod('custom')}
+            className={`px-4 py-2 rounded-md transition ${
+              period === 'custom'
+                ? 'bg-green-600 text-white'
+                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+            }`}
+          >
+            Произвольная дата
+          </button>
         </div>
+
+        {/* Выбор произвольной даты */}
+        {period === 'custom' && (
+          <div className="flex gap-4 items-end flex-wrap">
+            <div className="flex-1 min-w-[200px]">
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Дата начала
+              </label>
+              <input
+                type="date"
+                value={customStartDate}
+                onChange={(e) => setCustomStartDate(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white"
+              />
+            </div>
+            <div className="flex-1 min-w-[200px]">
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Дата окончания
+              </label>
+              <input
+                type="date"
+                value={customEndDate}
+                onChange={(e) => setCustomEndDate(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white"
+              />
+            </div>
+            <button
+              onClick={() => {
+                if (customStartDate && customEndDate) {
+                  loadData()
+                }
+              }}
+              disabled={!customStartDate || !customEndDate}
+              className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+            >
+              Применить
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
