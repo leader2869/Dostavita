@@ -38,14 +38,32 @@ export async function POST(request: Request) {
       )
     }
 
-    // Создаем пользователя в auth
-    const { data: newUser, error: signUpError } = await supabase.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true, // Автоматически подтверждаем email
-    })
+    // Создаем пользователя в auth через admin API
+    // Если admin API недоступен, используем обычный signUp
+    let newUser: any = null
+    let signUpError: any = null
 
-    if (signUpError || !newUser.user) {
+    try {
+      const adminResult = await supabase.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true, // Автоматически подтверждаем email
+      })
+      newUser = adminResult.data
+      signUpError = adminResult.error
+    } catch (err: any) {
+      // Если admin API недоступен, возвращаем инструкцию
+      console.error('Admin API недоступен:', err)
+      return NextResponse.json(
+        { 
+          error: 'Создание пользователей через API недоступно. Пожалуйста, попросите водителя зарегистрироваться самостоятельно, а затем отправьте ему запрос на привязку.',
+          requires_manual_registration: true
+        },
+        { status: 501 }
+      )
+    }
+
+    if (signUpError || !newUser?.user) {
       console.error('Ошибка создания пользователя:', signUpError)
       return NextResponse.json(
         { error: signUpError?.message || 'Ошибка создания аккаунта' },
@@ -71,8 +89,12 @@ export async function POST(request: Request) {
       .single()
 
     if (profileError) {
-      // Если ошибка создания профиля, удаляем созданного пользователя
-      await supabase.auth.admin.deleteUser(newUser.user.id)
+      // Если ошибка создания профиля, пытаемся удалить созданного пользователя
+      try {
+        await supabase.auth.admin.deleteUser(newUser.user.id)
+      } catch (deleteErr) {
+        console.error('Ошибка удаления пользователя:', deleteErr)
+      }
       console.error('Ошибка создания профиля водителя:', profileError)
       return NextResponse.json(
         { error: profileError.message },

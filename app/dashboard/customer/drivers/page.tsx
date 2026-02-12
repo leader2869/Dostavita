@@ -13,11 +13,22 @@ export default function CustomerDriversPage() {
   const [drivers, setDrivers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [showAddModal, setShowAddModal] = useState(false)
+  const [showCreateModal, setShowCreateModal] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<any[]>([])
   const [searching, setSearching] = useState(false)
   const [attaching, setAttaching] = useState<string | null>(null)
+  const [creating, setCreating] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  
+  // Форма создания водителя
+  const [newDriverEmail, setNewDriverEmail] = useState('')
+  const [newDriverPassword, setNewDriverPassword] = useState('')
+  const [newDriverFullName, setNewDriverFullName] = useState('')
+  const [newDriverPhone, setNewDriverPhone] = useState('')
+  const [newDriverVehicleType, setNewDriverVehicleType] = useState('')
+  const [newDriverVehicleNumber, setNewDriverVehicleNumber] = useState('')
+  const [newDriverLicenseNumber, setNewDriverLicenseNumber] = useState('')
 
   const loadDrivers = useCallback(async () => {
     try {
@@ -175,12 +186,20 @@ export default function CustomerDriversPage() {
       <div className="bg-gray-800 rounded-lg shadow p-6 mb-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold text-white">Мои водители ({drivers.length})</h2>
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition"
-          >
-            Добавить водителя
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+            >
+              Создать водителя
+            </button>
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition"
+            >
+              Найти водителя
+            </button>
+          </div>
         </div>
 
         {error && (
