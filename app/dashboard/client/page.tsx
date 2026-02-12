@@ -85,7 +85,7 @@ export default function ClientDashboard() {
       <h1 className="text-3xl font-bold mb-6 text-white">Главная</h1>
 
       <div className="bg-gray-800 rounded-lg shadow p-6 mb-6">
-        <h2 className="text-xl font-semibold mb-4 text-white">Мои заказы</h2>
+        <h2 className="text-xl font-semibold mb-4 text-white">Мои активные заказы</h2>
         {loading ? (
           <p className="text-gray-400">Загрузка...</p>
         ) : orders.length > 0 ? (
