@@ -52,6 +52,17 @@ export default async function DriverFinancePage() {
     .order('created_at', { ascending: false })
     .limit(50)
 
+  // Получаем завершенные заказы водителя
+  const { data: completedOrders } = await supabase
+    .from('orders')
+    .select('id, final_price')
+    .eq('executor_user_id', user.id)
+    .eq('status', 'completed')
+
+  // Подсчитываем статистику
+  const completedOrdersCount = completedOrders?.length || 0
+  const totalEarnings = completedOrders?.reduce((sum, order) => sum + (parseFloat(order.final_price) || 0), 0) || 0
+
   return (
     <div className="pb-20">
       <BackButton />
@@ -69,7 +80,17 @@ export default async function DriverFinancePage() {
         {/* Статистика */}
         <div className="bg-gray-800 rounded-lg shadow p-6">
           <h2 className="text-xl font-semibold mb-4 text-white">Статистика</h2>
-          <p className="text-gray-300">Всего транзакций: {transactions?.length || 0}</p>
+          <div className="space-y-2">
+            <p className="text-gray-300">
+              Завершенных заказов: <span className="text-white font-semibold">{completedOrdersCount}</span>
+            </p>
+            <p className="text-gray-300">
+              Общая сумма: <span className="text-green-400 font-semibold">{totalEarnings.toFixed(2)} BYN</span>
+            </p>
+            <p className="text-gray-300">
+              Всего транзакций: <span className="text-white font-semibold">{transactions?.length || 0}</span>
+            </p>
+          </div>
         </div>
       </div>
 
