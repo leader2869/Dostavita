@@ -178,9 +178,9 @@ export default async function CustomerDashboard() {
                   borderColor = 'border-red-500'
                   bgColor = 'bg-red-900/30'
                 } else if (isCompleted) {
-                  // Выполненные заказы - красным
-                  borderColor = 'border-red-500'
-                  bgColor = 'bg-red-900/30'
+                  // Выполненные заказы - зеленым
+                  borderColor = 'border-green-500'
+                  bgColor = 'bg-green-900/30'
                 } else if (isActive) {
                   // Активные заказы - желтым
                   borderColor = 'border-yellow-500'
