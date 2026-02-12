@@ -1,8 +1,13 @@
-import { createServerSupabaseClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
+'use client'
+
+import { useState, useEffect, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 import { BackButton } from '@/components/ui/BackButton'
 
-export default async function CustomerDriversPage() {
+export default function CustomerDriversPage() {
+  const router = useRouter()
+  const supabase = createClient()
   const supabase = createServerSupabaseClient()
   
   const {
@@ -34,13 +39,22 @@ export default async function CustomerDriversPage() {
 
       <div className="bg-gray-800 rounded-lg shadow p-6 mb-6">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-white">Мои водители ({drivers?.length || 0})</h2>
-          <button className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition">
+          <h2 className="text-xl font-semibold text-white">Мои водители ({drivers.length})</h2>
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition"
+          >
             Добавить водителя
           </button>
         </div>
 
-        {drivers && drivers.length > 0 ? (
+        {error && (
+          <div className="mb-4 p-3 bg-red-900/50 border border-red-500 rounded text-red-200 text-sm">
+            {error}
+          </div>
+        )}
+
+        {drivers.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {drivers.map((driver: any) => (
               <div key={driver.id} className="border border-gray-700 rounded-lg p-4 bg-gray-700 hover:bg-gray-600 transition">
@@ -97,6 +111,13 @@ export default async function CustomerDriversPage() {
                   >
                     Отследить
                   </a>
+                  <button
+                    onClick={() => handleDetachDriver(driver.id)}
+                    className="px-3 py-2 bg-red-600 text-white rounded text-sm hover:bg-red-700 transition"
+                    title="Отвязать водителя"
+                  >
+                    ✕
+                  </button>
                 </div>
               </div>
             ))}
@@ -104,12 +125,125 @@ export default async function CustomerDriversPage() {
         ) : (
           <div className="text-center py-8">
             <p className="text-gray-400 mb-4">У вас пока нет водителей</p>
-            <button className="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition">
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition"
+            >
               Добавить первого водителя
             </button>
           </div>
         )}
       </div>
+
+      {/* Модальное окно для добавления водителя */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-bold text-white">Добавить водителя</h2>
+                <button
+                  onClick={() => {
+                    setShowAddModal(false)
+                    setSearchQuery('')
+                    setSearchResults([])
+                    setError(null)
+                  }}
+                  className="text-gray-400 hover:text-white transition"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Поиск водителя (email, имя, телефон)
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                    placeholder="Введите email, имя или телефон..."
+                    className="flex-1 px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white placeholder-gray-400"
+                  />
+                  <button
+                    onClick={handleSearch}
+                    disabled={searching}
+                    className="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 disabled:opacity-50 transition"
+                  >
+                    {searching ? 'Поиск...' : 'Найти'}
+                  </button>
+                </div>
+              </div>
+
+              {error && (
+                <div className="mb-4 p-3 bg-red-900/50 border border-red-500 rounded text-red-200 text-sm">
+                  {error}
+                </div>
+              )}
+
+              {searchResults.length > 0 && (
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium text-gray-400 mb-2">
+                    Найдено водителей: {searchResults.length}
+                  </h3>
+                  <div className="space-y-2 max-h-96 overflow-y-auto">
+                    {searchResults.map((driver: any) => (
+                      <div
+                        key={driver.id}
+                        className="border border-gray-700 rounded-lg p-4 bg-gray-700 hover:bg-gray-600 transition"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <p className="font-medium text-white">{driver.full_name || 'Без имени'}</p>
+                            <p className="text-sm text-gray-400">{driver.email}</p>
+                            {driver.phone && (
+                              <p className="text-sm text-gray-400">{driver.phone}</p>
+                            )}
+                            {driver.vehicle_type && (
+                              <p className="text-xs text-gray-500 mt-1">
+                                Транспорт: {
+                                  driver.vehicle_type === 'car' ? 'Автомобиль' :
+                                  driver.vehicle_type === 'motorcycle' ? 'Мотоцикл' :
+                                  driver.vehicle_type === 'bicycle' ? 'Велосипед' :
+                                  driver.vehicle_type === 'walking' ? 'Пешком' : driver.vehicle_type
+                                }
+                              </p>
+                            )}
+                          </div>
+                          <button
+                            onClick={() => handleAttachDriver(driver.id)}
+                            disabled={attaching === driver.id}
+                            className="ml-4 bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700 disabled:opacity-50 transition"
+                          >
+                            {attaching === driver.id ? 'Привязка...' : 'Привязать'}
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {searchQuery && !searching && searchResults.length === 0 && (
+                <div className="text-center py-8 text-gray-400">
+                  Водители не найдены. Попробуйте другой поисковый запрос.
+                </div>
+              )}
+
+              {!searchQuery && searchResults.length === 0 && (
+                <div className="text-center py-8 text-gray-400">
+                  Введите данные для поиска водителя (email, имя или телефон)
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Нижняя навигация */}
       <div className="fixed bottom-0 left-0 right-0 bg-gray-800 border-t border-gray-700 z-50">
