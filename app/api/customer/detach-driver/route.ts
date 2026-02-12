@@ -38,40 +38,26 @@ export async function POST(request: Request) {
       )
     }
 
-    // Проверяем, что водитель привязан к этой организации
-    const { data: driverProfile, error: driverError } = await supabase
-      .from('profiles')
-      .select('id, organization_id')
-      .eq('id', driver_user_id)
-      .single()
-
-    if (driverError || !driverProfile) {
-      return NextResponse.json(
-        { error: 'Водитель не найден' },
-        { status: 404 }
-      )
-    }
-
-    if (driverProfile.organization_id !== user.id) {
-      return NextResponse.json(
-        { error: 'Водитель не привязан к вашей организации' },
-        { status: 400 }
-      )
-    }
-
-    // Отвязываем водителя от организации
-    const { data: updatedProfile, error: updateError } = await supabase
-      .from('profiles')
-      .update({ organization_id: null })
-      .eq('id', driver_user_id)
-      .select()
-      .single()
+    // Отвязываем водителя от организации через RPC функцию (обходит RLS)
+    const { data: success, error: updateError } = await supabase
+      .rpc('update_driver_organization', {
+        driver_user_id,
+        organization_user_id: user.id,
+        action: 'detach'
+      })
 
     if (updateError) {
       console.error('Ошибка отвязки водителя:', updateError)
       return NextResponse.json(
         { error: updateError.message },
         { status: 500 }
+      )
+    }
+
+    if (!success) {
+      return NextResponse.json(
+        { error: 'Не удалось отвязать водителя. Возможно, он не привязан к вашей организации.' },
+        { status: 400 }
       )
     }
 

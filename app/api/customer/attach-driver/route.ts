@@ -38,19 +38,19 @@ export async function POST(request: Request) {
       )
     }
 
-    // Проверяем, что водитель существует и имеет роль driver
-    const { data: driverProfile, error: driverError } = await supabase
-      .from('profiles')
-      .select('id, role, organization_id')
-      .eq('id', driver_user_id)
+    // Проверяем, что водитель существует и имеет роль driver через RPC функцию (обходит RLS)
+    const { data: driverProfileData, error: driverError } = await supabase
+      .rpc('get_driver_profile_for_organization', { driver_user_id })
       .single()
 
-    if (driverError || !driverProfile) {
+    if (driverError || !driverProfileData) {
       return NextResponse.json(
         { error: 'Водитель не найден' },
         { status: 404 }
       )
     }
+
+    const driverProfile = driverProfileData as any
 
     if (driverProfile.role !== 'driver') {
       return NextResponse.json(
@@ -73,13 +73,13 @@ export async function POST(request: Request) {
       )
     }
 
-    // Привязываем водителя к организации
-    const { data: updatedProfile, error: updateError } = await supabase
-      .from('profiles')
-      .update({ organization_id: user.id })
-      .eq('id', driver_user_id)
-      .select()
-      .single()
+    // Привязываем водителя к организации через RPC функцию (обходит RLS)
+    const { data: success, error: updateError } = await supabase
+      .rpc('update_driver_organization', {
+        driver_user_id,
+        organization_user_id: user.id,
+        action: 'attach'
+      })
 
     if (updateError) {
       console.error('Ошибка привязки водителя:', updateError)
@@ -88,6 +88,18 @@ export async function POST(request: Request) {
         { status: 500 }
       )
     }
+
+    if (!success) {
+      return NextResponse.json(
+        { error: 'Не удалось привязать водителя. Возможно, он уже привязан к другой организации.' },
+        { status: 400 }
+      )
+    }
+
+    // Получаем обновленный профиль через RPC функцию
+    const { data: updatedProfile } = await supabase
+      .rpc('get_driver_profile_for_organization', { driver_user_id })
+      .single()
 
     return NextResponse.json({ 
       success: true, 

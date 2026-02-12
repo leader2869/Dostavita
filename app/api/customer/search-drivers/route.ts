@@ -31,21 +31,11 @@ export async function POST(request: Request) {
       )
     }
 
-    // Ищем водителей, которые не привязаны к организации
-    let query = supabase
-      .from('profiles')
-      .select('id, email, full_name, phone, vehicle_type, vehicle_number, license_number, avatar_url, organization_id')
-      .eq('role', 'driver')
-      .is('organization_id', null)
-      .limit(20)
-
-    // Если есть поисковый запрос, ищем по email, имени или телефону
-    if (search && search.trim()) {
-      const searchTerm = `%${search.trim()}%`
-      query = query.or(`email.ilike.${searchTerm},full_name.ilike.${searchTerm},phone.ilike.${searchTerm}`)
-    }
-
-    const { data: drivers, error: driversError } = await query
+    // Ищем водителей через RPC функцию (обходит RLS)
+    const { data: drivers, error: driversError } = await supabase
+      .rpc('search_available_drivers', { 
+        search_term: search && search.trim() ? search.trim() : null 
+      })
 
     if (driversError) {
       console.error('Ошибка поиска водителей:', driversError)
