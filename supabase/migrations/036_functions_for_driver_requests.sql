@@ -34,9 +34,9 @@ BEGIN
   -- Проверяем, нет ли активного запроса
   SELECT id INTO existing_request_id
   FROM public.driver_organization_requests
-  WHERE driver_user_id = create_driver_organization_request.driver_user_id
-    AND organization_user_id = create_driver_organization_request.organization_user_id
-    AND status = 'pending';
+  WHERE driver_organization_requests.driver_user_id = create_driver_organization_request.driver_user_id
+    AND driver_organization_requests.organization_user_id = create_driver_organization_request.organization_user_id
+    AND driver_organization_requests.status = 'pending';
 
   IF existing_request_id IS NOT NULL THEN
     RAISE EXCEPTION 'Запрос уже существует';
@@ -150,9 +150,9 @@ BEGIN
   -- Получаем запрос
   SELECT * INTO request_record
   FROM public.driver_organization_requests
-  WHERE id = request_id
-    AND driver_user_id = respond_to_organization_request.driver_user_id
-    AND status = 'pending';
+  WHERE driver_organization_requests.id = request_id
+    AND driver_organization_requests.driver_user_id = respond_to_organization_request.driver_user_id
+    AND driver_organization_requests.status = 'pending';
 
   IF NOT FOUND THEN
     RETURN FALSE;
@@ -165,13 +165,13 @@ BEGIN
   SET 
     status = response,
     responded_at = NOW()
-  WHERE id = request_id;
+  WHERE driver_organization_requests.id = request_id;
 
   -- Если водитель принял запрос, привязываем его к организации
   IF response = 'accepted' THEN
     UPDATE public.profiles
     SET organization_id = organization_user_id
-    WHERE id = driver_user_id;
+    WHERE profiles.id = respond_to_organization_request.driver_user_id;
   END IF;
 
   RETURN TRUE;
@@ -192,9 +192,9 @@ BEGIN
   -- Отменяем запрос
   UPDATE public.driver_organization_requests
   SET status = 'cancelled'
-  WHERE id = request_id
-    AND organization_user_id = cancel_organization_request.organization_user_id
-    AND status = 'pending';
+  WHERE driver_organization_requests.id = request_id
+    AND driver_organization_requests.organization_user_id = cancel_organization_request.organization_user_id
+    AND driver_organization_requests.status = 'pending';
 
   RETURN FOUND;
 END;
