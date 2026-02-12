@@ -32,7 +32,7 @@ BEGIN
   END IF;
 
   -- Проверяем, нет ли активного запроса
-  SELECT id INTO existing_request_id
+  SELECT driver_organization_requests.id INTO existing_request_id
   FROM public.driver_organization_requests
   WHERE driver_organization_requests.driver_user_id = create_driver_organization_request.driver_user_id
     AND driver_organization_requests.organization_user_id = create_driver_organization_request.organization_user_id
