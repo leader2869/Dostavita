@@ -18,9 +18,9 @@ DECLARE
   existing_request_id UUID;
 BEGIN
   -- Проверяем, что водитель существует и имеет роль driver
-  SELECT role, organization_id INTO driver_role, driver_org_id
+  SELECT profiles.role, profiles.organization_id INTO driver_role, driver_org_id
   FROM public.profiles
-  WHERE id = driver_user_id;
+  WHERE profiles.id = create_driver_organization_request.driver_user_id;
 
   IF NOT FOUND OR driver_role != 'driver' THEN
     RAISE EXCEPTION 'Водитель не найден';
