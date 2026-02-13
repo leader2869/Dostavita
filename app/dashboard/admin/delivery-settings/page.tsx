@@ -22,11 +22,6 @@ export default function DeliverySettingsPage() {
   const [success, setSuccess] = useState<string | null>(null)
   const [isSuperadmin, setIsSuperadmin] = useState(false)
 
-  useEffect(() => {
-    checkRole()
-    loadSettings()
-  }, [checkRole, loadSettings])
-
   const checkRole = useCallback(async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser()

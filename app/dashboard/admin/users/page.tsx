@@ -67,7 +67,7 @@ export default function AdminUsersPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [supabase, router])
 
   const handleEdit = (user: any) => {
     setEditingUser(user)

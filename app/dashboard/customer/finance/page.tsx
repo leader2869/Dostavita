@@ -45,7 +45,7 @@ export default function CustomerFinancePage() {
       default:
         return { start: null, end: null }
     }
-  }
+  }, [customStartDate, customEndDate])
 
   const loadData = useCallback(async () => {
     try {
@@ -58,7 +58,7 @@ export default function CustomerFinancePage() {
 
       setUser(currentUser)
 
-      const dateFilter = getDateFilter(period)
+      const dateFilter = getDateFilter(period as Period)
       
       // Получаем финансы водителей организации
       const { data: financesData, error: financesError } = await supabase

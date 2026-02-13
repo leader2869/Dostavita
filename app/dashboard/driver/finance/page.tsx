@@ -70,7 +70,7 @@ export default function DriverFinancePage() {
       setBalance(balanceData)
 
       // Получаем транзакции с фильтром по периоду
-      const dateFilter = getDateFilter(period)
+      const dateFilter = getDateFilter(period as Period)
       let transactionsQuery = supabase
         .from('transactions')
         .select('*')

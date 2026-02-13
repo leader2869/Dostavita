@@ -127,8 +127,8 @@ export default function EditOrderPage() {
       }
 
       // Получаем координаты адресов (упрощенная версия)
-      const pickupCoords = { lat: 53.9045, lng: 27.5615 }
-      const deliveryCoords = { lat: 53.9045, lng: 27.5615 }
+      const pickupCoords = { lat: 53.9045, lon: 27.5615 }
+      const deliveryCoords = { lat: 53.9045, lon: 27.5615 }
 
       // Получаем базовую цену региона
       const selectedRegionData = regions.find(r => r.id === selectedRegion)
@@ -146,9 +146,9 @@ export default function EditOrderPage() {
         .from('orders')
         .update({
           pickup_address: pickupAddress,
-          pickup_coordinates: `(${pickupCoords.lat},${pickupCoords.lng})`,
+          pickup_coordinates: `(${pickupCoords.lon},${pickupCoords.lat})`,
           delivery_address: deliveryAddress,
-          delivery_coordinates: `(${deliveryCoords.lat},${deliveryCoords.lng})`,
+          delivery_coordinates: `(${deliveryCoords.lon},${deliveryCoords.lat})`,
           description: description,
           region_id: selectedRegion,
           base_price: basePrice,

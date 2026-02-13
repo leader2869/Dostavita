@@ -49,8 +49,8 @@ export default function CreateOrderPage() {
 
     try {
       // Используем координаты из автодополнения или координаты по умолчанию (Минск)
-      const pickupCoords = pickupCoordinates || { lat: 53.9045, lng: 27.5615 }
-      const deliveryCoords = deliveryCoordinates || { lat: 53.9045, lng: 27.5615 }
+      const pickupCoords = pickupCoordinates || { lat: 53.9045, lon: 27.5615 }
+      const deliveryCoords = deliveryCoordinates || { lat: 53.9045, lon: 27.5615 }
 
       const { data: user } = await supabase.auth.getUser()
       if (!user.user) {
@@ -63,8 +63,8 @@ export default function CreateOrderPage() {
       }
 
       // Форматируем координаты для PostgreSQL POINT
-      const pickupPoint = `(${pickupCoords.lng}, ${pickupCoords.lat})`
-      const deliveryPoint = `(${deliveryCoords.lng}, ${deliveryCoords.lat})`
+      const pickupPoint = `(${pickupCoords.lon}, ${pickupCoords.lat})`
+      const deliveryPoint = `(${deliveryCoords.lon}, ${deliveryCoords.lat})`
 
       const { data, error: insertError } = await supabase
         .from('orders')
