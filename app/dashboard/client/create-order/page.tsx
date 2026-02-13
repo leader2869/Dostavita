@@ -17,6 +17,8 @@ export default function CreateOrderPage() {
   // Форма заказа
   const [pickupAddress, setPickupAddress] = useState('')
   const [deliveryAddress, setDeliveryAddress] = useState('')
+  const [pickupCoordinates, setPickupCoordinates] = useState<{ lat: number; lon: number } | undefined>()
+  const [deliveryCoordinates, setDeliveryCoordinates] = useState<{ lat: number; lon: number } | undefined>()
   const [description, setDescription] = useState('')
   const [selectedRegion, setSelectedRegion] = useState('')
   const [itemType, setItemType] = useState<'documents' | 'parcel' | 'flowers' | 'food' | 'other'>('flowers')
@@ -93,10 +95,9 @@ export default function CreateOrderPage() {
         return
       }
 
-      // Получаем координаты адресов (упрощенная версия - в реальном проекте используйте геокодинг)
-      // Для теста используем координаты Минска
-      const pickupCoords = { lat: 53.9045, lng: 27.5615 }
-      const deliveryCoords = { lat: 53.9045, lng: 27.5615 }
+      // Используем координаты из автодополнения или координаты по умолчанию (Минск)
+      const pickupCoords = pickupCoordinates || { lat: 53.9045, lng: 27.5615 }
+      const deliveryCoords = deliveryCoordinates || { lat: 53.9045, lng: 27.5615 }
 
       // Получаем базовую цену региона
       const selectedRegionData = regions.find(r => r.id === selectedRegion)
@@ -153,14 +154,16 @@ export default function CreateOrderPage() {
           <label htmlFor="pickupAddress" className="block text-sm font-medium text-gray-300 mb-1">
             Адрес отправления
           </label>
-          <input
+          <AddressAutocomplete
             id="pickupAddress"
-            type="text"
             value={pickupAddress}
-            onChange={(e) => setPickupAddress(e.target.value)}
+            onChange={(address, coordinates) => {
+              setPickupAddress(address)
+              setPickupCoordinates(coordinates)
+            }}
+            placeholder="Начните вводить адрес отправления"
             required
             className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
-            placeholder="Введите адрес отправления"
           />
         </div>
 
@@ -168,14 +171,16 @@ export default function CreateOrderPage() {
           <label htmlFor="deliveryAddress" className="block text-sm font-medium text-gray-300 mb-1">
             Адрес доставки
           </label>
-          <input
+          <AddressAutocomplete
             id="deliveryAddress"
-            type="text"
             value={deliveryAddress}
-            onChange={(e) => setDeliveryAddress(e.target.value)}
+            onChange={(address, coordinates) => {
+              setDeliveryAddress(address)
+              setDeliveryCoordinates(coordinates)
+            }}
+            placeholder="Начните вводить адрес доставки"
             required
             className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
-            placeholder="Введите адрес доставки"
           />
         </div>
 
