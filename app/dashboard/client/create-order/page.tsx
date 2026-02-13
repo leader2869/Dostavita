@@ -351,9 +351,40 @@ export default function CreateOrderPage() {
 
       <form onSubmit={handleSubmit} className="bg-gray-800 rounded-lg shadow p-6 space-y-4">
         <div>
-          <label htmlFor="pickupAddress" className="block text-sm font-medium text-gray-300 mb-1">
-            Адрес отправления
-          </label>
+          <div className="flex justify-between items-center mb-1">
+            <label htmlFor="pickupAddress" className="block text-sm font-medium text-gray-300">
+              Адрес отправления
+            </label>
+            {savedAddresses.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setShowSavedAddresses(!showSavedAddresses)}
+                className="text-sm text-blue-400 hover:text-blue-300"
+              >
+                {showSavedAddresses ? 'Скрыть' : 'Выбрать из сохраненных'}
+              </button>
+            )}
+          </div>
+          {showSavedAddresses && (
+            <div className="mb-2 space-y-2 max-h-48 overflow-y-auto">
+              {savedAddresses
+                .filter(addr => addr.address_type === 'pickup' || addr.address_type === 'both')
+                .map((addr) => (
+                  <button
+                    key={addr.id}
+                    type="button"
+                    onClick={() => handleSelectSavedAddress(addr, 'pickup')}
+                    className="w-full text-left p-2 bg-gray-700 hover:bg-gray-600 rounded border border-gray-600 transition"
+                  >
+                    <p className="font-medium text-white text-sm">{addr.label}</p>
+                    <p className="text-xs text-gray-400">{addr.address}</p>
+                  </button>
+                ))}
+              {savedAddresses.filter(addr => addr.address_type === 'pickup' || addr.address_type === 'both').length === 0 && (
+                <p className="text-sm text-gray-400 p-2">Нет сохраненных адресов для отправления</p>
+              )}
+            </div>
+          )}
           <AddressAutocomplete
             id="pickupAddress"
             value={pickupAddress}
@@ -375,9 +406,40 @@ export default function CreateOrderPage() {
         </div>
 
         <div>
-          <label htmlFor="deliveryAddress" className="block text-sm font-medium text-gray-300 mb-1">
-            Адрес доставки
-          </label>
+          <div className="flex justify-between items-center mb-1">
+            <label htmlFor="deliveryAddress" className="block text-sm font-medium text-gray-300">
+              Адрес доставки
+            </label>
+            {savedAddresses.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setShowSavedAddresses(!showSavedAddresses)}
+                className="text-sm text-blue-400 hover:text-blue-300"
+              >
+                {showSavedAddresses ? 'Скрыть' : 'Выбрать из сохраненных'}
+              </button>
+            )}
+          </div>
+          {showSavedAddresses && (
+            <div className="mb-2 space-y-2 max-h-48 overflow-y-auto">
+              {savedAddresses
+                .filter(addr => addr.address_type === 'delivery' || addr.address_type === 'both')
+                .map((addr) => (
+                  <button
+                    key={addr.id}
+                    type="button"
+                    onClick={() => handleSelectSavedAddress(addr, 'delivery')}
+                    className="w-full text-left p-2 bg-gray-700 hover:bg-gray-600 rounded border border-gray-600 transition"
+                  >
+                    <p className="font-medium text-white text-sm">{addr.label}</p>
+                    <p className="text-xs text-gray-400">{addr.address}</p>
+                  </button>
+                ))}
+              {savedAddresses.filter(addr => addr.address_type === 'delivery' || addr.address_type === 'both').length === 0 && (
+                <p className="text-sm text-gray-400 p-2">Нет сохраненных адресов для доставки</p>
+              )}
+            </div>
+          )}
           <AddressAutocomplete
             id="deliveryAddress"
             value={deliveryAddress}
