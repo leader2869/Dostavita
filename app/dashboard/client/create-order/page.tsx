@@ -212,7 +212,46 @@ export default function CreateOrderPage() {
 
   useEffect(() => {
     loadRegions()
-  }, [loadRegions])
+    loadSavedAddresses()
+  }, [loadRegions, loadSavedAddresses])
+
+  const handleSelectSavedAddress = (savedAddress: any, type: 'pickup' | 'delivery') => {
+    setShowSavedAddresses(false)
+    
+    if (type === 'pickup') {
+      setPickupAddress(savedAddress.address)
+      if (savedAddress.coordinates) {
+        try {
+          const coords = typeof savedAddress.coordinates === 'string' 
+            ? JSON.parse(savedAddress.coordinates) 
+            : savedAddress.coordinates
+          if (coords.coordinates && coords.coordinates.length === 2) {
+            setPickupCoordinates({ lat: coords.coordinates[1], lon: coords.coordinates[0] })
+          }
+        } catch (e) {
+          console.error('Ошибка парсинга координат:', e)
+        }
+      }
+      if (savedAddress.region_id) {
+        setSelectedRegion(savedAddress.region_id)
+        setRegionAutoDetected(true)
+      }
+    } else {
+      setDeliveryAddress(savedAddress.address)
+      if (savedAddress.coordinates) {
+        try {
+          const coords = typeof savedAddress.coordinates === 'string' 
+            ? JSON.parse(savedAddress.coordinates) 
+            : savedAddress.coordinates
+          if (coords.coordinates && coords.coordinates.length === 2) {
+            setDeliveryCoordinates({ lat: coords.coordinates[1], lon: coords.coordinates[0] })
+          }
+        } catch (e) {
+          console.error('Ошибка парсинга координат:', e)
+        }
+      }
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

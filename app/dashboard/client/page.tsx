@@ -148,7 +148,7 @@ export default function ClientDashboard() {
         )}
       </div>
 
-      <div className="bg-gray-800 rounded-lg shadow p-6">
+      <div className="bg-gray-800 rounded-lg shadow p-6 mb-6">
         <h2 className="text-xl font-semibold mb-4 text-white">Быстрые действия</h2>
         <div className="grid grid-cols-2 gap-4">
           <a
@@ -164,6 +164,17 @@ export default function ClientDashboard() {
             Все заказы
           </a>
         </div>
+      </div>
+
+      <div className="bg-gray-800 rounded-lg shadow p-6">
+        <h2 className="text-xl font-semibold mb-4 text-white">Мои адреса</h2>
+        <p className="text-gray-400 mb-4 text-sm">Сохраняйте часто используемые адреса для быстрого создания заказов</p>
+        <a
+          href="/dashboard/client/addresses"
+          className="block bg-blue-600 text-white p-4 rounded-lg text-center hover:bg-blue-700 transition"
+        >
+          Управление адресами
+        </a>
       </div>
 
       <ClientBottomNavigation />
