@@ -500,6 +500,109 @@ export default function CreateOrderPage() {
         </button>
       </form>
 
+      {/* Модальное окно для выбора сохраненных адресов */}
+      {showSavedAddressesModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-bold text-white">
+                  Выбрать адрес {savedAddressType === 'pickup' ? 'отправления' : 'доставки'}
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowSavedAddressesModal(false)
+                    setSavedAddressType(null)
+                  }}
+                  className="text-gray-400 hover:text-white transition"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {savedAddresses.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-gray-400 mb-4">У вас пока нет сохраненных адресов</p>
+                  <a
+                    href="/dashboard/client/addresses"
+                    className="text-blue-400 hover:text-blue-300 underline"
+                  >
+                    Добавить адрес
+                  </a>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {savedAddresses
+                    .filter(addr => {
+                      if (savedAddressType === 'pickup') {
+                        return addr.address_type === 'pickup' || addr.address_type === 'both'
+                      } else {
+                        return addr.address_type === 'delivery' || addr.address_type === 'both'
+                      }
+                    })
+                    .map((addr) => (
+                      <button
+                        key={addr.id}
+                        type="button"
+                        onClick={() => handleSelectSavedAddress(addr)}
+                        className="w-full text-left p-4 bg-gray-700 hover:bg-gray-600 rounded-lg border border-gray-600 transition"
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <p className="font-medium text-white">{addr.label}</p>
+                              {addr.is_default && (
+                                <span className="px-2 py-1 bg-green-600 text-white text-xs rounded">
+                                  По умолчанию
+                                </span>
+                              )}
+                              <span className="px-2 py-1 bg-gray-600 text-gray-300 text-xs rounded">
+                                {addr.address_type === 'pickup' ? 'Отправление' :
+                                 addr.address_type === 'delivery' ? 'Доставка' : 'Оба'}
+                              </span>
+                            </div>
+                            <p className="text-sm text-gray-300">{addr.address}</p>
+                            {addr.region_id && (
+                              <p className="text-xs text-gray-400 mt-1">
+                                Регион: {regions.find(r => r.id === addr.region_id)?.name || 'Не указан'}
+                              </p>
+                            )}
+                          </div>
+                          <svg className="w-5 h-5 text-gray-400 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </div>
+                      </button>
+                    ))}
+                  {savedAddresses.filter(addr => {
+                    if (savedAddressType === 'pickup') {
+                      return addr.address_type === 'pickup' || addr.address_type === 'both'
+                    } else {
+                      return addr.address_type === 'delivery' || addr.address_type === 'both'
+                    }
+                  }).length === 0 && (
+                    <div className="text-center py-8">
+                      <p className="text-gray-400 mb-4">
+                        Нет сохраненных адресов для {savedAddressType === 'pickup' ? 'отправления' : 'доставки'}
+                      </p>
+                      <a
+                        href="/dashboard/client/addresses"
+                        className="text-blue-400 hover:text-blue-300 underline"
+                      >
+                        Добавить адрес
+                      </a>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       <ClientBottomNavigation />
     </div>
   )
