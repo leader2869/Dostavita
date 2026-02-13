@@ -25,8 +25,8 @@ export default function CreateOrderPage() {
   const [itemType, setItemType] = useState<'documents' | 'parcel' | 'flowers' | 'food' | 'other'>('flowers')
   const [regionAutoDetected, setRegionAutoDetected] = useState(false)
   const [savedAddresses, setSavedAddresses] = useState<any[]>([])
-  const [showSavedAddressesPickup, setShowSavedAddressesPickup] = useState(false)
-  const [showSavedAddressesDelivery, setShowSavedAddressesDelivery] = useState(false)
+  const [showSavedAddressesModal, setShowSavedAddressesModal] = useState(false)
+  const [savedAddressType, setSavedAddressType] = useState<'pickup' | 'delivery' | null>(null)
 
   // Функция для определения региона по адресу
   const detectRegionFromAddress = useCallback((address: string, addressDetails?: any) => {
@@ -236,14 +236,17 @@ export default function CreateOrderPage() {
     loadSavedAddresses()
   }, [loadRegions, loadSavedAddresses])
 
-  const handleSelectSavedAddress = (savedAddress: any, type: 'pickup' | 'delivery') => {
-    if (type === 'pickup') {
-      setShowSavedAddressesPickup(false)
-    } else {
-      setShowSavedAddressesDelivery(false)
-    }
+  const handleOpenSavedAddressesModal = (type: 'pickup' | 'delivery') => {
+    setSavedAddressType(type)
+    setShowSavedAddressesModal(true)
+  }
+
+  const handleSelectSavedAddress = (savedAddress: any) => {
+    if (!savedAddressType) return
+
+    setShowSavedAddressesModal(false)
     
-    if (type === 'pickup') {
+    if (savedAddressType === 'pickup') {
       setPickupAddress(savedAddress.address)
       if (savedAddress.coordinates) {
         try {
@@ -276,6 +279,8 @@ export default function CreateOrderPage() {
         }
       }
     }
+    
+    setSavedAddressType(null)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -363,33 +368,13 @@ export default function CreateOrderPage() {
             {savedAddresses.length > 0 && (
               <button
                 type="button"
-                onClick={() => setShowSavedAddressesPickup(!showSavedAddressesPickup)}
+                onClick={() => handleOpenSavedAddressesModal('pickup')}
                 className="text-sm text-blue-400 hover:text-blue-300"
               >
-                {showSavedAddressesPickup ? 'Скрыть' : 'Выбрать из сохраненных'}
+                Выбрать из сохраненных
               </button>
             )}
           </div>
-          {showSavedAddressesPickup && (
-            <div className="mb-2 space-y-2 max-h-48 overflow-y-auto">
-              {savedAddresses
-                .filter(addr => addr.address_type === 'pickup' || addr.address_type === 'both')
-                .map((addr) => (
-                  <button
-                    key={addr.id}
-                    type="button"
-                    onClick={() => handleSelectSavedAddress(addr, 'pickup')}
-                    className="w-full text-left p-2 bg-gray-700 hover:bg-gray-600 rounded border border-gray-600 transition"
-                  >
-                    <p className="font-medium text-white text-sm">{addr.label}</p>
-                    <p className="text-xs text-gray-400">{addr.address}</p>
-                  </button>
-                ))}
-              {savedAddresses.filter(addr => addr.address_type === 'pickup' || addr.address_type === 'both').length === 0 && (
-                <p className="text-sm text-gray-400 p-2">Нет сохраненных адресов для отправления</p>
-              )}
-            </div>
-          )}
           <AddressAutocomplete
             id="pickupAddress"
             value={pickupAddress}
@@ -418,33 +403,13 @@ export default function CreateOrderPage() {
             {savedAddresses.length > 0 && (
               <button
                 type="button"
-                onClick={() => setShowSavedAddressesDelivery(!showSavedAddressesDelivery)}
+                onClick={() => handleOpenSavedAddressesModal('delivery')}
                 className="text-sm text-blue-400 hover:text-blue-300"
               >
-                {showSavedAddressesDelivery ? 'Скрыть' : 'Выбрать из сохраненных'}
+                Выбрать из сохраненных
               </button>
             )}
           </div>
-          {showSavedAddressesDelivery && (
-            <div className="mb-2 space-y-2 max-h-48 overflow-y-auto">
-              {savedAddresses
-                .filter(addr => addr.address_type === 'delivery' || addr.address_type === 'both')
-                .map((addr) => (
-                  <button
-                    key={addr.id}
-                    type="button"
-                    onClick={() => handleSelectSavedAddress(addr, 'delivery')}
-                    className="w-full text-left p-2 bg-gray-700 hover:bg-gray-600 rounded border border-gray-600 transition"
-                  >
-                    <p className="font-medium text-white text-sm">{addr.label}</p>
-                    <p className="text-xs text-gray-400">{addr.address}</p>
-                  </button>
-                ))}
-              {savedAddresses.filter(addr => addr.address_type === 'delivery' || addr.address_type === 'both').length === 0 && (
-                <p className="text-sm text-gray-400 p-2">Нет сохраненных адресов для доставки</p>
-              )}
-            </div>
-          )}
           <AddressAutocomplete
             id="deliveryAddress"
             value={deliveryAddress}
