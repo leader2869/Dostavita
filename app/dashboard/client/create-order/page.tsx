@@ -25,7 +25,8 @@ export default function CreateOrderPage() {
   const [itemType, setItemType] = useState<'documents' | 'parcel' | 'flowers' | 'food' | 'other'>('flowers')
   const [regionAutoDetected, setRegionAutoDetected] = useState(false)
   const [savedAddresses, setSavedAddresses] = useState<any[]>([])
-  const [showSavedAddresses, setShowSavedAddresses] = useState(false)
+  const [showSavedAddressesPickup, setShowSavedAddressesPickup] = useState(false)
+  const [showSavedAddressesDelivery, setShowSavedAddressesDelivery] = useState(false)
 
   // Функция для определения региона по адресу
   const detectRegionFromAddress = useCallback((address: string, addressDetails?: any) => {
@@ -236,7 +237,11 @@ export default function CreateOrderPage() {
   }, [loadRegions, loadSavedAddresses])
 
   const handleSelectSavedAddress = (savedAddress: any, type: 'pickup' | 'delivery') => {
-    setShowSavedAddresses(false)
+    if (type === 'pickup') {
+      setShowSavedAddressesPickup(false)
+    } else {
+      setShowSavedAddressesDelivery(false)
+    }
     
     if (type === 'pickup') {
       setPickupAddress(savedAddress.address)
@@ -358,14 +363,14 @@ export default function CreateOrderPage() {
             {savedAddresses.length > 0 && (
               <button
                 type="button"
-                onClick={() => setShowSavedAddresses(!showSavedAddresses)}
+                onClick={() => setShowSavedAddressesPickup(!showSavedAddressesPickup)}
                 className="text-sm text-blue-400 hover:text-blue-300"
               >
-                {showSavedAddresses ? 'Скрыть' : 'Выбрать из сохраненных'}
+                {showSavedAddressesPickup ? 'Скрыть' : 'Выбрать из сохраненных'}
               </button>
             )}
           </div>
-          {showSavedAddresses && (
+          {showSavedAddressesPickup && (
             <div className="mb-2 space-y-2 max-h-48 overflow-y-auto">
               {savedAddresses
                 .filter(addr => addr.address_type === 'pickup' || addr.address_type === 'both')
@@ -413,14 +418,14 @@ export default function CreateOrderPage() {
             {savedAddresses.length > 0 && (
               <button
                 type="button"
-                onClick={() => setShowSavedAddresses(!showSavedAddresses)}
+                onClick={() => setShowSavedAddressesDelivery(!showSavedAddressesDelivery)}
                 className="text-sm text-blue-400 hover:text-blue-300"
               >
-                {showSavedAddresses ? 'Скрыть' : 'Выбрать из сохраненных'}
+                {showSavedAddressesDelivery ? 'Скрыть' : 'Выбрать из сохраненных'}
               </button>
             )}
           </div>
-          {showSavedAddresses && (
+          {showSavedAddressesDelivery && (
             <div className="mb-2 space-y-2 max-h-48 overflow-y-auto">
               {savedAddresses
                 .filter(addr => addr.address_type === 'delivery' || addr.address_type === 'both')
