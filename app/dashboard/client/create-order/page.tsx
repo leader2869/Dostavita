@@ -433,7 +433,8 @@ export default function CreateOrderPage() {
               setDeliveryAddress(address)
               setDeliveryCoordinates(coordinates)
             }}
-            placeholder="Начните вводить адрес доставки"
+            placeholder={pickupRegionName ? `Начните вводить адрес доставки (${pickupRegionName})` : "Начните вводить адрес доставки"}
+            filterByRegion={pickupRegionName}
             required
             className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
           />
