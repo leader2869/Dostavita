@@ -211,9 +211,13 @@ export default function CreateOrderPage() {
           </label>
           <AddressAutocomplete
             value={pickupAddress}
-            onChange={(address, coordinates) => {
+            onChange={(address, coordinates, addressDetails) => {
               setPickupAddress(address)
               setPickupCoordinates(coordinates)
+              // Автоматически определяем регион по адресу отправления
+              if (address) {
+                detectRegionFromAddress(address, addressDetails)
+              }
             }}
             placeholder="Начните вводить адрес отправления"
             required
