@@ -15,6 +15,7 @@ interface SavedAddress {
   address: string
   coordinates: any
   region_id: string | null
+  region_name?: string | null
   entrance?: string | null
   floor?: string | null
   apartment?: string | null
