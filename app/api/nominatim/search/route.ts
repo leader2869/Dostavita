@@ -31,12 +31,36 @@ export async function GET(request: Request) {
     const data = await response.json()
 
     // Форматируем результаты для удобства использования
-    const results = data.map((item: any) => ({
-      display_name: item.display_name,
-      lat: parseFloat(item.lat),
-      lon: parseFloat(item.lon),
-      address: item.address || {},
-    }))
+    const results = data.map((item: any) => {
+      // Формируем адрес без области и индекса
+      const addr = item.address || {}
+      const addressParts: string[] = []
+      
+      // Добавляем компоненты адреса в нужном порядке
+      if (addr.house_number && addr.road) {
+        addressParts.push(`${addr.road}, ${addr.house_number}`)
+      } else if (addr.road) {
+        addressParts.push(addr.road)
+      } else if (addr.house_number) {
+        addressParts.push(addr.house_number)
+      }
+      
+      if (addr.city || addr.town || addr.village) {
+        addressParts.push(addr.city || addr.town || addr.village)
+      }
+      
+      // Если нет деталей адреса, используем оригинальный display_name, но убираем индекс
+      const formattedAddress = addressParts.length > 0 
+        ? addressParts.join(', ')
+        : item.display_name.replace(/,\s*\d{6}(-\d{4})?/g, '').replace(/,\s*[А-Яа-яЁё\s]+ область/g, '').trim()
+      
+      return {
+        display_name: formattedAddress,
+        lat: parseFloat(item.lat),
+        lon: parseFloat(item.lon),
+        address: addr,
+      }
+    })
 
     return NextResponse.json({ results })
   } catch (error: any) {
