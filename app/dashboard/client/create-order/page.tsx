@@ -390,15 +390,27 @@ export default function CreateOrderPage() {
             <label htmlFor="pickupAddress" className="block text-sm font-medium text-gray-300">
               Адрес отправления
             </label>
-            {savedAddresses.length > 0 && (
+            <div className="flex gap-2">
               <button
                 type="button"
-                onClick={() => handleOpenSavedAddressesModal('pickup')}
-                className="text-sm text-blue-400 hover:text-blue-300"
+                onClick={() => {
+                  setMapPickerType('pickup')
+                  setShowMapPicker(true)
+                }}
+                className="text-sm text-green-400 hover:text-green-300"
               >
-                Выбрать из сохраненных
+                Указать на карте
               </button>
-            )}
+              {savedAddresses.filter(addr => addr.address_type === 'pickup' || addr.address_type === 'both').length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => handleOpenSavedAddressesModal('pickup')}
+                  className="text-sm text-blue-400 hover:text-blue-300"
+                >
+                  Выбрать из сохраненных
+                </button>
+              )}
+            </div>
           </div>
           <AddressAutocomplete
             id="pickupAddress"
