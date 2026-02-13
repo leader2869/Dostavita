@@ -285,8 +285,9 @@ export default function CreateOrderPage() {
           <select
             value={selectedRegion}
             onChange={(e) => setSelectedRegion(e.target.value)}
+            disabled={regionAutoDetected}
             required
-            className="w-full px-3 py-2 border border-gray-600 rounded-md"
+            className={`w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 ${regionAutoDetected ? 'opacity-60 cursor-not-allowed' : ''}`}
           >
             {regions.map((region) => (
               <option key={region.id} value={region.id}>
