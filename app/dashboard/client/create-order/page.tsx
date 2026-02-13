@@ -420,24 +420,28 @@ export default function CreateOrderPage() {
             <label htmlFor="pickupAddress" className="block text-lg font-semibold text-white">
               Адрес отправления
             </label>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setPickupAddress('')
-                  setPickupCoordinates(undefined)
-                  setPickupEntrance('')
-                  setPickupFloor('')
-                  setPickupApartment('')
-                  setSelectedRegion('')
-                  setRegionAutoDetected(false)
-                  setPickupRegionName(null)
-                }}
-                className="text-sm text-gray-400 hover:text-gray-300"
-                title="Очистить адрес отправления"
-              >
-                Очистить
-              </button>
+            <div className="flex gap-2 items-center">
+              {pickupAddress && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPickupAddress('')
+                    setPickupCoordinates(undefined)
+                    setPickupEntrance('')
+                    setPickupFloor('')
+                    setPickupApartment('')
+                    setSelectedRegion('')
+                    setRegionAutoDetected(false)
+                    setPickupRegionName(null)
+                  }}
+                  className="text-red-500 hover:text-red-400 transition"
+                  title="Очистить адрес отправления"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => {
@@ -527,21 +531,25 @@ export default function CreateOrderPage() {
             <label htmlFor="deliveryAddress" className="block text-lg font-semibold text-white">
               Адрес доставки
             </label>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setDeliveryAddress('')
-                  setDeliveryCoordinates(undefined)
-                  setDeliveryEntrance('')
-                  setDeliveryFloor('')
-                  setDeliveryApartment('')
-                }}
-                className="text-sm text-gray-400 hover:text-gray-300"
-                title="Очистить адрес доставки"
-              >
-                Очистить
-              </button>
+            <div className="flex gap-2 items-center">
+              {deliveryAddress && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDeliveryAddress('')
+                    setDeliveryCoordinates(undefined)
+                    setDeliveryEntrance('')
+                    setDeliveryFloor('')
+                    setDeliveryApartment('')
+                  }}
+                  className="text-red-500 hover:text-red-400 transition"
+                  title="Очистить адрес доставки"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => {
