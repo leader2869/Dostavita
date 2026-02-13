@@ -60,7 +60,16 @@ export default function SavedAddressesPage() {
         console.error('Ошибка загрузки адресов:', addressesError)
         setError('Ошибка загрузки адресов')
       } else {
-        setAddresses(addressesData || [])
+        console.log('Загруженные адреса:', addressesData)
+        // Убеждаемся, что поля entrance, floor, apartment присутствуют
+        const addressesWithDetails = (addressesData || []).map((addr: any) => ({
+          ...addr,
+          entrance: addr.entrance || null,
+          floor: addr.floor || null,
+          apartment: addr.apartment || null,
+        }))
+        console.log('Адреса с деталями:', addressesWithDetails)
+        setAddresses(addressesWithDetails)
       }
     } catch (err: any) {
       console.error('Ошибка загрузки адресов:', err)
