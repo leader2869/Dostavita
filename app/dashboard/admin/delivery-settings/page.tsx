@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { BackButton } from '@/components/ui/BackButton'
@@ -27,7 +27,7 @@ export default function DeliverySettingsPage() {
     loadSettings()
   }, [checkRole, loadSettings])
 
-  const checkRole = async () => {
+  const checkRole = useCallback(async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
@@ -51,9 +51,9 @@ export default function DeliverySettingsPage() {
       console.error('Ошибка проверки роли:', err)
       router.push('/dashboard')
     }
-  }
+  }, [supabase, router])
 
-  const loadSettings = async () => {
+  const loadSettings = useCallback(async () => {
     try {
       // Пробуем использовать RPC функцию
       let { data, error } = await supabase
@@ -78,7 +78,7 @@ export default function DeliverySettingsPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [supabase])
 
   const handleSave = async (setting: DeliverySetting, newValue: number) => {
     if (newValue < 1) {

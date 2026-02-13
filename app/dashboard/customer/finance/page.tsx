@@ -18,7 +18,7 @@ export default function CustomerFinancePage() {
   const [customStartDate, setCustomStartDate] = useState<string>('')
   const [customEndDate, setCustomEndDate] = useState<string>('')
 
-  const getDateFilter = (period: Period) => {
+  const getDateFilter = useCallback((period: Period) => {
     const now = new Date()
     switch (period) {
       case 'today':
