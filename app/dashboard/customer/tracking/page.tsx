@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { BackButton } from '@/components/ui/BackButton'
+import { DriverLocationMap } from '@/components/map/DriverLocationMap'
 
 export default function CustomerTrackingPage() {
   const router = useRouter()
@@ -153,9 +154,13 @@ export default function CustomerTrackingPage() {
                               Обновлено: {new Date(driver.location_updated_at).toLocaleString('ru-RU')}
                             </p>
                           )}
-                          {/* Здесь можно добавить карту Mapbox */}
-                          <div className="mt-4 h-64 bg-gray-600 rounded-lg flex items-center justify-center">
-                            <p className="text-gray-400">Карта будет здесь</p>
+                          {/* Карта с местоположением водителя */}
+                          <div className="mt-4">
+                            <DriverLocationMap
+                              driverId={driver.id}
+                              height="400px"
+                              zoom={15}
+                            />
                           </div>
                         </div>
                       ) : (

@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { ClientBottomNavigation } from '@/components/client/ClientBottomNavigation'
 import { OrderMap } from '@/components/map/OrderMap'
+import { DriverLocationMap } from '@/components/map/DriverLocationMap'
 
 export default function OrderDetailsPage() {
   const router = useRouter()
@@ -340,6 +341,19 @@ export default function OrderDetailsPage() {
                   <div>
                     <p className="text-sm text-gray-400">Номер транспорта</p>
                     <p className="text-white font-medium">{driver.vehicle_number}</p>
+                  </div>
+                )}
+
+                {/* Карта с местоположением водителя */}
+                {driver.current_location && (
+                  <div className="mt-4">
+                    <p className="text-sm text-gray-400 mb-2">Местоположение водителя</p>
+                    <DriverLocationMap
+                      driverId={order.executor_user_id}
+                      orderId={order.id}
+                      height="300px"
+                      zoom={15}
+                    />
                   </div>
                 )}
               </div>

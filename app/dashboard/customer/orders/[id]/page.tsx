@@ -4,6 +4,7 @@ import { BackButton } from '@/components/ui/BackButton'
 import { CustomerBottomNavigation } from '@/components/customer/CustomerBottomNavigation'
 import { formatDistanceToNowStrict } from 'date-fns'
 import { ru } from 'date-fns/locale'
+import { DriverLocationMapWrapper } from '@/components/map/DriverLocationMapWrapper'
 
 export default async function CustomerOrderDetailsPage({ params }: { params: { id: string } }) {
   const orderId = params.id
@@ -195,7 +196,7 @@ export default async function CustomerOrderDetailsPage({ params }: { params: { i
         </div>
 
         {/* Информация о водителе */}
-        {order.driver_full_name && (
+        {order.driver_full_name && order.executor_user_id && (
           <div>
             <h2 className="text-xl font-semibold mb-4 text-white">Водитель</h2>
             <div className="space-y-2">
@@ -207,6 +208,17 @@ export default async function CustomerOrderDetailsPage({ params }: { params: { i
                   <span className="text-gray-400">Телефон:</span> {order.driver_phone}
                 </p>
               )}
+              
+              {/* Карта с местоположением водителя */}
+              <div className="mt-4">
+                <p className="text-sm text-gray-400 mb-2">Местоположение водителя</p>
+                <DriverLocationMapWrapper
+                  driverId={order.executor_user_id}
+                  orderId={order.id}
+                  height="300px"
+                  zoom={15}
+                />
+              </div>
             </div>
           </div>
         )}
