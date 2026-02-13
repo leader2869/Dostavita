@@ -362,8 +362,61 @@ export default function SavedAddressesPage() {
         </div>
       )}
 
-      <div className="mb-6">
-        <button
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+        {addresses.map((addr) => (
+          <div
+            key={addr.id}
+            onClick={() => handleEdit(addr)}
+            className="bg-gray-800 rounded-lg shadow p-4 cursor-pointer hover:bg-gray-700 transition border border-gray-700 hover:border-green-500"
+          >
+            <div className="flex items-start justify-between mb-2">
+              <h3 className="text-base font-semibold text-white flex-1">{addr.label}</h3>
+              {addr.is_default && (
+                <span className="px-1.5 py-0.5 bg-green-600 text-white text-xs rounded">
+                  По умолчанию
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-gray-400 mb-1 line-clamp-2">{addr.address}</p>
+            {(addr.entrance || addr.floor || addr.apartment) && (
+              <p className="text-xs text-gray-500 mt-1">
+                {addr.entrance && `${addr.entrance}`}
+                {addr.entrance && (addr.floor || addr.apartment) && ', '}
+                {addr.floor && `${addr.floor}`}
+                {addr.floor && addr.apartment && ', '}
+                {addr.apartment && `${addr.apartment}`}
+              </p>
+            )}
+            <div className="flex gap-1 mt-2">
+              <span className="px-1.5 py-0.5 bg-gray-700 text-gray-300 text-xs rounded">
+                {getAddressTypeLabel(addr.address_type)}
+              </span>
+            </div>
+            <div className="flex gap-1 mt-2">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleEdit(addr)
+                }}
+                className="flex-1 bg-blue-600 text-white px-2 py-1 rounded text-xs hover:bg-blue-700 transition"
+              >
+                Редактировать
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleDelete(addr.id)
+                }}
+                className="flex-1 bg-red-600 text-white px-2 py-1 rounded text-xs hover:bg-red-700 transition"
+              >
+                Удалить
+              </button>
+            </div>
+          </div>
+        ))}
+        
+        {/* Квадратик для добавления нового адреса */}
+        <div
           onClick={() => {
             setEditingAddress(null)
             setLabel('')
@@ -377,69 +430,14 @@ export default function SavedAddressesPage() {
             setIsDefault(false)
             setShowAddModal(true)
           }}
-          className="w-full bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition font-semibold"
+          className="bg-gray-800 rounded-lg shadow p-4 cursor-pointer hover:bg-gray-700 transition border-2 border-dashed border-gray-600 hover:border-green-500 flex flex-col items-center justify-center min-h-[120px]"
         >
-          + Добавить адрес
-        </button>
+          <svg className="w-8 h-8 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+          <p className="text-sm text-gray-400 font-medium">Добавить адрес</p>
+        </div>
       </div>
-
-      {addresses.length === 0 ? (
-        <div className="bg-gray-800 rounded-lg shadow p-6 text-center">
-          <p className="text-gray-400 mb-4">У вас пока нет сохраненных адресов</p>
-          <p className="text-sm text-gray-500">Добавьте адреса для быстрого создания заказов</p>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {addresses.map((addr) => (
-            <div key={addr.id} className="bg-gray-800 rounded-lg shadow p-4">
-              <div className="flex justify-between items-start mb-2">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="text-lg font-semibold text-white">{addr.label}</h3>
-                    {addr.is_default && (
-                      <span className="px-2 py-1 bg-green-600 text-white text-xs rounded">
-                        По умолчанию
-                      </span>
-                    )}
-                    <span className="px-2 py-1 bg-gray-700 text-gray-300 text-xs rounded">
-                      {getAddressTypeLabel(addr.address_type)}
-                    </span>
-                  </div>
-                  <p className="text-gray-300 mb-1">{addr.address}</p>
-                  {(addr.entrance || addr.floor || addr.apartment) && (
-                    <p className="text-sm text-gray-300 mt-1">
-                      {addr.entrance && `Подъезд ${addr.entrance}`}
-                      {addr.entrance && (addr.floor || addr.apartment) && ', '}
-                      {addr.floor && `Этаж ${addr.floor}`}
-                      {addr.floor && addr.apartment && ', '}
-                      {addr.apartment && `Квартира ${addr.apartment}`}
-                    </p>
-                  )}
-                  {addr.region_id && (
-                    <p className="text-sm text-gray-400 mt-1">
-                      Регион: {regions.find(r => r.id === addr.region_id)?.name || 'Не указан'}
-                    </p>
-                  )}
-                </div>
-              </div>
-              <div className="flex gap-2 mt-3">
-                <button
-                  onClick={() => handleEdit(addr)}
-                  className="flex-1 bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700 transition"
-                >
-                  Редактировать
-                </button>
-                <button
-                  onClick={() => handleDelete(addr.id)}
-                  className="flex-1 bg-red-600 text-white px-4 py-2 rounded text-sm hover:bg-red-700 transition"
-                >
-                  Удалить
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
 
       {/* Модальное окно для добавления/редактирования адреса */}
       {showAddModal && (
