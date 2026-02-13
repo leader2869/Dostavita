@@ -32,7 +32,7 @@ export async function GET(request: Request) {
 
     // Форматируем результаты для удобства использования
     const results = data.map((item: any) => {
-      // Формируем адрес без области и индекса
+      // Формируем адрес с областью, но без района и индекса
       const addr = item.address || {}
       const addressParts: string[] = []
       
@@ -49,10 +49,18 @@ export async function GET(request: Request) {
         addressParts.push(addr.city || addr.town || addr.village)
       }
       
-      // Если нет деталей адреса, используем оригинальный display_name, но убираем индекс
+      // Добавляем область (state), но не район (county)
+      if (addr.state) {
+        addressParts.push(addr.state)
+      }
+      
+      // Если нет деталей адреса, используем оригинальный display_name, но убираем индекс и район
       const formattedAddress = addressParts.length > 0 
         ? addressParts.join(', ')
-        : item.display_name.replace(/,\s*\d{6}(-\d{4})?/g, '').replace(/,\s*[А-Яа-яЁё\s]+ область/g, '').trim()
+        : item.display_name
+            .replace(/,\s*\d{6}(-\d{4})?/g, '') // Убираем индекс
+            .replace(/,\s*[А-Яа-яЁё\s]+ район/g, '') // Убираем район
+            .trim()
       
       return {
         display_name: formattedAddress,
