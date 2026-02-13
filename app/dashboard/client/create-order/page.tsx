@@ -24,6 +24,8 @@ export default function CreateOrderPage() {
   const [selectedRegion, setSelectedRegion] = useState('')
   const [itemType, setItemType] = useState<'documents' | 'parcel' | 'flowers' | 'food' | 'other'>('flowers')
   const [regionAutoDetected, setRegionAutoDetected] = useState(false)
+  const [savedAddresses, setSavedAddresses] = useState<any[]>([])
+  const [showSavedAddresses, setShowSavedAddresses] = useState(false)
 
   // Функция для определения региона по адресу
   const detectRegionFromAddress = useCallback((address: string, addressDetails?: any) => {
