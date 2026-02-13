@@ -420,28 +420,7 @@ export default function CreateOrderPage() {
             <label htmlFor="pickupAddress" className="block text-lg font-semibold text-white">
               Адрес отправления
             </label>
-            <div className="flex gap-2 items-center">
-              {pickupAddress && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setPickupAddress('')
-                    setPickupCoordinates(undefined)
-                    setPickupEntrance('')
-                    setPickupFloor('')
-                    setPickupApartment('')
-                    setSelectedRegion('')
-                    setRegionAutoDetected(false)
-                    setPickupRegionName(null)
-                  }}
-                  className="text-red-500 hover:text-red-400 transition"
-                  title="Очистить адрес отправления"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              )}
+            <div className="flex gap-2">
               <button
                 type="button"
                 onClick={() => {
@@ -531,25 +510,7 @@ export default function CreateOrderPage() {
             <label htmlFor="deliveryAddress" className="block text-lg font-semibold text-white">
               Адрес доставки
             </label>
-            <div className="flex gap-2 items-center">
-              {deliveryAddress && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setDeliveryAddress('')
-                    setDeliveryCoordinates(undefined)
-                    setDeliveryEntrance('')
-                    setDeliveryFloor('')
-                    setDeliveryApartment('')
-                  }}
-                  className="text-red-500 hover:text-red-400 transition"
-                  title="Очистить адрес доставки"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              )}
+            <div className="flex gap-2">
               <button
                 type="button"
                 onClick={() => {
@@ -571,18 +532,38 @@ export default function CreateOrderPage() {
               )}
             </div>
           </div>
-          <AddressAutocomplete
-            id="deliveryAddress"
-            value={deliveryAddress}
-            onChange={(address, coordinates) => {
-              setDeliveryAddress(address)
-              setDeliveryCoordinates(coordinates)
-            }}
-            placeholder={pickupRegionName ? `Начните вводить адрес доставки (${pickupRegionName})` : "Начните вводить адрес доставки"}
-            filterByRegion={pickupRegionName}
-            required
-            className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
-          />
+          <div className="relative">
+            <AddressAutocomplete
+              id="deliveryAddress"
+              value={deliveryAddress}
+              onChange={(address, coordinates) => {
+                setDeliveryAddress(address)
+                setDeliveryCoordinates(coordinates)
+              }}
+              placeholder={pickupRegionName ? `Начните вводить адрес доставки (${pickupRegionName})` : "Начните вводить адрес доставки"}
+              filterByRegion={pickupRegionName}
+              required
+              className="w-full px-3 py-2 pr-10 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
+            />
+            {deliveryAddress && (
+              <button
+                type="button"
+                onClick={() => {
+                  setDeliveryAddress('')
+                  setDeliveryCoordinates(undefined)
+                  setDeliveryEntrance('')
+                  setDeliveryFloor('')
+                  setDeliveryApartment('')
+                }}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-red-500 hover:text-red-400 transition"
+                title="Очистить адрес доставки"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+          </div>
           
           {/* Дополнительные поля для адреса доставки */}
           <div className="grid grid-cols-3 gap-2 mt-2">
