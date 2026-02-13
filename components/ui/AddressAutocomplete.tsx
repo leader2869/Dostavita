@@ -25,6 +25,7 @@ export function AddressAutocomplete({
   className = '',
   required = false,
   id,
+  filterByRegion = null,
 }: AddressAutocompleteProps) {
   const [query, setQuery] = useState(value)
   const [results, setResults] = useState<AddressResult[]>([])
