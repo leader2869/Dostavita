@@ -31,7 +31,7 @@ function MapBounds({ pickupCoordinates, deliveryCoordinates, driverCoordinates }
   const map = useMap()
 
   useEffect(() => {
-    const bounds: L.LatLngExpression[] = []
+    const bounds: [number, number][] = []
     
     if (pickupCoordinates) {
       bounds.push([pickupCoordinates.lat, pickupCoordinates.lon])
@@ -44,7 +44,7 @@ function MapBounds({ pickupCoordinates, deliveryCoordinates, driverCoordinates }
     }
 
     if (bounds.length > 0) {
-      map.fitBounds(bounds, { padding: [50, 50] })
+      map.fitBounds(bounds as L.LatLngBoundsExpression, { padding: [50, 50] })
     }
   }, [map, pickupCoordinates, deliveryCoordinates, driverCoordinates])
 
