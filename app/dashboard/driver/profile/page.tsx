@@ -17,6 +17,7 @@ export default function DriverProfilePage() {
   const [error, setError] = useState<string | null>(null)
 
   const [fullName, setFullName] = useState('')
+  const [phone, setPhone] = useState('')
   const [vehicleType, setVehicleType] = useState('')
   const [vehicleNumber, setVehicleNumber] = useState('')
   const [licenseNumber, setLicenseNumber] = useState('')
@@ -48,6 +49,7 @@ export default function DriverProfilePage() {
       if (data) {
         setProfile(data as User)
         setFullName(data.full_name || '')
+        setPhone(data.phone || '')
         setVehicleType(data.vehicle_type || '')
         setVehicleNumber(data.vehicle_number || '')
         setLicenseNumber(data.license_number || '')
@@ -102,6 +104,7 @@ export default function DriverProfilePage() {
         },
         body: JSON.stringify({
           full_name: fullName,
+          phone: phone,
           vehicle_type: vehicleType,
           vehicle_number: vehicleNumber,
           license_number: licenseNumber,
@@ -264,6 +267,21 @@ export default function DriverProfilePage() {
             onChange={(e) => setFullName(e.target.value)}
             className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white"
             placeholder="Иванов Иван Иванович"
+          />
+        </div>
+
+        {/* Телефон */}
+        <div>
+          <label className="block text-sm font-medium text-gray-300 mb-1">
+            Телефон *
+          </label>
+          <input
+            type="tel"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            required
+            className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white"
+            placeholder="+375 (XX) XXX-XX-XX"
           />
         </div>
 

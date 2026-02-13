@@ -107,13 +107,42 @@ const getStatusLabel = (status: string) => {
   }
 }
 
-export function OrdersMap({ orders, height = '600px', zoom = 11, role = 'client' }: OrdersMapProps) {
-  const { coordinates: userLocation } = useGeolocation()
+// Компонент для обновления центра карты
+function MapCenter({ center, zoom }: { center: [number, number], zoom: number }) {
+  const map = useMap()
+  
+  useEffect(() => {
+    map.setView(center, zoom)
+  }, [map, center, zoom])
+  
+  return null
+}
+
+export function OrdersMap({ orders, height = '600px', zoom = 15, role = 'client' }: OrdersMapProps) {
+  const { coordinates: userLocation, loading: locationLoading } = useGeolocation()
   
   // Используем местоположение пользователя, если доступно, иначе Минск
   const center: [number, number] = userLocation
     ? [userLocation.lat, userLocation.lon]
-    : [53.9, 27.5667] // Минск по умолчанию
+    : [53.9, 27.5667] // Минск по умолчанию (только если геолокация недоступна)
+  
+  // Показываем индикатор загрузки, пока получаем геолокацию (только если нет заказов)
+  if (locationLoading && orders.length === 0 && !userLocation) {
+    return (
+      <div style={{ height, width: '100%' }} className="rounded-lg overflow-hidden border border-gray-700 flex items-center justify-center bg-gray-800">
+        <div className="text-center">
+          <svg className="animate-spin h-8 w-8 text-green-500 mx-auto mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <p className="text-gray-300 text-sm">Определение местоположения...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Используем ключ для перерисовки карты при получении геолокации
+  const mapKey = userLocation ? `${userLocation.lat}-${userLocation.lon}` : 'default'
 
   const getOrderUrl = (orderId: string) => {
     if (role === 'client') {
@@ -129,6 +158,7 @@ export function OrdersMap({ orders, height = '600px', zoom = 11, role = 'client'
   return (
     <div style={{ height, width: '100%' }} className="rounded-lg overflow-hidden border border-gray-700">
       <MapContainer
+        key={mapKey}
         center={center}
         zoom={zoom}
         style={{ height: '100%', width: '100%' }}
@@ -139,6 +169,7 @@ export function OrdersMap({ orders, height = '600px', zoom = 11, role = 'client'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
+        <MapCenter center={center} zoom={zoom} />
         <MapBounds orders={orders} userLocation={userLocation} />
 
         {/* Маркер текущего местоположения пользователя */}

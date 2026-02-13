@@ -366,33 +366,39 @@ export default function SavedAddressesPage() {
         {addresses.map((addr) => (
           <div
             key={addr.id}
-            onClick={() => handleEdit(addr)}
-            className="bg-gray-800 rounded-lg shadow p-4 cursor-pointer hover:bg-gray-700 transition border border-gray-700 hover:border-green-500"
+            className="bg-gray-800 rounded-lg shadow p-4 hover:bg-gray-700 transition border border-gray-700 hover:border-green-500 flex flex-col h-full min-h-[200px]"
           >
-            <div className="flex items-start justify-between mb-2">
-              <h3 className="text-base font-semibold text-white flex-1">{addr.label}</h3>
-              {addr.is_default && (
-                <span className="px-1.5 py-0.5 bg-green-600 text-white text-xs rounded">
-                  По умолчанию
-                </span>
+            <div 
+              onClick={() => handleEdit(addr)}
+              className="flex-1 cursor-pointer"
+            >
+              <div className="flex items-start justify-between mb-2">
+                <h3 className="text-base font-semibold text-white flex-1">{addr.label}</h3>
+                {addr.is_default && (
+                  <span className="px-1.5 py-0.5 bg-green-600 text-white text-xs rounded">
+                    По умолчанию
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-gray-400 mb-1 line-clamp-2">{addr.address}</p>
+              {(addr.entrance || addr.floor || addr.apartment) && (
+                <p className="text-xs text-gray-500 mt-1">
+                  {addr.entrance && `${addr.entrance}`}
+                  {addr.entrance && (addr.floor || addr.apartment) && ', '}
+                  {addr.floor && `${addr.floor}`}
+                  {addr.floor && addr.apartment && ', '}
+                  {addr.apartment && `${addr.apartment}`}
+                </p>
+              )}
+              {addr.address_type !== 'both' && (
+                <div className="flex gap-1 mt-2">
+                  <span className="px-1.5 py-0.5 bg-gray-700 text-gray-300 text-xs rounded">
+                    {getAddressTypeLabel(addr.address_type)}
+                  </span>
+                </div>
               )}
             </div>
-            <p className="text-xs text-gray-400 mb-1 line-clamp-2">{addr.address}</p>
-            {(addr.entrance || addr.floor || addr.apartment) && (
-              <p className="text-xs text-gray-500 mt-1">
-                {addr.entrance && `${addr.entrance}`}
-                {addr.entrance && (addr.floor || addr.apartment) && ', '}
-                {addr.floor && `${addr.floor}`}
-                {addr.floor && addr.apartment && ', '}
-                {addr.apartment && `${addr.apartment}`}
-              </p>
-            )}
-            <div className="flex gap-1 mt-2">
-              <span className="px-1.5 py-0.5 bg-gray-700 text-gray-300 text-xs rounded">
-                {getAddressTypeLabel(addr.address_type)}
-              </span>
-            </div>
-            <div className="flex gap-1 mt-2">
+            <div className="flex gap-1 mt-auto pt-2">
               <button
                 onClick={(e) => {
                   e.stopPropagation()

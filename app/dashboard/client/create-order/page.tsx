@@ -721,7 +721,7 @@ export default function CreateOrderPage() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                       <div>
-                        <p className="text-xs text-gray-400">Время в пути</p>
+                        <p className="text-xs text-gray-400">Время в пути (без учета пробок)</p>
                         <p className="text-lg font-semibold text-white">{routeDuration} мин</p>
                       </div>
                     </div>

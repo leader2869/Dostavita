@@ -32,11 +32,22 @@ function MapBounds({ coordinates }: { coordinates: { lat: number; lon: number } 
   return null
 }
 
+// Компонент для обновления центра карты
+function MapCenter({ center, zoom }: { center: [number, number], zoom: number }) {
+  const map = useMap()
+  
+  useEffect(() => {
+    map.setView(center, zoom)
+  }, [map, center, zoom])
+  
+  return null
+}
+
 export function SinglePointMap({
   coordinates,
   address,
   height = '300px',
-  zoom = 15,
+  zoom = 16,
 }: SinglePointMapProps) {
   const { coordinates: userLocation } = useGeolocation()
   
@@ -51,6 +62,7 @@ export function SinglePointMap({
         style={{ height: '100%', width: '100%' }}
         scrollWheelZoom={true}
       >
+        <MapCenter center={center} zoom={zoom} />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

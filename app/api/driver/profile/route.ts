@@ -5,11 +5,11 @@ export async function POST(request: Request) {
   try {
     const supabase = createServerSupabaseClient()
     const body = await request.json()
-    const { full_name, vehicle_type, vehicle_number, license_number } = body
+    const { full_name, phone, vehicle_type, vehicle_number, license_number } = body
 
-    if (!vehicle_type || !license_number) {
+    if (!vehicle_type || !license_number || !phone) {
       return NextResponse.json(
-        { error: 'Тип транспорта и номер лицензии обязательны' },
+        { error: 'Телефон, тип транспорта и номер лицензии обязательны' },
         { status: 400 }
       )
     }
@@ -32,6 +32,7 @@ export async function POST(request: Request) {
       .from('profiles')
       .update({
         full_name: full_name || null,
+        phone: phone,
         vehicle_type,
         vehicle_number: vehicle_number || null,
         license_number,

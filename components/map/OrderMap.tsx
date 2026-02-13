@@ -119,15 +119,26 @@ function RouteLine({ pickupCoordinates, deliveryCoordinates }: {
   return null
 }
 
+// Компонент для обновления центра карты
+function MapCenter({ center, zoom }: { center: [number, number], zoom: number }) {
+  const map = useMap()
+  
+  useEffect(() => {
+    map.setView(center, zoom)
+  }, [map, center, zoom])
+  
+  return null
+}
+
 export function OrderMap({
   pickupCoordinates,
   deliveryCoordinates,
   driverCoordinates,
   height = '400px',
   showRoute = true,
-  zoom = 13,
+  zoom = 15,
 }: OrderMapProps) {
-  const { coordinates: userLocation } = useGeolocation()
+  const { coordinates: userLocation, loading: locationLoading } = useGeolocation()
   
   // Определяем центр карты: приоритет - координаты заказа, затем местоположение пользователя, затем Минск
   const center: [number, number] = pickupCoordinates
@@ -146,6 +157,7 @@ export function OrderMap({
         style={{ height: '100%', width: '100%' }}
         scrollWheelZoom={true}
       >
+        <MapCenter center={center} zoom={zoom} />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

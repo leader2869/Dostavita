@@ -139,8 +139,55 @@ export default function OrderDetailsPage() {
     )
   }
 
+  // Функция для парсинга координат POINT из Supabase
+  const parseCoordinates = (coords: any): { lat: number; lon: number } | undefined => {
+    if (!coords) return undefined
+
+    try {
+      // Если это уже объект с lat и lon
+      if (typeof coords === 'object' && 'lat' in coords && 'lon' in coords) {
+        return { lat: coords.lat, lon: coords.lon }
+      }
+
+      // Если это объект с координатами в массиве (GeoJSON формат)
+      if (typeof coords === 'object' && 'coordinates' in coords && Array.isArray(coords.coordinates)) {
+        return { lat: coords.coordinates[1], lon: coords.coordinates[0] }
+      }
+
+      // Если это строка в формате "(lon,lat)"
+      if (typeof coords === 'string') {
+        // Пробуем парсить как JSON
+        try {
+          const parsed = JSON.parse(coords)
+          if (typeof parsed === 'object' && 'lat' in parsed && 'lon' in parsed) {
+            return parsed
+          }
+        } catch (e) {
+          // Не JSON, пробуем парсить как "(lon,lat)"
+          const match = coords.match(/\(([^,]+),\s*([^)]+)\)/)
+          if (match && match.length === 3) {
+            return { lat: parseFloat(match[2]), lon: parseFloat(match[1]) }
+          }
+          // Пробуем парсить как WKT формат "POINT(lon lat)"
+          const wktMatch = coords.match(/POINT\(([^ ]+) ([^ ]+)\)/)
+          if (wktMatch && wktMatch.length === 3) {
+            return { lat: parseFloat(wktMatch[2]), lon: parseFloat(wktMatch[1]) }
+          }
+        }
+      }
+    } catch (e) {
+      console.error('Ошибка парсинга координат:', e, coords)
+    }
+
+    return undefined
+  }
+
   // Проверяем, можно ли редактировать заказ
   const canEdit = order.status === 'searching_courier' && !order.executor_user_id
+
+  // Парсим координаты
+  const pickupCoords = parseCoordinates(order.pickup_coordinates)
+  const deliveryCoords = parseCoordinates(order.delivery_coordinates)
 
   return (
     <div className="pb-20">
@@ -222,24 +269,12 @@ export default function OrderDetailsPage() {
         </div>
 
         {/* Карта с маршрутом */}
-        {(order.pickup_coordinates || order.delivery_coordinates) && (
+        {(pickupCoords || deliveryCoords) && (
           <div className="mt-6 border-t border-gray-700 pt-4">
             <h3 className="text-lg font-semibold mb-3 text-white">Карта маршрута</h3>
             <OrderMap
-              pickupCoordinates={
-                order.pickup_coordinates
-                  ? typeof order.pickup_coordinates === 'string'
-                    ? JSON.parse(order.pickup_coordinates)
-                    : order.pickup_coordinates
-                  : undefined
-              }
-              deliveryCoordinates={
-                order.delivery_coordinates
-                  ? typeof order.delivery_coordinates === 'string'
-                    ? JSON.parse(order.delivery_coordinates)
-                    : order.delivery_coordinates
-                  : undefined
-              }
+              pickupCoordinates={pickupCoords}
+              deliveryCoordinates={deliveryCoords}
               height="400px"
               showRoute={true}
             />
@@ -247,49 +282,57 @@ export default function OrderDetailsPage() {
         )}
 
         {/* Информация о водителе (если заказ принят) */}
-        {order.executor_user_id && driver && (
+        {order.executor_user_id && (
           <div className="border-t border-gray-700 pt-4">
             <h2 className="text-xl font-semibold mb-4 text-white">Информация о водителе</h2>
             
-            <div className="space-y-3 bg-gray-700 rounded-lg p-4">
-              {driver.full_name && (
-                <div>
-                  <p className="text-sm text-gray-400">Имя водителя</p>
-                  <p className="text-white font-medium">{driver.full_name}</p>
-                </div>
-              )}
+            {driver ? (
+              <div className="space-y-3 bg-gray-700 rounded-lg p-4">
+                {driver.full_name && (
+                  <div>
+                    <p className="text-sm text-gray-400">Имя водителя</p>
+                    <p className="text-white font-medium">{driver.full_name}</p>
+                  </div>
+                )}
 
-              {driver.phone && (
                 <div>
                   <p className="text-sm text-gray-400">Телефон</p>
-                  <p className="text-white">
-                    <a href={`tel:${driver.phone}`} className="text-green-500 hover:text-green-400">
-                      {driver.phone}
-                    </a>
-                  </p>
+                  {driver.phone ? (
+                    <p className="text-white">
+                      <a href={`tel:${driver.phone}`} className="text-green-500 hover:text-green-400 font-medium text-lg">
+                        {driver.phone}
+                      </a>
+                    </p>
+                  ) : (
+                    <p className="text-yellow-400">Телефон не указан водителем</p>
+                  )}
                 </div>
-              )}
 
-              {driver.vehicle_type && (
-                <div>
-                  <p className="text-sm text-gray-400">Тип транспорта</p>
-                  <p className="text-white">
-                    {driver.vehicle_type === 'car' ? 'Легковой автомобиль' :
-                     driver.vehicle_type === 'motorcycle' ? 'Мотоцикл' :
-                     driver.vehicle_type === 'bicycle' ? 'Велосипед' :
-                     driver.vehicle_type === 'walking' ? 'Пешком' :
-                     driver.vehicle_type}
-                  </p>
-                </div>
-              )}
+                {driver.vehicle_type && (
+                  <div>
+                    <p className="text-sm text-gray-400">Тип транспорта</p>
+                    <p className="text-white">
+                      {driver.vehicle_type === 'car' ? 'Легковой автомобиль' :
+                       driver.vehicle_type === 'motorcycle' ? 'Мотоцикл' :
+                       driver.vehicle_type === 'bicycle' ? 'Велосипед' :
+                       driver.vehicle_type === 'walking' ? 'Пешком' :
+                       driver.vehicle_type}
+                    </p>
+                  </div>
+                )}
 
-              {driver.vehicle_number && (
-                <div>
-                  <p className="text-sm text-gray-400">Номер транспорта</p>
-                  <p className="text-white font-medium">{driver.vehicle_number}</p>
-                </div>
-              )}
-            </div>
+                {driver.vehicle_number && (
+                  <div>
+                    <p className="text-sm text-gray-400">Номер транспорта</p>
+                    <p className="text-white font-medium">{driver.vehicle_number}</p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="bg-gray-700 rounded-lg p-4">
+                <p className="text-yellow-400">Загрузка информации о водителе...</p>
+              </div>
+            )}
           </div>
         )}
 

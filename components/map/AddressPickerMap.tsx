@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { useGeolocation } from '@/hooks/useGeolocation'
@@ -32,22 +32,34 @@ function MapClickHandler({ onSelect }: { onSelect: (coordinates: { lat: number; 
   return null
 }
 
+// Компонент для обновления центра карты
+function MapCenter({ center, zoom }: { center: [number, number], zoom: number }) {
+  const map = useMap()
+  
+  useEffect(() => {
+    map.setView(center, zoom)
+  }, [map, center, zoom])
+  
+  return null
+}
+
 export function AddressPickerMap({
   onSelect,
   initialCoordinates,
   height = '400px',
   label = 'Выберите точку на карте',
 }: AddressPickerMapProps) {
-  const { coordinates: userLocation } = useGeolocation()
+  const { coordinates: userLocation, loading: locationLoading } = useGeolocation()
   const [selectedCoordinates, setSelectedCoordinates] = useState<{ lat: number; lon: number } | null>(
     initialCoordinates || null
   )
 
+  // Если есть initialCoordinates, используем их, иначе ждем геолокацию
   const center: [number, number] = initialCoordinates
     ? [initialCoordinates.lat, initialCoordinates.lon]
     : userLocation
     ? [userLocation.lat, userLocation.lon]
-    : [53.9, 27.5667] // Минск по умолчанию
+    : [53.9, 27.5667] // Минск по умолчанию (только если геолокация недоступна)
 
   const handleMapClick = (coordinates: { lat: number; lon: number }) => {
     setSelectedCoordinates(coordinates)
@@ -91,7 +103,7 @@ export function AddressPickerMap({
       </div>
       <MapContainer
         center={center}
-        zoom={initialCoordinates ? 15 : userLocation ? 13 : 11}
+        zoom={initialCoordinates ? 16 : userLocation ? 16 : 13}
         style={{ height: 'calc(100% - 40px)', width: '100%' }}
         scrollWheelZoom={true}
       >
@@ -99,6 +111,8 @@ export function AddressPickerMap({
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+
+        <MapCenter center={center} zoom={initialCoordinates ? 16 : userLocation ? 16 : 13} />
 
         <MapClickHandler onSelect={handleMapClick} />
 
