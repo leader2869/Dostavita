@@ -2,6 +2,7 @@ import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import type { User } from '@/lib/types'
 import { AvailableOrdersList } from '@/components/driver/AvailableOrdersList'
+import { DriverLocationTracker } from '@/components/driver/DriverLocationTracker'
 
 // Отключаем кеширование, чтобы данные всегда были актуальными
 export const dynamic = 'force-dynamic'
@@ -108,8 +109,10 @@ export default async function DriverDashboard() {
   })))
 
   return (
-    <div className="pb-20">
-      <h1 className="text-3xl font-bold mb-6 text-white">Панель исполнителя</h1>
+    <>
+      <DriverLocationTracker />
+      <div className="pb-20">
+        <h1 className="text-3xl font-bold mb-6 text-white">Панель исполнителя</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Доступные заказы */}
@@ -247,5 +250,6 @@ export default async function DriverDashboard() {
         </div>
       </div>
     </div>
+    </>
   )
 }
