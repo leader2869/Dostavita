@@ -197,7 +197,8 @@ export default function SavedAddressesPage() {
       }
 
       const coords = coordinates || { lat: 53.9045, lon: 27.5615 }
-      const point = `(${coords.lon}, ${coords.lat})`
+      // Для GEOGRAPHY(Point, 4326) нужен формат: SRID=4326;POINT(lon lat)
+      const point = `SRID=4326;POINT(${coords.lon} ${coords.lat})`
 
       if (editingAddress) {
         // Обновление существующего адреса
