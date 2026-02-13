@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import type { Region } from '@/lib/types'
 import { ClientBottomNavigation } from '@/components/client/ClientBottomNavigation'
+import { AddressAutocomplete } from '@/components/ui/AddressAutocomplete'
 
 export default function CreateOrderPage() {
   const router = useRouter()

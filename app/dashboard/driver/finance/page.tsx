@@ -109,7 +109,7 @@ export default function DriverFinancePage() {
     } finally {
       setLoading(false)
     }
-  }, [supabase, router, period])
+  }, [supabase, router, period, getDateFilter])
 
   useEffect(() => {
     loadData()

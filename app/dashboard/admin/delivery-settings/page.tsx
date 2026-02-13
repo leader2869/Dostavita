@@ -25,7 +25,7 @@ export default function DeliverySettingsPage() {
   useEffect(() => {
     checkRole()
     loadSettings()
-  }, [])
+  }, [checkRole, loadSettings])
 
   const checkRole = async () => {
     try {
