@@ -16,6 +16,7 @@ interface AddressAutocompleteProps {
   className?: string
   required?: boolean
   id?: string
+  filterByRegion?: string | null // Название региона для фильтрации результатов
 }
 
 export function AddressAutocomplete({
