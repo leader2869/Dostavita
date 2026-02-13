@@ -274,13 +274,22 @@ export default function CreateOrderPage() {
     
     if (savedAddressType === 'pickup') {
       setPickupAddress(savedAddress.address)
+      setPickupEntrance(savedAddress.entrance || '')
+      setPickupFloor(savedAddress.floor || '')
+      setPickupApartment(savedAddress.apartment || '')
       if (savedAddress.coordinates) {
         try {
-          const coords = typeof savedAddress.coordinates === 'string' 
-            ? JSON.parse(savedAddress.coordinates) 
-            : savedAddress.coordinates
-          if (coords.coordinates && coords.coordinates.length === 2) {
-            setPickupCoordinates({ lat: coords.coordinates[1], lon: coords.coordinates[0] })
+          // Парсим WKT формат: POINT(lon lat)
+          if (typeof savedAddress.coordinates === 'string') {
+            const match = savedAddress.coordinates.match(/POINT\(([^ ]+) ([^ ]+)\)/)
+            if (match && match.length === 3) {
+              setPickupCoordinates({ lat: parseFloat(match[2]), lon: parseFloat(match[1]) })
+            }
+          } else {
+            const coords = savedAddress.coordinates
+            if (coords.coordinates && coords.coordinates.length === 2) {
+              setPickupCoordinates({ lat: coords.coordinates[1], lon: coords.coordinates[0] })
+            }
           }
         } catch (e) {
           console.error('Ошибка парсинга координат:', e)
@@ -297,13 +306,22 @@ export default function CreateOrderPage() {
       }
     } else {
       setDeliveryAddress(savedAddress.address)
+      setDeliveryEntrance(savedAddress.entrance || '')
+      setDeliveryFloor(savedAddress.floor || '')
+      setDeliveryApartment(savedAddress.apartment || '')
       if (savedAddress.coordinates) {
         try {
-          const coords = typeof savedAddress.coordinates === 'string' 
-            ? JSON.parse(savedAddress.coordinates) 
-            : savedAddress.coordinates
-          if (coords.coordinates && coords.coordinates.length === 2) {
-            setDeliveryCoordinates({ lat: coords.coordinates[1], lon: coords.coordinates[0] })
+          // Парсим WKT формат: POINT(lon lat)
+          if (typeof savedAddress.coordinates === 'string') {
+            const match = savedAddress.coordinates.match(/POINT\(([^ ]+) ([^ ]+)\)/)
+            if (match && match.length === 3) {
+              setDeliveryCoordinates({ lat: parseFloat(match[2]), lon: parseFloat(match[1]) })
+            }
+          } else {
+            const coords = savedAddress.coordinates
+            if (coords.coordinates && coords.coordinates.length === 2) {
+              setDeliveryCoordinates({ lat: coords.coordinates[1], lon: coords.coordinates[0] })
+            }
           }
         } catch (e) {
           console.error('Ошибка парсинга координат:', e)
