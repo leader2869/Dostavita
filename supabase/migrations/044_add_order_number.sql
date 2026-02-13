@@ -37,9 +37,19 @@ CREATE TRIGGER trigger_assign_order_number
 DO $$
 DECLARE
   order_rec RECORD;
-  counter INTEGER := 1;
+  counter INTEGER;
+  max_number INTEGER;
 BEGIN
-  -- Присваиваем номера существующим заказам в порядке создания
+  -- Находим максимальный существующий номер заказа (если есть)
+  SELECT COALESCE(MAX(order_number), 0) INTO max_number
+  FROM public.orders
+  WHERE order_number IS NOT NULL;
+  
+  -- Начинаем счетчик с максимального номера + 1
+  -- Если номеров нет, начинаем с 1
+  counter := max_number + 1;
+  
+  -- Присваиваем номера существующим заказам без номеров в порядке создания
   FOR order_rec IN 
     SELECT id 
     FROM public.orders 
@@ -53,10 +63,17 @@ BEGIN
     counter := counter + 1;
   END LOOP;
   
-  -- Устанавливаем значение последовательности на максимальный номер + 1
-  IF counter > 1 THEN
+  -- Устанавливаем значение последовательности на максимальный номер
+  -- Это гарантирует, что новые заказы получат номера, начиная с максимального + 1
+  IF counter > max_number + 1 THEN
+    -- Были присвоены новые номера
     PERFORM setval('public.order_number_seq', counter - 1, true);
+  ELSIF max_number > 0 THEN
+    -- Номера уже были, но новых не присваивали
+    PERFORM setval('public.order_number_seq', max_number, true);
   END IF;
+  
+  RAISE NOTICE 'Присвоено номеров существующим заказам: %', GREATEST(0, counter - max_number - 1);
 END $$;
 
 -- Комментарии
