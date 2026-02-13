@@ -442,24 +442,47 @@ export default function CreateOrderPage() {
               )}
             </div>
           </div>
-          <AddressAutocomplete
-            id="pickupAddress"
-            value={pickupAddress}
-            onChange={(address, coordinates, addressDetails) => {
-              console.log('AddressAutocomplete onChange:', { address, coordinates, addressDetails })
-              setPickupAddress(address)
-              setPickupCoordinates(coordinates)
-              // Автоматически определяем регион по адресу отправления
-              if (address && regions.length > 0) {
-                detectRegionFromAddress(address, addressDetails)
-              } else {
-                console.log('Регионы еще не загружены или адрес пуст')
-              }
-            }}
-            placeholder="Начните вводить адрес отправления"
-            required
-            className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
-          />
+          <div className="relative">
+            <AddressAutocomplete
+              id="pickupAddress"
+              value={pickupAddress}
+              onChange={(address, coordinates, addressDetails) => {
+                console.log('AddressAutocomplete onChange:', { address, coordinates, addressDetails })
+                setPickupAddress(address)
+                setPickupCoordinates(coordinates)
+                // Автоматически определяем регион по адресу отправления
+                if (address && regions.length > 0) {
+                  detectRegionFromAddress(address, addressDetails)
+                } else {
+                  console.log('Регионы еще не загружены или адрес пуст')
+                }
+              }}
+              placeholder="Начните вводить адрес отправления"
+              required
+              className="w-full px-3 py-2 pr-10 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
+            />
+            {pickupAddress && (
+              <button
+                type="button"
+                onClick={() => {
+                  setPickupAddress('')
+                  setPickupCoordinates(undefined)
+                  setPickupEntrance('')
+                  setPickupFloor('')
+                  setPickupApartment('')
+                  setSelectedRegion('')
+                  setRegionAutoDetected(false)
+                  setPickupRegionName(null)
+                }}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-red-500 hover:text-red-400 transition"
+                title="Очистить адрес отправления"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+          </div>
           
           {/* Дополнительные поля для адреса отправления */}
           <div className="grid grid-cols-3 gap-2 mt-2">
