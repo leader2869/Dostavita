@@ -127,7 +127,7 @@ export default async function DriverDashboard() {
                 <div key={order.id} className="border rounded-lg p-4">
                   <div className="flex justify-between items-start">
                     <div>
-                      <p className="font-medium">Заказ №{order.id.slice(0, 8)}</p>
+                      <p className="font-medium text-white">Заказ №{order.order_number || order.id.slice(0, 8)}</p>
                       <p className="text-sm text-gray-300">
                         {order.pickup_address} → {order.delivery_address}
                       </p>

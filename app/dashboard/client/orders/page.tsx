@@ -97,7 +97,7 @@ export default function ClientOrdersPage() {
       >
         <div className="flex justify-between items-start">
           <div className="flex-1">
-            <p className="font-medium text-white">Заказ №{order.id.slice(0, 8)}</p>
+            <p className="font-medium text-white">Заказ №{order.order_number || order.id.slice(0, 8)}</p>
             <p className="text-sm text-gray-300 mt-1">
               {order.pickup_address} → {order.delivery_address}
             </p>

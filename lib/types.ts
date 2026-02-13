@@ -61,6 +61,7 @@ export interface Driver {
 
 export interface Order {
   id: string
+  order_number: number | null
   customer_id: string
   client_id: string | null
   driver_id: string | null

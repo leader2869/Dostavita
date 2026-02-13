@@ -132,6 +132,7 @@ $$;
 CREATE OR REPLACE FUNCTION public.get_organization_orders(organization_user_id UUID)
 RETURNS TABLE (
   id UUID,
+  order_number INTEGER,
   customer_id UUID,
   client_id UUID,
   executor_user_id UUID,
@@ -156,6 +157,7 @@ BEGIN
   RETURN QUERY
   SELECT 
     o.id,
+    o.order_number,
     o.customer_id,
     o.client_id,
     o.executor_user_id,

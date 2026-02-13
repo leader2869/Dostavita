@@ -79,7 +79,7 @@ export default async function AdminOrdersPage() {
               orders.map((order: any) => (
                 <tr key={order.id}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
-                    {order.id.slice(0, 8)}
+                    {order.order_number || order.id.slice(0, 8)}
                   </td>
                   <td className="px-6 py-4 text-sm text-white">
                     {order.pickup_address}
