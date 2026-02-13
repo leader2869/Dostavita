@@ -95,7 +95,27 @@ export function DriverLocationMap({
     // Загружаем текущее местоположение водителя
     const loadLocation = async () => {
       try {
-        // Сначала пробуем получить из profiles (current_location)
+        // Используем RPC функцию для безопасного получения местоположения
+        const { data: locationData, error: rpcError } = await supabase
+          .rpc('get_driver_location_for_order', {
+            p_driver_id: driverId,
+            p_order_id: orderId || null,
+          })
+
+        if (!rpcError && locationData && locationData.length > 0) {
+          const loc = locationData[0]
+          if (loc.latitude && loc.longitude) {
+            setLocation({
+              lat: parseFloat(loc.latitude),
+              lon: parseFloat(loc.longitude),
+            })
+            setLoading(false)
+            return
+          }
+        }
+
+        // Fallback: пробуем получить из profiles через RPC или прямой запрос
+        // (только если пользователь имеет доступ)
         const { data: profileData, error: profileError } = await supabase
           .from('profiles')
           .select('current_location')
@@ -107,11 +127,11 @@ export function DriverLocationMap({
           if (coords) {
             setLocation(coords)
             setLoading(false)
-            // Не возвращаемся, продолжаем подписку на обновления
+            return
           }
         }
 
-        // Также пробуем получить из driver_locations (более точные данные)
+        // Если ничего не получили, пробуем driver_locations напрямую
         let query = supabase
           .from('driver_locations')
           .select('latitude, longitude')
@@ -123,12 +143,12 @@ export function DriverLocationMap({
           query = query.eq('order_id', orderId)
         }
 
-        const { data: locationData, error: locationError } = await query.single()
+        const { data: locationDataDirect, error: locationError } = await query.single()
 
-        if (!locationError && locationData && locationData.latitude && locationData.longitude) {
+        if (!locationError && locationDataDirect && locationDataDirect.latitude && locationDataDirect.longitude) {
           const coords = {
-            lat: parseFloat(locationData.latitude),
-            lon: parseFloat(locationData.longitude),
+            lat: parseFloat(locationDataDirect.latitude),
+            lon: parseFloat(locationDataDirect.longitude),
           }
           setLocation(coords)
         }
