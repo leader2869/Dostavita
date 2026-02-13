@@ -50,17 +50,24 @@ export default function OrderDetailsPage() {
       // Если заказ принят водителем, загружаем информацию о водителе
       if (orderData.executor_user_id) {
         try {
+          // Используем RPC функцию для безопасного получения профиля водителя
           const { data: driverData, error: driverError } = await supabase
-            .from('profiles')
-            .select('id, full_name, phone, vehicle_type, vehicle_number')
-            .eq('id', orderData.executor_user_id)
-            .maybeSingle()
+            .rpc('get_user_profile', { user_id: orderData.executor_user_id })
 
           if (!driverError && driverData) {
             setDriver(driverData)
           } else if (driverError) {
             console.warn('Ошибка загрузки профиля водителя:', driverError)
-            // Не показываем ошибку пользователю, просто не отображаем информацию о водителе
+            // Пробуем прямой запрос как fallback (если RPC не работает)
+            const { data: directDriverData, error: directError } = await supabase
+              .from('profiles')
+              .select('id, full_name, phone, vehicle_type, vehicle_number')
+              .eq('id', orderData.executor_user_id)
+              .maybeSingle()
+            
+            if (!directError && directDriverData) {
+              setDriver(directDriverData)
+            }
           }
         } catch (driverErr: any) {
           console.warn('Ошибка при загрузке данных водителя:', driverErr)
