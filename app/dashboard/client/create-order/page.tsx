@@ -30,6 +30,8 @@ export default function CreateOrderPage() {
   const [showSavedAddressesModal, setShowSavedAddressesModal] = useState(false)
   const [savedAddressType, setSavedAddressType] = useState<'pickup' | 'delivery' | null>(null)
   const [pickupRegionName, setPickupRegionName] = useState<string | null>(null)
+  const [showMapPicker, setShowMapPicker] = useState(false)
+  const [mapPickerType, setMapPickerType] = useState<'pickup' | 'delivery' | null>(null)
 
   // Функция для определения региона по адресу
   const detectRegionFromAddress = useCallback((address: string, addressDetails?: any) => {
