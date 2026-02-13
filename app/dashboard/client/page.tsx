@@ -10,6 +10,7 @@ export default function ClientDashboard() {
   const router = useRouter()
   const supabase = createClient()
   const [orders, setOrders] = useState<any[]>([])
+  const [savedAddresses, setSavedAddresses] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -34,6 +35,17 @@ export default function ClientDashboard() {
         console.error('Ошибка загрузки заказов:', error)
       } else {
         setOrders(ordersData || [])
+      }
+
+      // Загружаем сохраненные адреса (первые 3)
+      const { data: addressesData, error: addressesError } = await supabase
+        .rpc('get_user_saved_addresses', { user_uuid: user.id })
+
+      if (addressesError) {
+        console.error('Ошибка загрузки адресов:', addressesError)
+      } else {
+        // Берем первые 3 адреса
+        setSavedAddresses((addressesData || []).slice(0, 3))
       }
       
       setLoading(false)
@@ -168,14 +180,69 @@ export default function ClientDashboard() {
       </div>
 
       <div className="bg-gray-800 rounded-lg shadow p-6">
-        <h2 className="text-xl font-semibold mb-4 text-white">Мои адреса</h2>
-        <p className="text-gray-400 mb-4 text-sm">Сохраняйте часто используемые адреса для быстрого создания заказов</p>
-        <a
-          href="/dashboard/client/addresses"
-          className="block bg-blue-600 text-white p-4 rounded-lg text-center hover:bg-blue-700 transition"
-        >
-          Управление адресами
-        </a>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold text-white">Мои адреса</h2>
+          <a
+            href="/dashboard/client/addresses"
+            className="text-sm text-blue-400 hover:text-blue-300"
+          >
+            Все адреса →
+          </a>
+        </div>
+        
+        {savedAddresses.length > 0 ? (
+          <div className="grid grid-cols-3 gap-3">
+            {savedAddresses.map((addr) => (
+              <div
+                key={addr.id}
+                className="bg-gray-700 rounded-lg p-3 cursor-pointer hover:bg-gray-600 transition border border-gray-600 hover:border-green-500"
+                onClick={() => router.push('/dashboard/client/addresses')}
+              >
+                <div className="flex items-start justify-between mb-1">
+                  <h3 className="text-sm font-semibold text-white flex-1 line-clamp-1">{addr.label}</h3>
+                  {addr.is_default && (
+                    <span className="px-1 py-0.5 bg-green-600 text-white text-xs rounded ml-1">
+                      ✓
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-gray-400 line-clamp-2 mb-1">{addr.address}</p>
+                {(addr.entrance || addr.floor || addr.apartment) && (
+                  <p className="text-xs text-gray-500">
+                    {addr.entrance && `${addr.entrance}`}
+                    {addr.entrance && (addr.floor || addr.apartment) && ', '}
+                    {addr.floor && `${addr.floor}`}
+                    {addr.floor && addr.apartment && ', '}
+                    {addr.apartment && `${addr.apartment}`}
+                  </p>
+                )}
+              </div>
+            ))}
+            
+            {/* Квадратик для добавления нового адреса, если адресов меньше 3 */}
+            {savedAddresses.length < 3 && (
+              <div
+                onClick={() => router.push('/dashboard/client/addresses')}
+                className="bg-gray-700 rounded-lg p-3 cursor-pointer hover:bg-gray-600 transition border-2 border-dashed border-gray-600 hover:border-green-500 flex flex-col items-center justify-center min-h-[100px]"
+              >
+                <svg className="w-6 h-6 text-gray-400 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                <p className="text-xs text-gray-400 font-medium">Добавить</p>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div
+            onClick={() => router.push('/dashboard/client/addresses')}
+            className="bg-gray-700 rounded-lg p-4 cursor-pointer hover:bg-gray-600 transition border-2 border-dashed border-gray-600 hover:border-green-500 flex flex-col items-center justify-center min-h-[100px]"
+          >
+            <svg className="w-8 h-8 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            <p className="text-sm text-gray-400 font-medium">Добавить адрес</p>
+          </div>
+        )}
       </div>
 
       <ClientBottomNavigation />
