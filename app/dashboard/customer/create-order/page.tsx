@@ -235,12 +235,18 @@ export default function CreateOrderPage() {
           <AddressAutocomplete
             value={pickupAddress}
             onChange={(address, coordinates, addressDetails) => {
+              console.log('AddressAutocomplete onChange:', { address, coordinates, addressDetails })
               setPickupAddress(address)
               setPickupCoordinates(coordinates)
               // Автоматически определяем регион по адресу отправления
-              if (address) {
-                detectRegionFromAddress(address, addressDetails)
-              }
+              // Используем setTimeout чтобы убедиться, что регионы уже загружены
+              setTimeout(() => {
+                if (address && regions.length > 0) {
+                  detectRegionFromAddress(address, addressDetails)
+                } else {
+                  console.log('Регионы еще не загружены или адрес пуст')
+                }
+              }, 100)
             }}
             placeholder="Начните вводить адрес отправления"
             required
