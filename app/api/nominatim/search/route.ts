@@ -13,11 +13,13 @@ export async function GET(request: Request) {
     }
 
     // Nominatim требует указания User-Agent
+    // accept-language=ru для получения адресов на русском языке
     const response = await fetch(
-      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=5&addressdetails=1&countrycodes=by`,
+      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=5&addressdetails=1&countrycodes=by&accept-language=ru`,
       {
         headers: {
           'User-Agent': 'Dostavita Delivery App (contact@dostavita.by)',
+          'Accept-Language': 'ru',
         },
       }
     )
