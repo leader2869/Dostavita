@@ -417,7 +417,7 @@ export default function CreateOrderPage() {
       <form onSubmit={handleSubmit} className="bg-gray-800 rounded-lg shadow p-6 space-y-4">
         <div>
           <div className="flex justify-between items-center mb-1">
-            <label htmlFor="pickupAddress" className="block text-sm font-medium text-gray-300">
+            <label htmlFor="pickupAddress" className="block text-lg font-semibold text-white">
               Адрес отправления
             </label>
             <div className="flex gap-2">
@@ -507,7 +507,7 @@ export default function CreateOrderPage() {
 
         <div>
           <div className="flex justify-between items-center mb-1">
-            <label htmlFor="deliveryAddress" className="block text-sm font-medium text-gray-300">
+            <label htmlFor="deliveryAddress" className="block text-lg font-semibold text-white">
               Адрес доставки
             </label>
             <div className="flex gap-2">
