@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { ClientBottomNavigation } from '@/components/client/ClientBottomNavigation'
+import { OrdersMap } from '@/components/map/OrdersMap'
 
 export default function ClientDashboard() {
   const router = useRouter()

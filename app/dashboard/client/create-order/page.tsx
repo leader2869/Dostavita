@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import type { Region } from '@/lib/types'
 import { ClientBottomNavigation } from '@/components/client/ClientBottomNavigation'
 import { AddressAutocomplete } from '@/components/ui/AddressAutocomplete'
+import { OrderMap } from '@/components/map/OrderMap'
 
 export default function CreateOrderPage() {
   const router = useRouter()
@@ -511,6 +512,19 @@ export default function CreateOrderPage() {
 
         {error && (
           <div className="text-red-400 text-sm bg-red-900 bg-opacity-30 p-3 rounded border border-red-800">{error}</div>
+        )}
+
+        {/* Карта с адресами */}
+        {(pickupCoordinates || deliveryCoordinates) && (
+          <div className="mt-4">
+            <h3 className="text-sm font-medium text-gray-300 mb-2">Карта маршрута</h3>
+            <OrderMap
+              pickupCoordinates={pickupCoordinates}
+              deliveryCoordinates={deliveryCoordinates}
+              height="300px"
+              showRoute={pickupCoordinates && deliveryCoordinates ? true : false}
+            />
+          </div>
         )}
 
         <button

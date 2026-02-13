@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { ClientBottomNavigation } from '@/components/client/ClientBottomNavigation'
+import { OrderMap } from '@/components/map/OrderMap'
+import { DriverLocationTracker } from '@/components/map/DriverLocationTracker'
 
 export default function OrderDetailsPage() {
   const router = useRouter()
