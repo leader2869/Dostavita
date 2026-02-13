@@ -64,14 +64,35 @@ export function AddressAutocomplete({
 
     setLoading(true)
     try {
-      const response = await fetch(`/api/nominatim/search?q=${encodeURIComponent(searchQuery)}`)
+      // Если указан фильтр по региону, добавляем его к запросу
+      let query = searchQuery
+      if (filterByRegion) {
+        query = `${searchQuery}, ${filterByRegion}`
+      }
+      
+      const response = await fetch(`/api/nominatim/search?q=${encodeURIComponent(query)}`)
       
       if (!response.ok) {
         throw new Error('Ошибка поиска адреса')
       }
 
       const data = await response.json()
-      setResults(data.results || [])
+      let results = data.results || []
+      
+      // Дополнительная фильтрация по региону, если указан
+      if (filterByRegion) {
+        const regionLower = filterByRegion.toLowerCase()
+        results = results.filter((result: AddressResult) => {
+          const address = result.address || {}
+          const state = (address.state || '').toLowerCase()
+          const displayName = (result.display_name || '').toLowerCase()
+          
+          // Проверяем, содержит ли адрес указанный регион
+          return state.includes(regionLower) || displayName.includes(regionLower)
+        })
+      }
+      
+      setResults(results)
       setShowResults(true)
       setSelectedIndex(-1)
     } catch (error) {
