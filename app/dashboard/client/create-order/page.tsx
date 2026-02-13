@@ -424,6 +424,23 @@ export default function CreateOrderPage() {
               <button
                 type="button"
                 onClick={() => {
+                  setPickupAddress('')
+                  setPickupCoordinates(undefined)
+                  setPickupEntrance('')
+                  setPickupFloor('')
+                  setPickupApartment('')
+                  setSelectedRegion('')
+                  setRegionAutoDetected(false)
+                  setPickupRegionName(null)
+                }}
+                className="text-sm text-gray-400 hover:text-gray-300"
+                title="Очистить адрес отправления"
+              >
+                Очистить
+              </button>
+              <button
+                type="button"
+                onClick={() => {
                   setMapPickerType('pickup')
                   setShowMapPicker(true)
                 }}
@@ -511,6 +528,20 @@ export default function CreateOrderPage() {
               Адрес доставки
             </label>
             <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setDeliveryAddress('')
+                  setDeliveryCoordinates(undefined)
+                  setDeliveryEntrance('')
+                  setDeliveryFloor('')
+                  setDeliveryApartment('')
+                }}
+                className="text-sm text-gray-400 hover:text-gray-300"
+                title="Очистить адрес доставки"
+              >
+                Очистить
+              </button>
               <button
                 type="button"
                 onClick={() => {
