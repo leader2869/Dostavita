@@ -279,6 +279,11 @@ export default function CreateOrderPage() {
       if (savedAddress.region_id) {
         setSelectedRegion(savedAddress.region_id)
         setRegionAutoDetected(true)
+        // Устанавливаем название региона для фильтрации адреса доставки
+        const region = regions.find(r => r.id === savedAddress.region_id)
+        if (region) {
+          setPickupRegionName(region.name)
+        }
       }
     } else {
       setDeliveryAddress(savedAddress.address)
