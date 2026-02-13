@@ -442,6 +442,49 @@ export default function CreateOrderPage() {
             required
             className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
           />
+          
+          {/* Дополнительные поля для адреса отправления */}
+          <div className="grid grid-cols-3 gap-2 mt-2">
+            <div>
+              <label htmlFor="pickupEntrance" className="block text-xs text-gray-400 mb-1">
+                Подъезд
+              </label>
+              <input
+                type="text"
+                id="pickupEntrance"
+                value={pickupEntrance}
+                onChange={(e) => setPickupEntrance(e.target.value)}
+                placeholder="1"
+                className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 text-sm"
+              />
+            </div>
+            <div>
+              <label htmlFor="pickupFloor" className="block text-xs text-gray-400 mb-1">
+                Этаж
+              </label>
+              <input
+                type="text"
+                id="pickupFloor"
+                value={pickupFloor}
+                onChange={(e) => setPickupFloor(e.target.value)}
+                placeholder="5"
+                className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 text-sm"
+              />
+            </div>
+            <div>
+              <label htmlFor="pickupApartment" className="block text-xs text-gray-400 mb-1">
+                Квартира
+              </label>
+              <input
+                type="text"
+                id="pickupApartment"
+                value={pickupApartment}
+                onChange={(e) => setPickupApartment(e.target.value)}
+                placeholder="12"
+                className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 text-sm"
+              />
+            </div>
+          </div>
         </div>
 
         <div>
