@@ -81,6 +81,7 @@ export async function POST(request: Request) {
         phone: phone || null,
         role: 'driver',
         organization_id: user.id,
+        organization_attached_at: new Date().toISOString(),
         vehicle_type,
         vehicle_number: vehicle_number || null,
         license_number,

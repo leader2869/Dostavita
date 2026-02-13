@@ -176,8 +176,24 @@ BEGIN
   -- Если водитель принял запрос, привязываем его к организации
   IF response = 'accepted' THEN
     UPDATE public.profiles
-    SET organization_id = organization_user_id
+    SET 
+      organization_id = organization_user_id,
+      organization_attached_at = NOW()
     WHERE profiles.id = respond_to_organization_request.driver_user_id;
+    
+    -- Добавляем запись в историю привязок
+    INSERT INTO public.driver_organization_history (
+      driver_user_id,
+      organization_user_id,
+      attached_at,
+      is_active
+    ) VALUES (
+      respond_to_organization_request.driver_user_id,
+      organization_user_id,
+      NOW(),
+      true
+    )
+    ON CONFLICT DO NOTHING;
   END IF;
 
   RETURN TRUE;

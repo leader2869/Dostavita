@@ -160,6 +160,21 @@ export default function OrderDetailsPage() {
             <p className="text-white"><strong className="text-white">Описание:</strong> {order.description}</p>
           )}
           <p className="text-xl font-bold mt-4 text-white">Стоимость: {order.final_price} BYN</p>
+          
+          {order.accepted_at && (
+            <div className="mt-4">
+              <p className="text-sm text-gray-400">Время принятия заказа</p>
+              <p className="text-white">
+                {new Date(order.accepted_at).toLocaleString('ru-RU', {
+                  day: '2-digit',
+                  month: '2-digit',
+                  year: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
+              </p>
+            </div>
+          )}
         </div>
 
         {error && (

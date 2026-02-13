@@ -265,6 +265,21 @@ export default function OrderDetailsPage() {
                 })}
               </p>
             </div>
+
+            {order.accepted_at && (
+              <div>
+                <p className="text-sm text-gray-400">Время принятия заказа курьером</p>
+                <p className="text-white">
+                  {new Date(order.accepted_at).toLocaleString('ru-RU', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
