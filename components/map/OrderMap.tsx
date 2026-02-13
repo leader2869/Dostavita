@@ -154,23 +154,39 @@ export function OrderMap({
           />
         )}
 
-        {/* Маркер адреса отправления */}
+        {/* Маркер адреса отправления (точка А) */}
         {pickupCoordinates && (
-          <Marker position={[pickupCoordinates.lat, pickupCoordinates.lon]}>
+          <Marker
+            position={[pickupCoordinates.lat, pickupCoordinates.lon]}
+            icon={L.divIcon({
+              className: 'custom-marker-pickup',
+              html: `<div style="background-color: #3b82f6; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">А</div>`,
+              iconSize: [30, 30],
+              iconAnchor: [15, 15],
+            })}
+          >
             <Popup>
               <div className="text-sm">
-                <strong>Адрес отправления</strong>
+                <strong>Точка А: Адрес отправления</strong>
               </div>
             </Popup>
           </Marker>
         )}
 
-        {/* Маркер адреса доставки */}
+        {/* Маркер адреса доставки (точка Б) */}
         {deliveryCoordinates && (
-          <Marker position={[deliveryCoordinates.lat, deliveryCoordinates.lon]}>
+          <Marker
+            position={[deliveryCoordinates.lat, deliveryCoordinates.lon]}
+            icon={L.divIcon({
+              className: 'custom-marker-delivery',
+              html: `<div style="background-color: #10b981; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">Б</div>`,
+              iconSize: [30, 30],
+              iconAnchor: [15, 15],
+            })}
+          >
             <Popup>
               <div className="text-sm">
-                <strong>Адрес доставки</strong>
+                <strong>Точка Б: Адрес доставки</strong>
               </div>
             </Popup>
           </Marker>

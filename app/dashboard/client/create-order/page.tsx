@@ -7,6 +7,7 @@ import type { Region } from '@/lib/types'
 import { ClientBottomNavigation } from '@/components/client/ClientBottomNavigation'
 import { AddressAutocomplete } from '@/components/ui/AddressAutocomplete'
 import { OrderMap } from '@/components/map/OrderMap'
+import { AddressPickerMap } from '@/components/map/AddressPickerMap'
 
 export default function CreateOrderPage() {
   const router = useRouter()
@@ -422,15 +423,27 @@ export default function CreateOrderPage() {
             <label htmlFor="deliveryAddress" className="block text-sm font-medium text-gray-300">
               Адрес доставки
             </label>
-            {savedAddresses.length > 0 && (
+            <div className="flex gap-2">
               <button
                 type="button"
-                onClick={() => handleOpenSavedAddressesModal('delivery')}
-                className="text-sm text-blue-400 hover:text-blue-300"
+                onClick={() => {
+                  setMapPickerType('delivery')
+                  setShowMapPicker(true)
+                }}
+                className="text-sm text-green-400 hover:text-green-300"
               >
-                Выбрать из сохраненных
+                Указать на карте
               </button>
-            )}
+              {savedAddresses.filter(addr => addr.address_type === 'delivery' || addr.address_type === 'both').length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => handleOpenSavedAddressesModal('delivery')}
+                  className="text-sm text-blue-400 hover:text-blue-300"
+                >
+                  Выбрать из сохраненных
+                </button>
+              )}
+            </div>
           </div>
           <AddressAutocomplete
             id="deliveryAddress"
@@ -535,6 +548,75 @@ export default function CreateOrderPage() {
           {loading ? 'Создание заказа...' : 'Создать заказ'}
         </button>
       </form>
+
+      {/* Модальное окно для выбора адреса на карте */}
+      {showMapPicker && mapPickerType && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-bold text-white">
+                  Выберите {mapPickerType === 'pickup' ? 'адрес отправления' : 'адрес доставки'} на карте
+                </h2>
+                <button
+                  onClick={() => {
+                    setShowMapPicker(false)
+                    setMapPickerType(null)
+                  }}
+                  className="text-gray-400 hover:text-white transition"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <AddressPickerMap
+                onSelect={async (coordinates) => {
+                  // Обратный геокодинг для получения адреса
+                  try {
+                    const response = await fetch(
+                      `/api/nominatim/reverse?lat=${coordinates.lat}&lon=${coordinates.lon}`
+                    )
+                    if (response.ok) {
+                      const data = await response.json()
+                      if (data.address) {
+                        if (mapPickerType === 'pickup') {
+                          setPickupAddress(data.address)
+                          setPickupCoordinates(coordinates)
+                          if (regions.length > 0) {
+                            detectRegionFromAddress(data.address, data.addressDetails)
+                          }
+                        } else {
+                          setDeliveryAddress(data.address)
+                          setDeliveryCoordinates(coordinates)
+                        }
+                        setShowMapPicker(false)
+                        setMapPickerType(null)
+                      }
+                    }
+                  } catch (error) {
+                    console.error('Ошибка получения адреса:', error)
+                    // Если API не работает, просто используем координаты
+                    if (mapPickerType === 'pickup') {
+                      setPickupCoordinates(coordinates)
+                    } else {
+                      setDeliveryCoordinates(coordinates)
+                    }
+                    setShowMapPicker(false)
+                    setMapPickerType(null)
+                  }
+                }}
+                initialCoordinates={
+                  mapPickerType === 'pickup' ? pickupCoordinates : deliveryCoordinates
+                }
+                height="500px"
+                label={`Кликните на карте, чтобы выбрать ${mapPickerType === 'pickup' ? 'адрес отправления' : 'адрес доставки'}`}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Модальное окно для выбора сохраненных адресов */}
       {showSavedAddressesModal && (

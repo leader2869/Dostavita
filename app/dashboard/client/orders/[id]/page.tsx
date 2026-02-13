@@ -5,7 +5,6 @@ import { useRouter, useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { ClientBottomNavigation } from '@/components/client/ClientBottomNavigation'
 import { OrderMap } from '@/components/map/OrderMap'
-import { DriverLocationTracker } from '@/components/map/DriverLocationTracker'
 
 export default function OrderDetailsPage() {
   const router = useRouter()
@@ -203,6 +202,31 @@ export default function OrderDetailsPage() {
             </div>
           </div>
         </div>
+
+        {/* Карта с маршрутом */}
+        {(order.pickup_coordinates || order.delivery_coordinates) && (
+          <div className="mt-6 border-t border-gray-700 pt-4">
+            <h3 className="text-lg font-semibold mb-3 text-white">Карта маршрута</h3>
+            <OrderMap
+              pickupCoordinates={
+                order.pickup_coordinates
+                  ? typeof order.pickup_coordinates === 'string'
+                    ? JSON.parse(order.pickup_coordinates)
+                    : order.pickup_coordinates
+                  : undefined
+              }
+              deliveryCoordinates={
+                order.delivery_coordinates
+                  ? typeof order.delivery_coordinates === 'string'
+                    ? JSON.parse(order.delivery_coordinates)
+                    : order.delivery_coordinates
+                  : undefined
+              }
+              height="400px"
+              showRoute={true}
+            />
+          </div>
+        )}
 
         {/* Информация о водителе (если заказ принят) */}
         {order.executor_user_id && driver && (
