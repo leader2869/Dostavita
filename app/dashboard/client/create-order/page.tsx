@@ -346,9 +346,9 @@ export default function CreateOrderPage() {
               console.log('Выбран регион:', e.target.value)
               setSelectedRegion(e.target.value)
             }}
-            disabled={regionAutoDetected || loadingRegions || regions.length === 0}
+            disabled={!pickupAddress || regionAutoDetected || loadingRegions || regions.length === 0}
             required
-            className={`w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 ${regionAutoDetected ? 'opacity-60 cursor-not-allowed' : 'disabled:opacity-50 disabled:cursor-not-allowed'}`}
+            className={`w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 ${(!pickupAddress || regionAutoDetected) ? 'opacity-60 cursor-not-allowed' : 'disabled:opacity-50 disabled:cursor-not-allowed'}`}
           >
             {loadingRegions ? (
               <option value="" className="bg-gray-700">Загрузка регионов...</option>
