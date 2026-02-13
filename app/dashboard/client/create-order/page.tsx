@@ -303,14 +303,11 @@ export default function CreateOrderPage() {
               setPickupAddress(address)
               setPickupCoordinates(coordinates)
               // Автоматически определяем регион по адресу отправления
-              // Используем setTimeout чтобы убедиться, что регионы уже загружены
-              setTimeout(() => {
-                if (address && regions.length > 0) {
-                  detectRegionFromAddress(address, addressDetails)
-                } else {
-                  console.log('Регионы еще не загружены или адрес пуст')
-                }
-              }, 100)
+              if (address && regions.length > 0) {
+                detectRegionFromAddress(address, addressDetails)
+              } else {
+                console.log('Регионы еще не загружены или адрес пуст')
+              }
             }}
             placeholder="Начните вводить адрес отправления"
             required
