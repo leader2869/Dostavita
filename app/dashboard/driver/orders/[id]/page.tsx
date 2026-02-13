@@ -122,8 +122,30 @@ export default function OrderDetailsPage() {
 
         <div>
           <h2 className="font-semibold mb-2 text-white">Адреса</h2>
-          <p className="text-white"><strong className="text-white">Откуда:</strong> {order.pickup_address}</p>
-          <p className="text-white"><strong className="text-white">Куда:</strong> {order.delivery_address}</p>
+          <div className="mb-3">
+            <p className="text-white"><strong className="text-white">Откуда:</strong> {order.pickup_address}</p>
+            {(order.pickup_entrance || order.pickup_floor || order.pickup_apartment) && (
+              <p className="text-sm text-gray-300 mt-1 ml-4">
+                {order.pickup_entrance && `Подъезд ${order.pickup_entrance}`}
+                {order.pickup_entrance && (order.pickup_floor || order.pickup_apartment) && ', '}
+                {order.pickup_floor && `Этаж ${order.pickup_floor}`}
+                {order.pickup_floor && order.pickup_apartment && ', '}
+                {order.pickup_apartment && `Квартира ${order.pickup_apartment}`}
+              </p>
+            )}
+          </div>
+          <div>
+            <p className="text-white"><strong className="text-white">Куда:</strong> {order.delivery_address}</p>
+            {(order.delivery_entrance || order.delivery_floor || order.delivery_apartment) && (
+              <p className="text-sm text-gray-300 mt-1 ml-4">
+                {order.delivery_entrance && `Подъезд ${order.delivery_entrance}`}
+                {order.delivery_entrance && (order.delivery_floor || order.delivery_apartment) && ', '}
+                {order.delivery_floor && `Этаж ${order.delivery_floor}`}
+                {order.delivery_floor && order.delivery_apartment && ', '}
+                {order.delivery_apartment && `Квартира ${order.delivery_apartment}`}
+              </p>
+            )}
+          </div>
         </div>
 
         <div>

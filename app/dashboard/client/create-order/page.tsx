@@ -22,6 +22,12 @@ export default function CreateOrderPage() {
   const [deliveryAddress, setDeliveryAddress] = useState('')
   const [pickupCoordinates, setPickupCoordinates] = useState<{ lat: number; lon: number } | undefined>()
   const [deliveryCoordinates, setDeliveryCoordinates] = useState<{ lat: number; lon: number } | undefined>()
+  const [pickupEntrance, setPickupEntrance] = useState('')
+  const [pickupFloor, setPickupFloor] = useState('')
+  const [pickupApartment, setPickupApartment] = useState('')
+  const [deliveryEntrance, setDeliveryEntrance] = useState('')
+  const [deliveryFloor, setDeliveryFloor] = useState('')
+  const [deliveryApartment, setDeliveryApartment] = useState('')
   const [description, setDescription] = useState('')
   const [selectedRegion, setSelectedRegion] = useState('')
   const [itemType, setItemType] = useState<'documents' | 'parcel' | 'flowers' | 'food' | 'other'>('flowers')
@@ -353,8 +359,14 @@ export default function CreateOrderPage() {
           client_id: user.id, // И получателем одновременно
           pickup_address: pickupAddress,
           pickup_coordinates: `(${pickupCoords.lon},${pickupCoords.lat})`,
+          pickup_entrance: pickupEntrance || null,
+          pickup_floor: pickupFloor || null,
+          pickup_apartment: pickupApartment || null,
           delivery_address: deliveryAddress,
           delivery_coordinates: `(${deliveryCoords.lon},${deliveryCoords.lat})`,
+          delivery_entrance: deliveryEntrance || null,
+          delivery_floor: deliveryFloor || null,
+          delivery_apartment: deliveryApartment || null,
           description: description,
           region_id: selectedRegion,
           base_price: basePrice,
@@ -471,6 +483,49 @@ export default function CreateOrderPage() {
             required
             className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
           />
+          
+          {/* Дополнительные поля для адреса доставки */}
+          <div className="grid grid-cols-3 gap-2 mt-2">
+            <div>
+              <label htmlFor="deliveryEntrance" className="block text-xs text-gray-400 mb-1">
+                Подъезд
+              </label>
+              <input
+                type="text"
+                id="deliveryEntrance"
+                value={deliveryEntrance}
+                onChange={(e) => setDeliveryEntrance(e.target.value)}
+                placeholder="1"
+                className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 text-sm"
+              />
+            </div>
+            <div>
+              <label htmlFor="deliveryFloor" className="block text-xs text-gray-400 mb-1">
+                Этаж
+              </label>
+              <input
+                type="text"
+                id="deliveryFloor"
+                value={deliveryFloor}
+                onChange={(e) => setDeliveryFloor(e.target.value)}
+                placeholder="5"
+                className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 text-sm"
+              />
+            </div>
+            <div>
+              <label htmlFor="deliveryApartment" className="block text-xs text-gray-400 mb-1">
+                Квартира
+              </label>
+              <input
+                type="text"
+                id="deliveryApartment"
+                value={deliveryApartment}
+                onChange={(e) => setDeliveryApartment(e.target.value)}
+                placeholder="12"
+                className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 text-sm"
+              />
+            </div>
+          </div>
         </div>
 
         <div>

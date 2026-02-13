@@ -164,11 +164,29 @@ export default function OrderDetailsPage() {
             <div>
               <p className="text-sm text-gray-400">Адрес отправления</p>
               <p className="text-white">{order.pickup_address}</p>
+              {(order.pickup_entrance || order.pickup_floor || order.pickup_apartment) && (
+                <p className="text-sm text-gray-300 mt-1">
+                  {order.pickup_entrance && `Подъезд ${order.pickup_entrance}`}
+                  {order.pickup_entrance && (order.pickup_floor || order.pickup_apartment) && ', '}
+                  {order.pickup_floor && `Этаж ${order.pickup_floor}`}
+                  {order.pickup_floor && order.pickup_apartment && ', '}
+                  {order.pickup_apartment && `Квартира ${order.pickup_apartment}`}
+                </p>
+              )}
             </div>
 
             <div>
               <p className="text-sm text-gray-400">Адрес доставки</p>
               <p className="text-white">{order.delivery_address}</p>
+              {(order.delivery_entrance || order.delivery_floor || order.delivery_apartment) && (
+                <p className="text-sm text-gray-300 mt-1">
+                  {order.delivery_entrance && `Подъезд ${order.delivery_entrance}`}
+                  {order.delivery_entrance && (order.delivery_floor || order.delivery_apartment) && ', '}
+                  {order.delivery_floor && `Этаж ${order.delivery_floor}`}
+                  {order.delivery_floor && order.delivery_apartment && ', '}
+                  {order.delivery_apartment && `Квартира ${order.delivery_apartment}`}
+                </p>
+              )}
             </div>
 
             <div>
