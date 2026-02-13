@@ -447,9 +447,9 @@ export default function SavedAddressesPage() {
 
       {/* Модальное окно для добавления/редактирования адреса */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <form onSubmit={handleSaveAddress} className="p-6">
+        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
+          <div className="bg-gray-800 rounded-t-lg sm:rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] sm:max-h-[90vh] h-[90vh] sm:h-auto flex flex-col">
+            <form onSubmit={handleSaveAddress} className="flex flex-col flex-1 overflow-y-auto p-4 sm:p-6">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-bold text-white">
                   {editingAddress ? 'Редактировать адрес' : 'Добавить адрес'}
@@ -614,7 +614,7 @@ export default function SavedAddressesPage() {
                 </div>
               </div>
 
-              <div className="flex justify-end gap-4 mt-6">
+              <div className="flex justify-end gap-4 mt-6 pt-4 border-t border-gray-700 sticky bottom-0 bg-gray-800 pb-4 sm:pb-2 -mx-4 sm:-mx-6 px-4 sm:px-6">
                 <button
                   type="button"
                   onClick={() => {

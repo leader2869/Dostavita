@@ -20,20 +20,27 @@ export default function DriverFinancePage() {
   const [customStartDate, setCustomStartDate] = useState<string>('')
   const [customEndDate, setCustomEndDate] = useState<string>('')
 
-  const getDateFilter = (period: Period) => {
+  const getDateFilter = useCallback((period: Period) => {
     const now = new Date()
     switch (period) {
       case 'today':
-        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-        return { start: todayStart.toISOString(), end: null }
+        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0)
+        const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999)
+        return { start: todayStart.toISOString(), end: todayEnd.toISOString() }
       case 'week':
         const weekStart = new Date(now)
         weekStart.setDate(now.getDate() - 7)
-        return { start: weekStart.toISOString(), end: null }
+        weekStart.setHours(0, 0, 0, 0)
+        const weekEnd = new Date(now)
+        weekEnd.setHours(23, 59, 59, 999)
+        return { start: weekStart.toISOString(), end: weekEnd.toISOString() }
       case 'month':
         const monthStart = new Date(now)
         monthStart.setMonth(now.getMonth() - 1)
-        return { start: monthStart.toISOString(), end: null }
+        monthStart.setHours(0, 0, 0, 0)
+        const monthEnd = new Date(now)
+        monthEnd.setHours(23, 59, 59, 999)
+        return { start: monthStart.toISOString(), end: monthEnd.toISOString() }
       case 'custom':
         if (customStartDate && customEndDate) {
           const start = new Date(customStartDate)
@@ -47,7 +54,7 @@ export default function DriverFinancePage() {
       default:
         return { start: null, end: null }
     }
-  }
+  }, [customStartDate, customEndDate])
 
   const loadData = useCallback(async () => {
     try {
@@ -109,7 +116,7 @@ export default function DriverFinancePage() {
     } finally {
       setLoading(false)
     }
-  }, [supabase, router, period, getDateFilter])
+  }, [supabase, router, period, getDateFilter, customStartDate, customEndDate])
 
   useEffect(() => {
     loadData()
