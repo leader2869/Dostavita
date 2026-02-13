@@ -72,11 +72,17 @@ export interface Order {
     lat: number
     lng: number
   }
+  pickup_entrance: string | null
+  pickup_floor: string | null
+  pickup_apartment: string | null
   delivery_address: string
   delivery_coordinates: {
     lat: number
     lng: number
   }
+  delivery_entrance: string | null
+  delivery_floor: string | null
+  delivery_apartment: string | null
   description: string | null
   weight: number | null
   volume: number | null
