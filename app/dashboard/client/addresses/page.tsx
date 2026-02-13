@@ -514,6 +514,49 @@ export default function SavedAddressesPage() {
                     required
                     className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
                   />
+                  
+                  {/* Дополнительные поля */}
+                  <div className="grid grid-cols-3 gap-2 mt-2">
+                    <div>
+                      <label htmlFor="entrance" className="block text-xs text-gray-400 mb-1">
+                        Подъезд
+                      </label>
+                      <input
+                        type="text"
+                        id="entrance"
+                        value={entrance}
+                        onChange={(e) => setEntrance(e.target.value)}
+                        placeholder="1"
+                        className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="floor" className="block text-xs text-gray-400 mb-1">
+                        Этаж
+                      </label>
+                      <input
+                        type="text"
+                        id="floor"
+                        value={floor}
+                        onChange={(e) => setFloor(e.target.value)}
+                        placeholder="5"
+                        className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="apartment" className="block text-xs text-gray-400 mb-1">
+                        Квартира
+                      </label>
+                      <input
+                        type="text"
+                        id="apartment"
+                        value={apartment}
+                        onChange={(e) => setApartment(e.target.value)}
+                        placeholder="12"
+                        className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 text-sm"
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 <div>
