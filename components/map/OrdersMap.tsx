@@ -37,7 +37,7 @@ function MapBounds({ orders }: { orders: Order[] }) {
   const map = useMap()
 
   useEffect(() => {
-    const bounds: L.LatLngExpression[] = []
+    const bounds: [number, number][] = []
 
     orders.forEach((order) => {
       if (order.pickup_coordinates) {
@@ -59,7 +59,7 @@ function MapBounds({ orders }: { orders: Order[] }) {
     })
 
     if (bounds.length > 0) {
-      map.fitBounds(bounds, { padding: [50, 50] })
+      map.fitBounds(bounds as L.LatLngBoundsExpression, { padding: [50, 50] })
     }
   }, [map, orders])
 
