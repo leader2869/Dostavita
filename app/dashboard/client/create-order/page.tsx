@@ -38,6 +38,9 @@ export default function CreateOrderPage() {
   const [pickupRegionName, setPickupRegionName] = useState<string | null>(null)
   const [showMapPicker, setShowMapPicker] = useState(false)
   const [mapPickerType, setMapPickerType] = useState<'pickup' | 'delivery' | null>(null)
+  const [routeDistance, setRouteDistance] = useState<number | null>(null) // расстояние в км
+  const [routeDuration, setRouteDuration] = useState<number | null>(null) // время в минутах
+  const [calculatingRoute, setCalculatingRoute] = useState(false)
 
   // Функция для определения региона по адресу
   const detectRegionFromAddress = useCallback((address: string, addressDetails?: any) => {
@@ -257,6 +260,57 @@ export default function CreateOrderPage() {
     }
   }, [supabase])
 
+  // Функция для расчета маршрута через OSRM
+  const calculateRoute = useCallback(async () => {
+    if (!pickupCoordinates || !deliveryCoordinates) {
+      setRouteDistance(null)
+      setRouteDuration(null)
+      return
+    }
+
+    setCalculatingRoute(true)
+    try {
+      const response = await fetch(
+        `https://router.project-osrm.org/route/v1/driving/${pickupCoordinates.lon},${pickupCoordinates.lat};${deliveryCoordinates.lon},${deliveryCoordinates.lat}?overview=false`
+      )
+      const data = await response.json()
+
+      if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
+        const route = data.routes[0]
+        // Расстояние в метрах, переводим в километры
+        const distanceKm = (route.distance / 1000).toFixed(2)
+        // Время в секундах, переводим в минуты
+        const durationMinutes = Math.round(route.duration / 60)
+        
+        setRouteDistance(parseFloat(distanceKm))
+        setRouteDuration(durationMinutes)
+      } else {
+        setRouteDistance(null)
+        setRouteDuration(null)
+      }
+    } catch (error) {
+      console.error('Ошибка расчета маршрута:', error)
+      setRouteDistance(null)
+      setRouteDuration(null)
+    } finally {
+      setCalculatingRoute(false)
+    }
+  }, [pickupCoordinates, deliveryCoordinates])
+
+  // Автоматически рассчитываем маршрут при изменении координат
+  useEffect(() => {
+    if (pickupCoordinates && deliveryCoordinates) {
+      // Небольшая задержка для дебаунса
+      const timer = setTimeout(() => {
+        calculateRoute()
+      }, 500)
+      return () => clearTimeout(timer)
+    } else {
+      setRouteDistance(null)
+      setRouteDuration(null)
+    }
+  }, [pickupCoordinates, deliveryCoordinates, calculateRoute])
+
   useEffect(() => {
     loadRegions()
     loadSavedAddresses()
@@ -473,6 +527,8 @@ export default function CreateOrderPage() {
                   setSelectedRegion('')
                   setRegionAutoDetected(false)
                   setPickupRegionName(null)
+                  setRouteDistance(null)
+                  setRouteDuration(null)
                 }}
                 className="absolute right-2 top-1/2 -translate-y-1/2 text-red-500 hover:text-red-400 transition"
                 title="Очистить адрес отправления"
@@ -577,6 +633,8 @@ export default function CreateOrderPage() {
                   setDeliveryEntrance('')
                   setDeliveryFloor('')
                   setDeliveryApartment('')
+                  setRouteDistance(null)
+                  setRouteDuration(null)
                 }}
                 className="absolute right-2 top-1/2 -translate-y-1/2 text-red-500 hover:text-red-400 transition"
                 title="Очистить адрес доставки"
@@ -631,6 +689,50 @@ export default function CreateOrderPage() {
             </div>
           </div>
         </div>
+
+        {/* Информация о маршруте */}
+        {(pickupCoordinates && deliveryCoordinates) && (
+          <div className="bg-gray-700 rounded-lg p-4 border border-gray-600">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-medium text-gray-300 mb-2">Информация о маршруте</h3>
+                {calculatingRoute ? (
+                  <div className="flex items-center gap-2 text-gray-400">
+                    <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span className="text-sm">Расчет маршрута...</span>
+                  </div>
+                ) : routeDistance !== null && routeDuration !== null ? (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="flex items-center gap-2">
+                      <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      <div>
+                        <p className="text-xs text-gray-400">Расстояние</p>
+                        <p className="text-lg font-semibold text-white">{routeDistance} км</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <div>
+                        <p className="text-xs text-gray-400">Время в пути</p>
+                        <p className="text-lg font-semibold text-white">{routeDuration} мин</p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-400">Не удалось рассчитать маршрут</p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         <div>
           <label htmlFor="region" className="block text-sm font-medium text-gray-300 mb-1">
