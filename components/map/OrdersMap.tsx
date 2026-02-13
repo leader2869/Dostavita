@@ -5,6 +5,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import Link from 'next/link'
+import { useGeolocation } from '@/hooks/useGeolocation'
 
 // Исправление иконок по умолчанию для Leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl
@@ -33,7 +34,7 @@ interface OrdersMapProps {
 }
 
 // Компонент для автоматического изменения границ карты
-function MapBounds({ orders }: { orders: Order[] }) {
+function MapBounds({ orders, userLocation }: { orders: Order[], userLocation?: { lat: number; lon: number } | null }) {
   const map = useMap()
 
   useEffect(() => {
@@ -58,10 +59,16 @@ function MapBounds({ orders }: { orders: Order[] }) {
       }
     })
 
+    // Если нет заказов, но есть местоположение пользователя, центрируем на нем
+    if (bounds.length === 0 && userLocation) {
+      map.setView([userLocation.lat, userLocation.lon], map.getZoom())
+      return
+    }
+
     if (bounds.length > 0) {
       map.fitBounds(bounds as L.LatLngBoundsExpression, { padding: [50, 50] })
     }
-  }, [map, orders])
+  }, [map, orders, userLocation])
 
   return null
 }
@@ -101,7 +108,12 @@ const getStatusLabel = (status: string) => {
 }
 
 export function OrdersMap({ orders, height = '600px', zoom = 11, role = 'client' }: OrdersMapProps) {
-  const center: [number, number] = [53.9, 27.5667] // Минск по умолчанию
+  const { coordinates: userLocation } = useGeolocation()
+  
+  // Используем местоположение пользователя, если доступно, иначе Минск
+  const center: [number, number] = userLocation
+    ? [userLocation.lat, userLocation.lon]
+    : [53.9, 27.5667] // Минск по умолчанию
 
   const getOrderUrl = (orderId: string) => {
     if (role === 'client') {
@@ -127,7 +139,26 @@ export function OrdersMap({ orders, height = '600px', zoom = 11, role = 'client'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        <MapBounds orders={orders} />
+        <MapBounds orders={orders} userLocation={userLocation} />
+
+        {/* Маркер текущего местоположения пользователя */}
+        {userLocation && (
+          <Marker
+            position={[userLocation.lat, userLocation.lon]}
+            icon={L.divIcon({
+              className: 'custom-marker-user-location',
+              html: `<div style="background-color: #8b5cf6; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">📍</div>`,
+              iconSize: [30, 30],
+              iconAnchor: [15, 15],
+            })}
+          >
+            <Popup>
+              <div className="text-sm">
+                <strong>Ваше местоположение</strong>
+              </div>
+            </Popup>
+          </Marker>
+        )}
 
         {orders.map((order) => {
           // Обрабатываем координаты отправления

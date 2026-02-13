@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import { useGeolocation } from '@/hooks/useGeolocation'
 
 // Исправление иконок по умолчанию для Leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl
@@ -37,10 +38,15 @@ export function SinglePointMap({
   height = '300px',
   zoom = 15,
 }: SinglePointMapProps) {
+  const { coordinates: userLocation } = useGeolocation()
+  
+  // Используем координаты точки, если они есть, иначе местоположение пользователя
+  const center: [number, number] = [coordinates.lat, coordinates.lon]
+  
   return (
     <div style={{ height, width: '100%' }} className="rounded-lg overflow-hidden border border-gray-600">
       <MapContainer
-        center={[coordinates.lat, coordinates.lon]}
+        center={center}
         zoom={zoom}
         style={{ height: '100%', width: '100%' }}
         scrollWheelZoom={true}
@@ -51,6 +57,25 @@ export function SinglePointMap({
         />
 
         <MapBounds coordinates={coordinates} />
+
+        {/* Маркер текущего местоположения пользователя */}
+        {userLocation && (
+          <Marker
+            position={[userLocation.lat, userLocation.lon]}
+            icon={L.divIcon({
+              className: 'custom-marker-user-location',
+              html: `<div style="background-color: #8b5cf6; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">📍</div>`,
+              iconSize: [30, 30],
+              iconAnchor: [15, 15],
+            })}
+          >
+            <Popup>
+              <div className="text-sm">
+                <strong>Ваше местоположение</strong>
+              </div>
+            </Popup>
+          </Marker>
+        )}
 
         {/* Маркер выбранной точки */}
         <Marker

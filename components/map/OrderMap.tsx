@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import { useGeolocation } from '@/hooks/useGeolocation'
 
 // Исправление иконок по умолчанию для Leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl
@@ -23,10 +24,11 @@ interface OrderMapProps {
 }
 
 // Компонент для автоматического изменения границ карты
-function MapBounds({ pickupCoordinates, deliveryCoordinates, driverCoordinates }: {
+function MapBounds({ pickupCoordinates, deliveryCoordinates, driverCoordinates, userLocation }: {
   pickupCoordinates?: { lat: number; lon: number }
   deliveryCoordinates?: { lat: number; lon: number }
   driverCoordinates?: { lat: number; lon: number }
+  userLocation?: { lat: number; lon: number } | null
 }) {
   const map = useMap()
 
@@ -42,11 +44,16 @@ function MapBounds({ pickupCoordinates, deliveryCoordinates, driverCoordinates }
     if (driverCoordinates) {
       bounds.push([driverCoordinates.lat, driverCoordinates.lon])
     }
+    // Если нет координат заказа, но есть местоположение пользователя, центрируем на нем
+    if (bounds.length === 0 && userLocation) {
+      map.setView([userLocation.lat, userLocation.lon], map.getZoom())
+      return
+    }
 
     if (bounds.length > 0) {
       map.fitBounds(bounds as L.LatLngBoundsExpression, { padding: [50, 50] })
     }
-  }, [map, pickupCoordinates, deliveryCoordinates, driverCoordinates])
+  }, [map, pickupCoordinates, deliveryCoordinates, driverCoordinates, userLocation])
 
   return null
 }
@@ -120,11 +127,15 @@ export function OrderMap({
   showRoute = true,
   zoom = 13,
 }: OrderMapProps) {
-  // Определяем центр карты
+  const { coordinates: userLocation } = useGeolocation()
+  
+  // Определяем центр карты: приоритет - координаты заказа, затем местоположение пользователя, затем Минск
   const center: [number, number] = pickupCoordinates
     ? [pickupCoordinates.lat, pickupCoordinates.lon]
     : deliveryCoordinates
     ? [deliveryCoordinates.lat, deliveryCoordinates.lon]
+    : userLocation
+    ? [userLocation.lat, userLocation.lon]
     : [53.9, 27.5667] // Минск по умолчанию
 
   return (
@@ -145,6 +156,7 @@ export function OrderMap({
           pickupCoordinates={pickupCoordinates}
           deliveryCoordinates={deliveryCoordinates}
           driverCoordinates={driverCoordinates}
+          userLocation={userLocation}
         />
 
         {/* Построение маршрута */}
@@ -209,6 +221,25 @@ export function OrderMap({
             <Popup>
               <div className="text-sm">
                 <strong>Местоположение курьера</strong>
+              </div>
+            </Popup>
+          </Marker>
+        )}
+
+        {/* Маркер текущего местоположения пользователя */}
+        {userLocation && !pickupCoordinates && !deliveryCoordinates && (
+          <Marker
+            position={[userLocation.lat, userLocation.lon]}
+            icon={L.divIcon({
+              className: 'custom-marker-user-location',
+              html: `<div style="background-color: #8b5cf6; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">📍</div>`,
+              iconSize: [30, 30],
+              iconAnchor: [15, 15],
+            })}
+          >
+            <Popup>
+              <div className="text-sm">
+                <strong>Ваше местоположение</strong>
               </div>
             </Popup>
           </Marker>

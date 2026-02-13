@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import { useGeolocation } from '@/hooks/useGeolocation'
 
 // Исправление иконок по умолчанию для Leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl
@@ -37,12 +38,15 @@ export function AddressPickerMap({
   height = '400px',
   label = 'Выберите точку на карте',
 }: AddressPickerMapProps) {
+  const { coordinates: userLocation } = useGeolocation()
   const [selectedCoordinates, setSelectedCoordinates] = useState<{ lat: number; lon: number } | null>(
     initialCoordinates || null
   )
 
   const center: [number, number] = initialCoordinates
     ? [initialCoordinates.lat, initialCoordinates.lon]
+    : userLocation
+    ? [userLocation.lat, userLocation.lon]
     : [53.9, 27.5667] // Минск по умолчанию
 
   const handleMapClick = (coordinates: { lat: number; lon: number }) => {
@@ -87,7 +91,7 @@ export function AddressPickerMap({
       </div>
       <MapContainer
         center={center}
-        zoom={initialCoordinates ? 15 : 11}
+        zoom={initialCoordinates ? 15 : userLocation ? 13 : 11}
         style={{ height: 'calc(100% - 40px)', width: '100%' }}
         scrollWheelZoom={true}
       >
@@ -97,6 +101,25 @@ export function AddressPickerMap({
         />
 
         <MapClickHandler onSelect={handleMapClick} />
+
+        {/* Маркер текущего местоположения пользователя */}
+        {userLocation && (
+          <Marker
+            position={[userLocation.lat, userLocation.lon]}
+            icon={L.divIcon({
+              className: 'custom-marker-user-location',
+              html: `<div style="background-color: #8b5cf6; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">📍</div>`,
+              iconSize: [30, 30],
+              iconAnchor: [15, 15],
+            })}
+          >
+            <Popup>
+              <div className="text-sm">
+                <strong>Ваше местоположение</strong>
+              </div>
+            </Popup>
+          </Marker>
+        )}
 
         {/* Маркер выбранной точки */}
         {selectedCoordinates && (
