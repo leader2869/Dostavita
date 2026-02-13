@@ -23,6 +23,109 @@ export default function CreateOrderPage() {
   const [selectedRegion, setSelectedRegion] = useState('')
   const [itemType, setItemType] = useState<'documents' | 'parcel' | 'flowers' | 'food'>('parcel')
 
+  // Функция для определения региона по адресу
+  const detectRegionFromAddress = useCallback((address: string, addressDetails?: any) => {
+    if (!address || !regions.length) return
+
+    const addressLower = address.toLowerCase()
+    
+    // Проверяем по названию области из адреса
+    if (addressDetails?.state) {
+      const stateName = addressDetails.state.toLowerCase()
+      
+      // Сопоставляем область с регионом
+      if (stateName.includes('минск') && !stateName.includes('область')) {
+        // Минск (город)
+        const minskRegion = regions.find(r => r.name.toLowerCase() === 'минск')
+        if (minskRegion) {
+          setSelectedRegion(minskRegion.id)
+          return
+        }
+      } else if (stateName.includes('минская область')) {
+        const region = regions.find(r => r.name.toLowerCase() === 'минская область')
+        if (region) {
+          setSelectedRegion(region.id)
+          return
+        }
+      } else if (stateName.includes('брестская область')) {
+        const region = regions.find(r => r.name.toLowerCase() === 'брестская область')
+        if (region) {
+          setSelectedRegion(region.id)
+          return
+        }
+      } else if (stateName.includes('витебская область')) {
+        const region = regions.find(r => r.name.toLowerCase() === 'витебская область')
+        if (region) {
+          setSelectedRegion(region.id)
+          return
+        }
+      } else if (stateName.includes('гомельская область')) {
+        const region = regions.find(r => r.name.toLowerCase() === 'гомельская область')
+        if (region) {
+          setSelectedRegion(region.id)
+          return
+        }
+      } else if (stateName.includes('гродненская область')) {
+        const region = regions.find(r => r.name.toLowerCase() === 'гродненская область')
+        if (region) {
+          setSelectedRegion(region.id)
+          return
+        }
+      } else if (stateName.includes('могилевская область') || stateName.includes('могилёвская область')) {
+        const region = regions.find(r => r.name.toLowerCase().includes('могилевская область') || r.name.toLowerCase().includes('могилёвская область'))
+        if (region) {
+          setSelectedRegion(region.id)
+          return
+        }
+      }
+    }
+
+    // Fallback: проверяем по тексту адреса
+    if (addressLower.includes('минск') && !addressLower.includes('область')) {
+      const minskRegion = regions.find(r => r.name.toLowerCase() === 'минск')
+      if (minskRegion) {
+        setSelectedRegion(minskRegion.id)
+        return
+      }
+    } else if (addressLower.includes('минская область')) {
+      const region = regions.find(r => r.name.toLowerCase() === 'минская область')
+      if (region) {
+        setSelectedRegion(region.id)
+        return
+      }
+    } else if (addressLower.includes('брестская область')) {
+      const region = regions.find(r => r.name.toLowerCase() === 'брестская область')
+      if (region) {
+        setSelectedRegion(region.id)
+        return
+      }
+    } else if (addressLower.includes('витебская область')) {
+      const region = regions.find(r => r.name.toLowerCase() === 'витебская область')
+      if (region) {
+        setSelectedRegion(region.id)
+        return
+      }
+    } else if (addressLower.includes('гомельская область')) {
+      const region = regions.find(r => r.name.toLowerCase() === 'гомельская область')
+      if (region) {
+        setSelectedRegion(region.id)
+        return
+      }
+    } else if (addressLower.includes('гродненская область')) {
+      const region = regions.find(r => r.name.toLowerCase() === 'гродненская область')
+      if (region) {
+        setSelectedRegion(region.id)
+        return
+      }
+    } else if (addressLower.includes('могилевская область') || addressLower.includes('могилёвская область')) {
+      const region = regions.find(r => r.name.toLowerCase().includes('могилевская область') || r.name.toLowerCase().includes('могилёвская область'))
+      if (region) {
+        setSelectedRegion(region.id)
+        return
+      }
+    }
+  }, [regions])
+
   const loadRegions = useCallback(async () => {
     const { data } = await supabase
       .from('regions')

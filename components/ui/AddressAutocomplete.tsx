@@ -11,7 +11,7 @@ interface AddressResult {
 
 interface AddressAutocompleteProps {
   value: string
-  onChange: (address: string, coordinates?: { lat: number; lon: number }) => void
+  onChange: (address: string, coordinates?: { lat: number; lon: number }, addressDetails?: any) => void
   placeholder?: string
   className?: string
   required?: boolean
@@ -100,7 +100,7 @@ export function AddressAutocomplete({
   const handleSelectAddress = (result: AddressResult) => {
     setQuery(result.display_name)
     setShowResults(false)
-    onChange(result.display_name, { lat: result.lat, lon: result.lon })
+    onChange(result.display_name, { lat: result.lat, lon: result.lon }, result.address)
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
