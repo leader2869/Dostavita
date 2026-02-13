@@ -361,6 +361,9 @@ export default function SavedAddressesPage() {
             setCoordinates(undefined)
             setAddressType('both')
             setSelectedRegion('')
+            setEntrance('')
+            setFloor('')
+            setApartment('')
             setIsDefault(false)
             setShowAddModal(true)
           }}
@@ -447,6 +450,9 @@ export default function SavedAddressesPage() {
                     setCoordinates(undefined)
                     setAddressType('both')
                     setSelectedRegion('')
+                    setEntrance('')
+                    setFloor('')
+                    setApartment('')
                     setIsDefault(false)
                     setError(null)
                   }}
@@ -562,6 +568,9 @@ export default function SavedAddressesPage() {
                     setCoordinates(undefined)
                     setAddressType('both')
                     setSelectedRegion('')
+                    setEntrance('')
+                    setFloor('')
+                    setApartment('')
                     setIsDefault(false)
                     setError(null)
                   }}
