@@ -85,9 +85,10 @@ function RouteLine({ pickupCoordinates, deliveryCoordinates }: {
           }
 
           routeRef.current = L.polyline(coordinates as L.LatLngExpression[], {
-            color: '#10b981',
-            weight: 4,
-            opacity: 0.7,
+            color: '#22c55e',
+            weight: 6,
+            opacity: 0.9,
+            dashArray: '10, 5',
           }).addTo(map)
 
           // Обновляем границы карты с учетом маршрута
