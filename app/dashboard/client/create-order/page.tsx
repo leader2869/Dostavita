@@ -23,6 +23,7 @@ export default function CreateOrderPage() {
   const [description, setDescription] = useState('')
   const [selectedRegion, setSelectedRegion] = useState('')
   const [itemType, setItemType] = useState<'documents' | 'parcel' | 'flowers' | 'food' | 'other'>('flowers')
+  const [regionAutoDetected, setRegionAutoDetected] = useState(false)
 
   // Функция для определения региона по адресу
   const detectRegionFromAddress = useCallback((address: string, addressDetails?: any) => {
@@ -54,6 +55,7 @@ export default function CreateOrderPage() {
         if (region) {
           console.log('Найден регион Минская область:', region.id)
           setSelectedRegion(region.id)
+          setRegionAutoDetected(true)
           return
         }
       } else if (stateName.includes('брестская область') || stateName.includes('брестская')) {
@@ -61,6 +63,7 @@ export default function CreateOrderPage() {
         if (region) {
           console.log('Найден регион Брестская область:', region.id)
           setSelectedRegion(region.id)
+          setRegionAutoDetected(true)
           return
         }
       } else if (stateName.includes('витебская область') || stateName.includes('витебская')) {
@@ -68,6 +71,7 @@ export default function CreateOrderPage() {
         if (region) {
           console.log('Найден регион Витебская область:', region.id)
           setSelectedRegion(region.id)
+          setRegionAutoDetected(true)
           return
         }
       } else if (stateName.includes('гомельская область') || stateName.includes('гомельская')) {
@@ -75,6 +79,7 @@ export default function CreateOrderPage() {
         if (region) {
           console.log('Найден регион Гомельская область:', region.id)
           setSelectedRegion(region.id)
+          setRegionAutoDetected(true)
           return
         }
       } else if (stateName.includes('гродненская область') || stateName.includes('гродненская')) {
@@ -82,6 +87,7 @@ export default function CreateOrderPage() {
         if (region) {
           console.log('Найден регион Гродненская область:', region.id)
           setSelectedRegion(region.id)
+          setRegionAutoDetected(true)
           return
         }
       } else if (stateName.includes('могилевская область') || stateName.includes('могилёвская область') || stateName.includes('могилевская') || stateName.includes('могилёвская')) {
@@ -89,6 +95,7 @@ export default function CreateOrderPage() {
         if (region) {
           console.log('Найден регион Могилевская область:', region.id)
           setSelectedRegion(region.id)
+          setRegionAutoDetected(true)
           return
         }
       }
@@ -101,6 +108,7 @@ export default function CreateOrderPage() {
       if (minskRegion) {
         console.log('Найден регион Минск (fallback):', minskRegion.id)
         setSelectedRegion(minskRegion.id)
+        setRegionAutoDetected(true)
         return
       }
     } else if (addressLower.includes('минская область') || addressLower.includes('минская')) {
@@ -108,6 +116,7 @@ export default function CreateOrderPage() {
       if (region) {
         console.log('Найден регион Минская область (fallback):', region.id)
         setSelectedRegion(region.id)
+        setRegionAutoDetected(true)
         return
       }
     } else if (addressLower.includes('брестская область') || addressLower.includes('брестская')) {
@@ -115,6 +124,7 @@ export default function CreateOrderPage() {
       if (region) {
         console.log('Найден регион Брестская область (fallback):', region.id)
         setSelectedRegion(region.id)
+        setRegionAutoDetected(true)
         return
       }
     } else if (addressLower.includes('витебская область') || addressLower.includes('витебская')) {
@@ -122,6 +132,7 @@ export default function CreateOrderPage() {
       if (region) {
         console.log('Найден регион Витебская область (fallback):', region.id)
         setSelectedRegion(region.id)
+        setRegionAutoDetected(true)
         return
       }
     } else if (addressLower.includes('гомельская область') || addressLower.includes('гомельская')) {
@@ -129,6 +140,7 @@ export default function CreateOrderPage() {
       if (region) {
         console.log('Найден регион Гомельская область (fallback):', region.id)
         setSelectedRegion(region.id)
+        setRegionAutoDetected(true)
         return
       }
     } else if (addressLower.includes('гродненская область') || addressLower.includes('гродненская')) {
@@ -136,6 +148,7 @@ export default function CreateOrderPage() {
       if (region) {
         console.log('Найден регион Гродненская область (fallback):', region.id)
         setSelectedRegion(region.id)
+        setRegionAutoDetected(true)
         return
       }
     } else if (addressLower.includes('могилевская область') || addressLower.includes('могилёвская область') || addressLower.includes('могилевская') || addressLower.includes('могилёвская')) {
@@ -143,6 +156,7 @@ export default function CreateOrderPage() {
       if (region) {
         console.log('Найден регион Могилевская область (fallback):', region.id)
         setSelectedRegion(region.id)
+        setRegionAutoDetected(true)
         return
       }
     }
