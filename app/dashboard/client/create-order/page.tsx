@@ -52,6 +52,8 @@ export default function CreateOrderPage() {
         if (minskRegion) {
           console.log('Найден регион Минск:', minskRegion.id)
           setSelectedRegion(minskRegion.id)
+          setRegionAutoDetected(true)
+          setPickupRegionName('Минск')
           return
         }
       } else if (stateName.includes('минская область') || stateName.includes('минская')) {
