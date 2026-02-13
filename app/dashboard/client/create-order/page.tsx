@@ -212,6 +212,24 @@ export default function CreateOrderPage() {
     }
   }, [supabase])
 
+  const loadSavedAddresses = useCallback(async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data, error } = await supabase
+        .rpc('get_user_saved_addresses', { user_uuid: user.id })
+
+      if (error) {
+        console.error('Ошибка загрузки сохраненных адресов:', error)
+      } else {
+        setSavedAddresses(data || [])
+      }
+    } catch (err) {
+      console.error('Ошибка загрузки сохраненных адресов:', err)
+    }
+  }, [supabase])
+
   useEffect(() => {
     loadRegions()
     loadSavedAddresses()
