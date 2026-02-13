@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import type { Region } from '@/lib/types'
 import { BackButton } from '@/components/ui/BackButton'
+import { AddressAutocomplete } from '@/components/ui/AddressAutocomplete'
 
 export default function CreateOrderPage() {
   const router = useRouter()
@@ -16,6 +17,8 @@ export default function CreateOrderPage() {
   // Форма заказа
   const [pickupAddress, setPickupAddress] = useState('')
   const [deliveryAddress, setDeliveryAddress] = useState('')
+  const [pickupCoordinates, setPickupCoordinates] = useState<{ lat: number; lon: number } | undefined>()
+  const [deliveryCoordinates, setDeliveryCoordinates] = useState<{ lat: number; lon: number } | undefined>()
   const [description, setDescription] = useState('')
   const [selectedRegion, setSelectedRegion] = useState('')
   const [itemType, setItemType] = useState<'documents' | 'parcel' | 'flowers' | 'food'>('parcel')
@@ -45,10 +48,9 @@ export default function CreateOrderPage() {
     setError(null)
 
     try {
-      // Получаем координаты адресов (упрощенная версия - в реальном проекте используйте геокодинг)
-      // Для теста используем координаты Минска
-      const pickupCoords = { lat: 53.9045, lng: 27.5615 }
-      const deliveryCoords = { lat: 53.9045, lng: 27.5615 }
+      // Используем координаты из автодополнения или координаты по умолчанию (Минск)
+      const pickupCoords = pickupCoordinates || { lat: 53.9045, lng: 27.5615 }
+      const deliveryCoords = deliveryCoordinates || { lat: 53.9045, lng: 27.5615 }
 
       const { data: user } = await supabase.auth.getUser()
       if (!user.user) {
@@ -104,13 +106,15 @@ export default function CreateOrderPage() {
           <label className="block text-sm font-medium text-gray-300 mb-1">
             Адрес отправления
           </label>
-          <input
-            type="text"
+          <AddressAutocomplete
             value={pickupAddress}
-            onChange={(e) => setPickupAddress(e.target.value)}
+            onChange={(address, coordinates) => {
+              setPickupAddress(address)
+              setPickupCoordinates(coordinates)
+            }}
+            placeholder="Начните вводить адрес отправления"
             required
-            className="w-full px-3 py-2 border border-gray-600 rounded-md"
-            placeholder="г. Минск, ул. Примерная, д. 1"
+            className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
           />
         </div>
 
@@ -118,13 +122,15 @@ export default function CreateOrderPage() {
           <label className="block text-sm font-medium text-gray-300 mb-1">
             Адрес доставки
           </label>
-          <input
-            type="text"
+          <AddressAutocomplete
             value={deliveryAddress}
-            onChange={(e) => setDeliveryAddress(e.target.value)}
+            onChange={(address, coordinates) => {
+              setDeliveryAddress(address)
+              setDeliveryCoordinates(coordinates)
+            }}
+            placeholder="Начните вводить адрес доставки"
             required
-            className="w-full px-3 py-2 border border-gray-600 rounded-md"
-            placeholder="г. Минск, ул. Примерная, д. 2"
+            className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
           />
         </div>
 
