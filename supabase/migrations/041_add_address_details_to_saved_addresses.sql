@@ -10,8 +10,11 @@ COMMENT ON COLUMN public.saved_addresses.entrance IS 'Подъезд';
 COMMENT ON COLUMN public.saved_addresses.floor IS 'Этаж';
 COMMENT ON COLUMN public.saved_addresses.apartment IS 'Номер квартиры';
 
--- Обновляем RPC функцию для получения сохраненных адресов
-CREATE OR REPLACE FUNCTION public.get_user_saved_addresses(user_uuid UUID)
+-- Удаляем старую функцию перед обновлением
+DROP FUNCTION IF EXISTS public.get_user_saved_addresses(UUID);
+
+-- Создаем обновленную RPC функцию для получения сохраненных адресов
+CREATE FUNCTION public.get_user_saved_addresses(user_uuid UUID)
 RETURNS TABLE (
   id UUID,
   address_type TEXT,
