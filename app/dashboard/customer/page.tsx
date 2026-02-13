@@ -197,7 +197,7 @@ export default async function CustomerDashboard() {
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <p className="font-medium text-white">Заказ #{order.id.slice(0, 8)}</p>
+                          <p className="font-medium text-white">Заказ №{order.id.slice(0, 8)}</p>
                           {hasRejections && (
                             <span className="px-2 py-1 bg-red-500 text-white text-xs rounded">
                               Есть отказы

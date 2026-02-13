@@ -87,7 +87,7 @@ BEGIN
     order_uuid,
     order_record.final_price,
     'credit',
-    'Начисление за выполнение заказа #' || order_uuid::TEXT
+    'Начисление за выполнение Заказа №' || order_uuid::TEXT
   );
   
   RETURN TRUE;

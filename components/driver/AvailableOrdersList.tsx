@@ -84,7 +84,7 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId }: Ava
         <div key={order.id} className="border border-gray-700 rounded-lg p-4">
           <div className="flex justify-between items-start mb-3">
             <div className="flex-1">
-              <p className="font-medium text-white">Заказ #{order.id.slice(0, 8)}</p>
+              <p className="font-medium text-white">Заказ №{order.id.slice(0, 8)}</p>
               <p className="text-sm text-gray-300 mt-1">
                 {order.pickup_address} → {order.delivery_address}
               </p>

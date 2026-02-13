@@ -129,7 +129,7 @@ export default async function CustomerOrderDetailsPage({ params }: { params: { i
           <div className="space-y-3">
             <div>
               <p className="text-sm text-gray-400">Номер заказа</p>
-              <p className="text-white font-medium">#{order.id.slice(0, 8)}</p>
+              <p className="text-white font-medium">Заказ №{order.id.slice(0, 8)}</p>
             </div>
 
             <div>
