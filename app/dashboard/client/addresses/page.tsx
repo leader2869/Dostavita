@@ -15,6 +15,9 @@ interface SavedAddress {
   address: string
   coordinates: any
   region_id: string | null
+  entrance?: string | null
+  floor?: string | null
+  apartment?: string | null
   is_default: boolean
   created_at: string
   updated_at: string
@@ -36,6 +39,9 @@ export default function SavedAddressesPage() {
   const [coordinates, setCoordinates] = useState<{ lat: number; lon: number } | undefined>()
   const [addressType, setAddressType] = useState<'pickup' | 'delivery' | 'both'>('both')
   const [selectedRegion, setSelectedRegion] = useState('')
+  const [entrance, setEntrance] = useState('')
+  const [floor, setFloor] = useState('')
+  const [apartment, setApartment] = useState('')
   const [isDefault, setIsDefault] = useState(false)
   const [saving, setSaving] = useState(false)
 
@@ -211,6 +217,9 @@ export default function SavedAddressesPage() {
             coordinates: point,
             address_type: addressType,
             region_id: selectedRegion || null,
+            entrance: entrance || null,
+            floor: floor || null,
+            apartment: apartment || null,
             is_default: isDefault,
             updated_at: new Date().toISOString(),
           })
@@ -237,6 +246,9 @@ export default function SavedAddressesPage() {
             coordinates: point,
             address_type: addressType,
             region_id: selectedRegion || null,
+            entrance: entrance || null,
+            floor: floor || null,
+            apartment: apartment || null,
             is_default: isDefault,
           })
 
@@ -251,6 +263,9 @@ export default function SavedAddressesPage() {
       setCoordinates(undefined)
       setAddressType('both')
       setSelectedRegion('')
+      setEntrance('')
+      setFloor('')
+      setApartment('')
       setIsDefault(false)
     } catch (err: any) {
       console.error('Ошибка сохранения адреса:', err)
@@ -266,6 +281,9 @@ export default function SavedAddressesPage() {
     setAddress(addr.address)
     setAddressType(addr.address_type)
     setSelectedRegion(addr.region_id || '')
+    setEntrance(addr.entrance || '')
+    setFloor(addr.floor || '')
+    setApartment(addr.apartment || '')
     setIsDefault(addr.is_default)
     
     // Парсим координаты если они есть
@@ -375,8 +393,17 @@ export default function SavedAddressesPage() {
                     </span>
                   </div>
                   <p className="text-gray-300 mb-1">{addr.address}</p>
+                  {(addr.entrance || addr.floor || addr.apartment) && (
+                    <p className="text-sm text-gray-300 mt-1">
+                      {addr.entrance && `Подъезд ${addr.entrance}`}
+                      {addr.entrance && (addr.floor || addr.apartment) && ', '}
+                      {addr.floor && `Этаж ${addr.floor}`}
+                      {addr.floor && addr.apartment && ', '}
+                      {addr.apartment && `Квартира ${addr.apartment}`}
+                    </p>
+                  )}
                   {addr.region_id && (
-                    <p className="text-sm text-gray-400">
+                    <p className="text-sm text-gray-400 mt-1">
                       Регион: {regions.find(r => r.id === addr.region_id)?.name || 'Не указан'}
                     </p>
                   )}
