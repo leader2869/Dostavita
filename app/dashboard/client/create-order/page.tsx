@@ -346,6 +346,7 @@ export default function CreateOrderPage() {
               console.log('Выбран регион:', e.target.value)
               setSelectedRegion(e.target.value)
             }}
+            disabled={regionAutoDetected}
             required
             disabled={loadingRegions || regions.length === 0}
             className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
