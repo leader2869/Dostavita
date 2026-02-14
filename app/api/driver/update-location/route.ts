@@ -39,42 +39,10 @@ export async function POST(request: Request) {
       )
     }
 
-    // Обновляем текущее местоположение в profiles через прямой SQL запрос
-    // Используем серверный клиент, который имеет больше прав
-    // ВАЖНО: Не используем RPC функцию, если она вызывает рекурсию
-    let profileUpdateSuccess = false
-    try {
-      // Пробуем обновить через прямой запрос (может не работать из-за RLS)
-      const { error: directUpdateError } = await supabase
-        .from('profiles')
-        .update({
-          current_location: `(${longitude},${latitude})`,
-          location_updated_at: new Date().toISOString(),
-        })
-        .eq('id', user.id)
-
-      if (!directUpdateError) {
-        profileUpdateSuccess = true
-      } else {
-        // Если прямой запрос не работает, пробуем RPC функцию
-        console.warn('Прямое обновление не удалось, пробуем RPC функцию:', directUpdateError)
-        const { data: updateResult, error: profileUpdateError } = await supabase
-          .rpc('update_driver_location', {
-            p_driver_id: user.id,
-            p_longitude: longitude,
-            p_latitude: latitude,
-          })
-
-        if (profileUpdateError) {
-          console.error('Ошибка обновления местоположения в profiles через RPC:', profileUpdateError)
-        } else if (updateResult) {
-          profileUpdateSuccess = true
-        }
-      }
-    } catch (err: any) {
-      console.error('Исключение при обновлении местоположения в profiles:', err.message)
-      // Не прерываем выполнение, так как запись в driver_locations все равно сохранится
-    }
+    // ВРЕМЕННО: Не обновляем profiles.current_location из-за рекурсии RLS
+    // Используем только driver_locations для хранения местоположения
+    // Это решает проблему рекурсии, так как driver_locations не имеет проблемных RLS политик
+    // TODO: После исправления RLS политик можно вернуть обновление profiles
 
     // Сохраняем запись в driver_locations
     const { data: locationData, error: locationError } = await supabase
