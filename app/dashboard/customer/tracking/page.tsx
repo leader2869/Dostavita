@@ -17,8 +17,15 @@ export default function CustomerTrackingPage() {
 
   const loadData = useCallback(async () => {
     try {
-      const { data: { user: currentUser } } = await supabase.auth.getUser()
+      setLoading(true)
+      const { data: { user: currentUser }, error: authError } = await supabase.auth.getUser()
       
+      if (authError) {
+        console.error('Ошибка аутентификации:', authError)
+        router.push('/login')
+        return
+      }
+
       if (!currentUser) {
         router.push('/login')
         return
@@ -32,6 +39,14 @@ export default function CustomerTrackingPage() {
 
       if (driversError) {
         console.error('Ошибка загрузки водителей:', driversError)
+        console.error('Детали ошибки:', {
+          code: driversError.code,
+          message: driversError.message,
+          details: driversError.details,
+          hint: driversError.hint
+        })
+        // Устанавливаем пустой массив при ошибке, чтобы не ломать UI
+        setDrivers([])
       } else {
         setDrivers(driversData || [])
         if (driversData && driversData.length > 0 && !selectedDriver) {
@@ -40,6 +55,7 @@ export default function CustomerTrackingPage() {
       }
     } catch (err: any) {
       console.error('Ошибка загрузки данных:', err)
+      setDrivers([])
     } finally {
       setLoading(false)
     }
@@ -89,8 +105,13 @@ export default function CustomerTrackingPage() {
         <div className="lg:col-span-1">
           <div className="bg-gray-800 rounded-lg shadow p-6">
             <h2 className="text-xl font-semibold mb-4 text-white">Водители</h2>
-            <div className="space-y-2">
-              {drivers.map((driver: any) => (
+            {drivers.length === 0 ? (
+              <div className="text-center py-4 text-gray-400 text-sm">
+                Нет водителей с активными заказами
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {drivers.map((driver: any) => (
                 <button
                   key={driver.id}
                   onClick={() => setSelectedDriver(driver.id)}
@@ -126,8 +147,9 @@ export default function CustomerTrackingPage() {
                     </div>
                   </div>
                 </button>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
