@@ -5,6 +5,7 @@ import { CustomerBottomNavigation } from '@/components/customer/CustomerBottomNa
 import { formatDistanceToNowStrict } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { DriverLocationMapWrapper } from '@/components/map/DriverLocationMapWrapper'
+import { formatAddressForOrder } from '@/lib/utils/formatAddress'
 
 export default async function CustomerOrderDetailsPage({ params }: { params: { id: string } }) {
   const orderId = params.id
