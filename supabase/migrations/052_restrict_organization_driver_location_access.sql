@@ -317,23 +317,24 @@ BEGIN
     RETURN;
   END IF;
 
+  -- Используем явное указание схемы и обходим RLS через SECURITY DEFINER
   RETURN QUERY
   SELECT DISTINCT ON (p.id)
     p.id,
-    p.email,
-    p.full_name,
-    p.phone,
-    p.vehicle_type,
-    p.vehicle_number,
-    p.license_number,
+    COALESCE(p.email, '')::TEXT as email,
+    COALESCE(p.full_name, '')::TEXT as full_name,
+    COALESCE(p.phone, '')::TEXT as phone,
+    COALESCE(p.vehicle_type, '')::TEXT as vehicle_type,
+    COALESCE(p.vehicle_number, '')::TEXT as vehicle_number,
+    COALESCE(p.license_number, '')::TEXT as license_number,
     -- Возвращаем current_location только если есть активный заказ
     p.current_location,
     -- Возвращаем location_updated_at только если есть активный заказ
     p.location_updated_at,
-    p.avatar_url,
+    COALESCE(p.avatar_url, '')::TEXT as avatar_url,
     p.created_at,
     o.id as active_order_id,
-    o.status as active_order_status
+    COALESCE(o.status, '')::TEXT as active_order_status
   FROM public.profiles p
   INNER JOIN public.orders o ON o.executor_user_id = p.id
     AND o.customer_id = organization_user_id
@@ -341,6 +342,11 @@ BEGIN
   WHERE p.organization_id = organization_user_id
     AND p.role = 'driver'
   ORDER BY p.id, o.created_at DESC;
+EXCEPTION
+  WHEN OTHERS THEN
+    -- В случае ошибки возвращаем пустой результат
+    RAISE WARNING 'Ошибка в get_organization_drivers_with_active_orders: %', SQLERRM;
+    RETURN;
 END;
 $$;
 
