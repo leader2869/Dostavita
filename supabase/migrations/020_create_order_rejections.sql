@@ -26,3 +26,4 @@ CREATE POLICY "Drivers can view own rejections"
   ON public.order_rejections FOR SELECT
   USING (driver_user_id = auth.uid());
 
+

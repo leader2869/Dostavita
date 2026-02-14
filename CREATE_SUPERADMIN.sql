@@ -57,3 +57,4 @@ LEFT JOIN public.profiles p ON u.id = p.id
 WHERE p.role = 'superadmin'
 ORDER BY u.created_at DESC;
 
+

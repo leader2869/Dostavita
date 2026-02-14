@@ -42,3 +42,4 @@ BEGIN
   RAISE NOTICE '✅ Балансов создано: %', balances_created;
 END $$;
 
+

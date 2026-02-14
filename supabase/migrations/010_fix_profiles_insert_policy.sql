@@ -16,3 +16,4 @@ CREATE POLICY "Users can insert own balance"
   ON public.balances FOR INSERT
   WITH CHECK (user_id = auth.uid());
 
+

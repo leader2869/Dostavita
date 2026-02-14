@@ -41,3 +41,4 @@ WHERE status = 'searching_courier'
 ORDER BY created_at DESC
 LIMIT 10;
 
+

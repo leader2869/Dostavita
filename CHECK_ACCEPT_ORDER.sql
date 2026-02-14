@@ -47,3 +47,4 @@ LIMIT 10;
 -- 5. Тестируем функцию accept_order вручную (замените ORDER_ID на реальный ID заказа)
 -- SELECT public.accept_order('ORDER_ID_HERE'::uuid, '3efb4975-5bfd-4151-920e-2ce5508f0729'::uuid);
 
+

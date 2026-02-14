@@ -10,3 +10,4 @@ INSERT INTO public.regions (name, base_price, is_active) VALUES
   ('Могилевская область', 25.00, true)
 ON CONFLICT (name) DO NOTHING;
 
+

@@ -22,3 +22,4 @@ CREATE POLICY "Drivers can view available orders"
     status = 'searching_courier'
   );
 
+

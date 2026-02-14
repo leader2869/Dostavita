@@ -88,3 +88,4 @@ GRANT EXECUTE ON FUNCTION public.get_all_users() TO anon;
 GRANT EXECUTE ON FUNCTION public.get_all_drivers() TO authenticated;
 GRANT EXECUTE ON FUNCTION public.get_all_drivers() TO anon;
 
+

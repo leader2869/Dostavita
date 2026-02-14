@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
 
 interface UseDriverLocationTrackingOptions {
   enabled?: boolean
@@ -17,7 +16,6 @@ export function useDriverLocationTracking({
   interval = 10000, // 10 секунд по умолчанию
   orderId = null,
 }: UseDriverLocationTrackingOptions = {}) {
-  const supabase = createClient()
   const [isTracking, setIsTracking] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const watchIdRef = useRef<number | null>(null)
@@ -120,7 +118,7 @@ export function useDriverLocationTracking({
       }
       setIsTracking(false)
     }
-  }, [enabled, interval, orderId, supabase])
+  }, [enabled, interval, orderId])
 
   return {
     isTracking,
