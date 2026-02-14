@@ -106,8 +106,15 @@ export default function ClientProfilePage() {
   }
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut()
-    router.push('/login')
+    try {
+      await supabase.auth.signOut()
+      // Используем window.location для полной перезагрузки страницы
+      window.location.href = '/login'
+    } catch (error) {
+      console.error('Ошибка при выходе:', error)
+      // В случае ошибки все равно перенаправляем на login
+      window.location.href = '/login'
+    }
   }
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {

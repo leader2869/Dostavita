@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
@@ -10,6 +10,24 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+    // Проверяем, не авторизован ли уже пользователь
+    const checkAuth = async () => {
+      try {
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          router.push('/dashboard')
+        }
+      } catch (err) {
+        console.error('Ошибка при проверке аутентификации:', err)
+      }
+    }
+    checkAuth()
+  }, [router])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -64,6 +82,14 @@ export default function LoginPage() {
       setError(err.message || 'Ошибка входа')
       setLoading(false)
     }
+  }
+
+  if (!mounted) {
+    return (
+      <div className="bg-gray-800 p-8 rounded-lg shadow-md">
+        <div className="text-center text-white">Загрузка...</div>
+      </div>
+    )
   }
 
   return (
