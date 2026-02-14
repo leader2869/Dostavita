@@ -39,17 +39,17 @@ export async function POST(request: Request) {
       )
     }
 
-    // Обновляем текущее местоположение в profiles
-    const { error: profileUpdateError } = await supabase
-      .from('profiles')
-      .update({
-        current_location: `(${longitude},${latitude})`,
-        location_updated_at: new Date().toISOString(),
+    // Обновляем текущее местоположение в profiles через RPC функцию (обходит RLS)
+    const { data: updateResult, error: profileUpdateError } = await supabase
+      .rpc('update_driver_location', {
+        p_driver_id: user.id,
+        p_longitude: longitude,
+        p_latitude: latitude,
       })
-      .eq('id', user.id)
 
-    if (profileUpdateError) {
+    if (profileUpdateError || !updateResult) {
       console.error('Ошибка обновления местоположения в profiles:', profileUpdateError)
+      // Не прерываем выполнение, так как запись в driver_locations все равно сохранится
     }
 
     // Сохраняем запись в driver_locations
