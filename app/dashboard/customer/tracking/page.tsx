@@ -39,18 +39,15 @@ export default function CustomerTrackingPage() {
       console.log('Organization User ID:', currentUser.id)
       console.log('Organization Email:', currentUser.email)
       
-      // Сначала проверим, какие водители привязаны к организации
+      // Используем RPC функцию для получения водителей (обходит RLS)
       const { data: allDrivers, error: allDriversError } = await supabase
-        .from('profiles')
-        .select('id, email, full_name, organization_id, role')
-        .eq('organization_id', currentUser.id)
-        .eq('role', 'driver')
+        .rpc('get_organization_drivers', { organization_user_id: currentUser.id })
       
-      console.log('Все водители организации:', allDrivers?.length || 0, allDrivers)
+      console.log('Все водители организации (через RPC):', allDrivers?.length || 0, allDrivers)
       
       // Проверим активные заказы этих водителей
       if (allDrivers && allDrivers.length > 0) {
-        const driverIds = allDrivers.map(d => d.id)
+        const driverIds = allDrivers.map((d: any) => d.id)
         const { data: activeOrders, error: ordersError } = await supabase
           .from('orders')
           .select('id, order_number, status, executor_user_id, customer_id, client_id')
@@ -59,7 +56,7 @@ export default function CustomerTrackingPage() {
         
         console.log('Активные заказы водителей организации:', activeOrders?.length || 0, activeOrders)
         console.log('Заказы с customer_id = organization_user_id:', 
-          activeOrders?.filter(o => o.customer_id === currentUser.id) || [])
+          activeOrders?.filter((o: any) => o.customer_id === currentUser.id) || [])
       }
       
       const { data: driversData, error: driversError } = await supabase
