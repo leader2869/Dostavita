@@ -312,6 +312,11 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 BEGIN
+  -- Проверяем, что organization_user_id не NULL
+  IF organization_user_id IS NULL THEN
+    RETURN;
+  END IF;
+
   RETURN QUERY
   SELECT DISTINCT ON (p.id)
     p.id,
