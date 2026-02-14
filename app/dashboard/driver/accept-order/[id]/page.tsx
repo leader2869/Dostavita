@@ -171,7 +171,7 @@ export default function AcceptOrderPage() {
   }
 
   if (loading) {
-    return <div className="text-center py-8">Загрузка...</div>
+    return <div className="text-center py-8 text-white">Загрузка...</div>
   }
 
   if (!order) {
@@ -186,18 +186,18 @@ export default function AcceptOrderPage() {
       <div className="bg-gray-800 rounded-lg shadow p-6 space-y-4">
         <div>
           <h2 className="font-semibold mb-2 text-white">Детали заказа</h2>
-          <p><strong>Откуда:</strong> {order.pickup_address}</p>
-          <p><strong>Куда:</strong> {order.delivery_address}</p>
-          <p><strong>Тип груза:</strong> {
+          <p className="text-white"><strong className="text-white">Откуда:</strong> {order.pickup_address}</p>
+          <p className="text-white"><strong className="text-white">Куда:</strong> {order.delivery_address}</p>
+          <p className="text-white"><strong className="text-white">Тип груза:</strong> {
             order.item_type === 'documents' ? 'Документы' :
             order.item_type === 'parcel' ? 'Посылка' :
             order.item_type === 'flowers' ? 'Цветы' :
             order.item_type === 'food' ? 'Еда' : 'Не указан'
           }</p>
           {order.description && (
-            <p><strong>Описание:</strong> {order.description}</p>
+            <p className="text-white"><strong className="text-white">Описание:</strong> {order.description}</p>
           )}
-          <p className="text-xl font-bold mt-4">Стоимость: {order.final_price} BYN</p>
+          <p className="text-xl font-bold mt-4 text-white">Стоимость: {order.final_price} BYN</p>
         </div>
 
         {!driver && (
