@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, useMap, Polyline } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
@@ -24,32 +24,75 @@ interface DriverLocationMapProps {
   trackDate?: Date // Дата для отображения трека (по умолчанию сегодня)
 }
 
-// Компонент для обновления центра карты
-function MapCenter({ center, zoom }: { center: [number, number], zoom: number }) {
+// Компонент для обновления центра карты (только если нет трека)
+function MapCenter({ center, zoom, hasTrack }: { center: [number, number], zoom: number, hasTrack: boolean }) {
   const map = useMap()
   
   useEffect(() => {
-    map.setView(center, zoom)
-  }, [map, center, zoom])
+    // Не обновляем центр, если есть трек - трек сам управляет границами
+    if (!hasTrack && map && map.getContainer()) {
+      try {
+        map.setView(center, zoom, { animate: false })
+      } catch (e) {
+        // Игнорируем ошибки, если карта еще не готова
+        console.warn('Ошибка обновления центра карты:', e)
+      }
+    }
+  }, [map, center, zoom, hasTrack])
   
   return null
 }
 
-/**
- * Компонент для отображения карты с местоположением водителя
- * Автоматически обновляется через Supabase Realtime
- */
 // Компонент для отображения трека водителя
-function DriverTrack({ trackPoints }: { trackPoints: Array<{ lat: number; lon: number }> }) {
+function DriverTrack({ trackPoints, currentLocation }: { trackPoints: Array<{ lat: number; lon: number }>, currentLocation: { lat: number; lon: number } | null }) {
   const map = useMap()
+  const boundsSetRef = useRef(false)
+  const trackPointsRef = useRef<string>('')
   
   useEffect(() => {
-    if (trackPoints.length > 0) {
-      // Подгоняем границы карты под трек
-      const bounds = L.latLngBounds(trackPoints.map(p => [p.lat, p.lon] as L.LatLngExpression))
-      map.fitBounds(bounds, { padding: [50, 50] })
+    if (!map || !map.getContainer()) {
+      return
     }
-  }, [map, trackPoints])
+
+    if (trackPoints.length > 0) {
+      // Создаем уникальный ключ из количества точек трека
+      const trackKey = `${trackPoints.length}-${trackPoints[0]?.lat}-${trackPoints[0]?.lon}`
+      
+      // Устанавливаем границы только если трек изменился (новые точки добавились)
+      if (trackKey !== trackPointsRef.current) {
+        trackPointsRef.current = trackKey
+        
+        try {
+          // Создаем границы из трека и текущего местоположения
+          const allPoints = [...trackPoints]
+          if (currentLocation) {
+            allPoints.push(currentLocation)
+          }
+          
+          if (allPoints.length > 0) {
+            const bounds = L.latLngBounds(allPoints.map(p => [p.lat, p.lon] as L.LatLngExpression))
+            
+            // Устанавливаем границы только один раз при первой загрузке трека
+            if (!boundsSetRef.current) {
+              // Небольшая задержка, чтобы карта успела инициализироваться
+              setTimeout(() => {
+                if (map && map.getContainer()) {
+                  try {
+                    map.fitBounds(bounds, { padding: [50, 50], animate: false })
+                    boundsSetRef.current = true
+                  } catch (e) {
+                    // Игнорируем ошибки, если карта еще не готова
+                  }
+                }
+              }, 200)
+            }
+          }
+        } catch (e) {
+          // Игнорируем ошибки
+        }
+      }
+    }
+  }, [map, trackPoints, currentLocation])
   
   if (trackPoints.length === 0) {
     return null
@@ -304,7 +347,7 @@ export function DriverLocationMap({
         style={{ height: '100%', width: '100%' }}
         scrollWheelZoom={true}
       >
-        <MapCenter center={center} zoom={zoom} />
+        <MapCenter center={center} zoom={zoom} hasTrack={showTrack && trackPoints.length > 0} />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -312,7 +355,7 @@ export function DriverLocationMap({
 
         {/* Трек водителя за день */}
         {showTrack && trackPoints.length > 0 && (
-          <DriverTrack trackPoints={trackPoints} />
+          <DriverTrack trackPoints={trackPoints} currentLocation={location} />
         )}
 
         {/* Маркер местоположения водителя */}
