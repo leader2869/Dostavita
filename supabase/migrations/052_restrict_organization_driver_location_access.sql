@@ -313,7 +313,7 @@ SET search_path = public
 AS $$
 BEGIN
   RETURN QUERY
-  SELECT DISTINCT
+  SELECT DISTINCT ON (p.id)
     p.id,
     p.email,
     p.full_name,
@@ -335,7 +335,7 @@ BEGIN
     AND o.status IN ('courier_coming', 'courier_delivering')
   WHERE p.organization_id = organization_user_id
     AND p.role = 'driver'
-  ORDER BY p.created_at DESC;
+  ORDER BY p.id, o.created_at DESC;
 END;
 $$;
 
