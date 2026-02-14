@@ -2,6 +2,7 @@
 
 -- Обновляем RLS политику для profiles: организация может видеть current_location только для водителей с активными заказами
 DROP POLICY IF EXISTS "Organizations can view their drivers location" ON public.profiles;
+DROP POLICY IF EXISTS "Organizations can view their drivers location for active orders" ON public.profiles;
 CREATE POLICY "Organizations can view their drivers location for active orders"
   ON public.profiles FOR SELECT
   TO authenticated
@@ -32,6 +33,7 @@ CREATE POLICY "Organizations can view their drivers location for active orders"
 
 -- Обновляем RLS политику для driver_locations: организация может видеть местоположение только для активных заказов
 DROP POLICY IF EXISTS "Organizations can view their drivers locations" ON public.driver_locations;
+DROP POLICY IF EXISTS "Organizations can view their drivers locations for active orders" ON public.driver_locations;
 CREATE POLICY "Organizations can view their drivers locations for active orders"
   ON public.driver_locations FOR SELECT
   USING (
