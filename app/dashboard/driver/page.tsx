@@ -145,7 +145,7 @@ export default async function DriverDashboard() {
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="font-semibold">{order.final_price} BYN</p>
+                      <p className="font-semibold text-white">{order.final_price} BYN</p>
                       <a
                         href={`/dashboard/driver/orders/${order.id}`}
                         className="text-sm text-green-500 hover:text-green-600"
