@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import type { Order, Driver } from '@/lib/types'
 import { BackButton } from '@/components/ui/BackButton'
+import { formatAddressForOrder } from '@/lib/utils/formatAddress'
 
 export default function AcceptOrderPage() {
   const router = useRouter()
