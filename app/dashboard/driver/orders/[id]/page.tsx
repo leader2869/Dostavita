@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import type { Order } from '@/lib/types'
 import { BackButton } from '@/components/ui/BackButton'
+import { formatAddressForOrder } from '@/lib/utils/formatAddress'
 
 export default function OrderDetailsPage() {
   const router = useRouter()
@@ -123,7 +124,7 @@ export default function OrderDetailsPage() {
         <div>
           <h2 className="font-semibold mb-2 text-white">Адреса</h2>
           <div className="mb-3">
-            <p className="text-white"><strong className="text-white">Откуда:</strong> {order.pickup_address}</p>
+            <p className="text-white"><strong className="text-white">Откуда:</strong> {formatAddressForOrder(order.pickup_address)}</p>
             {(order.pickup_entrance || order.pickup_floor || order.pickup_apartment) && (
               <p className="text-sm text-gray-300 mt-1 ml-4">
                 {order.pickup_entrance && `Подъезд ${order.pickup_entrance}`}
@@ -135,7 +136,7 @@ export default function OrderDetailsPage() {
             )}
           </div>
           <div>
-            <p className="text-white"><strong className="text-white">Куда:</strong> {order.delivery_address}</p>
+            <p className="text-white"><strong className="text-white">Куда:</strong> {formatAddressForOrder(order.delivery_address)}</p>
             {(order.delivery_entrance || order.delivery_floor || order.delivery_apartment) && (
               <p className="text-sm text-gray-300 mt-1 ml-4">
                 {order.delivery_entrance && `Подъезд ${order.delivery_entrance}`}

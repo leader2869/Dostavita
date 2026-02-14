@@ -3,6 +3,7 @@ import { redirect, notFound } from 'next/navigation'
 import { BackButton } from '@/components/ui/BackButton'
 import { formatDistanceToNow } from 'date-fns'
 import { ru } from 'date-fns/locale'
+import { formatAddressForOrder } from '@/lib/utils/formatAddress'
 
 export default async function DriverDetailsPage({ params }: { params: { id: string } }) {
   const supabase = createServerSupabaseClient()

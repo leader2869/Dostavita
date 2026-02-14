@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { BackButton } from '@/components/ui/BackButton'
 import { useAuthCheck } from '@/hooks/useAuthCheck'
+import { formatAddressForOrder } from '@/lib/utils/formatAddress'
 
 export default function DriverMyOrdersPage() {
   const router = useRouter()
@@ -103,10 +104,10 @@ export default function DriverMyOrdersPage() {
               </span>
             </div>
             <p className="text-sm text-gray-300 mb-1">
-              <span className="font-medium">Откуда:</span> {order.pickup_address}
+              <span className="font-medium">Откуда:</span> {formatAddressForOrder(order.pickup_address)}
             </p>
             <p className="text-sm text-gray-300 mb-1">
-              <span className="font-medium">Куда:</span> {order.delivery_address}
+              <span className="font-medium">Куда:</span> {formatAddressForOrder(order.delivery_address)}
             </p>
             {order.item_type && (
               <p className="text-sm text-gray-400 mt-2">

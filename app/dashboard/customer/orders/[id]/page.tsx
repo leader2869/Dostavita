@@ -135,12 +135,12 @@ export default async function CustomerOrderDetailsPage({ params }: { params: { i
 
             <div>
               <p className="text-sm text-gray-400">Адрес отправления</p>
-              <p className="text-white">{order.pickup_address}</p>
+              <p className="text-white">{formatAddressForOrder(order.pickup_address)}</p>
             </div>
 
             <div>
               <p className="text-sm text-gray-400">Адрес доставки</p>
-              <p className="text-white">{order.delivery_address}</p>
+              <p className="text-white">{formatAddressForOrder(order.delivery_address)}</p>
             </div>
 
             <div>

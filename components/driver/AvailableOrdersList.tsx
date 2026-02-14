@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { formatDistanceToNow } from 'date-fns'
 import { ru } from 'date-fns/locale'
+import { formatAddressForOrder } from '@/lib/utils/formatAddress'
 
 interface Order {
   id: string
