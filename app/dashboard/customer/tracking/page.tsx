@@ -74,15 +74,35 @@ export default function CustomerTrackingPage() {
         // Если функция не найдена, пробуем альтернативный способ
         if (driversError.code === '42883' || driversError.message?.includes('function') || driversError.message?.includes('does not exist')) {
           console.warn('Функция get_organization_drivers_with_active_orders не найдена, используем альтернативный метод')
-          // Пробуем получить водителей через обычный запрос
+          // Пробуем получить водителей через RPC функцию get_organization_drivers
           const { data: altDrivers, error: altError } = await supabase
-            .from('profiles')
-            .select('id, email, full_name, phone, vehicle_type, vehicle_number, license_number, avatar_url, created_at')
-            .eq('organization_id', currentUser.id)
-            .eq('role', 'driver')
+            .rpc('get_organization_drivers', { organization_user_id: currentUser.id })
           
           if (!altError && altDrivers) {
-            setDrivers(altDrivers.map((d: any) => ({ ...d, active_order_id: null, active_order_status: null })))
+            // Для каждого водителя проверяем активные заказы
+            const driversWithOrders = []
+            for (const driver of altDrivers) {
+              const { data: driverOrders } = await supabase
+                .from('orders')
+                .select('id, status')
+                .eq('executor_user_id', driver.id)
+                .in('status', ['courier_coming', 'courier_delivering'])
+                .limit(1)
+              
+              if (driverOrders && driverOrders.length > 0) {
+                driversWithOrders.push({
+                  ...driver,
+                  active_order_id: driverOrders[0].id,
+                  active_order_status: driverOrders[0].status
+                })
+              }
+            }
+            
+            console.log('Водители с активными заказами (альтернативный метод):', driversWithOrders.length)
+            setDrivers(driversWithOrders)
+            if (driversWithOrders.length > 0 && !selectedDriver) {
+              setSelectedDriver(driversWithOrders[0].id)
+            }
             return
           }
         }
@@ -91,9 +111,15 @@ export default function CustomerTrackingPage() {
         setDrivers([])
       } else {
         console.log('Успешно загружено водителей:', driversData?.length || 0)
+        console.log('Данные водителей:', driversData)
         setDrivers(driversData || [])
         if (driversData && driversData.length > 0 && !selectedDriver) {
           setSelectedDriver(driversData[0].id)
+        } else {
+          console.warn('Функция вернула пустой массив. Проверьте:')
+          console.warn('1. Привязан ли водитель к организации (organization_id)')
+          console.warn('2. Есть ли у водителя активные заказы (status: courier_coming или courier_delivering)')
+          console.warn('3. Применена ли функция get_organization_drivers_with_active_orders в Supabase')
         }
       }
     } catch (err: any) {
