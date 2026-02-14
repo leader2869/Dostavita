@@ -34,6 +34,7 @@ export default function CustomerTrackingPage() {
       setUser(currentUser)
 
       // Получаем водителей организации только с активными заказами
+      console.log('Вызов RPC функции get_organization_drivers_with_active_orders с параметром:', currentUser.id)
       const { data: driversData, error: driversError } = await supabase
         .rpc('get_organization_drivers_with_active_orders', { organization_user_id: currentUser.id })
 
@@ -45,9 +46,27 @@ export default function CustomerTrackingPage() {
           details: driversError.details,
           hint: driversError.hint
         })
+        
+        // Если функция не найдена, пробуем альтернативный способ
+        if (driversError.code === '42883' || driversError.message?.includes('function') || driversError.message?.includes('does not exist')) {
+          console.warn('Функция get_organization_drivers_with_active_orders не найдена, используем альтернативный метод')
+          // Пробуем получить водителей через обычный запрос
+          const { data: altDrivers, error: altError } = await supabase
+            .from('profiles')
+            .select('id, email, full_name, phone, vehicle_type, vehicle_number, license_number, avatar_url, created_at')
+            .eq('organization_id', currentUser.id)
+            .eq('role', 'driver')
+          
+          if (!altError && altDrivers) {
+            setDrivers(altDrivers.map((d: any) => ({ ...d, active_order_id: null, active_order_status: null })))
+            return
+          }
+        }
+        
         // Устанавливаем пустой массив при ошибке, чтобы не ломать UI
         setDrivers([])
       } else {
+        console.log('Успешно загружено водителей:', driversData?.length || 0)
         setDrivers(driversData || [])
         if (driversData && driversData.length > 0 && !selectedDriver) {
           setSelectedDriver(driversData[0].id)
