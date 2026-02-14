@@ -4,16 +4,17 @@ import { useEffect, useRef, useState } from 'react'
 
 interface UseDriverLocationTrackingOptions {
   enabled?: boolean
-  interval?: number // Интервал обновления в миллисекундах (по умолчанию 10 секунд)
+  interval?: number // Интервал обновления в миллисекундах (по умолчанию 1 минута)
   orderId?: string | null
 }
 
 /**
- * Хук для постоянного отслеживания местоположения водителя при активных заказах
+ * Хук для постоянного отслеживания местоположения водителя
+ * Водитель всегда передает свое местоположение
  */
 export function useDriverLocationTracking({
   enabled = true,
-  interval = 10000, // 10 секунд по умолчанию
+  interval = 60000, // 1 минута (60000 мс) по умолчанию
   orderId = null,
 }: UseDriverLocationTrackingOptions = {}) {
   const [isTracking, setIsTracking] = useState(false)

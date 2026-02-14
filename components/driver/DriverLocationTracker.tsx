@@ -15,7 +15,7 @@ export function DriverLocationTracker() {
   // Отслеживаем местоположение всегда (без проверки активных заказов)
   const { isTracking, error } = useDriverLocationTracking({
     enabled: true, // Всегда включено
-    interval: 10000, // Обновляем каждые 10 секунд
+    interval: 60000, // Обновляем каждую минуту (60000 мс = 60 секунд)
     orderId: activeOrderId,
   })
 
