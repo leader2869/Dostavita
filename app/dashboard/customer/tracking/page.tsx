@@ -141,37 +141,47 @@ export default function CustomerTrackingPage() {
                   </h2>
 
                   <div className="space-y-4">
-                    {/* Местоположение */}
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-400 mb-2">Текущее местоположение</h3>
-                      {driver.current_location ? (
-                        <div className="bg-gray-700 rounded-lg p-4">
-                          <p className="text-white font-mono text-sm">
-                            {formatLocation(driver.current_location)}
-                          </p>
-                          {driver.location_updated_at && (
-                            <p className="text-gray-400 text-xs mt-2">
-                              Обновлено: {new Date(driver.location_updated_at).toLocaleString('ru-RU')}
+                    {/* Местоположение - показываем только если есть активный заказ */}
+                    {driver.active_order_id ? (
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-400 mb-2">Текущее местоположение</h3>
+                        {driver.current_location ? (
+                          <div className="bg-gray-700 rounded-lg p-4">
+                            <p className="text-white font-mono text-sm">
+                              {formatLocation(driver.current_location)}
                             </p>
-                          )}
-                          {/* Карта с местоположением водителя */}
-                          <div className="mt-4">
-                            <DriverLocationMap
-                              driverId={driver.id}
-                              height="400px"
-                              zoom={15}
-                            />
+                            {driver.location_updated_at && (
+                              <p className="text-gray-400 text-xs mt-2">
+                                Обновлено: {new Date(driver.location_updated_at).toLocaleString('ru-RU')}
+                              </p>
+                            )}
+                            {/* Карта с местоположением водителя */}
+                            <div className="mt-4">
+                              <DriverLocationMap
+                                driverId={driver.id}
+                                orderId={driver.active_order_id}
+                                height="400px"
+                                zoom={15}
+                              />
+                            </div>
                           </div>
-                        </div>
-                      ) : (
-                        <div className="bg-gray-700 rounded-lg p-4">
-                          <p className="text-gray-400">Местоположение не определено</p>
-                          <p className="text-gray-500 text-xs mt-2">
-                            Водитель не передает данные о местоположении
-                          </p>
-                        </div>
-                      )}
-                    </div>
+                        ) : (
+                          <div className="bg-gray-700 rounded-lg p-4">
+                            <p className="text-gray-400">Местоположение не определено</p>
+                            <p className="text-gray-500 text-xs mt-2">
+                              Водитель не передает данные о местоположении
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="bg-gray-700 rounded-lg p-4">
+                        <p className="text-gray-400">Нет активных заказов</p>
+                        <p className="text-gray-500 text-xs mt-2">
+                          Местоположение водителя доступно только при наличии активного заказа
+                        </p>
+                      </div>
+                    )}
 
                     {/* Информация о водителе */}
                     <div>
