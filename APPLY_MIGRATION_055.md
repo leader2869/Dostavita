@@ -62,7 +62,7 @@ ORDER BY policyname;
    - Обрабатывает ошибки и гарантирует включение RLS даже при исключениях
 
 4. **Пересоздает все политики** с использованием исправленных функций:
-   - "Organizations can view their drivers location for active orders" - организация может видеть местоположение водителей ТОЛЬКО при наличии активных заказов
+   - "Organizations can view their drivers location" - организация может видеть местоположение своих водителей ВСЕГДА (без ограничения на активные заказы)
    - "Admins can view all profiles"
    - "Superadmins can update any profile"
 
