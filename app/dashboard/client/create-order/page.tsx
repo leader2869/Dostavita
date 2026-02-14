@@ -958,12 +958,9 @@ export default function CreateOrderPage() {
                                  addr.address_type === 'delivery' ? 'Доставка' : 'Оба'}
                               </span>
                             </div>
-                            <p className="text-sm text-gray-300">{addr.address}</p>
-                            {addr.region_id && (
-                              <p className="text-xs text-gray-400 mt-1">
-                                Регион: {regions.find(r => r.id === addr.region_id)?.name || 'Не указан'}
-                              </p>
-                            )}
+                            <p className="text-sm text-gray-300">
+                              {formatAddressForCard(addr.address, addr.entrance, addr.floor, addr.apartment)}
+                            </p>
                           </div>
                           <svg className="w-5 h-5 text-gray-400 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
