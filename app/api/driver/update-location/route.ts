@@ -40,15 +40,23 @@ export async function POST(request: Request) {
     }
 
     // Обновляем текущее местоположение в profiles через RPC функцию (обходит RLS)
-    const { data: updateResult, error: profileUpdateError } = await supabase
-      .rpc('update_driver_location', {
-        p_driver_id: user.id,
-        p_longitude: longitude,
-        p_latitude: latitude,
-      })
+    // Используем try-catch для обработки ошибок соединения
+    let profileUpdateSuccess = false
+    try {
+      const { data: updateResult, error: profileUpdateError } = await supabase
+        .rpc('update_driver_location', {
+          p_driver_id: user.id,
+          p_longitude: longitude,
+          p_latitude: latitude,
+        })
 
-    if (profileUpdateError || !updateResult) {
-      console.error('Ошибка обновления местоположения в profiles:', profileUpdateError)
+      if (profileUpdateError) {
+        console.error('Ошибка обновления местоположения в profiles:', profileUpdateError)
+      } else if (updateResult) {
+        profileUpdateSuccess = true
+      }
+    } catch (err: any) {
+      console.error('Исключение при обновлении местоположения в profiles (connection error):', err.message)
       // Не прерываем выполнение, так как запись в driver_locations все равно сохранится
     }
 
