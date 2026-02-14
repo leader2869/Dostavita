@@ -21,10 +21,24 @@ export function DriverLocationTracker() {
   })
 
   useEffect(() => {
+    let channel: any = null
+    let interval: NodeJS.Timeout | null = null
+
     const checkActiveOrders = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) return
+        const { data: { user }, error: userError } = await supabase.auth.getUser()
+        
+        if (userError) {
+          console.error('Ошибка получения пользователя:', userError)
+          return
+        }
+        
+        if (!user) {
+          console.log('Пользователь не авторизован')
+          setHasActiveOrders(false)
+          setActiveOrderId(null)
+          return
+        }
 
         // Проверяем наличие активных заказов
         const { data: activeOrders, error: ordersError } = await supabase
@@ -46,8 +60,10 @@ export function DriverLocationTracker() {
         // Берем ID первого активного заказа
         if (hasActive && activeOrders && activeOrders.length > 0) {
           setActiveOrderId(activeOrders[0].id)
+          console.log('Активные заказы найдены, начинаем отслеживание местоположения')
         } else {
           setActiveOrderId(null)
+          console.log('Активных заказов нет, отслеживание местоположения отключено')
         }
       } catch (err) {
         console.error('Ошибка проверки активных заказов:', err)
@@ -58,41 +74,48 @@ export function DriverLocationTracker() {
     checkActiveOrders()
 
     // Подписываемся на изменения заказов через Supabase Realtime
-    // Если Realtime недоступен, проверка все равно выполняется каждые 30 секунд
-    const channel = supabase
-      .channel('driver-active-orders')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'orders',
-          filter: `executor_user_id=eq.${(async () => {
-            const { data: { user } } = await supabase.auth.getUser()
-            return user?.id || ''
-          })()}`,
-        },
-        () => {
-          // При изменении заказов проверяем снова
-          checkActiveOrders()
-        }
-      )
-      .subscribe((status) => {
-        if (status === 'SUBSCRIBED') {
-          console.log('Подписка на обновления заказов активна')
-        } else if (status === 'CHANNEL_ERROR') {
-          console.warn('Ошибка подключения к Realtime (не критично, проверка выполняется каждые 30 секунд)')
-        }
-      })
+    // Используем правильный фильтр с получением user_id
+    const setupRealtime = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      channel = supabase
+        .channel(`driver-active-orders-${user.id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'orders',
+            filter: `executor_user_id=eq.${user.id}`,
+          },
+          () => {
+            // При изменении заказов проверяем снова
+            console.log('Обнаружено изменение заказов, проверяем активные заказы')
+            checkActiveOrders()
+          }
+        )
+        .subscribe((status) => {
+          if (status === 'SUBSCRIBED') {
+            console.log('Подписка на обновления заказов активна')
+          } else if (status === 'CHANNEL_ERROR') {
+            console.warn('Ошибка подключения к Realtime (не критично, проверка выполняется каждые 30 секунд)')
+          }
+        })
+    }
+
+    setupRealtime()
 
     // Проверяем каждые 30 секунд на случай, если Realtime не сработал
-    const interval = setInterval(checkActiveOrders, 30000)
+    interval = setInterval(checkActiveOrders, 30000)
 
     return () => {
       if (channel) {
         supabase.removeChannel(channel)
       }
-      clearInterval(interval)
+      if (interval) {
+        clearInterval(interval)
+      }
     }
   }, [supabase])
 

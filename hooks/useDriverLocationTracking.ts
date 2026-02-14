@@ -22,17 +22,28 @@ export function useDriverLocationTracking({
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
+    console.log('useDriverLocationTracking: enabled =', enabled, 'orderId =', orderId)
+    
     if (!enabled) {
+      console.log('Отслеживание местоположения отключено')
       return
     }
 
     if (!navigator.geolocation) {
-      setError('Геолокация не поддерживается вашим браузером')
+      const errorMsg = 'Геолокация не поддерживается вашим браузером'
+      console.error(errorMsg)
+      setError(errorMsg)
       return
     }
 
     const updateLocation = async (position: GeolocationPosition) => {
       try {
+        console.log('Отправка местоположения:', {
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          orderId,
+        })
+
         const response = await fetch('/api/driver/update-location', {
           method: 'POST',
           headers: {
@@ -50,9 +61,12 @@ export function useDriverLocationTracking({
 
         if (!response.ok) {
           const data = await response.json()
+          console.error('Ошибка ответа API:', response.status, data)
           throw new Error(data.error || 'Ошибка обновления местоположения')
         }
 
+        const result = await response.json()
+        console.log('Местоположение успешно отправлено:', result)
         setError(null)
       } catch (err: any) {
         console.error('Ошибка обновления местоположения:', err)
