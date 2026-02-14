@@ -66,8 +66,8 @@ BEGIN
   FROM public.driver_locations dl
   WHERE dl.driver_id = p_driver_id
     AND DATE(dl.created_at) = p_date
-    AND (p_start_time IS NULL OR TIME(dl.created_at) >= p_start_time)
-    AND (p_end_time IS NULL OR TIME(dl.created_at) <= p_end_time)
+    AND (p_start_time IS NULL OR CAST(dl.created_at AS TIME) >= p_start_time)
+    AND (p_end_time IS NULL OR CAST(dl.created_at AS TIME) <= p_end_time)
   ORDER BY dl.created_at ASC;
   
   -- Включаем RLS обратно
