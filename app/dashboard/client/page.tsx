@@ -8,6 +8,7 @@ import { OrdersMap } from '@/components/map/OrdersMap'
 import { AddressAutocomplete } from '@/components/ui/AddressAutocomplete'
 import { AddressPickerMap } from '@/components/map/AddressPickerMap'
 import { SinglePointMap } from '@/components/map/SinglePointMap'
+import { formatAddressForCard } from '@/lib/utils/formatAddress'
 import type { Region } from '@/lib/types'
 
 export default function ClientDashboard() {
@@ -489,16 +490,9 @@ export default function ClientDashboard() {
                   </span>
                 )}
               </div>
-              <p className="text-xs text-gray-400 line-clamp-2 mb-1">{addr.address}</p>
-              {(addr.entrance || addr.floor || addr.apartment) && (
-                <p className="text-xs text-gray-500">
-                  {addr.entrance && `${addr.entrance}`}
-                  {addr.entrance && (addr.floor || addr.apartment) && ', '}
-                  {addr.floor && `${addr.floor}`}
-                  {addr.floor && addr.apartment && ', '}
-                  {addr.apartment && `${addr.apartment}`}
-                </p>
-              )}
+              <p className="text-xs text-gray-400 line-clamp-3 mb-1">
+                {formatAddressForCard(addr.address, addr.entrance, addr.floor, addr.apartment)}
+              </p>
             </div>
           ))}
           

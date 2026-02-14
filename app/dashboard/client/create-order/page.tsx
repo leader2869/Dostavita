@@ -8,6 +8,7 @@ import { ClientBottomNavigation } from '@/components/client/ClientBottomNavigati
 import { AddressAutocomplete } from '@/components/ui/AddressAutocomplete'
 import { OrderMap } from '@/components/map/OrderMap'
 import { AddressPickerMap } from '@/components/map/AddressPickerMap'
+import { formatAddressForCard } from '@/lib/utils/formatAddress'
 
 export default function CreateOrderPage() {
   const router = useRouter()

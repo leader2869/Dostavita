@@ -7,6 +7,7 @@ import { BackButton } from '@/components/ui/BackButton'
 import { ClientBottomNavigation } from '@/components/client/ClientBottomNavigation'
 import { AddressAutocomplete } from '@/components/ui/AddressAutocomplete'
 import type { Region } from '@/lib/types'
+import { formatAddressForCard } from '@/lib/utils/formatAddress'
 
 interface SavedAddress {
   id: string
@@ -380,16 +381,9 @@ export default function SavedAddressesPage() {
                   </span>
                 )}
               </div>
-              <p className="text-xs text-gray-400 mb-1 line-clamp-2">{addr.address}</p>
-              {(addr.entrance || addr.floor || addr.apartment) && (
-                <p className="text-xs text-gray-500 mt-1">
-                  {addr.entrance && `${addr.entrance}`}
-                  {addr.entrance && (addr.floor || addr.apartment) && ', '}
-                  {addr.floor && `${addr.floor}`}
-                  {addr.floor && addr.apartment && ', '}
-                  {addr.apartment && `${addr.apartment}`}
-                </p>
-              )}
+              <p className="text-xs text-gray-400 mb-1 line-clamp-3">
+                {formatAddressForCard(addr.address, addr.entrance, addr.floor, addr.apartment)}
+              </p>
               {addr.address_type !== 'both' && (
                 <div className="flex gap-1 mt-2">
                   <span className="px-1.5 py-0.5 bg-gray-700 text-gray-300 text-xs rounded">
