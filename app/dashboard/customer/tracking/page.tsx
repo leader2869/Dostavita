@@ -26,9 +26,9 @@ export default function CustomerTrackingPage() {
 
       setUser(currentUser)
 
-      // Получаем водителей организации
+      // Получаем водителей организации только с активными заказами
       const { data: driversData, error: driversError } = await supabase
-        .rpc('get_organization_drivers', { organization_user_id: currentUser.id })
+        .rpc('get_organization_drivers_with_active_orders', { organization_user_id: currentUser.id })
 
       if (driversError) {
         console.error('Ошибка загрузки водителей:', driversError)
