@@ -20,12 +20,23 @@ export async function POST(request: NextRequest) {
   const origin = request.headers.get('origin') || request.nextUrl.origin
   const loginUrl = new URL('/login', origin)
   
+  // Добавляем параметр для принудительной перезагрузки страницы
+  loginUrl.searchParams.set('signedOut', 'true')
+  
   // Создаем редирект с очисткой cookies
   const response = NextResponse.redirect(loginUrl)
   
   // Очищаем cookies сессии Supabase
   response.cookies.delete('sb-access-token')
   response.cookies.delete('sb-refresh-token')
+  
+  // Очищаем все cookies, связанные с Supabase
+  const cookies = request.cookies.getAll()
+  cookies.forEach(cookie => {
+    if (cookie.name.startsWith('sb-') || cookie.name.includes('supabase')) {
+      response.cookies.delete(cookie.name)
+    }
+  })
   
   return response
 }

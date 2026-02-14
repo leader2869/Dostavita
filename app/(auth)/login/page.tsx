@@ -10,24 +10,38 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [mounted, setMounted] = useState(false)
+  const [checkingAuth, setCheckingAuth] = useState(true)
 
   useEffect(() => {
-    setMounted(true)
+    // Проверяем параметр signedOut в URL
+    const urlParams = new URLSearchParams(window.location.search)
+    if (urlParams.get('signedOut') === 'true') {
+      // Очищаем параметр из URL
+      window.history.replaceState({}, '', '/login')
+      // Принудительно очищаем состояние Supabase на клиенте
+      const supabase = createClient()
+      supabase.auth.signOut().catch(() => {
+        // Игнорируем ошибки при выходе, так как мы уже вышли
+      })
+    }
+
     // Проверяем, не авторизован ли уже пользователь
     const checkAuth = async () => {
       try {
         const supabase = createClient()
         const { data: { user } } = await supabase.auth.getUser()
         if (user) {
-          router.push('/dashboard')
+          // Используем window.location для полной перезагрузки
+          window.location.href = '/dashboard'
         }
       } catch (err) {
         console.error('Ошибка при проверке аутентификации:', err)
+      } finally {
+        setCheckingAuth(false)
       }
     }
     checkAuth()
-  }, [router])
+  }, [])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -84,17 +98,12 @@ export default function LoginPage() {
     }
   }
 
-  if (!mounted) {
-    return (
-      <div className="bg-gray-800 p-8 rounded-lg shadow-md">
-        <div className="text-center text-white">Загрузка...</div>
-      </div>
-    )
-  }
-
   return (
     <div className="bg-gray-800 p-8 rounded-lg shadow-md">
       <h1 className="text-2xl font-bold text-center mb-6 text-white">Вход в Dostavita</h1>
+      {checkingAuth && (
+        <div className="text-center text-gray-400 text-sm mb-4">Проверка аутентификации...</div>
+      )}
       
       <form onSubmit={handleLogin} className="space-y-4">
         <div>
