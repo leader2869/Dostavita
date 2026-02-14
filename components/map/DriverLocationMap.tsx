@@ -96,29 +96,44 @@ export function DriverLocationMap({
     const loadLocation = async () => {
       try {
         // Используем RPC функцию для безопасного получения местоположения
-        const { data: locationData, error: rpcError } = await supabase
-          .rpc('get_driver_location_for_order', {
-            p_driver_id: driverId,
-            p_order_id: orderId || null,
-          })
+        // Добавляем обработку таймаута
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 10000) // Таймаут 10 секунд
 
-        if (!rpcError && locationData && locationData.length > 0) {
-          const loc = locationData[0]
-          if (loc.latitude && loc.longitude) {
-            setLocation({
-              lat: parseFloat(loc.latitude),
-              lon: parseFloat(loc.longitude),
+        try {
+          const { data: locationData, error: rpcError } = await supabase
+            .rpc('get_driver_location_for_order', {
+              p_driver_id: driverId,
+              p_order_id: orderId || null,
             })
-            setLoading(false)
-            return
-          }
-        }
 
-        // Если RPC функция не вернула данные, логируем ошибку
-        if (rpcError) {
-          console.error('Ошибка получения местоположения через RPC:', rpcError)
-        } else if (!locationData || locationData.length === 0) {
-          console.warn('RPC функция не вернула данные о местоположении водителя')
+          clearTimeout(timeoutId)
+
+          if (!rpcError && locationData && locationData.length > 0) {
+            const loc = locationData[0]
+            if (loc.latitude && loc.longitude) {
+              setLocation({
+                lat: parseFloat(loc.latitude),
+                lon: parseFloat(loc.longitude),
+              })
+              setLoading(false)
+              return
+            }
+          }
+
+          // Если RPC функция не вернула данные, логируем ошибку
+          if (rpcError) {
+            console.error('Ошибка получения местоположения через RPC:', rpcError)
+          } else if (!locationData || locationData.length === 0) {
+            console.warn('RPC функция не вернула данные о местоположении водителя')
+          }
+        } catch (timeoutError: any) {
+          clearTimeout(timeoutId)
+          if (timeoutError.name === 'AbortError') {
+            console.warn('Таймаут при получении местоположения водителя')
+          } else {
+            throw timeoutError
+          }
         }
       } catch (err) {
         console.error('Ошибка загрузки местоположения:', err)
