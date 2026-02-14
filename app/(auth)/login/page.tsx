@@ -1,11 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -14,10 +15,10 @@ export default function LoginPage() {
 
   useEffect(() => {
     // Проверяем параметр signedOut в URL
-    const urlParams = new URLSearchParams(window.location.search)
-    if (urlParams.get('signedOut') === 'true') {
+    const signedOut = searchParams.get('signedOut')
+    if (signedOut === 'true') {
       // Очищаем параметр из URL
-      window.history.replaceState({}, '', '/login')
+      router.replace('/login')
       // Принудительно очищаем состояние Supabase на клиенте
       const supabase = createClient()
       supabase.auth.signOut().catch(() => {
@@ -33,6 +34,7 @@ export default function LoginPage() {
         if (user) {
           // Используем window.location для полной перезагрузки
           window.location.href = '/dashboard'
+          return
         }
       } catch (err) {
         console.error('Ошибка при проверке аутентификации:', err)
@@ -40,8 +42,14 @@ export default function LoginPage() {
         setCheckingAuth(false)
       }
     }
-    checkAuth()
-  }, [])
+    
+    // Небольшая задержка для обеспечения правильной гидратации
+    const timer = setTimeout(() => {
+      checkAuth()
+    }, 100)
+    
+    return () => clearTimeout(timer)
+  }, [searchParams, router])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -99,11 +107,12 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="bg-gray-800 p-8 rounded-lg shadow-md">
-      <h1 className="text-2xl font-bold text-center mb-6 text-white">Вход в Dostavita</h1>
-      {checkingAuth && (
-        <div className="text-center text-gray-400 text-sm mb-4">Проверка аутентификации...</div>
-      )}
+    <>
+      <div className="bg-gray-800 p-8 rounded-lg shadow-md">
+        <h1 className="text-2xl font-bold text-center mb-6 text-white">Вход в Dostavita</h1>
+        {checkingAuth && (
+          <div className="text-center text-gray-400 text-sm mb-4">Проверка аутентификации...</div>
+        )}
       
       <form onSubmit={handleLogin} className="space-y-4">
         <div>
@@ -152,6 +161,7 @@ export default function LoginPage() {
           Нет аккаунта? Зарегистрироваться
         </a>
       </div>
-    </div>
+      </div>
+    </>
   )
 }
