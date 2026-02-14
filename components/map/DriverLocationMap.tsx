@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, useMap, Polyline } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { createClient } from '@/lib/supabase/client'
@@ -20,6 +20,8 @@ interface DriverLocationMapProps {
   height?: string
   zoom?: number
   showUserLocation?: boolean
+  showTrack?: boolean // Показывать ли трек водителя за день
+  trackDate?: Date // Дата для отображения трека (по умолчанию сегодня)
 }
 
 // Компонент для обновления центра карты
@@ -37,15 +39,44 @@ function MapCenter({ center, zoom }: { center: [number, number], zoom: number })
  * Компонент для отображения карты с местоположением водителя
  * Автоматически обновляется через Supabase Realtime
  */
+// Компонент для отображения трека водителя
+function DriverTrack({ trackPoints }: { trackPoints: Array<{ lat: number; lon: number }> }) {
+  const map = useMap()
+  
+  useEffect(() => {
+    if (trackPoints.length > 0) {
+      // Подгоняем границы карты под трек
+      const bounds = L.latLngBounds(trackPoints.map(p => [p.lat, p.lon] as L.LatLngExpression))
+      map.fitBounds(bounds, { padding: [50, 50] })
+    }
+  }, [map, trackPoints])
+  
+  if (trackPoints.length === 0) {
+    return null
+  }
+  
+  return (
+    <Polyline
+      positions={trackPoints.map(p => [p.lat, p.lon] as L.LatLngExpression)}
+      color="#3b82f6"
+      weight={4}
+      opacity={0.7}
+    />
+  )
+}
+
 export function DriverLocationMap({
   driverId,
   orderId,
   height = '400px',
   zoom = 15,
   showUserLocation = false,
+  showTrack = true,
+  trackDate = new Date(),
 }: DriverLocationMapProps) {
   const supabase = createClient()
   const [location, setLocation] = useState<{ lat: number; lon: number } | null>(null)
+  const [trackPoints, setTrackPoints] = useState<Array<{ lat: number; lon: number }>>([])
   const [loading, setLoading] = useState(true)
 
   // Парсим координаты из POINT формата
@@ -90,6 +121,40 @@ export function DriverLocationMap({
 
     return null
   }
+
+  // Загружаем трек водителя за день
+  useEffect(() => {
+    if (!showTrack) {
+      return
+    }
+
+    const loadTrack = async () => {
+      try {
+        const dateStr = trackDate.toISOString().split('T')[0] // Формат YYYY-MM-DD
+        const { data: trackData, error: trackError } = await supabase
+          .rpc('get_driver_track', {
+            p_driver_id: driverId,
+            p_date: dateStr,
+          })
+
+        if (!trackError && trackData && trackData.length > 0) {
+          const points = trackData
+            .map((point: any) => ({
+              lat: parseFloat(point.latitude),
+              lon: parseFloat(point.longitude),
+            }))
+            .filter((p: { lat: number; lon: number }) => !isNaN(p.lat) && !isNaN(p.lon))
+          setTrackPoints(points)
+        } else if (trackError) {
+          console.error('Ошибка загрузки трека:', trackError)
+        }
+      } catch (err) {
+        console.error('Ошибка загрузки трека водителя:', err)
+      }
+    }
+
+    loadTrack()
+  }, [driverId, trackDate, showTrack, supabase])
 
   useEffect(() => {
     // Загружаем текущее местоположение водителя
@@ -244,6 +309,11 @@ export function DriverLocationMap({
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+
+        {/* Трек водителя за день */}
+        {showTrack && trackPoints.length > 0 && (
+          <DriverTrack trackPoints={trackPoints} />
+        )}
 
         {/* Маркер местоположения водителя */}
         <Marker position={[location.lat, location.lon]} icon={driverIcon}>

@@ -38,12 +38,9 @@ export async function POST(request: Request) {
       )
     }
 
-    // ВРЕМЕННО: Не обновляем profiles.current_location из-за рекурсии RLS
-    // Используем только driver_locations для хранения местоположения
-    // Это решает проблему рекурсии, так как driver_locations не имеет проблемных RLS политик
-    // TODO: После исправления RLS политик можно вернуть обновление profiles
-
-    // Сохраняем запись в driver_locations
+    // Сохраняем точку трека в driver_locations
+    // Каждая запись - это точка трека водителя, сохраняемая каждую минуту
+    // Это позволяет отслеживать маршрут движения водителя в течение дня
     const { data: locationData, error: locationError } = await supabase
       .from('driver_locations')
       .insert({
