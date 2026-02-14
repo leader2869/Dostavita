@@ -58,6 +58,7 @@ export function DriverLocationTracker() {
     checkActiveOrders()
 
     // Подписываемся на изменения заказов через Supabase Realtime
+    // Если Realtime недоступен, проверка все равно выполняется каждые 30 секунд
     const channel = supabase
       .channel('driver-active-orders')
       .on(
@@ -76,7 +77,13 @@ export function DriverLocationTracker() {
           checkActiveOrders()
         }
       )
-      .subscribe()
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          console.log('Подписка на обновления заказов активна')
+        } else if (status === 'CHANNEL_ERROR') {
+          console.warn('Ошибка подключения к Realtime (не критично, проверка выполняется каждые 30 секунд)')
+        }
+      })
 
     // Проверяем каждые 30 секунд на случай, если Realtime не сработал
     const interval = setInterval(checkActiveOrders, 30000)

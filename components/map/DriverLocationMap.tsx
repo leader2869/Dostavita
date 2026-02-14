@@ -130,6 +130,7 @@ export function DriverLocationMap({
     loadLocation()
 
     // Подписываемся на изменения местоположения через Supabase Realtime
+    // Если Realtime недоступен, данные все равно обновляются при загрузке компонента
     const channel = supabase
       .channel(`driver-location-map-${driverId}`)
       .on(
@@ -169,10 +170,22 @@ export function DriverLocationMap({
           }
         }
       )
-      .subscribe()
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          console.log('Подписка на обновления местоположения водителя активна')
+        } else if (status === 'CHANNEL_ERROR') {
+          console.warn('Ошибка подключения к Realtime (не критично, данные обновляются через API)')
+        }
+      })
+    
+    // Периодически обновляем местоположение, если Realtime недоступен
+    const refreshInterval = setInterval(() => {
+      loadLocation()
+    }, 30000) // Обновляем каждые 30 секунд
 
     return () => {
       supabase.removeChannel(channel)
+      clearInterval(refreshInterval)
     }
   }, [driverId, orderId, supabase])
 
