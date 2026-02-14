@@ -114,43 +114,11 @@ export function DriverLocationMap({
           }
         }
 
-        // Fallback: пробуем получить из profiles через RPC или прямой запрос
-        // (только если пользователь имеет доступ)
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .select('current_location')
-          .eq('id', driverId)
-          .single()
-
-        if (!profileError && profileData?.current_location) {
-          const coords = parsePoint(profileData.current_location)
-          if (coords) {
-            setLocation(coords)
-            setLoading(false)
-            return
-          }
-        }
-
-        // Если ничего не получили, пробуем driver_locations напрямую
-        let query = supabase
-          .from('driver_locations')
-          .select('latitude, longitude')
-          .eq('driver_id', driverId)
-          .order('updated_at', { ascending: false })
-          .limit(1)
-
-        if (orderId) {
-          query = query.eq('order_id', orderId)
-        }
-
-        const { data: locationDataDirect, error: locationError } = await query.single()
-
-        if (!locationError && locationDataDirect && locationDataDirect.latitude && locationDataDirect.longitude) {
-          const coords = {
-            lat: parseFloat(locationDataDirect.latitude),
-            lon: parseFloat(locationDataDirect.longitude),
-          }
-          setLocation(coords)
+        // Если RPC функция не вернула данные, логируем ошибку
+        if (rpcError) {
+          console.error('Ошибка получения местоположения через RPC:', rpcError)
+        } else if (!locationData || locationData.length === 0) {
+          console.warn('RPC функция не вернула данные о местоположении водителя')
         }
       } catch (err) {
         console.error('Ошибка загрузки местоположения:', err)
