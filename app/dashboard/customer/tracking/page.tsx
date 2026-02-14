@@ -117,7 +117,11 @@ export default function CustomerTrackingPage() {
                     <div className="flex-1">
                       <p className="font-medium">{driver.full_name || 'Без имени'}</p>
                       <p className="text-xs opacity-75">
-                        {driver.current_location ? '📍 Онлайн' : '⚫ Офлайн'}
+                        {driver.active_order_id ? (
+                          <span className="text-green-400">📍 Активный заказ</span>
+                        ) : (
+                          <span className="text-gray-500">⚫ Нет активных заказов</span>
+                        )}
                       </p>
                     </div>
                   </div>
