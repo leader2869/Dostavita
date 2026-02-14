@@ -2,6 +2,7 @@ import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { BackButton } from '@/components/ui/BackButton'
 import type { User } from '@/lib/types'
+import { formatAddressForOrder } from '@/lib/utils/formatAddress'
 
 export default async function AdminOrdersPage() {
   const supabase = createServerSupabaseClient()

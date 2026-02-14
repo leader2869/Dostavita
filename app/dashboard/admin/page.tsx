@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import type { User } from '@/lib/types'
 import { formatDistanceToNow } from 'date-fns'
 import { ru } from 'date-fns/locale'
+import { formatAddressForOrder } from '@/lib/utils/formatAddress'
 
 export default async function AdminDashboard() {
   const supabase = createServerSupabaseClient()
