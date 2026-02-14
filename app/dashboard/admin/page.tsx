@@ -225,7 +225,10 @@ export default async function AdminDashboard() {
                     <div className="flex-1">
                       <p className="font-medium text-white">Заказ №{order.order_number || order.id.slice(0, 8)}</p>
                       <p className="text-sm text-gray-300 mt-1">
-                        {order.pickup_address} → {order.delivery_address}
+                        а) {formatAddressForOrder(order.pickup_address)}
+                      </p>
+                      <p className="text-sm text-gray-300 mt-1">
+                        б) {formatAddressForOrder(order.delivery_address)}
                       </p>
                       <p className="text-sm text-gray-400 mt-1">
                         Статус: {

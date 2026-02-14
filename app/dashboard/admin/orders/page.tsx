@@ -82,10 +82,10 @@ export default async function AdminOrdersPage() {
                     {order.order_number || order.id.slice(0, 8)}
                   </td>
                   <td className="px-6 py-4 text-sm text-white">
-                    {order.pickup_address}
+                    {formatAddressForOrder(order.pickup_address)}
                   </td>
                   <td className="px-6 py-4 text-sm text-white">
-                    {order.delivery_address}
+                    {formatAddressForOrder(order.delivery_address)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
                     {order.status === 'searching_courier' && 'Ищем курьера'}
