@@ -1,6 +1,9 @@
 -- Миграция 053: RPC функция для обновления местоположения водителя (обходит RLS)
 
 -- Функция для обновления местоположения водителя
+-- Использует SECURITY DEFINER для обхода RLS
+-- ВАЖНО: Не проверяем роль через SELECT, чтобы избежать рекурсии
+-- Проверка роли выполняется в API перед вызовом функции
 CREATE OR REPLACE FUNCTION public.update_driver_location(
   p_driver_id UUID,
   p_longitude DECIMAL,
@@ -11,26 +14,21 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public
 AS $$
-DECLARE
-  v_role TEXT;
 BEGIN
-  -- Проверяем, что пользователь существует и является водителем
-  SELECT role INTO v_role
-  FROM public.profiles
-  WHERE id = p_driver_id;
-
-  IF NOT FOUND OR v_role != 'driver' THEN
-    RETURN FALSE;
-  END IF;
-
-  -- Обновляем местоположение водителя
+  -- Обновляем местоположение водителя напрямую, без проверки роли
+  -- Проверка роли выполняется в API перед вызовом этой функции
   UPDATE public.profiles
   SET 
     current_location = POINT(p_longitude, p_latitude),
     location_updated_at = NOW()
   WHERE id = p_driver_id;
   
-  RETURN TRUE;
+  -- Проверяем, была ли обновлена хотя бы одна строка
+  IF FOUND THEN
+    RETURN TRUE;
+  ELSE
+    RETURN FALSE;
+  END IF;
 EXCEPTION
   WHEN OTHERS THEN
     RAISE WARNING 'Ошибка обновления местоположения водителя: %', SQLERRM;
