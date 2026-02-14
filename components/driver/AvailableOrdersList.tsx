@@ -87,7 +87,10 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId }: Ava
             <div className="flex-1">
               <p className="font-medium text-white">Заказ №{order.order_number || order.id.slice(0, 8)}</p>
               <p className="text-sm text-gray-300 mt-1">
-                {order.pickup_address} → {order.delivery_address}
+                а) {order.pickup_address}
+              </p>
+              <p className="text-sm text-gray-300 mt-1">
+                б) {order.delivery_address}
               </p>
               <p className="text-sm text-gray-400 mt-1">
                 Тип груза: <span className="text-gray-300">{getItemTypeLabel(order.item_type)}</span>
