@@ -49,7 +49,7 @@ ORDER BY policyname;
 1. **Удаляет ВСЕ потенциально проблемные политики**:
    - "Admins can view all profiles" (старая версия с прямым SELECT)
    - "Superadmins can update any profile" (старая версия с прямым SELECT)
-   - "Organizations can view their drivers location" (пересоздается с исправленной функцией)
+   - "Organizations can view their drivers location" (пересоздается с исправленной функцией и ограничением для активных заказов)
 
 2. **Исправляет функцию `check_user_role`**:
    - Отключает RLS перед SELECT из `profiles` с помощью `set_config('row_security', 'off', true)`
@@ -62,7 +62,7 @@ ORDER BY policyname;
    - Обрабатывает ошибки и гарантирует включение RLS даже при исключениях
 
 4. **Пересоздает все политики** с использованием исправленных функций:
-   - "Organizations can view their drivers location"
+   - "Organizations can view their drivers location for active orders" - организация может видеть местоположение водителей ТОЛЬКО при наличии активных заказов
    - "Admins can view all profiles"
    - "Superadmins can update any profile"
 

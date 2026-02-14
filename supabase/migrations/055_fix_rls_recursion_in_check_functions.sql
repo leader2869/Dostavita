@@ -78,20 +78,26 @@ END;
 $$;
 
 -- Пересоздаем политику "Organizations can view their drivers location" с использованием исправленной функции
--- ВАЖНО: Организация ВСЕГДА может видеть местоположение своих водителей, независимо от наличия активных заказов
-CREATE POLICY "Organizations can view their drivers location"
+-- ВАЖНО: Организация может видеть current_location своих водителей ТОЛЬКО если у них есть активный заказ
+CREATE POLICY "Organizations can view their drivers location for active orders"
   ON public.profiles FOR SELECT
   TO authenticated
   USING (
     -- Пользователь может видеть свой собственный профиль
     auth.uid() = profiles.id
     OR
-    -- Организация может видеть профили своих водителей ВСЕГДА
-    -- Проверяем только, что водитель принадлежит организации и текущий пользователь - организация
+    -- Организация может видеть current_location своих водителей ТОЛЬКО если у них есть активный заказ
     (
       profiles.organization_id = auth.uid()
       AND profiles.role = 'driver'
       AND public.check_user_role(auth.uid(), 'customer')
+      AND EXISTS (
+        -- Проверяем, что у водителя есть активный заказ организации
+        SELECT 1 FROM public.orders o
+        WHERE o.executor_user_id = profiles.id
+          AND o.customer_id = auth.uid()
+          AND o.status IN ('courier_coming', 'courier_delivering')
+      )
     )
   );
 
@@ -123,23 +129,38 @@ CREATE POLICY "Superadmins can update any profile"
     public.check_user_role(auth.uid(), 'superadmin')
   );
 
--- Обновляем политику для driver_locations: организация ВСЕГДА может видеть местоположение своих водителей
--- Удаляем старую ограничительную политику, если она существует
+-- Обновляем политику для driver_locations: организация может видеть местоположение только для активных заказов
+-- Удаляем старую политику, если она существует
 DROP POLICY IF EXISTS "Organizations can view their drivers locations" ON public.driver_locations;
 DROP POLICY IF EXISTS "Organizations can view their drivers locations for active orders" ON public.driver_locations;
 
--- Создаем политику: организация ВСЕГДА может видеть местоположение своих водителей
-CREATE POLICY "Organizations can view their drivers locations"
+-- Создаем политику: организация может видеть местоположение своих водителей ТОЛЬКО для активных заказов
+CREATE POLICY "Organizations can view their drivers locations for active orders"
   ON public.driver_locations FOR SELECT
   TO authenticated
   USING (
-    -- Организация может видеть местоположение своих водителей ВСЕГДА
-    -- Проверяем только, что водитель принадлежит организации
     EXISTS (
       SELECT 1 FROM public.profiles
       WHERE profiles.id = driver_locations.driver_id
         AND profiles.organization_id = auth.uid()
         AND profiles.role = 'driver'
+    )
+    AND (
+      -- Если есть order_id, проверяем что это активный заказ организации
+      (order_id IS NOT NULL AND EXISTS (
+        SELECT 1 FROM public.orders
+        WHERE orders.id = driver_locations.order_id
+          AND orders.customer_id = auth.uid()
+          AND orders.status IN ('courier_coming', 'courier_delivering')
+      ))
+      OR
+      -- Если order_id нет, проверяем что у водителя есть активный заказ организации
+      (order_id IS NULL AND EXISTS (
+        SELECT 1 FROM public.orders
+        WHERE orders.executor_user_id = driver_locations.driver_id
+          AND orders.customer_id = auth.uid()
+          AND orders.status IN ('courier_coming', 'courier_delivering')
+      ))
     )
   );
 
@@ -150,9 +171,9 @@ COMMENT ON FUNCTION public.check_user_role(UUID, TEXT) IS
 COMMENT ON FUNCTION public.is_driver_organization(UUID, UUID) IS 
   'Проверяет, является ли пользователь организацией водителя. Отключает RLS для предотвращения бесконечной рекурсии.';
 
-COMMENT ON POLICY "Organizations can view their drivers location" ON public.profiles IS 
-  'Организация ВСЕГДА может видеть местоположение своих водителей в таблице profiles, независимо от наличия активных заказов.';
+COMMENT ON POLICY "Organizations can view their drivers location for active orders" ON public.profiles IS 
+  'Организация может видеть current_location своих водителей только если у них есть активный заказ';
 
-COMMENT ON POLICY "Organizations can view their drivers locations" ON public.driver_locations IS 
-  'Организация ВСЕГДА может видеть местоположение своих водителей в таблице driver_locations, независимо от наличия активных заказов.';
+COMMENT ON POLICY "Organizations can view their drivers locations for active orders" ON public.driver_locations IS 
+  'Организация может видеть местоположение своих водителей только для активных заказов';
 
