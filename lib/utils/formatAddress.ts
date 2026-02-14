@@ -73,7 +73,8 @@ export function formatAddressForOrder(fullAddress: string): string {
     const lower = part.toLowerCase()
     return !lower.includes('область') && 
            !lower.includes('беларусь') && 
-           !lower.includes('belarus')
+           !lower.includes('belarus') &&
+           !lower.includes('республика')
   })
 
   if (filteredParts.length === 0) return fullAddress
@@ -81,30 +82,27 @@ export function formatAddressForOrder(fullAddress: string): string {
   // Ищем город (обычно это последняя часть перед областью, или часть с названием города)
   // Города обычно: Минск, Витебск, Гродно, Брест, Гомель, Могилёв
   const cityPattern = /^(минск|витебск|гродно|брест|гомель|могилёв|могилев)$/i
+  let cityIndex = -1
   let city = ''
-  let street = ''
-  let house = ''
 
-  // Ищем город
+  // Ищем город с конца (обычно он ближе к концу)
   for (let i = filteredParts.length - 1; i >= 0; i--) {
     if (cityPattern.test(filteredParts[i])) {
       city = filteredParts[i]
-      filteredParts.splice(i, 1)
+      cityIndex = i
       break
     }
   }
 
-  // Остальные части - это улица и дом
-  // Обычно формат: "улица/проспект/переулок название, номер дома"
-  // Или: "название улицы, номер дома"
-  const remaining = filteredParts.join(', ')
-  
-  // Если есть город, форматируем: город, улица, дом
-  if (city) {
+  // Если город найден, формируем: город, остальные части
+  if (cityIndex >= 0) {
+    const beforeCity = filteredParts.slice(0, cityIndex)
+    const afterCity = filteredParts.slice(cityIndex + 1)
+    const remaining = [...beforeCity, ...afterCity].join(', ')
     return `${city}, ${remaining}`
   }
 
   // Если города нет, возвращаем как есть, но без области
-  return remaining
+  return filteredParts.join(', ')
 }
 
