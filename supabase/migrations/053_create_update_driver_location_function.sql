@@ -2,7 +2,7 @@
 
 -- Функция для обновления местоположения водителя
 -- Использует SECURITY DEFINER для обхода RLS
--- ВАЖНО: Не проверяем роль через SELECT, чтобы избежать рекурсии
+-- ВАЖНО: Отключаем RLS внутри функции, чтобы полностью избежать рекурсии
 -- Проверка роли выполняется в API перед вызовом функции
 CREATE OR REPLACE FUNCTION public.update_driver_location(
   p_driver_id UUID,
@@ -15,13 +15,19 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 BEGIN
-  -- Обновляем местоположение водителя напрямую, без проверки роли
-  -- Проверка роли выполняется в API перед вызовом этой функции
+  -- Временно отключаем RLS для этого обновления
+  -- Это гарантирует, что обновление пройдет без проверки политик
+  PERFORM set_config('row_security', 'off', true);
+  
+  -- Обновляем местоположение водителя напрямую
   UPDATE public.profiles
   SET 
     current_location = POINT(p_longitude, p_latitude),
     location_updated_at = NOW()
   WHERE id = p_driver_id;
+  
+  -- Включаем RLS обратно
+  PERFORM set_config('row_security', 'on', true);
   
   -- Проверяем, была ли обновлена хотя бы одна строка
   IF FOUND THEN
@@ -31,6 +37,8 @@ BEGIN
   END IF;
 EXCEPTION
   WHEN OTHERS THEN
+    -- Включаем RLS обратно даже при ошибке
+    PERFORM set_config('row_security', 'on', true);
     RAISE WARNING 'Ошибка обновления местоположения водителя: %', SQLERRM;
     RETURN FALSE;
 END;
