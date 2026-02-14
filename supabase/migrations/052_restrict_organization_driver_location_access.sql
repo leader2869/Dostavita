@@ -337,7 +337,6 @@ BEGIN
     COALESCE(o.status, '')::TEXT as active_order_status
   FROM public.profiles p
   INNER JOIN public.orders o ON o.executor_user_id = p.id
-    AND o.customer_id = organization_user_id
     AND o.status IN ('courier_coming', 'courier_delivering')
   WHERE p.organization_id = organization_user_id
     AND p.role = 'driver'
