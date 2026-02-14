@@ -22,6 +22,9 @@ interface DriverLocationMapProps {
   showUserLocation?: boolean
   showTrack?: boolean // Показывать ли трек водителя за день
   trackDate?: Date // Дата для отображения трека (по умолчанию сегодня)
+  selectedTime?: string // Выбранное время для отображения позиции (формат HH:MM)
+  currentPosition?: { lat: number; lon: number } | null // Позиция в выбранное время
+  trackPoints?: Array<{ lat: number; lon: number }> // Точки трека (если переданы, используются вместо загрузки)
 }
 
 // Компонент для обновления центра карты (только если нет трека)
@@ -116,11 +119,17 @@ export function DriverLocationMap({
   showUserLocation = false,
   showTrack = true,
   trackDate = new Date(),
+  selectedTime,
+  currentPosition,
+  trackPoints: externalTrackPoints,
 }: DriverLocationMapProps) {
   const supabase = createClient()
   const [location, setLocation] = useState<{ lat: number; lon: number } | null>(null)
   const [trackPoints, setTrackPoints] = useState<Array<{ lat: number; lon: number }>>([])
   const [loading, setLoading] = useState(true)
+  
+  // Используем переданные точки трека или загружаем сами
+  const displayTrackPoints = externalTrackPoints || trackPoints
 
   // Парсим координаты из POINT формата
   const parsePoint = (point: any): { lat: number; lon: number } | null => {
@@ -165,9 +174,9 @@ export function DriverLocationMap({
     return null
   }
 
-  // Загружаем трек водителя за день
+  // Загружаем трек водителя за день (только если не передан через пропсы)
   useEffect(() => {
-    if (!showTrack) {
+    if (!showTrack || externalTrackPoints) {
       return
     }
 
@@ -197,7 +206,7 @@ export function DriverLocationMap({
     }
 
     loadTrack()
-  }, [driverId, trackDate, showTrack, supabase])
+  }, [driverId, trackDate, showTrack, externalTrackPoints, supabase])
 
   useEffect(() => {
     // Загружаем текущее местоположение водителя
@@ -320,7 +329,10 @@ export function DriverLocationMap({
     )
   }
 
-  if (!location) {
+  // Используем currentPosition если выбранное время, иначе location
+  const displayLocation = (selectedTime && currentPosition) ? currentPosition : location
+
+  if (!displayLocation) {
     return (
       <div style={{ height }} className="rounded-lg overflow-hidden border border-gray-600 bg-gray-700 flex items-center justify-center">
         <p className="text-gray-400">Местоположение водителя недоступно</p>
@@ -328,7 +340,7 @@ export function DriverLocationMap({
     )
   }
 
-  const center: [number, number] = [location.lat, location.lon]
+  const center: [number, number] = [displayLocation.lat, displayLocation.lon]
 
   // Создаем кастомную иконку для водителя (красный маркер)
   const driverIcon = L.icon({
@@ -354,19 +366,27 @@ export function DriverLocationMap({
         />
 
         {/* Трек водителя за день */}
-        {showTrack && trackPoints.length > 0 && (
-          <DriverTrack trackPoints={trackPoints} currentLocation={location} />
+        {showTrack && displayTrackPoints.length > 0 && (
+          <DriverTrack trackPoints={displayTrackPoints} currentLocation={displayLocation} />
         )}
 
         {/* Маркер местоположения водителя */}
-        <Marker position={[location.lat, location.lon]} icon={driverIcon}>
+        <Marker position={[displayLocation.lat, displayLocation.lon]} icon={driverIcon}>
           <Popup>
             <div className="text-sm">
-              <strong>Местоположение водителя</strong>
+              <strong>
+                {selectedTime ? `Местоположение в ${selectedTime}` : 'Местоположение водителя'}
+              </strong>
               <div className="mt-1 text-xs text-gray-600">
-                Широта: {location.lat.toFixed(6)}
+                Широта: {displayLocation.lat.toFixed(6)}
                 <br />
-                Долгота: {location.lon.toFixed(6)}
+                Долгота: {displayLocation.lon.toFixed(6)}
+                {selectedTime && (
+                  <>
+                    <br />
+                    <span className="text-gray-500">Время: {selectedTime}</span>
+                  </>
+                )}
               </div>
             </div>
           </Popup>

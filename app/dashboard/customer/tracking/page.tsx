@@ -14,6 +14,10 @@ export default function CustomerTrackingPage() {
   const [drivers, setDrivers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedDriver, setSelectedDriver] = useState<string | null>(null)
+  const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]) // Формат YYYY-MM-DD
+  const [selectedTime, setSelectedTime] = useState<string>('') // Время в формате HH:MM
+  const [trackPoints, setTrackPoints] = useState<Array<{ lat: number; lon: number; time: string }>>([])
+  const [currentPosition, setCurrentPosition] = useState<{ lat: number; lon: number } | null>(null)
 
   const loadData = useCallback(async () => {
     try {
@@ -133,6 +137,71 @@ export default function CustomerTrackingPage() {
     loadData()
   }, [loadData])
 
+  // Загружаем трек водителя за выбранный день
+  useEffect(() => {
+    if (!selectedDriver || !selectedDate) {
+      setTrackPoints([])
+      setCurrentPosition(null)
+      return
+    }
+
+    const loadTrack = async () => {
+      try {
+        const { data: trackData, error: trackError } = await supabase
+          .rpc('get_driver_track', {
+            p_driver_id: selectedDriver,
+            p_date: selectedDate,
+          })
+
+        if (!trackError && trackData && trackData.length > 0) {
+          const points = trackData
+            .map((point: any) => ({
+              lat: parseFloat(point.latitude),
+              lon: parseFloat(point.longitude),
+              time: new Date(point.created_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }),
+              timestamp: new Date(point.created_at).getTime(),
+            }))
+            .filter((p: any) => !isNaN(p.lat) && !isNaN(p.lon))
+          
+          setTrackPoints(points)
+          
+          // Если выбрано время, находим ближайшую точку
+          if (selectedTime) {
+            const [hours, minutes] = selectedTime.split(':').map(Number)
+            const selectedTimestamp = new Date(`${selectedDate}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00`).getTime()
+            
+            // Находим ближайшую точку по времени
+            let closestPoint = points[0]
+            let minDiff = Math.abs(points[0].timestamp - selectedTimestamp)
+            
+            for (const point of points) {
+              const diff = Math.abs(point.timestamp - selectedTimestamp)
+              if (diff < minDiff) {
+                minDiff = diff
+                closestPoint = point
+              }
+            }
+            
+            setCurrentPosition({ lat: closestPoint.lat, lon: closestPoint.lon })
+          } else if (points.length > 0) {
+            // Если время не выбрано, показываем последнюю точку
+            const lastPoint = points[points.length - 1]
+            setCurrentPosition({ lat: lastPoint.lat, lon: lastPoint.lon })
+          }
+        } else {
+          setTrackPoints([])
+          setCurrentPosition(null)
+        }
+      } catch (err) {
+        console.error('Ошибка загрузки трека:', err)
+        setTrackPoints([])
+        setCurrentPosition(null)
+      }
+    }
+
+    loadTrack()
+  }, [selectedDriver, selectedDate, selectedTime, supabase])
+
   // Обновляем данные каждые 30 секунд
   useEffect(() => {
     const interval = setInterval(() => {
@@ -235,15 +304,75 @@ export default function CustomerTrackingPage() {
                   </h2>
 
                   <div className="space-y-4">
+                    {/* Выбор даты и времени для просмотра трека */}
+                    <div className="bg-gray-700 rounded-lg p-4">
+                      <h3 className="text-sm font-medium text-gray-400 mb-3">Просмотр трека</h3>
+                      
+                      {/* Выбор даты */}
+                      <div className="mb-4">
+                        <label className="block text-xs text-gray-400 mb-2">Выберите день:</label>
+                        <input
+                          type="date"
+                          value={selectedDate}
+                          onChange={(e) => {
+                            setSelectedDate(e.target.value)
+                            setSelectedTime('')
+                          }}
+                          max={new Date().toISOString().split('T')[0]}
+                          className="w-full bg-gray-600 text-white px-3 py-2 rounded-lg border border-gray-500 focus:border-green-400 focus:outline-none"
+                        />
+                      </div>
+
+                      {/* Шкала времени */}
+                      {trackPoints.length > 0 && (
+                        <div className="mb-4">
+                          <label className="block text-xs text-gray-400 mb-2">
+                            Время: {selectedTime || trackPoints[0]?.time || 'Не выбрано'}
+                          </label>
+                          <input
+                            type="range"
+                            min="0"
+                            max={trackPoints.length - 1}
+                            value={selectedTime ? trackPoints.findIndex((p) => p.time === selectedTime) : trackPoints.length - 1}
+                            onChange={(e) => {
+                              const index = parseInt(e.target.value)
+                              if (trackPoints[index]) {
+                                setSelectedTime(trackPoints[index].time)
+                              }
+                            }}
+                            className="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer accent-green-400"
+                          />
+                          <div className="flex justify-between text-xs text-gray-500 mt-1">
+                            <span>{trackPoints[0]?.time || ''}</span>
+                            <span>{trackPoints[trackPoints.length - 1]?.time || ''}</span>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Кнопка сброса времени */}
+                      {selectedTime && (
+                        <button
+                          onClick={() => setSelectedTime('')}
+                          className="text-xs text-green-400 hover:text-green-300"
+                        >
+                          Показать весь трек
+                        </button>
+                      )}
+                    </div>
+
                     {/* Местоположение - показываем всегда для всех водителей организации */}
                     <div>
-                      <h3 className="text-sm font-medium text-gray-400 mb-2">Текущее местоположение</h3>
-                      {driver.current_location ? (
+                      <h3 className="text-sm font-medium text-gray-400 mb-2">
+                        {selectedTime ? `Местоположение в ${selectedTime}` : 'Текущее местоположение'}
+                      </h3>
+                      {(currentPosition || driver.current_location) ? (
                         <div className="bg-gray-700 rounded-lg p-4">
-                          <p className="text-white font-mono text-sm">
-                            {formatLocation(driver.current_location)}
-                          </p>
-                          {driver.location_updated_at && (
+                          {currentPosition && (
+                            <p className="text-white font-mono text-sm mb-2">
+                              Широта: {currentPosition.lat.toFixed(6)}, Долгота: {currentPosition.lon.toFixed(6)}
+                            </p>
+                          )}
+                          {driver.location_updated_at && !selectedTime && (
                             <p className="text-gray-400 text-xs mt-2">
                               Обновлено: {new Date(driver.location_updated_at).toLocaleString('ru-RU')}
                             </p>
@@ -255,6 +384,18 @@ export default function CustomerTrackingPage() {
                               orderId={driver.active_order_id}
                               height="400px"
                               zoom={15}
+                              showTrack={true}
+                              trackDate={new Date(selectedDate)}
+                              selectedTime={selectedTime}
+                              currentPosition={currentPosition}
+                              trackPoints={selectedTime ? trackPoints.filter(p => {
+                                const pointTime = p.time
+                                const [pointHours, pointMinutes] = pointTime.split(':').map(Number)
+                                const [selectedHours, selectedMinutes] = selectedTime.split(':').map(Number)
+                                const pointTotal = pointHours * 60 + pointMinutes
+                                const selectedTotal = selectedHours * 60 + selectedMinutes
+                                return pointTotal <= selectedTotal
+                              }) : trackPoints}
                             />
                           </div>
                         </div>
@@ -262,7 +403,9 @@ export default function CustomerTrackingPage() {
                         <div className="bg-gray-700 rounded-lg p-4">
                           <p className="text-gray-400">Местоположение не определено</p>
                           <p className="text-gray-500 text-xs mt-2">
-                            Водитель не передает данные о местоположении
+                            {selectedDate === new Date().toISOString().split('T')[0] 
+                              ? 'Водитель не передает данные о местоположении'
+                              : 'Нет данных за выбранный день'}
                           </p>
                         </div>
                       )}
