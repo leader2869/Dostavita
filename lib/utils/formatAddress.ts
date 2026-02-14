@@ -54,3 +54,57 @@ export function formatAddressForCard(
   return parts.join(', ')
 }
 
+/**
+ * Форматирует адрес для отображения в заказах
+ * Формат: город, улица, дом
+ * Без области
+ * Пример: "проспект Фрунзе, 55, Витебск, Витебская область" -> "Витебск, проспект Фрунзе, 55"
+ */
+export function formatAddressForOrder(fullAddress: string): string {
+  if (!fullAddress) return ''
+
+  // Разбиваем адрес на части
+  const parts = fullAddress.split(',').map(p => p.trim()).filter(p => p)
+  
+  if (parts.length === 0) return fullAddress
+
+  // Удаляем область и страну
+  const filteredParts = parts.filter(part => {
+    const lower = part.toLowerCase()
+    return !lower.includes('область') && 
+           !lower.includes('беларусь') && 
+           !lower.includes('belarus')
+  })
+
+  if (filteredParts.length === 0) return fullAddress
+
+  // Ищем город (обычно это последняя часть перед областью, или часть с названием города)
+  // Города обычно: Минск, Витебск, Гродно, Брест, Гомель, Могилёв
+  const cityPattern = /^(минск|витебск|гродно|брест|гомель|могилёв|могилев)$/i
+  let city = ''
+  let street = ''
+  let house = ''
+
+  // Ищем город
+  for (let i = filteredParts.length - 1; i >= 0; i--) {
+    if (cityPattern.test(filteredParts[i])) {
+      city = filteredParts[i]
+      filteredParts.splice(i, 1)
+      break
+    }
+  }
+
+  // Остальные части - это улица и дом
+  // Обычно формат: "улица/проспект/переулок название, номер дома"
+  // Или: "название улицы, номер дома"
+  const remaining = filteredParts.join(', ')
+  
+  // Если есть город, форматируем: город, улица, дом
+  if (city) {
+    return `${city}, ${remaining}`
+  }
+
+  // Если города нет, возвращаем как есть, но без области
+  return remaining
+}
+

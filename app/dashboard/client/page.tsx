@@ -8,7 +8,7 @@ import { OrdersMap } from '@/components/map/OrdersMap'
 import { AddressAutocomplete } from '@/components/ui/AddressAutocomplete'
 import { AddressPickerMap } from '@/components/map/AddressPickerMap'
 import { SinglePointMap } from '@/components/map/SinglePointMap'
-import { formatAddressForCard } from '@/lib/utils/formatAddress'
+import { formatAddressForCard, formatAddressForOrder } from '@/lib/utils/formatAddress'
 import type { Region } from '@/lib/types'
 
 export default function ClientDashboard() {
@@ -419,7 +419,10 @@ export default function ClientDashboard() {
                     <div className="flex-1">
                       <p className="font-medium text-white">Заказ №{order.order_number || order.id.slice(0, 8)}</p>
                       <p className="text-sm text-gray-300 mt-1">
-                        {order.pickup_address} → {order.delivery_address}
+                        а) {formatAddressForOrder(order.pickup_address)}
+                      </p>
+                      <p className="text-sm text-gray-300 mt-1">
+                        б) {formatAddressForOrder(order.delivery_address)}
                       </p>
                       <div className="mt-1">
                         <span className="text-sm text-gray-400">Статус: </span>
@@ -829,10 +832,10 @@ export default function ClientDashboard() {
                         <div className="flex-1">
                           <p className="font-medium text-white">Заказ №{order.order_number || order.id.slice(0, 8)}</p>
                           <p className="text-sm text-gray-300 mt-1">
-                            а) {order.pickup_address}
+                            а) {formatAddressForOrder(order.pickup_address)}
                           </p>
                           <p className="text-sm text-gray-300 mt-1">
-                            б) {order.delivery_address}
+                            б) {formatAddressForOrder(order.delivery_address)}
                           </p>
                           {order.driver?.full_name && (
                             <p className="text-xs text-gray-400 mt-1">Курьер: {order.driver.full_name}</p>

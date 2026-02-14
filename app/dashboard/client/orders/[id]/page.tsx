@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { ClientBottomNavigation } from '@/components/client/ClientBottomNavigation'
 import { OrderMap } from '@/components/map/OrderMap'
 import { DriverLocationMap } from '@/components/map/DriverLocationMap'
+import { formatAddressForOrder } from '@/lib/utils/formatAddress'
 
 export default function OrderDetailsPage() {
   const router = useRouter()
@@ -223,7 +224,7 @@ export default function OrderDetailsPage() {
 
             <div>
               <p className="text-sm text-gray-400">Адрес отправления</p>
-              <p className="text-white">{order.pickup_address}</p>
+              <p className="text-white">{formatAddressForOrder(order.pickup_address)}</p>
               {(order.pickup_entrance || order.pickup_floor || order.pickup_apartment) && (
                 <p className="text-sm text-gray-300 mt-1">
                   {order.pickup_entrance && `Подъезд ${order.pickup_entrance}`}
@@ -237,7 +238,7 @@ export default function OrderDetailsPage() {
 
             <div>
               <p className="text-sm text-gray-400">Адрес доставки</p>
-              <p className="text-white">{order.delivery_address}</p>
+              <p className="text-white">{formatAddressForOrder(order.delivery_address)}</p>
               {(order.delivery_entrance || order.delivery_floor || order.delivery_apartment) && (
                 <p className="text-sm text-gray-300 mt-1">
                   {order.delivery_entrance && `Подъезд ${order.delivery_entrance}`}
