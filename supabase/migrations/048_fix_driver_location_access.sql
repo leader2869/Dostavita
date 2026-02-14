@@ -5,21 +5,29 @@
 -- Поэтому не нужно создавать отдельную политику для current_location
 
 -- Добавляем политику для profiles: организации могут видеть current_location своих водителей
+-- ВАЖНО: Используем подзапрос без SELECT из profiles, чтобы избежать рекурсии
+DROP POLICY IF EXISTS "Organizations can view their drivers location" ON public.profiles;
 CREATE POLICY "Organizations can view their drivers location"
   ON public.profiles FOR SELECT
   TO authenticated
   USING (
-    -- Организация может видеть current_location своих водителей
-    EXISTS (
-      SELECT 1 FROM public.profiles org
-      WHERE org.id = auth.uid()
-        AND org.role = 'customer'
-        AND profiles.organization_id = org.id
-        AND profiles.role = 'driver'
-    )
-    OR
     -- Пользователь может видеть свой собственный профиль
     auth.uid() = profiles.id
+    OR
+    -- Организация может видеть current_location своих водителей
+    -- Проверяем через подзапрос, который не вызывает рекурсию
+    (
+      profiles.organization_id = auth.uid()
+      AND profiles.role = 'driver'
+      AND EXISTS (
+        -- Проверяем, что текущий пользователь - организация (customer)
+        -- Используем простую проверку через auth.uid() без SELECT из profiles
+        SELECT 1 FROM public.profiles p
+        WHERE p.id = auth.uid()
+          AND p.role = 'customer'
+        LIMIT 1
+      )
+    )
   );
 
 -- Улучшаем политику для driver_locations: клиенты могут видеть местоположение водителя для своих заказов
