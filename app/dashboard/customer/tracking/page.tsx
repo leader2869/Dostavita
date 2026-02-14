@@ -34,7 +34,34 @@ export default function CustomerTrackingPage() {
       setUser(currentUser)
 
       // Получаем водителей организации только с активными заказами
-      console.log('Вызов RPC функции get_organization_drivers_with_active_orders с параметром:', currentUser.id)
+      console.log('=== TRACKING PAGE DEBUG ===')
+      console.log('Вызов RPC функции get_organization_drivers_with_active_orders')
+      console.log('Organization User ID:', currentUser.id)
+      console.log('Organization Email:', currentUser.email)
+      
+      // Сначала проверим, какие водители привязаны к организации
+      const { data: allDrivers, error: allDriversError } = await supabase
+        .from('profiles')
+        .select('id, email, full_name, organization_id, role')
+        .eq('organization_id', currentUser.id)
+        .eq('role', 'driver')
+      
+      console.log('Все водители организации:', allDrivers?.length || 0, allDrivers)
+      
+      // Проверим активные заказы этих водителей
+      if (allDrivers && allDrivers.length > 0) {
+        const driverIds = allDrivers.map(d => d.id)
+        const { data: activeOrders, error: ordersError } = await supabase
+          .from('orders')
+          .select('id, order_number, status, executor_user_id, customer_id, client_id')
+          .in('executor_user_id', driverIds)
+          .in('status', ['courier_coming', 'courier_delivering'])
+        
+        console.log('Активные заказы водителей организации:', activeOrders?.length || 0, activeOrders)
+        console.log('Заказы с customer_id = organization_user_id:', 
+          activeOrders?.filter(o => o.customer_id === currentUser.id) || [])
+      }
+      
       const { data: driversData, error: driversError } = await supabase
         .rpc('get_organization_drivers_with_active_orders', { organization_user_id: currentUser.id })
 
