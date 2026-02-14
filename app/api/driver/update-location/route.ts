@@ -26,14 +26,13 @@ export async function POST(request: Request) {
       )
     }
 
-    // Проверяем, что пользователь - водитель
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
+    // Проверяем, что пользователь - водитель (используем RPC функцию для обхода RLS)
+    const { data: profile, error: profileError } = await supabase
+      .rpc('get_user_profile', { user_id: user.id })
       .single()
 
-    if (!profile || profile.role !== 'driver') {
+    if (profileError || !profile || (profile as any).role !== 'driver') {
+      console.error('Ошибка проверки роли водителя:', profileError)
       return NextResponse.json(
         { error: 'Доступ запрещен. Только водители могут обновлять местоположение' },
         { status: 403 }
