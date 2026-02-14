@@ -39,24 +39,40 @@ export async function POST(request: Request) {
       )
     }
 
-    // Обновляем текущее местоположение в profiles через RPC функцию (обходит RLS)
-    // Используем try-catch для обработки ошибок соединения
+    // Обновляем текущее местоположение в profiles через прямой SQL запрос
+    // Используем серверный клиент, который имеет больше прав
+    // ВАЖНО: Не используем RPC функцию, если она вызывает рекурсию
     let profileUpdateSuccess = false
     try {
-      const { data: updateResult, error: profileUpdateError } = await supabase
-        .rpc('update_driver_location', {
-          p_driver_id: user.id,
-          p_longitude: longitude,
-          p_latitude: latitude,
+      // Пробуем обновить через прямой запрос (может не работать из-за RLS)
+      const { error: directUpdateError } = await supabase
+        .from('profiles')
+        .update({
+          current_location: `(${longitude},${latitude})`,
+          location_updated_at: new Date().toISOString(),
         })
+        .eq('id', user.id)
 
-      if (profileUpdateError) {
-        console.error('Ошибка обновления местоположения в profiles:', profileUpdateError)
-      } else if (updateResult) {
+      if (!directUpdateError) {
         profileUpdateSuccess = true
+      } else {
+        // Если прямой запрос не работает, пробуем RPC функцию
+        console.warn('Прямое обновление не удалось, пробуем RPC функцию:', directUpdateError)
+        const { data: updateResult, error: profileUpdateError } = await supabase
+          .rpc('update_driver_location', {
+            p_driver_id: user.id,
+            p_longitude: longitude,
+            p_latitude: latitude,
+          })
+
+        if (profileUpdateError) {
+          console.error('Ошибка обновления местоположения в profiles через RPC:', profileUpdateError)
+        } else if (updateResult) {
+          profileUpdateSuccess = true
+        }
       }
     } catch (err: any) {
-      console.error('Исключение при обновлении местоположения в profiles (connection error):', err.message)
+      console.error('Исключение при обновлении местоположения в profiles:', err.message)
       // Не прерываем выполнение, так как запись в driver_locations все равно сохранится
     }
 
