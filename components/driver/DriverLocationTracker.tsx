@@ -6,122 +6,62 @@ import { useDriverLocationTracking } from '@/hooks/useDriverLocationTracking'
 
 /**
  * Компонент для автоматического отслеживания местоположения водителя
- * при наличии активных заказов
+ * Водитель всегда передает свое местоположение
  */
 export function DriverLocationTracker() {
   const supabase = createClient()
   const [activeOrderId, setActiveOrderId] = useState<string | null>(null)
-  const [hasActiveOrders, setHasActiveOrders] = useState(false)
 
-  // Отслеживаем местоположение, если есть активные заказы
+  // Отслеживаем местоположение всегда (без проверки активных заказов)
   const { isTracking, error } = useDriverLocationTracking({
-    enabled: hasActiveOrders,
+    enabled: true, // Всегда включено
     interval: 10000, // Обновляем каждые 10 секунд
     orderId: activeOrderId,
   })
 
   useEffect(() => {
-    let channel: any = null
-    let interval: NodeJS.Timeout | null = null
-
-    const checkActiveOrders = async () => {
+    // Опционально: получаем ID активного заказа для привязки к местоположению
+    // Но отслеживание местоположения работает всегда, независимо от наличия заказов
+    const updateActiveOrderId = async () => {
       try {
         const { data: { user }, error: userError } = await supabase.auth.getUser()
         
-        if (userError) {
-          console.error('Ошибка получения пользователя:', userError)
-          return
-        }
-        
-        if (!user) {
-          console.log('Пользователь не авторизован')
-          setHasActiveOrders(false)
-          setActiveOrderId(null)
+        if (userError || !user) {
           return
         }
 
-        // Проверяем наличие активных заказов
-        const { data: activeOrders, error: ordersError } = await supabase
+        // Получаем ID первого активного заказа (если есть) для привязки к местоположению
+        const { data: activeOrders } = await supabase
           .from('orders')
-          .select('id, status')
+          .select('id')
           .eq('executor_user_id', user.id)
           .in('status', ['courier_coming', 'courier_delivering'])
           .order('created_at', { ascending: false })
           .limit(1)
 
-        if (ordersError) {
-          console.error('Ошибка проверки активных заказов:', ordersError)
-          return
-        }
-
-        const hasActive = (activeOrders?.length || 0) > 0
-        setHasActiveOrders(hasActive)
-        
-        // Берем ID первого активного заказа
-        if (hasActive && activeOrders && activeOrders.length > 0) {
+        if (activeOrders && activeOrders.length > 0) {
           setActiveOrderId(activeOrders[0].id)
-          console.log('Активные заказы найдены, начинаем отслеживание местоположения')
         } else {
           setActiveOrderId(null)
-          console.log('Активных заказов нет, отслеживание местоположения отключено')
         }
       } catch (err) {
-        console.error('Ошибка проверки активных заказов:', err)
+        console.error('Ошибка получения активного заказа:', err)
       }
     }
 
-    // Проверяем сразу
-    checkActiveOrders()
+    // Обновляем ID активного заказа при монтировании
+    updateActiveOrderId()
 
-    // Подписываемся на изменения заказов через Supabase Realtime
-    // Используем правильный фильтр с получением user_id
-    const setupRealtime = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-
-      channel = supabase
-        .channel(`driver-active-orders-${user.id}`)
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'orders',
-            filter: `executor_user_id=eq.${user.id}`,
-          },
-          () => {
-            // При изменении заказов проверяем снова
-            console.log('Обнаружено изменение заказов, проверяем активные заказы')
-            checkActiveOrders()
-          }
-        )
-        .subscribe((status) => {
-          if (status === 'SUBSCRIBED') {
-            console.log('Подписка на обновления заказов активна')
-          } else if (status === 'CHANNEL_ERROR') {
-            console.warn('Ошибка подключения к Realtime (не критично, проверка выполняется каждые 30 секунд)')
-          }
-        })
-    }
-
-    setupRealtime()
-
-    // Проверяем каждые 30 секунд на случай, если Realtime не сработал
-    interval = setInterval(checkActiveOrders, 30000)
+    // Обновляем ID активного заказа каждые 30 секунд (опционально)
+    const interval = setInterval(updateActiveOrderId, 30000)
 
     return () => {
-      if (channel) {
-        supabase.removeChannel(channel)
-      }
-      if (interval) {
-        clearInterval(interval)
-      }
+      clearInterval(interval)
     }
   }, [supabase])
 
-  // Не рендерим ничего визуально, только отслеживаем местоположение
-  // Можно добавить индикатор, если нужно
-  if (error && hasActiveOrders) {
+  // Показываем ошибку, если есть проблема с отслеживанием местоположения
+  if (error) {
     return (
       <div className="fixed bottom-20 left-4 right-4 bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm z-50">
         <p>⚠️ {error}</p>
@@ -129,6 +69,7 @@ export function DriverLocationTracker() {
     )
   }
 
+  // Не рендерим ничего визуально, только отслеживаем местоположение
   return null
 }
 
