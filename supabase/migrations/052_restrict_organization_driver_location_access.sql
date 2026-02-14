@@ -320,36 +320,19 @@ BEGIN
     p.vehicle_number,
     p.license_number,
     -- Возвращаем current_location только если есть активный заказ
-    CASE 
-      WHEN EXISTS (
-        SELECT 1 FROM public.orders o
-        WHERE o.executor_user_id = p.id
-          AND o.customer_id = organization_user_id
-          AND o.status IN ('courier_coming', 'courier_delivering')
-      ) THEN p.current_location
-      ELSE NULL
-    END as current_location,
+    p.current_location,
     -- Возвращаем location_updated_at только если есть активный заказ
-    CASE 
-      WHEN EXISTS (
-        SELECT 1 FROM public.orders o
-        WHERE o.executor_user_id = p.id
-          AND o.customer_id = organization_user_id
-          AND o.status IN ('courier_coming', 'courier_delivering')
-      ) THEN p.location_updated_at
-      ELSE NULL
-    END as location_updated_at,
+    p.location_updated_at,
     p.avatar_url,
     p.created_at,
     o.id as active_order_id,
     o.status as active_order_status
   FROM public.profiles p
-  LEFT JOIN public.orders o ON o.executor_user_id = p.id
+  INNER JOIN public.orders o ON o.executor_user_id = p.id
     AND o.customer_id = organization_user_id
     AND o.status IN ('courier_coming', 'courier_delivering')
   WHERE p.organization_id = organization_user_id
     AND p.role = 'driver'
-    AND o.id IS NOT NULL  -- Только водители с активными заказами
   ORDER BY p.created_at DESC;
 END;
 $$;
