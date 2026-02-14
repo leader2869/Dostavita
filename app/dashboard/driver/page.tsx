@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import type { User } from '@/lib/types'
 import { AvailableOrdersList } from '@/components/driver/AvailableOrdersList'
 import { DriverLocationTracker } from '@/components/driver/DriverLocationTracker'
+import { formatAddressForOrder } from '@/lib/utils/formatAddress'
 
 // Отключаем кеширование, чтобы данные всегда были актуальными
 export const dynamic = 'force-dynamic'
@@ -131,8 +132,11 @@ export default async function DriverDashboard() {
                   <div className="flex justify-between items-start">
                     <div>
                       <p className="font-medium text-white">Заказ №{order.order_number || order.id.slice(0, 8)}</p>
-                      <p className="text-sm text-gray-300">
-                        {order.pickup_address} → {order.delivery_address}
+                      <p className="text-sm text-gray-300 mt-1">
+                        а) {formatAddressForOrder(order.pickup_address)}
+                      </p>
+                      <p className="text-sm text-gray-300 mt-1">
+                        б) {formatAddressForOrder(order.delivery_address)}
                       </p>
                       <p className="text-sm text-gray-400 mt-1">
                         Статус: {order.status === 'courier_coming' ? 'Еду за посылкой' :
