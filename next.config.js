@@ -57,7 +57,7 @@ const nextConfig = {
       },
     ]
   },
-  webpack: (config, { isServer }) => {
+  webpack: (config, { isServer, dev }) => {
     if (!isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,
@@ -66,6 +66,17 @@ const nextConfig = {
         tls: false,
       }
     }
+    
+    // Настройки для WebSocket в режиме разработки
+    if (dev) {
+      // Отключаем агрессивное переподключение WebSocket, если есть проблемы
+      config.optimization = {
+        ...config.optimization,
+        removeAvailableModules: false,
+        removeEmptyChunks: false,
+      }
+    }
+    
     return config
   },
 }
