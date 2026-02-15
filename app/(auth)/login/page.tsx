@@ -6,21 +6,31 @@ import { createClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [checkingAuth, setCheckingAuth] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  // Отмечаем, что компонент смонтирован
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
+    if (!mounted) return
+
     // Проверяем параметр signedOut в URL и очищаем его
-    const signedOut = searchParams.get('signedOut')
-    if (signedOut === 'true' && typeof window !== 'undefined') {
-      // Очищаем параметр из URL без перезагрузки через history API
-      const url = new URL(window.location.href)
-      url.searchParams.delete('signedOut')
-      window.history.replaceState({}, '', url.toString())
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search)
+      const signedOut = urlParams.get('signedOut')
+      if (signedOut === 'true') {
+        // Очищаем параметр из URL без перезагрузки через history API
+        urlParams.delete('signedOut')
+        const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '')
+        window.history.replaceState({}, '', newUrl)
+      }
     }
 
     // Проверяем, не авторизован ли уже пользователь
@@ -47,7 +57,7 @@ export default function LoginPage() {
     }, 200)
     
     return () => clearTimeout(timer)
-  }, [searchParams])
+  }, [mounted])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
