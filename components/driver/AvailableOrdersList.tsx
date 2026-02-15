@@ -135,24 +135,16 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
   }
 
   // Скрытые заказы - это уже заказы из order_rejections, их не нужно фильтровать
-  // Они должны показываться когда showCancelled = true
-  const filteredCancelledOrders = showCancelled && cancelledOrders && cancelledOrders.length > 0
+  // Они должны показываться в отдельной секции под основным списком
+  const hiddenOrders = showCancelled && cancelledOrders && cancelledOrders.length > 0
     ? cancelledOrders  // Не фильтруем, так как это уже отфильтрованные заказы (из order_rejections)
     : []
 
-  // Убираем дубликаты: если заказ уже в orders, не добавляем его из cancelledOrders
-  const allOrdersToShow = showCancelled 
-    ? [
-        ...orders,
-        ...filteredCancelledOrders.filter(hiddenOrder => !orders.some(regularOrder => regularOrder.id === hiddenOrder.id))
-      ]
-    : orders
-
   console.log('AvailableOrdersList - showCancelled:', showCancelled)
-  console.log('AvailableOrdersList - filteredCancelledOrders:', filteredCancelledOrders)
-  console.log('AvailableOrdersList - allOrdersToShow count:', allOrdersToShow.length)
+  console.log('AvailableOrdersList - hiddenOrders:', hiddenOrders)
+  console.log('AvailableOrdersList - orders count:', orders.length)
 
-  if (allOrdersToShow.length === 0 && !showCancelled) {
+  if (orders.length === 0 && hiddenOrders.length === 0) {
     return (
       <div className="space-y-4">
         {/* Переключатель для показа скрытых заказов - показываем всегда */}
@@ -175,30 +167,9 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
     )
   }
 
-  return (
-    <div className="space-y-4">
-      {/* Переключатель для показа скрытых заказов - показываем всегда */}
-      <div className="flex items-center justify-end mb-4">
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={showCancelled}
-            onChange={(e) => setShowCancelled(e.target.checked)}
-            disabled={!cancelledOrders || cancelledOrders.length === 0}
-            className="w-4 h-4 text-green-600 bg-gray-700 border-gray-600 rounded focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
-          />
-          <span className={`text-sm ${cancelledOrders && cancelledOrders.length > 0 ? 'text-gray-300' : 'text-gray-500'}`}>
-            Показать скрытые заказы ({cancelledOrders?.length || 0})
-          </span>
-        </label>
-      </div>
-      {allOrdersToShow.map((order) => {
-        // Проверяем, является ли заказ скрытым (от которого водитель отказался, находится в списке cancelledOrders)
-        const isHidden = cancelledOrders && cancelledOrders.length > 0 
-          ? cancelledOrders.some(co => co.id === order.id)
-          : false
-        return (
-        <div key={order.id} className={`border rounded-lg p-4 ${isHidden ? 'border-yellow-600 bg-yellow-900/20' : 'border-gray-700'}`}>
+  // Функция для отображения карточки заказа
+  const renderOrderCard = (order: Order, isHidden: boolean = false) => (
+    <div key={order.id} className={`border rounded-lg p-4 ${isHidden ? 'border-yellow-600 bg-yellow-900/20' : 'border-gray-700'}`}>
           <div className="flex justify-between items-start mb-3">
             <div className="flex-1">
               <div className="flex items-center gap-2">
