@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import type { User } from '@/lib/types'
+import { SignOutButton } from '@/components/auth/SignOutButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -176,14 +177,26 @@ export default async function DashboardLayout({
                   {(profile as User).full_name || (profile as User).email}
                 </span>
               </div>
-              <form action="/auth/signout" method="post">
-                <button
-                  type="submit"
-                  className="text-sm text-red-600 hover:text-red-700"
-                >
-                  Выйти
-                </button>
-              </form>
+              <button
+                onClick={async () => {
+                  try {
+                    // Выполняем выход через API
+                    await fetch('/auth/signout', {
+                      method: 'POST',
+                      credentials: 'include',
+                    })
+                    // Используем window.location для надежного редиректа
+                    window.location.href = '/login'
+                  } catch (error) {
+                    console.error('Ошибка при выходе:', error)
+                    // В случае ошибки все равно редиректим на логин
+                    window.location.href = '/login'
+                  }
+                }}
+                className="text-sm text-red-600 hover:text-red-700"
+              >
+                Выйти
+              </button>
             </div>
           </div>
         </div>
