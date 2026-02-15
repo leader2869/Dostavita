@@ -99,11 +99,30 @@ export default async function DriverDashboard() {
   }
   
   // Для обратной совместимости используем rejectedOrders как cancelledOrders (скрытые заказы)
-  const cancelledOrders = rejectedOrders || []
+  let cancelledOrders = rejectedOrders || []
+  
+  // Fallback: если RPC функция не вернула данные, но есть прямые отказы, используем прямой запрос
+  if ((!cancelledOrders || cancelledOrders.length === 0) && directRejections && directRejections.length > 0) {
+    console.log('Driver Dashboard - RPC функция не вернула данные, используем fallback')
+    const rejectionOrderIds = directRejections.map(r => r.order_id)
+    const { data: fallbackOrders, error: fallbackError } = await supabase
+      .from('orders')
+      .select('id, order_number, pickup_address, delivery_address, final_price, item_type, description, created_at, cancelled_at, status')
+      .in('id', rejectionOrderIds)
+      .eq('status', 'searching_courier')
+    
+    if (!fallbackError && fallbackOrders) {
+      console.log('Driver Dashboard - Fallback orders found:', fallbackOrders.length)
+      cancelledOrders = fallbackOrders
+    } else if (fallbackError) {
+      console.error('Driver Dashboard - Fallback error:', fallbackError)
+    }
+  }
   
   // Дополнительная проверка: если функция вернула null или undefined, используем пустой массив
   if (!cancelledOrders) {
     console.warn('Driver Dashboard - cancelledOrders is null/undefined, using empty array')
+    cancelledOrders = []
   }
 
   // Получаем отказы водителя, чтобы исключить их из списка
