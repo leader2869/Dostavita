@@ -3,6 +3,8 @@ import { redirect } from 'next/navigation'
 import type { User } from '@/lib/types'
 import { AvailableOrdersList } from '@/components/driver/AvailableOrdersList'
 import { DriverLocationTracker } from '@/components/driver/DriverLocationTracker'
+import { DriverPushNotifications } from '@/components/driver/DriverPushNotifications'
+import { DriverBottomNavigation } from '@/components/driver/DriverBottomNavigation'
 import { formatAddressForOrder } from '@/lib/utils/formatAddress'
 
 // Отключаем кеширование, чтобы данные всегда были актуальными
@@ -196,6 +198,7 @@ export default async function DriverDashboard() {
   return (
     <>
       <DriverLocationTracker />
+      <DriverPushNotifications driverUserId={user.id} />
       <div className="pb-20">
         <h1 className="text-3xl font-bold mb-6 text-white">Панель исполнителя</h1>
 

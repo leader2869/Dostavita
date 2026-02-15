@@ -4,11 +4,14 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { useAvailableOrdersCount } from '@/hooks/useAvailableOrdersCount'
 
 export function DriverBottomNavigation() {
   const pathname = usePathname()
   const supabase = createClient()
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0)
+  const [driverUserId, setDriverUserId] = useState<string | null>(null)
+  const { count: availableOrdersCount } = useAvailableOrdersCount(driverUserId)
 
   const isActive = (path: string) => {
     if (path === '/dashboard/driver') {
@@ -20,10 +23,12 @@ export function DriverBottomNavigation() {
   useEffect(() => {
     let isMounted = true
     
-    const loadRequestsCount = async () => {
+    const loadUserAndRequests = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser()
         if (!user || !isMounted) return
+
+        setDriverUserId(user.id)
 
         const { data: requestsData, error: requestsError } = await supabase
           .rpc('get_driver_requests', { driver_user_id: user.id })
@@ -34,15 +39,15 @@ export function DriverBottomNavigation() {
         }
       } catch (err) {
         if (isMounted) {
-          console.error('Ошибка загрузки количества запросов:', err)
+          console.error('Ошибка загрузки данных:', err)
         }
       }
     }
 
-    loadRequestsCount()
+    loadUserAndRequests()
     
     // Обновляем каждые 30 секунд
-    const interval = setInterval(loadRequestsCount, 30000)
+    const interval = setInterval(loadUserAndRequests, 30000)
     
     return () => {
       isMounted = false
@@ -55,23 +60,30 @@ export function DriverBottomNavigation() {
       <div className="flex justify-around items-center h-16">
         <Link
           href="/dashboard/driver"
-          className={`flex flex-col items-center justify-center flex-1 h-full ${
+          className={`flex flex-col items-center justify-center flex-1 h-full relative ${
             isActive('/dashboard/driver') ? 'text-green-400' : 'text-gray-400'
           } hover:text-green-400 transition`}
         >
-          <svg
-            className="w-6 h-6 mb-1"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-            />
-          </svg>
+          <div className="relative">
+            <svg
+              className="w-6 h-6 mb-1"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+              />
+            </svg>
+            {availableOrdersCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-green-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                {availableOrdersCount > 9 ? '9+' : availableOrdersCount}
+              </span>
+            )}
+          </div>
           <span className="text-xs">Главная</span>
         </Link>
 
