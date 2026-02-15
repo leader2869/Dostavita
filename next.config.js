@@ -13,7 +13,8 @@ const nextConfig = {
   async headers() {
     return [
       {
-        source: '/_next/static/:path*',
+        // Общее правило для всех статических файлов Next.js
+        source: '/_next/:path*',
         headers: [
           {
             key: 'Access-Control-Allow-Origin',
@@ -21,41 +22,20 @@ const nextConfig = {
           },
           {
             key: 'Access-Control-Allow-Methods',
-            value: 'GET, OPTIONS',
+            value: 'GET, OPTIONS, HEAD',
           },
           {
             key: 'Access-Control-Allow-Headers',
             value: '*',
           },
-        ],
-      },
-      {
-        source: '/_next/webpack-hmr',
-        headers: [
           {
-            key: 'Access-Control-Allow-Origin',
-            value: '*',
+            key: 'Access-Control-Allow-Credentials',
+            value: 'true',
           },
         ],
       },
       {
-        source: '/_next/static/webpack/:path*',
-        headers: [
-          {
-            key: 'Access-Control-Allow-Origin',
-            value: '*',
-          },
-          {
-            key: 'Access-Control-Allow-Methods',
-            value: 'GET, OPTIONS',
-          },
-          {
-            key: 'Access-Control-Allow-Headers',
-            value: '*',
-          },
-        ],
-      },
-      {
+        // Специфичное правило для webpack hot-update файлов
         source: '/_next/static/webpack/:path*.webpack.hot-update.json',
         headers: [
           {
@@ -64,7 +44,7 @@ const nextConfig = {
           },
           {
             key: 'Access-Control-Allow-Methods',
-            value: 'GET, OPTIONS',
+            value: 'GET, OPTIONS, HEAD',
           },
           {
             key: 'Access-Control-Allow-Headers',
@@ -73,6 +53,28 @@ const nextConfig = {
           {
             key: 'Content-Type',
             value: 'application/json',
+          },
+          {
+            key: 'Cache-Control',
+            value: 'no-cache, no-store, must-revalidate',
+          },
+        ],
+      },
+      {
+        // Правило для WebSocket HMR
+        source: '/_next/webpack-hmr',
+        headers: [
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: '*',
+          },
+          {
+            key: 'Access-Control-Allow-Methods',
+            value: 'GET, OPTIONS, HEAD',
+          },
+          {
+            key: 'Access-Control-Allow-Headers',
+            value: '*',
           },
         ],
       },
