@@ -247,7 +247,7 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
     <div className="space-y-6">
       {/* Доступные заказы - без заголовка, так как он уже есть в родительском компоненте */}
       <div>
-        <div className="flex items-center justify-end mb-4">
+        <div className="flex items-center justify-start mb-4">
           {/* Переключатель для показа скрытых заказов */}
           {cancelledOrders && cancelledOrders.length > 0 && (
             <label className="flex items-center gap-2 cursor-pointer">
