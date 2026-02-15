@@ -62,7 +62,7 @@ EXCEPTION
 END;
 $$;
 
--- Даем права на выполнение функции
+-- Даем права на выполнение функции (параметр опциональный, но сигнатура остается UUID)
 GRANT EXECUTE ON FUNCTION public.get_driver_cancelled_orders(UUID) TO authenticated;
 
 -- Комментарий
