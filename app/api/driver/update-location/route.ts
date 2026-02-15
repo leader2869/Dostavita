@@ -63,6 +63,19 @@ export async function POST(request: Request) {
       )
     }
 
+    // Также обновляем current_location в profiles для быстрого доступа
+    // Используем RPC функцию для обхода RLS
+    const { error: updateProfileError } = await supabase.rpc('update_driver_location', {
+      p_driver_id: user.id,
+      p_longitude: parseFloat(longitude.toString()),
+      p_latitude: parseFloat(latitude.toString()),
+    })
+
+    if (updateProfileError) {
+      console.error('Ошибка обновления current_location в profiles:', updateProfileError)
+      // Не возвращаем ошибку, так как основное сохранение в driver_locations прошло успешно
+    }
+
     return NextResponse.json({
       success: true,
       location: locationData,
