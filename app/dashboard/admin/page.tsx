@@ -95,6 +95,32 @@ export default async function AdminDashboard() {
     .select('*', { count: 'exact', head: true })
     .in('status', ['courier_coming', 'courier_delivering'])
 
+  // 4. Статистика отказов от заказов
+  const { count: totalRejectionsCount } = await supabase
+    .from('order_rejections')
+    .select('*', { count: 'exact', head: true })
+
+  // Получаем статистику отказов по заказам (сколько водителей отказалось от каждого заказа)
+  const { data: rejectionsByOrder } = await supabase
+    .from('order_rejections')
+    .select('order_id')
+    .order('created_at', { ascending: false })
+    .limit(1000)
+
+  // Группируем отказы по заказам
+  const rejectionsCountByOrder: Record<string, number> = {}
+  if (rejectionsByOrder) {
+    rejectionsByOrder.forEach((rejection: any) => {
+      rejectionsCountByOrder[rejection.order_id] = (rejectionsCountByOrder[rejection.order_id] || 0) + 1
+    })
+  }
+
+  // Находим заказы с наибольшим количеством отказов
+  const ordersWithMostRejections = Object.entries(rejectionsCountByOrder)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 10)
+    .map(([orderId, count]) => ({ orderId, count }))
+
   // Получаем настройки доставки
   let { data: deliverySettings } = await supabase
     .rpc('get_delivery_settings')
@@ -150,7 +176,7 @@ export default async function AdminDashboard() {
       </h1>
 
       {/* Статистика заказов */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
         <div className="bg-gray-800 rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold mb-2 text-white">Активные заказы</h2>
           <p className="text-3xl font-bold text-white">{activeOrdersCount || 0}</p>
@@ -166,7 +192,27 @@ export default async function AdminDashboard() {
           <p className="text-3xl font-bold text-white">{inProgressCount || 0}</p>
           <p className="text-sm text-gray-400 mt-1">Курьер едет, доставляется</p>
         </div>
+        <div className="bg-gray-800 rounded-lg shadow p-6">
+          <h2 className="text-lg font-semibold mb-2 text-white">Всего отказов</h2>
+          <p className="text-3xl font-bold text-red-400">{totalRejectionsCount || 0}</p>
+          <p className="text-sm text-gray-400 mt-1">Отказов водителей от заказов</p>
+        </div>
       </div>
+
+      {/* Статистика отказов по заказам */}
+      {ordersWithMostRejections.length > 0 && (
+        <div className="bg-gray-800 rounded-lg shadow p-6 mb-6">
+          <h2 className="text-xl font-semibold mb-4 text-white">Заказы с наибольшим количеством отказов</h2>
+          <div className="space-y-2">
+            {ordersWithMostRejections.map(({ orderId, count }) => (
+              <div key={orderId} className="flex justify-between items-center p-3 bg-gray-700 rounded">
+                <span className="text-white">Заказ {orderId.slice(0, 8)}...</span>
+                <span className="text-red-400 font-semibold">{count} отказ(ов)</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Активные заказы */}
       <div className="bg-gray-800 rounded-lg shadow p-6 mb-6">

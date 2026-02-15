@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { formatDistanceToNow } from 'date-fns'
@@ -45,11 +45,16 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId }: Ava
   const supabase = createClient()
   const [orders, setOrders] = useState(initialOrders)
   const [rejectedOrderIds, setRejectedOrderIds] = useState<Set<string>>(new Set())
+  // Используем ref для отслеживания отклоненных заказов, которые не должны возвращаться
+  const rejectedOrderIdsRef = useRef<Set<string>>(new Set())
 
   // Синхронизируем локальное состояние с пропсами при обновлении
+  // НО исключаем заказы, от которых водитель отказался
   useEffect(() => {
     // Фильтруем заказы, исключая те, от которых водитель отказался
-    const filtered = initialOrders.filter(order => !rejectedOrderIds.has(order.id))
+    // Используем и состояние, и ref для надежности
+    const allRejectedIds = new Set([...rejectedOrderIds, ...rejectedOrderIdsRef.current])
+    const filtered = initialOrders.filter(order => !allRejectedIds.has(order.id))
     setOrders(filtered)
   }, [initialOrders, rejectedOrderIds])
 
@@ -63,7 +68,9 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId }: Ava
           .eq('driver_user_id', driverUserId)
 
         if (rejections) {
-          setRejectedOrderIds(new Set(rejections.map(r => r.order_id)))
+          const rejectedIds = new Set(rejections.map(r => r.order_id))
+          setRejectedOrderIds(rejectedIds)
+          rejectedOrderIdsRef.current = rejectedIds
         }
       } catch (error) {
         console.error('Ошибка загрузки отказов:', error)
@@ -75,7 +82,9 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId }: Ava
 
   const handleReject = async (orderId: string) => {
     // Добавляем заказ в список отказов для немедленного скрытия
-    setRejectedOrderIds(prev => new Set([...prev, orderId]))
+    const newRejectedIds = new Set([...rejectedOrderIds, orderId])
+    setRejectedOrderIds(newRejectedIds)
+    rejectedOrderIdsRef.current = newRejectedIds
     
     // Сохраняем отказ в БД в фоне (для сохранения после перезагрузки)
     try {
@@ -92,22 +101,22 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId }: Ava
       if (!response.ok) {
         console.error('Ошибка сохранения отказа:', data.error || 'Неизвестная ошибка')
         // Если ошибка, убираем из списка отказов (заказ вернется)
-        setRejectedOrderIds(prev => {
-          const newSet = new Set(prev)
-          newSet.delete(orderId)
-          return newSet
-        })
+        const updatedRejectedIds = new Set(rejectedOrderIds)
+        updatedRejectedIds.delete(orderId)
+        setRejectedOrderIds(updatedRejectedIds)
+        rejectedOrderIdsRef.current = updatedRejectedIds
       } else {
         console.log('Отказ успешно сохранен:', orderId)
+        // Подтверждаем, что отказ сохранен - обновляем ref
+        rejectedOrderIdsRef.current = new Set([...rejectedOrderIdsRef.current, orderId])
       }
     } catch (error) {
       console.error('Ошибка сохранения отказа:', error)
       // Если ошибка, убираем из списка отказов (заказ вернется)
-      setRejectedOrderIds(prev => {
-        const newSet = new Set(prev)
-        newSet.delete(orderId)
-        return newSet
-      })
+      const updatedRejectedIds = new Set(rejectedOrderIds)
+      updatedRejectedIds.delete(orderId)
+      setRejectedOrderIds(updatedRejectedIds)
+      rejectedOrderIdsRef.current = updatedRejectedIds
     }
   }
 
