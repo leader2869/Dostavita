@@ -85,7 +85,19 @@ export async function POST(request: Request) {
     }
 
     // Создаем профиль водителя и сразу привязываем к организации
-    const { data: driverProfile, error: profileError } = await supabase
+    // Используем admin клиент для обхода RLS политик
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false,
+        },
+      }
+    )
+
+    const { data: driverProfile, error: profileError } = await supabaseAdmin
       .from('profiles')
       .insert({
         id: newUser.user.id,
@@ -126,8 +138,8 @@ export async function POST(request: Request) {
       )
     }
 
-    // Создаем баланс для водителя
-    await supabase
+    // Создаем баланс для водителя (используем admin клиент)
+    await supabaseAdmin
       .from('balances')
       .insert({
         user_id: newUser.user.id,
