@@ -60,8 +60,13 @@ export function usePushNotifications() {
 
       // Проверяем наличие VAPID ключа
       const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
-      if (!vapidKey) {
+      console.log('VAPID ключ проверка:', vapidKey ? 'найден' : 'не найден', vapidKey ? `(${vapidKey.substring(0, 20)}...)` : '')
+      
+      if (!vapidKey || vapidKey.trim() === '') {
         console.warn('VAPID ключ не настроен. Push-подписка недоступна, но уведомления через Service Worker будут работать.')
+        console.warn('Убедитесь, что:')
+        console.warn('1. Переменная NEXT_PUBLIC_VAPID_PUBLIC_KEY добавлена в .env.local')
+        console.warn('2. Сервер разработки перезапущен после добавления переменной')
         // Уведомления через Service Worker будут работать без push-подписки
         setIsSubscribed(true) // Помечаем как подписанного, чтобы не запрашивать снова
         return true
