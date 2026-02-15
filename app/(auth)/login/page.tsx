@@ -13,27 +13,8 @@ export default function LoginPage() {
   const [checkingAuth, setCheckingAuth] = useState(false)
   const [mounted, setMounted] = useState(false)
 
-  // Отмечаем, что компонент смонтирован
+  // Проверяем, не авторизован ли уже пользователь
   useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  useEffect(() => {
-    if (!mounted) return
-
-    // Проверяем параметр signedOut в URL и очищаем его
-    if (typeof window !== 'undefined') {
-      const urlParams = new URLSearchParams(window.location.search)
-      const signedOut = urlParams.get('signedOut')
-      if (signedOut === 'true') {
-        // Очищаем параметр из URL без перезагрузки через history API
-        urlParams.delete('signedOut')
-        const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '')
-        window.history.replaceState({}, '', newUrl)
-      }
-    }
-
-    // Проверяем, не авторизован ли уже пользователь
     const checkAuth = async () => {
       setCheckingAuth(true)
       try {
@@ -57,7 +38,7 @@ export default function LoginPage() {
     }, 200)
     
     return () => clearTimeout(timer)
-  }, [mounted])
+  }, [])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()

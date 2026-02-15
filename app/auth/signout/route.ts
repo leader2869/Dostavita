@@ -20,8 +20,8 @@ export async function POST(request: NextRequest) {
   const origin = request.headers.get('origin') || request.nextUrl.origin
   const loginUrl = new URL('/login', origin)
   
-  // Добавляем параметр для принудительной перезагрузки страницы
-  loginUrl.searchParams.set('signedOut', 'true')
+  // НЕ добавляем параметр signedOut, чтобы избежать ошибки 405
+  // Просто редиректим на /login
   
   // Создаем редирект с очисткой cookies
   const response = NextResponse.redirect(loginUrl)
