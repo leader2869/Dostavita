@@ -241,8 +241,47 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
             )}
           </div>
         </div>
-      )
-      })}
+  )
+
+  return (
+    <div className="space-y-6">
+      {/* Доступные заказы */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-white">Доступные заказы</h3>
+          {/* Переключатель для показа скрытых заказов */}
+          {cancelledOrders && cancelledOrders.length > 0 && (
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={showCancelled}
+                onChange={(e) => setShowCancelled(e.target.checked)}
+                className="w-4 h-4 text-green-600 bg-gray-700 border-gray-600 rounded focus:ring-green-500"
+              />
+              <span className="text-sm text-gray-300">
+                Показать скрытые ({cancelledOrders.length})
+              </span>
+            </label>
+          )}
+        </div>
+        {orders.length > 0 ? (
+          <div className="space-y-4">
+            {orders.map((order) => renderOrderCard(order, false))}
+          </div>
+        ) : (
+          <p className="text-gray-400">Нет доступных заказов</p>
+        )}
+      </div>
+
+      {/* Скрытые заказы - показываем под доступными заказами */}
+      {showCancelled && hiddenOrders.length > 0 && (
+        <div>
+          <h3 className="text-lg font-semibold text-white mb-4">Скрытые заказы</h3>
+          <div className="space-y-4">
+            {hiddenOrders.map((order) => renderOrderCard(order, true))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
