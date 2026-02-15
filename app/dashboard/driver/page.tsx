@@ -51,30 +51,22 @@ export default async function DriverDashboard() {
     .order('created_at', { ascending: false })
     .limit(10)
 
-  // Получаем отмененные заказы через RPC функцию для обхода RLS
-  // Параметр не обязателен, функция вернет все отмененные заказы
-  const { data: cancelledOrders, error: cancelledOrdersError } = await supabase
-    .rpc('get_driver_cancelled_orders', { p_driver_user_id: user.id })
+  // Получаем заказы, от которых водитель отказался (скрытые заказы)
+  // Это заказы со статусом searching_courier, которые есть в order_rejections для этого водителя
+  const { data: rejectedOrders, error: rejectedOrdersError } = await supabase
+    .rpc('get_driver_rejected_orders', { p_driver_user_id: user.id })
 
-  if (cancelledOrdersError) {
-    console.error('Ошибка загрузки отмененных заказов:', cancelledOrdersError)
-    console.error('Ошибка детали:', JSON.stringify(cancelledOrdersError, null, 2))
+  if (rejectedOrdersError) {
+    console.error('Ошибка загрузки скрытых заказов:', rejectedOrdersError)
+    console.error('Ошибка детали:', JSON.stringify(rejectedOrdersError, null, 2))
   }
   
   console.log('Driver Dashboard - User ID:', user.id)
-  console.log('Driver Dashboard - Cancelled orders count:', cancelledOrders?.length || 0)
-  console.log('Driver Dashboard - Cancelled orders:', cancelledOrders)
+  console.log('Driver Dashboard - Rejected orders count:', rejectedOrders?.length || 0)
+  console.log('Driver Dashboard - Rejected orders:', rejectedOrders)
   
-  // Также проверяем напрямую через запрос для сравнения
-  const { data: directCancelledOrders, error: directError } = await supabase
-    .from('orders')
-    .select('id, status, cancelled_at')
-    .eq('status', 'cancelled')
-    .not('cancelled_at', 'is', null)
-    .limit(5)
-  
-  console.log('Driver Dashboard - Direct query cancelled orders count:', directCancelledOrders?.length || 0)
-  console.log('Driver Dashboard - Direct query error:', directError)
+  // Для обратной совместимости используем rejectedOrders как cancelledOrders
+  const cancelledOrders = rejectedOrders || []
 
   // Получаем отказы водителя, чтобы исключить их из списка
   const { data: rejections, error: rejectionsError } = await supabase
