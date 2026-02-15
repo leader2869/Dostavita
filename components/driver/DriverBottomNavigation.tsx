@@ -79,7 +79,7 @@ export function DriverBottomNavigation() {
               />
             </svg>
             {availableOrdersCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-green-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+              <span className="absolute -top-1 -right-1 bg-red-500 text-black text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                 {availableOrdersCount > 9 ? '9+' : availableOrdersCount}
               </span>
             )}
