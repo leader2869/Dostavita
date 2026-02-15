@@ -53,6 +53,8 @@ export default async function DriverDashboard() {
 
   // Получаем заказы, от которых водитель отказался (скрытые заказы)
   // Это заказы со статусом searching_courier, которые есть в order_rejections для этого водителя
+  console.log('Driver Dashboard - Запрос скрытых заказов для user.id:', user.id)
+  
   const { data: rejectedOrders, error: rejectedOrdersError } = await supabase
     .rpc('get_driver_rejected_orders', { p_driver_user_id: user.id })
 
@@ -62,8 +64,39 @@ export default async function DriverDashboard() {
   }
   
   console.log('Driver Dashboard - User ID:', user.id)
+  console.log('Driver Dashboard - Rejected orders (raw):', rejectedOrders)
   console.log('Driver Dashboard - Rejected orders count:', rejectedOrders?.length || 0)
-  console.log('Driver Dashboard - Rejected orders:', rejectedOrders)
+  console.log('Driver Dashboard - Rejected orders is array:', Array.isArray(rejectedOrders))
+  
+  // Проверяем напрямую через запрос для сравнения
+  const { data: directRejections, error: directRejectionsError } = await supabase
+    .from('order_rejections')
+    .select('order_id')
+    .eq('driver_user_id', user.id)
+  
+  console.log('Driver Dashboard - Direct rejections count:', directRejections?.length || 0)
+  console.log('Driver Dashboard - Direct rejections:', directRejections)
+  if (directRejectionsError) {
+    console.error('Driver Dashboard - Direct rejections error:', directRejectionsError)
+  }
+  
+  // Если есть отказы, проверяем заказы
+  if (directRejections && directRejections.length > 0) {
+    const rejectionOrderIds = directRejections.map(r => r.order_id)
+    console.log('Driver Dashboard - Rejection order IDs:', rejectionOrderIds)
+    
+    const { data: rejectedOrdersDirect, error: rejectedOrdersDirectError } = await supabase
+      .from('orders')
+      .select('id, order_number, status, pickup_address, delivery_address, final_price, item_type, description, created_at, cancelled_at')
+      .in('id', rejectionOrderIds)
+      .eq('status', 'searching_courier')
+    
+    console.log('Driver Dashboard - Direct rejected orders (searching_courier):', rejectedOrdersDirect)
+    console.log('Driver Dashboard - Direct rejected orders count:', rejectedOrdersDirect?.length || 0)
+    if (rejectedOrdersDirectError) {
+      console.error('Driver Dashboard - Direct rejected orders error:', rejectedOrdersDirectError)
+    }
+  }
   
   // Для обратной совместимости используем rejectedOrders как cancelledOrders (скрытые заказы)
   const cancelledOrders = rejectedOrders || []
