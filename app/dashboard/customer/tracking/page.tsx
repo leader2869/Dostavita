@@ -113,27 +113,33 @@ export default function CustomerTrackingPage() {
               }
             }
             
-            console.log('Водители с активными заказами (альтернативный метод):', driversWithOrders.length)
-            setDrivers(driversWithOrders)
-            if (driversWithOrders.length > 0 && !selectedDriver) {
-              setSelectedDriver(driversWithOrders[0].id)
+            if (isMounted) {
+              console.log('Водители с активными заказами (альтернативный метод):', driversWithOrders.length)
+              setDrivers(driversWithOrders)
+              if (driversWithOrders.length > 0 && !selectedDriver) {
+                setSelectedDriver(driversWithOrders[0].id)
+              }
             }
             return
           }
         }
         
         // Устанавливаем пустой массив при ошибке, чтобы не ломать UI
-        setDrivers([])
+        if (isMounted) {
+          setDrivers([])
+        }
       } else {
         console.log('Успешно загружено водителей:', driversData?.length || 0)
         console.log('Данные водителей:', driversData)
-        setDrivers(driversData || [])
-        if (driversData && driversData.length > 0 && !selectedDriver) {
-          setSelectedDriver(driversData[0].id)
-        } else if (!driversData || driversData.length === 0) {
-          console.warn('Функция вернула пустой массив. Проверьте:')
-          console.warn('1. Привязан ли водитель к организации (organization_id)')
-          console.warn('2. Применена ли миграция 056 в Supabase для обновления функции get_organization_drivers_with_active_orders')
+        if (isMounted) {
+          setDrivers(driversData || [])
+          if (driversData && driversData.length > 0 && !selectedDriver) {
+            setSelectedDriver(driversData[0].id)
+          } else if (!driversData || driversData.length === 0) {
+            console.warn('Функция вернула пустой массив. Проверьте:')
+            console.warn('1. Привязан ли водитель к организации (organization_id)')
+            console.warn('2. Применена ли миграция 056 в Supabase для обновления функции get_organization_drivers_with_active_orders')
+          }
         }
       }
     } catch (err: any) {
