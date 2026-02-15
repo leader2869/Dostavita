@@ -154,17 +154,19 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
     }
   }
 
-  // Скрытые заказы - это уже заказы из order_rejections, их не нужно фильтровать
-  // Они должны показываться в отдельной секции под основным списком
-  const hiddenOrders = showCancelled && cancelledOrders && cancelledOrders.length > 0
-    ? cancelledOrders  // Не фильтруем, так как это уже отфильтрованные заказы (из order_rejections)
+  // Скрытые заказы - это заказы из order_rejections
+  // Отфильтровываем скрытые заказы, которые уже есть в основном списке доступных заказов
+  const uniqueHiddenOrders = showCancelled && cancelledOrders && cancelledOrders.length > 0
+    ? cancelledOrders.filter(
+        (hiddenOrder) => !orders.some((order) => order.id === hiddenOrder.id)
+      )
     : []
 
   console.log('AvailableOrdersList - showCancelled:', showCancelled)
-  console.log('AvailableOrdersList - hiddenOrders:', hiddenOrders)
+  console.log('AvailableOrdersList - uniqueHiddenOrders:', uniqueHiddenOrders)
   console.log('AvailableOrdersList - orders count:', orders.length)
 
-  if (orders.length === 0 && hiddenOrders.length === 0) {
+  if (orders.length === 0 && uniqueHiddenOrders.length === 0) {
     return (
       <div className="space-y-4">
         {/* Переключатель для показа скрытых заказов - показываем всегда */}
@@ -292,12 +294,12 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
         )}
       </div>
 
-      {/* Скрытые заказы - показываем под доступными заказами */}
-      {showCancelled && hiddenOrders.length > 0 && (
-        <div>
+      {/* Скрытые заказы - показываем ПОД доступными заказами (внизу) */}
+      {showCancelled && uniqueHiddenOrders.length > 0 && (
+        <div className="mt-6">
           <h3 className="text-lg font-semibold text-white mb-4">Скрытые заказы</h3>
           <div className="space-y-4">
-            {hiddenOrders.map((order) => renderOrderCard(order, true))}
+            {uniqueHiddenOrders.map((order) => renderOrderCard(order, true))}
           </div>
         </div>
       )}
