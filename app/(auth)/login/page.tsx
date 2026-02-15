@@ -17,13 +17,17 @@ export default function LoginPage() {
     // Проверяем параметр signedOut в URL
     const signedOut = searchParams.get('signedOut')
     if (signedOut === 'true') {
-      // Очищаем параметр из URL
-      router.replace('/login')
       // Принудительно очищаем состояние Supabase на клиенте
       const supabase = createClient()
       supabase.auth.signOut().catch(() => {
         // Игнорируем ошибки при выходе, так как мы уже вышли
       })
+      // Очищаем параметр из URL без перезагрузки
+      if (typeof window !== 'undefined') {
+        const url = new URL(window.location.href)
+        url.searchParams.delete('signedOut')
+        window.history.replaceState({}, '', url.pathname)
+      }
     }
 
     // Проверяем, не авторизован ли уже пользователь
@@ -107,8 +111,8 @@ export default function LoginPage() {
   }
 
   return (
-    <>
-      <div className="bg-gray-800 p-8 rounded-lg shadow-md">
+    <div className="min-h-screen bg-gray-900 flex items-center justify-center px-4">
+      <div className="bg-gray-800 p-8 rounded-lg shadow-md w-full max-w-md">
         <h1 className="text-2xl font-bold text-center mb-6 text-white">Вход в Dostavita</h1>
         {checkingAuth && (
           <div className="text-center text-gray-400 text-sm mb-4">Проверка аутентификации...</div>
@@ -156,12 +160,12 @@ export default function LoginPage() {
         </button>
       </form>
 
-      <div className="mt-4 text-center">
-        <a href="/register" className="text-sm text-green-500 hover:text-green-500">
-          Нет аккаунта? Зарегистрироваться
-        </a>
+        <div className="mt-4 text-center">
+          <a href="/register" className="text-sm text-green-500 hover:text-green-500">
+            Нет аккаунта? Зарегистрироваться
+          </a>
+        </div>
       </div>
-      </div>
-    </>
+    </div>
   )
 }
