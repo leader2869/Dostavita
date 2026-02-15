@@ -34,7 +34,8 @@ CREATE POLICY "Drivers can view own rejections"
   USING (driver_user_id = auth.uid());
 
 -- Суперадмины могут видеть все отказы
-CREATE POLICY IF NOT EXISTS "Superadmins can view all rejections"
+DROP POLICY IF EXISTS "Superadmins can view all rejections" ON public.order_rejections;
+CREATE POLICY "Superadmins can view all rejections"
   ON public.order_rejections FOR SELECT
   TO authenticated
   USING (
