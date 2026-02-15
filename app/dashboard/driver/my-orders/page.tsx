@@ -18,6 +18,8 @@ export default function DriverMyOrdersPage() {
   useEffect(() => {
     if (authLoading || !user) return
 
+    let isMounted = true
+
     const loadOrders = async () => {
       // Получаем все заказы водителя (где executor_user_id равен ID текущего пользователя)
       const { data: ordersData, error } = await supabase
@@ -25,6 +27,8 @@ export default function DriverMyOrdersPage() {
         .select('*')
         .eq('executor_user_id', user.id)
         .order('created_at', { ascending: false })
+
+      if (!isMounted) return
 
       if (error) {
         console.error('Ошибка загрузки заказов:', error)
@@ -37,7 +41,12 @@ export default function DriverMyOrdersPage() {
     }
 
     loadOrders()
-  }, [supabase, user, authLoading])
+    
+    return () => {
+      isMounted = false
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, authLoading]) // Убрали supabase из зависимостей
 
   const getStatusLabel = (status: string) => {
     switch (status) {

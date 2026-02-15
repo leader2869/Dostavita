@@ -57,15 +57,21 @@ export default function DriverFinancePage() {
   }, [customStartDate, customEndDate])
 
   const loadData = useCallback(async () => {
+    let isMounted = true
+    
     try {
       const { data: { user: currentUser } } = await supabase.auth.getUser()
       
       if (!currentUser) {
-        router.push('/login')
+        if (isMounted) {
+          router.push('/login')
+        }
         return
       }
 
-      setUser(currentUser)
+      if (isMounted) {
+        setUser(currentUser)
+      }
 
       // Получаем баланс
       const { data: balanceData, error: balanceError } = await supabase
@@ -73,6 +79,8 @@ export default function DriverFinancePage() {
         .select('*')
         .eq('user_id', currentUser.id)
         .maybeSingle()
+      
+      if (!isMounted) return
       
       if (balanceError) {
         console.error('Ошибка загрузки баланса:', balanceError)
@@ -87,10 +95,14 @@ export default function DriverFinancePage() {
             })
             .select()
             .single()
-          setBalance(newBalance)
+          if (isMounted) {
+            setBalance(newBalance)
+          }
         }
       } else {
-        setBalance(balanceData)
+        if (isMounted) {
+          setBalance(balanceData)
+        }
       }
 
       // Получаем транзакции с фильтром по периоду
@@ -110,7 +122,10 @@ export default function DriverFinancePage() {
       }
 
       const { data: transactionsData } = await transactionsQuery
-      setTransactions(transactionsData || [])
+      
+      if (isMounted) {
+        setTransactions(transactionsData || [])
+      }
 
       // Получаем завершенные заказы с фильтром по периоду
       let ordersQuery = supabase
@@ -127,13 +142,18 @@ export default function DriverFinancePage() {
       }
 
       const { data: ordersData } = await ordersQuery
-      setCompletedOrders(ordersData || [])
+      
+      if (isMounted) {
+        setCompletedOrders(ordersData || [])
+        setLoading(false)
+      }
     } catch (err: any) {
-      console.error('Ошибка загрузки данных:', err)
-    } finally {
-      setLoading(false)
+      if (isMounted) {
+        console.error('Ошибка загрузки данных:', err)
+        setLoading(false)
+      }
     }
-  }, [supabase, router, period, getDateFilter, customStartDate, customEndDate])
+  }, [period, getDateFilter, customStartDate, customEndDate]) // Убрали supabase и router из зависимостей
 
   useEffect(() => {
     loadData()
