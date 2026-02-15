@@ -2,6 +2,9 @@
 -- Водители должны видеть отмененные заказы, чтобы иметь возможность их активировать
 -- ВАЖНО: Используем функцию check_driver_role для избежания рекурсии RLS
 
+-- Удаляем старую политику, если она существует
+DROP POLICY IF EXISTS "Drivers can view cancelled orders" ON public.orders;
+
 -- Создаем политику: водители могут видеть отмененные заказы
 -- Используем функцию check_driver_role, которая отключает RLS перед SELECT из profiles
 CREATE POLICY "Drivers can view cancelled orders"
