@@ -141,7 +141,8 @@ export default function CustomerTrackingPage() {
     }
 
     loadTrack()
-  }, [selectedDriver, selectedDate, selectedTime, supabase])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDriver, selectedDate, selectedTime]) // supabase - стабильный объект, не нужно включать в зависимости
 
   // Обновляем данные каждые 30 секунд
   useEffect(() => {

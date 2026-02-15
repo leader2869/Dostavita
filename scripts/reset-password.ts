@@ -47,6 +47,12 @@ if (!email) {
 }
 
 async function resetPassword() {
+  // Проверяем, что переменные окружения установлены
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+    console.error('Ошибка: NEXT_PUBLIC_SUPABASE_URL и SUPABASE_SERVICE_ROLE_KEY должны быть установлены в переменных окружения')
+    process.exit(1)
+  }
+
   // Создаем клиент с service role key для доступа к admin API
   const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
     auth: {
