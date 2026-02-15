@@ -14,15 +14,13 @@ export default function LoginPage() {
   const [checkingAuth, setCheckingAuth] = useState(false)
 
   useEffect(() => {
-    // Проверяем параметр signedOut в URL
+    // Проверяем параметр signedOut в URL и очищаем его
     const signedOut = searchParams.get('signedOut')
-    if (signedOut === 'true') {
-      // Очищаем параметр из URL без перезагрузки
-      // Не вызываем signOut() на клиенте, так как мы уже вышли на сервере
-      if (typeof window !== 'undefined') {
-        // Используем router.replace для безопасной очистки URL
-        router.replace('/login', { scroll: false })
-      }
+    if (signedOut === 'true' && typeof window !== 'undefined') {
+      // Очищаем параметр из URL без перезагрузки через history API
+      const url = new URL(window.location.href)
+      url.searchParams.delete('signedOut')
+      window.history.replaceState({}, '', url.toString())
     }
 
     // Проверяем, не авторизован ли уже пользователь
@@ -32,8 +30,8 @@ export default function LoginPage() {
         const supabase = createClient()
         const { data: { user } } = await supabase.auth.getUser()
         if (user) {
-          // Используем router.push для навигации
-          router.push('/dashboard')
+          // Используем window.location для надежного редиректа
+          window.location.href = '/dashboard'
           return
         }
       } catch (err) {
@@ -46,10 +44,10 @@ export default function LoginPage() {
     // Небольшая задержка для обеспечения правильной гидратации
     const timer = setTimeout(() => {
       checkAuth()
-    }, 100)
+    }, 200)
     
     return () => clearTimeout(timer)
-  }, [searchParams, router])
+  }, [searchParams])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
