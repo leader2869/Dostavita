@@ -68,13 +68,30 @@ export default function DriverFinancePage() {
       setUser(currentUser)
 
       // Получаем баланс
-      const { data: balanceData } = await supabase
+      const { data: balanceData, error: balanceError } = await supabase
         .from('balances')
         .select('*')
         .eq('user_id', currentUser.id)
-        .single()
+        .maybeSingle()
       
-      setBalance(balanceData)
+      if (balanceError) {
+        console.error('Ошибка загрузки баланса:', balanceError)
+        // Если баланс не найден, создаем его с нулевым значением
+        if (balanceError.code === 'PGRST116') {
+          const { data: newBalance } = await supabase
+            .from('balances')
+            .insert({
+              user_id: currentUser.id,
+              amount: 0.00,
+              currency: 'BYN',
+            })
+            .select()
+            .single()
+          setBalance(newBalance)
+        }
+      } else {
+        setBalance(balanceData)
+      }
 
       // Получаем транзакции с фильтром по периоду
       const dateFilter = getDateFilter(period as Period)

@@ -55,6 +55,27 @@ const nextConfig = {
           },
         ],
       },
+      {
+        source: '/_next/static/webpack/:path*.webpack.hot-update.json',
+        headers: [
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: '*',
+          },
+          {
+            key: 'Access-Control-Allow-Methods',
+            value: 'GET, OPTIONS',
+          },
+          {
+            key: 'Access-Control-Allow-Headers',
+            value: '*',
+          },
+          {
+            key: 'Content-Type',
+            value: 'application/json',
+          },
+        ],
+      },
     ]
   },
   webpack: (config, { isServer, dev }) => {
