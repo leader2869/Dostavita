@@ -1,4 +1,5 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
@@ -39,12 +40,24 @@ export async function POST(request: Request) {
     }
 
     // Создаем пользователя в auth через admin API
-    // Если admin API недоступен, используем обычный signUp
+    // Для admin API нужен service role key
     let newUser: any = null
     let signUpError: any = null
 
     try {
-      const adminResult = await supabase.auth.admin.createUser({
+      // Создаем admin клиент с service role key
+      const supabaseAdmin = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        {
+          auth: {
+            autoRefreshToken: false,
+            persistSession: false,
+          },
+        }
+      )
+
+      const adminResult = await supabaseAdmin.auth.admin.createUser({
         email,
         password,
         email_confirm: true, // Автоматически подтверждаем email
@@ -92,7 +105,17 @@ export async function POST(request: Request) {
     if (profileError) {
       // Если ошибка создания профиля, пытаемся удалить созданного пользователя
       try {
-        await supabase.auth.admin.deleteUser(newUser.user.id)
+        const supabaseAdmin = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.SUPABASE_SERVICE_ROLE_KEY!,
+          {
+            auth: {
+              autoRefreshToken: false,
+              persistSession: false,
+            },
+          }
+        )
+        await supabaseAdmin.auth.admin.deleteUser(newUser.user.id)
       } catch (deleteErr) {
         console.error('Ошибка удаления пользователя:', deleteErr)
       }
