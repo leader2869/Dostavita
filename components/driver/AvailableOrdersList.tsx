@@ -52,6 +52,12 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
   // Используем ref для отслеживания отклоненных заказов, которые не должны возвращаться
   const rejectedOrderIdsRef = useRef<Set<string>>(new Set())
 
+  // Отладка: логируем cancelledOrders
+  useEffect(() => {
+    console.log('AvailableOrdersList - cancelledOrders:', cancelledOrders)
+    console.log('AvailableOrdersList - cancelledOrders length:', cancelledOrders?.length || 0)
+  }, [cancelledOrders])
+
   // Синхронизируем локальное состояние с пропсами при обновлении
   // НО исключаем заказы, от которых водитель отказался
   useEffect(() => {
