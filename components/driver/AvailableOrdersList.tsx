@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { formatDistanceToNow } from 'date-fns'
@@ -44,10 +44,38 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId }: Ava
   const router = useRouter()
   const supabase = createClient()
   const [orders, setOrders] = useState(initialOrders)
+  const [rejectedOrderIds, setRejectedOrderIds] = useState<Set<string>>(new Set())
+
+  // Синхронизируем локальное состояние с пропсами при обновлении
+  useEffect(() => {
+    // Фильтруем заказы, исключая те, от которых водитель отказался
+    const filtered = initialOrders.filter(order => !rejectedOrderIds.has(order.id))
+    setOrders(filtered)
+  }, [initialOrders, rejectedOrderIds])
+
+  // Загружаем отказы водителя при монтировании
+  useEffect(() => {
+    const loadRejections = async () => {
+      try {
+        const { data: rejections } = await supabase
+          .from('order_rejections')
+          .select('order_id')
+          .eq('driver_user_id', driverUserId)
+
+        if (rejections) {
+          setRejectedOrderIds(new Set(rejections.map(r => r.order_id)))
+        }
+      } catch (error) {
+        console.error('Ошибка загрузки отказов:', error)
+      }
+    }
+
+    loadRejections()
+  }, [driverUserId, supabase])
 
   const handleReject = async (orderId: string) => {
-    // Сразу удаляем заказ из списка для мгновенного отклика
-    setOrders(orders.filter(order => order.id !== orderId))
+    // Добавляем заказ в список отказов для немедленного скрытия
+    setRejectedOrderIds(prev => new Set([...prev, orderId]))
     
     // Сохраняем отказ в БД в фоне (для сохранения после перезагрузки)
     try {
@@ -63,14 +91,23 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId }: Ava
 
       if (!response.ok) {
         console.error('Ошибка сохранения отказа:', data.error || 'Неизвестная ошибка')
-        // Заказ уже удален из списка, но отказ не сохранен
-        // Можно показать предупреждение, но не критично
+        // Если ошибка, убираем из списка отказов (заказ вернется)
+        setRejectedOrderIds(prev => {
+          const newSet = new Set(prev)
+          newSet.delete(orderId)
+          return newSet
+        })
       } else {
         console.log('Отказ успешно сохранен:', orderId)
       }
     } catch (error) {
-      console.error('Ошибка сохранения отказа (не критично):', error)
-      // Заказ уже удален из списка, ошибка не критична
+      console.error('Ошибка сохранения отказа:', error)
+      // Если ошибка, убираем из списка отказов (заказ вернется)
+      setRejectedOrderIds(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(orderId)
+        return newSet
+      })
     }
   }
 
