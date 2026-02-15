@@ -45,9 +45,24 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId }: Ava
   const supabase = createClient()
   const [orders, setOrders] = useState(initialOrders)
 
-  const handleReject = (orderId: string) => {
-    // Просто удаляем заказ из списка без записи в БД
+  const handleReject = async (orderId: string) => {
+    // Сразу удаляем заказ из списка для мгновенного отклика
     setOrders(orders.filter(order => order.id !== orderId))
+    
+    // Сохраняем отказ в БД в фоне (для сохранения после перезагрузки)
+    try {
+      await fetch('/api/driver/reject-order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ orderId }),
+      })
+      // Не обрабатываем ошибки - заказ уже удален из списка
+    } catch (error) {
+      console.error('Ошибка сохранения отказа (не критично):', error)
+      // Заказ уже удален из списка, ошибка не критична
+    }
   }
 
   if (orders.length === 0) {
