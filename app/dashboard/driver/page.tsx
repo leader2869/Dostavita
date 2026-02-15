@@ -52,6 +52,7 @@ export default async function DriverDashboard() {
     .limit(10)
 
   // Получаем отмененные заказы через RPC функцию для обхода RLS
+  // Параметр не обязателен, функция вернет все отмененные заказы
   const { data: cancelledOrders, error: cancelledOrdersError } = await supabase
     .rpc('get_driver_cancelled_orders', { p_driver_user_id: user.id })
 
@@ -60,8 +61,20 @@ export default async function DriverDashboard() {
     console.error('Ошибка детали:', JSON.stringify(cancelledOrdersError, null, 2))
   }
   
+  console.log('Driver Dashboard - User ID:', user.id)
   console.log('Driver Dashboard - Cancelled orders count:', cancelledOrders?.length || 0)
   console.log('Driver Dashboard - Cancelled orders:', cancelledOrders)
+  
+  // Также проверяем напрямую через запрос для сравнения
+  const { data: directCancelledOrders, error: directError } = await supabase
+    .from('orders')
+    .select('id, status, cancelled_at')
+    .eq('status', 'cancelled')
+    .not('cancelled_at', 'is', null)
+    .limit(5)
+  
+  console.log('Driver Dashboard - Direct query cancelled orders count:', directCancelledOrders?.length || 0)
+  console.log('Driver Dashboard - Direct query error:', directError)
 
   // Получаем отказы водителя, чтобы исключить их из списка
   const { data: rejections, error: rejectionsError } = await supabase

@@ -1,7 +1,7 @@
 -- Миграция 065: RPC функция для получения отмененных заказов водителя
 -- Использует SECURITY DEFINER для обхода RLS и предотвращения рекурсии
 
-CREATE OR REPLACE FUNCTION public.get_driver_cancelled_orders(p_driver_user_id UUID)
+CREATE OR REPLACE FUNCTION public.get_driver_cancelled_orders(p_driver_user_id UUID DEFAULT NULL)
 RETURNS TABLE (
   id UUID,
   order_number INTEGER,
@@ -18,9 +18,20 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public
 AS $$
+DECLARE
+  v_count INTEGER;
 BEGIN
   -- Временно отключаем RLS для этого SELECT
   PERFORM set_config('row_security', 'off', true);
+
+  -- Проверяем, сколько отмененных заказов есть в базе
+  SELECT COUNT(*) INTO v_count
+  FROM public.orders
+  WHERE status = 'cancelled'
+    AND cancelled_at IS NOT NULL;
+  
+  -- Логируем для отладки (в production это можно убрать)
+  RAISE NOTICE 'Найдено отмененных заказов: %', v_count;
 
   RETURN QUERY
   SELECT
