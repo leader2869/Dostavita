@@ -18,6 +18,15 @@ export default function AcceptOrderPage() {
   const [loading, setLoading] = useState(true)
   const [accepting, setAccepting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [isReactivating, setIsReactivating] = useState(false)
+
+  // Проверяем параметр reactivate из URL
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search)
+      setIsReactivating(urlParams.get('reactivate') === 'true')
+    }
+  }, [])
 
   const loadData = useCallback(async () => {
     try {
@@ -84,6 +93,21 @@ export default function AcceptOrderPage() {
       
       console.log('Order BEFORE accept:', { orderBefore, orderBeforeError })
       
+      // Если заказ отменен, сначала активируем его (меняем статус на searching_courier)
+      if (isReactivating && order?.status === 'cancelled') {
+        const { error: reactivateError } = await supabase
+          .from('orders')
+          .update({ 
+            status: 'searching_courier',
+            cancelled_at: null
+          })
+          .eq('id', orderId)
+        
+        if (reactivateError) {
+          throw reactivateError
+        }
+      }
+
       const { data, error: rpcError } = await supabase.rpc('accept_order', {
         order_uuid: orderId,
         driver_user_uuid: user.id,

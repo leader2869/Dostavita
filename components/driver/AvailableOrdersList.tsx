@@ -17,11 +17,13 @@ interface Order {
   description: string | null
   created_at: string
   cancelled_at?: string | null
+  status?: string
 }
 
 interface AvailableOrdersListProps {
   orders: Order[]
   driverUserId: string
+  cancelledOrders?: Order[]
 }
 
 const getItemTypeLabel = (itemType: string | null): string => {
@@ -41,11 +43,12 @@ const getItemTypeLabel = (itemType: string | null): string => {
   }
 }
 
-export function AvailableOrdersList({ orders: initialOrders, driverUserId }: AvailableOrdersListProps) {
+export function AvailableOrdersList({ orders: initialOrders, driverUserId, cancelledOrders = [] }: AvailableOrdersListProps) {
   const router = useRouter()
   const supabase = createClient()
   const [orders, setOrders] = useState(initialOrders)
   const [rejectedOrderIds, setRejectedOrderIds] = useState<Set<string>>(new Set())
+  const [showCancelled, setShowCancelled] = useState(false)
   // Используем ref для отслеживания отклоненных заказов, которые не должны возвращаться
   const rejectedOrderIdsRef = useRef<Set<string>>(new Set())
 
@@ -121,19 +124,66 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId }: Ava
     }
   }
 
-  if (orders.length === 0) {
-    return <p className="text-gray-400">Нет доступных заказов</p>
+  // Фильтруем отмененные заказы, исключая те, от которых водитель отказался
+  const filteredCancelledOrders = showCancelled 
+    ? cancelledOrders.filter(order => !rejectedOrderIdsRef.current.has(order.id))
+    : []
+
+  const allOrdersToShow = showCancelled 
+    ? [...orders, ...filteredCancelledOrders]
+    : orders
+
+  if (allOrdersToShow.length === 0 && !showCancelled) {
+    return (
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <p className="text-gray-400">Нет доступных заказов</p>
+          {cancelledOrders.length > 0 && (
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={showCancelled}
+                onChange={(e) => setShowCancelled(e.target.checked)}
+                className="w-4 h-4 text-green-600 bg-gray-700 border-gray-600 rounded focus:ring-green-500"
+              />
+              <span className="text-sm text-gray-300">Показать отмененные ({cancelledOrders.length})</span>
+            </label>
+          )}
+        </div>
+      </div>
+    )
   }
 
   return (
     <div className="space-y-4">
-      {orders.map((order) => (
-        <div key={order.id} className="border border-gray-700 rounded-lg p-4">
+      {/* Переключатель для показа отмененных заказов */}
+      {cancelledOrders.length > 0 && (
+        <div className="flex items-center justify-end mb-4">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={showCancelled}
+              onChange={(e) => setShowCancelled(e.target.checked)}
+              className="w-4 h-4 text-green-600 bg-gray-700 border-gray-600 rounded focus:ring-green-500"
+            />
+            <span className="text-sm text-gray-300">Показать отмененные заказы ({cancelledOrders.length})</span>
+          </label>
+        </div>
+      )}
+      {allOrdersToShow.map((order) => {
+        const isCancelled = order.status === 'cancelled' || (showCancelled && cancelledOrders.some(co => co.id === order.id))
+        return (
+        <div key={order.id} className={`border rounded-lg p-4 ${isCancelled ? 'border-red-600 bg-red-900/20' : 'border-gray-700'}`}>
           <div className="flex justify-between items-start mb-3">
             <div className="flex-1">
               <div className="flex items-center gap-2">
                 <p className="font-medium text-white">Заказ №{order.order_number || order.id.slice(0, 8)}</p>
-                {order.cancelled_at && (
+                {isCancelled && (
+                  <span className="text-xs bg-red-600 text-white px-2 py-1 rounded">
+                    Отменен
+                  </span>
+                )}
+                {!isCancelled && order.cancelled_at && (
                   <span className="text-xs bg-yellow-600 text-white px-2 py-1 rounded">
                     Был отменен
                   </span>
@@ -175,21 +225,33 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId }: Ava
             <p className="font-semibold text-white ml-4">{order.final_price} BYN</p>
           </div>
           <div className="flex gap-2 mt-3">
-            <a
-              href={`/dashboard/driver/accept-order/${order.id}`}
-              className="flex-1 text-center bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700 transition"
-            >
-              Принять заказ
-            </a>
-            <button
-              onClick={() => handleReject(order.id)}
-              className="flex-1 bg-red-600 text-white px-4 py-2 rounded text-sm hover:bg-red-700 transition"
-            >
-              Отказаться
-            </button>
+            {isCancelled ? (
+              <a
+                href={`/dashboard/driver/accept-order/${order.id}?reactivate=true`}
+                className="flex-1 text-center bg-yellow-600 text-white px-4 py-2 rounded text-sm hover:bg-yellow-700 transition"
+              >
+                Активировать заказ
+              </a>
+            ) : (
+              <>
+                <a
+                  href={`/dashboard/driver/accept-order/${order.id}`}
+                  className="flex-1 text-center bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700 transition"
+                >
+                  Принять заказ
+                </a>
+                <button
+                  onClick={() => handleReject(order.id)}
+                  className="flex-1 bg-red-600 text-white px-4 py-2 rounded text-sm hover:bg-red-700 transition"
+                >
+                  Отказаться
+                </button>
+              </>
+            )}
           </div>
         </div>
-      ))}
+      )
+      })}
     </div>
   )
 }

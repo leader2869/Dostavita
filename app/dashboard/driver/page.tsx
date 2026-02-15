@@ -51,6 +51,14 @@ export default async function DriverDashboard() {
     .order('created_at', { ascending: false })
     .limit(10)
 
+  // Получаем отмененные заказы (со статусом cancelled)
+  const { data: cancelledOrders } = await supabase
+    .from('orders')
+    .select('id, order_number, pickup_address, delivery_address, final_price, item_type, description, created_at, cancelled_at')
+    .eq('status', 'cancelled')
+    .order('cancelled_at', { ascending: false })
+    .limit(10)
+
   // Получаем отказы водителя, чтобы исключить их из списка
   const { data: rejections, error: rejectionsError } = await supabase
     .from('order_rejections')
@@ -175,7 +183,11 @@ export default async function DriverDashboard() {
         {/* Доступные заказы - показываем вторыми */}
         <div className="bg-gray-800 rounded-lg shadow p-6">
           <h2 className="text-xl font-semibold mb-4 text-white">Доступные заказы</h2>
-          <AvailableOrdersList orders={filteredOrders} driverUserId={user.id} />
+          <AvailableOrdersList 
+            orders={filteredOrders} 
+            driverUserId={user.id}
+            cancelledOrders={cancelledOrders || []}
+          />
         </div>
       </div>
       
