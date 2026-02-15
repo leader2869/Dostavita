@@ -134,14 +134,23 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
     }
   }
 
-  // Фильтруем скрытые заказы (от которых водитель отказался), исключая те, от которых водитель отказался повторно
+  // Скрытые заказы - это уже заказы из order_rejections, их не нужно фильтровать
+  // Они должны показываться когда showCancelled = true
   const filteredCancelledOrders = showCancelled && cancelledOrders && cancelledOrders.length > 0
-    ? cancelledOrders.filter(order => !rejectedOrderIdsRef.current.has(order.id))
+    ? cancelledOrders  // Не фильтруем, так как это уже отфильтрованные заказы (из order_rejections)
     : []
 
+  // Убираем дубликаты: если заказ уже в orders, не добавляем его из cancelledOrders
   const allOrdersToShow = showCancelled 
-    ? [...orders, ...filteredCancelledOrders]
+    ? [
+        ...orders,
+        ...filteredCancelledOrders.filter(hiddenOrder => !orders.some(regularOrder => regularOrder.id === hiddenOrder.id))
+      ]
     : orders
+
+  console.log('AvailableOrdersList - showCancelled:', showCancelled)
+  console.log('AvailableOrdersList - filteredCancelledOrders:', filteredCancelledOrders)
+  console.log('AvailableOrdersList - allOrdersToShow count:', allOrdersToShow.length)
 
   if (allOrdersToShow.length === 0 && !showCancelled) {
     return (
