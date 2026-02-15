@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
-    "supabase:types": "supabase gen types typescript --local > types/database.ts"
+    "supabase:types": "supabase gen types typescript --local > types/database.ts",
+    "generate-vapid-keys": "node scripts/generate-vapid-keys.js"
   },
   "dependencies": {
     "@supabase/auth-helpers-nextjs": "^0.8.7",
@@ -38,6 +39,7 @@
     "eslint-config-next": "14.0.4",
     "postcss": "^8.4.32",
     "tailwindcss": "^3.4.0",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "web-push": "^3.6.7"
   }
 }
