@@ -16,6 +16,7 @@ interface Order {
   item_type: 'documents' | 'parcel' | 'flowers' | 'food' | 'other' | null
   description: string | null
   created_at: string
+  cancelled_at?: string | null
 }
 
 interface AvailableOrdersListProps {
@@ -130,7 +131,14 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId }: Ava
         <div key={order.id} className="border border-gray-700 rounded-lg p-4">
           <div className="flex justify-between items-start mb-3">
             <div className="flex-1">
-              <p className="font-medium text-white">Заказ №{order.order_number || order.id.slice(0, 8)}</p>
+              <div className="flex items-center gap-2">
+                <p className="font-medium text-white">Заказ №{order.order_number || order.id.slice(0, 8)}</p>
+                {order.cancelled_at && (
+                  <span className="text-xs bg-yellow-600 text-white px-2 py-1 rounded">
+                    Был отменен
+                  </span>
+                )}
+              </div>
               <p className="text-sm text-gray-300 mt-1">
                 а) {formatAddressForOrder(order.pickup_address)}
               </p>

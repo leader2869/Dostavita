@@ -43,9 +43,10 @@ export default async function DriverDashboard() {
   }
 
   // Получаем доступные заказы (все заказы со статусом "ищем курьера")
+  // Включаем заказы, которые были отменены, но сейчас снова активны (статус searching_courier)
   const { data: availableOrders } = await supabase
     .from('orders')
-    .select('id, order_number, pickup_address, delivery_address, final_price, item_type, description, created_at')
+    .select('id, order_number, pickup_address, delivery_address, final_price, item_type, description, created_at, cancelled_at')
     .eq('status', 'searching_courier')
     .order('created_at', { ascending: false })
     .limit(10)
