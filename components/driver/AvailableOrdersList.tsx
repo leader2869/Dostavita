@@ -235,7 +235,7 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
                   onClick={() => handleReject(order.id)}
                   className="flex-1 bg-red-600 text-white px-4 py-2 rounded text-sm hover:bg-red-700 transition"
                 >
-                  Отказаться
+                  Скрыть заказ
                 </button>
               </>
             )}
