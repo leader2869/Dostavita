@@ -65,15 +65,25 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
   // Синхронизируем локальное состояние с пропсами при обновлении
   // НО исключаем заказы, от которых водитель отказался
   useEffect(() => {
+    let isMounted = true
     // Фильтруем заказы, исключая те, от которых водитель отказался
     // Используем и состояние, и ref для надежности
     const allRejectedIds = new Set([...rejectedOrderIds, ...rejectedOrderIdsRef.current])
     const filtered = initialOrders.filter(order => !allRejectedIds.has(order.id))
-    setOrders(filtered)
+    
+    if (isMounted) {
+      setOrders(filtered)
+    }
+    
+    return () => {
+      isMounted = false
+    }
   }, [initialOrders, rejectedOrderIds])
 
   // Загружаем отказы водителя при монтировании
   useEffect(() => {
+    let isMounted = true
+    
     const loadRejections = async () => {
       try {
         const { data: rejections } = await supabase
@@ -81,18 +91,24 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
           .select('order_id')
           .eq('driver_user_id', driverUserId)
 
-        if (rejections) {
+        if (isMounted && rejections) {
           const rejectedIds = new Set(rejections.map(r => r.order_id))
           setRejectedOrderIds(rejectedIds)
           rejectedOrderIdsRef.current = rejectedIds
         }
       } catch (error) {
-        console.error('Ошибка загрузки отказов:', error)
+        if (isMounted) {
+          console.error('Ошибка загрузки отказов:', error)
+        }
       }
     }
 
     loadRejections()
-  }, [driverUserId, supabase])
+    
+    return () => {
+      isMounted = false
+    }
+  }, [driverUserId]) // Убрали supabase из зависимостей, так как это стабильный объект
 
   const handleReject = async (orderId: string) => {
     // Добавляем заказ в список отказов для немедленного скрытия
@@ -115,10 +131,12 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
       if (!response.ok) {
         console.error('Ошибка сохранения отказа:', data.error || 'Неизвестная ошибка')
         // Если ошибка, убираем из списка отказов (заказ вернется)
-        const updatedRejectedIds = new Set(rejectedOrderIds)
-        updatedRejectedIds.delete(orderId)
-        setRejectedOrderIds(updatedRejectedIds)
-        rejectedOrderIdsRef.current = updatedRejectedIds
+        setRejectedOrderIds(prev => {
+          const updated = new Set(prev)
+          updated.delete(orderId)
+          rejectedOrderIdsRef.current = updated
+          return updated
+        })
       } else {
         console.log('Отказ успешно сохранен:', orderId)
         // Подтверждаем, что отказ сохранен - обновляем ref
@@ -127,10 +145,12 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
     } catch (error) {
       console.error('Ошибка сохранения отказа:', error)
       // Если ошибка, убираем из списка отказов (заказ вернется)
-      const updatedRejectedIds = new Set(rejectedOrderIds)
-      updatedRejectedIds.delete(orderId)
-      setRejectedOrderIds(updatedRejectedIds)
-      rejectedOrderIdsRef.current = updatedRejectedIds
+      setRejectedOrderIds(prev => {
+        const updated = new Set(prev)
+        updated.delete(orderId)
+        rejectedOrderIdsRef.current = updated
+        return updated
+      })
     }
   }
 

@@ -18,20 +18,24 @@ export function DriverBottomNavigation() {
   }
 
   useEffect(() => {
+    let isMounted = true
+    
     const loadRequestsCount = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser()
-        if (!user) return
+        if (!user || !isMounted) return
 
         const { data: requestsData, error: requestsError } = await supabase
           .rpc('get_driver_requests', { driver_user_id: user.id })
         
-        if (!requestsError && requestsData) {
+        if (isMounted && !requestsError && requestsData) {
           const pendingCount = requestsData.filter((r: any) => r.status === 'pending').length
           setPendingRequestsCount(pendingCount)
         }
       } catch (err) {
-        console.error('Ошибка загрузки количества запросов:', err)
+        if (isMounted) {
+          console.error('Ошибка загрузки количества запросов:', err)
+        }
       }
     }
 
@@ -39,8 +43,12 @@ export function DriverBottomNavigation() {
     
     // Обновляем каждые 30 секунд
     const interval = setInterval(loadRequestsCount, 30000)
-    return () => clearInterval(interval)
-  }, [supabase])
+    
+    return () => {
+      isMounted = false
+      clearInterval(interval)
+    }
+  }, []) // Убрали supabase из зависимостей
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-gray-800 border-t border-gray-700 z-50">

@@ -20,6 +20,8 @@ export function DriverLocationTracker() {
   })
 
   useEffect(() => {
+    let isMounted = true
+    
     // Опционально: получаем ID активного заказа для привязки к местоположению
     // Но отслеживание местоположения работает всегда, независимо от наличия заказов
     const updateActiveOrderId = async () => {
@@ -39,13 +41,17 @@ export function DriverLocationTracker() {
           .order('created_at', { ascending: false })
           .limit(1)
 
-        if (activeOrders && activeOrders.length > 0) {
-          setActiveOrderId(activeOrders[0].id)
-        } else {
-          setActiveOrderId(null)
+        if (isMounted) {
+          if (activeOrders && activeOrders.length > 0) {
+            setActiveOrderId(activeOrders[0].id)
+          } else {
+            setActiveOrderId(null)
+          }
         }
       } catch (err) {
-        console.error('Ошибка получения активного заказа:', err)
+        if (isMounted) {
+          console.error('Ошибка получения активного заказа:', err)
+        }
       }
     }
 
@@ -56,9 +62,10 @@ export function DriverLocationTracker() {
     const interval = setInterval(updateActiveOrderId, 30000)
 
     return () => {
+      isMounted = false
       clearInterval(interval)
     }
-  }, [supabase])
+  }, []) // Убрали supabase из зависимостей
 
   // Показываем ошибку, если есть проблема с отслеживанием местоположения
   if (error) {
