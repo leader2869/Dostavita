@@ -173,7 +173,9 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
       </div>
       {allOrdersToShow.map((order) => {
         // Проверяем, является ли заказ отмененным (находится в списке cancelledOrders)
-        const isCancelled = cancelledOrders.some(co => co.id === order.id)
+        const isCancelled = cancelledOrders && cancelledOrders.length > 0 
+          ? cancelledOrders.some(co => co.id === order.id)
+          : false
         return (
         <div key={order.id} className={`border rounded-lg p-4 ${isCancelled ? 'border-red-600 bg-red-900/20' : 'border-gray-700'}`}>
           <div className="flex justify-between items-start mb-3">
