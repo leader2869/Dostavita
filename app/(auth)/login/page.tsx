@@ -11,7 +11,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [checkingAuth, setCheckingAuth] = useState(true)
+  const [checkingAuth, setCheckingAuth] = useState(false)
 
   useEffect(() => {
     // Проверяем параметр signedOut в URL
@@ -20,20 +20,20 @@ export default function LoginPage() {
       // Очищаем параметр из URL без перезагрузки
       // Не вызываем signOut() на клиенте, так как мы уже вышли на сервере
       if (typeof window !== 'undefined') {
-        const url = new URL(window.location.href)
-        url.searchParams.delete('signedOut')
-        window.history.replaceState({}, '', url.pathname + (url.search || ''))
+        // Используем router.replace для безопасной очистки URL
+        router.replace('/login', { scroll: false })
       }
     }
 
     // Проверяем, не авторизован ли уже пользователь
     const checkAuth = async () => {
+      setCheckingAuth(true)
       try {
         const supabase = createClient()
         const { data: { user } } = await supabase.auth.getUser()
         if (user) {
-          // Используем window.location для полной перезагрузки
-          window.location.href = '/dashboard'
+          // Используем router.push для навигации
+          router.push('/dashboard')
           return
         }
       } catch (err) {
