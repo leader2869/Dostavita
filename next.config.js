@@ -38,6 +38,23 @@ const nextConfig = {
           },
         ],
       },
+      {
+        source: '/_next/static/webpack/:path*',
+        headers: [
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: '*',
+          },
+          {
+            key: 'Access-Control-Allow-Methods',
+            value: 'GET, OPTIONS',
+          },
+          {
+            key: 'Access-Control-Allow-Headers',
+            value: '*',
+          },
+        ],
+      },
     ]
   },
   webpack: (config, { isServer }) => {
