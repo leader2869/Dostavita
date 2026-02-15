@@ -130,7 +130,7 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
     }
   }
 
-  // Фильтруем отмененные заказы, исключая те, от которых водитель отказался
+  // Фильтруем скрытые заказы (от которых водитель отказался), исключая те, от которых водитель отказался повторно
   const filteredCancelledOrders = showCancelled && cancelledOrders && cancelledOrders.length > 0
     ? cancelledOrders.filter(order => !rejectedOrderIdsRef.current.has(order.id))
     : []
@@ -142,7 +142,7 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
   if (allOrdersToShow.length === 0 && !showCancelled) {
     return (
       <div className="space-y-4">
-        {/* Переключатель для показа отмененных заказов - показываем всегда */}
+        {/* Переключатель для показа скрытых заказов - показываем всегда */}
         <div className="flex items-center justify-end mb-4">
           <label className="flex items-center gap-2 cursor-pointer">
             <input
@@ -164,7 +164,7 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
 
   return (
     <div className="space-y-4">
-      {/* Переключатель для показа отмененных заказов - показываем всегда */}
+      {/* Переключатель для показа скрытых заказов - показываем всегда */}
       <div className="flex items-center justify-end mb-4">
         <label className="flex items-center gap-2 cursor-pointer">
           <input
@@ -175,29 +175,24 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
             className="w-4 h-4 text-green-600 bg-gray-700 border-gray-600 rounded focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
           />
           <span className={`text-sm ${cancelledOrders && cancelledOrders.length > 0 ? 'text-gray-300' : 'text-gray-500'}`}>
-            Показать отмененные заказы ({cancelledOrders?.length || 0})
+            Показать скрытые заказы ({cancelledOrders?.length || 0})
           </span>
         </label>
       </div>
       {allOrdersToShow.map((order) => {
-        // Проверяем, является ли заказ отмененным (находится в списке cancelledOrders)
-        const isCancelled = cancelledOrders && cancelledOrders.length > 0 
+        // Проверяем, является ли заказ скрытым (от которого водитель отказался, находится в списке cancelledOrders)
+        const isHidden = cancelledOrders && cancelledOrders.length > 0 
           ? cancelledOrders.some(co => co.id === order.id)
           : false
         return (
-        <div key={order.id} className={`border rounded-lg p-4 ${isCancelled ? 'border-red-600 bg-red-900/20' : 'border-gray-700'}`}>
+        <div key={order.id} className={`border rounded-lg p-4 ${isHidden ? 'border-yellow-600 bg-yellow-900/20' : 'border-gray-700'}`}>
           <div className="flex justify-between items-start mb-3">
             <div className="flex-1">
               <div className="flex items-center gap-2">
                 <p className="font-medium text-white">Заказ №{order.order_number || order.id.slice(0, 8)}</p>
-                {isCancelled && (
-                  <span className="text-xs bg-red-600 text-white px-2 py-1 rounded">
-                    Отменен
-                  </span>
-                )}
-                {!isCancelled && order.cancelled_at && (
+                {isHidden && (
                   <span className="text-xs bg-yellow-600 text-white px-2 py-1 rounded">
-                    Был отменен
+                    Скрыт
                   </span>
                 )}
               </div>
@@ -237,12 +232,12 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
             <p className="font-semibold text-white ml-4">{order.final_price} BYN</p>
           </div>
           <div className="flex gap-2 mt-3">
-            {isCancelled ? (
+            {isHidden ? (
               <a
-                href={`/dashboard/driver/accept-order/${order.id}?reactivate=true`}
-                className="flex-1 text-center bg-yellow-600 text-white px-4 py-2 rounded text-sm hover:bg-yellow-700 transition"
+                href={`/dashboard/driver/accept-order/${order.id}`}
+                className="flex-1 text-center bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700 transition"
               >
-                Активировать заказ
+                Принять заказ
               </a>
             ) : (
               <>

@@ -65,8 +65,13 @@ export default async function DriverDashboard() {
   console.log('Driver Dashboard - Rejected orders count:', rejectedOrders?.length || 0)
   console.log('Driver Dashboard - Rejected orders:', rejectedOrders)
   
-  // Для обратной совместимости используем rejectedOrders как cancelledOrders
+  // Для обратной совместимости используем rejectedOrders как cancelledOrders (скрытые заказы)
   const cancelledOrders = rejectedOrders || []
+  
+  // Дополнительная проверка: если функция вернула null или undefined, используем пустой массив
+  if (!cancelledOrders) {
+    console.warn('Driver Dashboard - cancelledOrders is null/undefined, using empty array')
+  }
 
   // Получаем отказы водителя, чтобы исключить их из списка
   const { data: rejections, error: rejectionsError } = await supabase
