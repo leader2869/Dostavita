@@ -68,6 +68,7 @@ export function DriverPushNotifications({ driverUserId }: DriverPushNotification
           if ('serviceWorker' in navigator && 'PushManager' in window) {
             try {
               const registration = await navigator.serviceWorker.ready
+              // Используем type assertion для actions, так как это не стандартный тип TypeScript
               await registration.showNotification('Новый заказ!', {
                 body: `Заказ №${newOrder.order_number || newOrder.id.slice(0, 8)} - ${newOrder.final_price} BYN`,
                 icon: '/icon-192x192.png',
@@ -78,6 +79,7 @@ export function DriverPushNotifications({ driverUserId }: DriverPushNotification
                   url: `/dashboard/driver`,
                 },
                 requireInteraction: true,
+                // @ts-ignore - actions поддерживается браузерами, но не в типах TypeScript
                 actions: [
                   {
                     action: 'view',
@@ -88,7 +90,7 @@ export function DriverPushNotifications({ driverUserId }: DriverPushNotification
                     title: 'Закрыть',
                   },
                 ],
-              })
+              } as NotificationOptions)
             } catch (error) {
               console.error('Ошибка отправки push-уведомления:', error)
             }
@@ -105,7 +107,8 @@ export function DriverPushNotifications({ driverUserId }: DriverPushNotification
       isMounted = false
       supabase.removeChannel(channel)
     }
-  }, [driverUserId, supabase])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [driverUserId]) // supabase - стабильный объект, не нужно включать в зависимости
 
   return null // Компонент не рендерит ничего визуально
 }

@@ -107,7 +107,8 @@ export function useAvailableOrdersCount(driverUserId: string | null) {
       supabase.removeChannel(channel)
       clearInterval(interval)
     }
-  }, [driverUserId])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [driverUserId]) // supabase - стабильный объект, не нужно включать в зависимости
 
   return { count, loading }
 }
