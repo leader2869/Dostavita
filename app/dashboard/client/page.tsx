@@ -117,11 +117,15 @@ export default function ClientDashboard() {
   }, [supabase])
 
   useEffect(() => {
+    let isMounted = true
+    
     const loadData = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       
       if (!user) {
-        router.push('/login')
+        if (isMounted) {
+          router.push('/login')
+        }
         return
       }
 
@@ -133,6 +137,8 @@ export default function ClientDashboard() {
         .not('status', 'in', '(completed,cancelled)')
         .order('created_at', { ascending: false })
         .limit(5)
+
+      if (!isMounted) return
 
       if (error) {
         console.error('Ошибка загрузки заказов:', error)
@@ -146,12 +152,19 @@ export default function ClientDashboard() {
       // Загружаем заказы с курьерами для кнопки звонка
       await loadOrdersWithDrivers()
       
-      setLoading(false)
+      if (isMounted) {
+        setLoading(false)
+      }
     }
 
     loadData()
     loadRegions()
-  }, [supabase, router, loadSavedAddresses, loadRegions, loadOrdersWithDrivers])
+    
+    return () => {
+      isMounted = false
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // Убрали зависимости, чтобы избежать лишних перезагрузок
 
   const getStatusLabel = (status: string) => {
     switch (status) {

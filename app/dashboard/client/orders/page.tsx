@@ -13,11 +13,15 @@ export default function ClientOrdersPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    let isMounted = true
+    
     const loadOrders = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       
       if (!user) {
-        router.push('/login')
+        if (isMounted) {
+          router.push('/login')
+        }
         return
       }
 
@@ -27,6 +31,8 @@ export default function ClientOrdersPage() {
         .select('*')
         .or(`customer_id.eq.${user.id},client_id.eq.${user.id}`)
         .order('created_at', { ascending: false })
+
+      if (!isMounted) return
 
       if (error) {
         console.error('Ошибка загрузки заказов:', error)
@@ -38,7 +44,12 @@ export default function ClientOrdersPage() {
     }
 
     loadOrders()
-  }, [supabase, router])
+    
+    return () => {
+      isMounted = false
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // Убрали supabase и router из зависимостей
 
   const getStatusLabel = (status: string) => {
     switch (status) {

@@ -20,22 +20,33 @@ export default function CustomerTrackingPage() {
   const [currentPosition, setCurrentPosition] = useState<{ lat: number; lon: number } | null>(null)
 
   const loadData = useCallback(async () => {
+    let isMounted = true
+    
     try {
-      setLoading(true)
+      if (isMounted) {
+        setLoading(true)
+      }
+      
       const { data: { user: currentUser }, error: authError } = await supabase.auth.getUser()
       
       if (authError) {
         console.error('Ошибка аутентификации:', authError)
-        router.push('/login')
+        if (isMounted) {
+          router.push('/login')
+        }
         return
       }
 
       if (!currentUser) {
-        router.push('/login')
+        if (isMounted) {
+          router.push('/login')
+        }
         return
       }
 
-      setUser(currentUser)
+      if (isMounted) {
+        setUser(currentUser)
+      }
 
       // Получаем водителей организации только с активными заказами
       console.log('=== TRACKING PAGE DEBUG ===')
