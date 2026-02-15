@@ -54,7 +54,7 @@ export default async function DriverDashboard() {
   // Получаем отмененные заказы (со статусом cancelled)
   const { data: cancelledOrders } = await supabase
     .from('orders')
-    .select('id, order_number, pickup_address, delivery_address, final_price, item_type, description, created_at, cancelled_at')
+    .select('id, order_number, pickup_address, delivery_address, final_price, item_type, description, created_at, cancelled_at, status')
     .eq('status', 'cancelled')
     .order('cancelled_at', { ascending: false })
     .limit(10)
