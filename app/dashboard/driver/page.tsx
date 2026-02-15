@@ -51,15 +51,9 @@ export default async function DriverDashboard() {
     .order('created_at', { ascending: false })
     .limit(10)
 
-  // Получаем отмененные заказы (со статусом cancelled)
-  // Используем .not('cancelled_at', 'is', null) чтобы получить только заказы, которые были отменены
+  // Получаем отмененные заказы через RPC функцию для обхода RLS
   const { data: cancelledOrders, error: cancelledOrdersError } = await supabase
-    .from('orders')
-    .select('id, order_number, pickup_address, delivery_address, final_price, item_type, description, created_at, cancelled_at, status')
-    .eq('status', 'cancelled')
-    .not('cancelled_at', 'is', null)
-    .order('cancelled_at', { ascending: false })
-    .limit(10)
+    .rpc('get_driver_cancelled_orders', { p_driver_user_id: user.id })
 
   if (cancelledOrdersError) {
     console.error('Ошибка загрузки отмененных заказов:', cancelledOrdersError)
