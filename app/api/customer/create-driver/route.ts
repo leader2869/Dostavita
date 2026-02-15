@@ -97,22 +97,59 @@ export async function POST(request: Request) {
       }
     )
 
-    const { data: driverProfile, error: profileError } = await supabaseAdmin
+    // Проверяем, существует ли уже профиль для этого пользователя
+    const { data: existingProfile } = await supabaseAdmin
       .from('profiles')
-      .insert({
-        id: newUser.user.id,
-        email,
-        full_name,
-        phone: phone || null,
-        role: 'driver',
-        organization_id: user.id,
-        organization_attached_at: new Date().toISOString(),
-        vehicle_type,
-        vehicle_number: vehicle_number || null,
-        license_number,
-      })
-      .select()
+      .select('id')
+      .eq('id', newUser.user.id)
       .single()
+
+    let driverProfile: any
+    let profileError: any
+
+    if (existingProfile) {
+      // Если профиль уже существует, обновляем его
+      const { data: updatedProfile, error: updateError } = await supabaseAdmin
+        .from('profiles')
+        .update({
+          email,
+          full_name,
+          phone: phone || null,
+          role: 'driver',
+          organization_id: user.id,
+          organization_attached_at: new Date().toISOString(),
+          vehicle_type,
+          vehicle_number: vehicle_number || null,
+          license_number,
+        })
+        .eq('id', newUser.user.id)
+        .select()
+        .single()
+      
+      driverProfile = updatedProfile
+      profileError = updateError
+    } else {
+      // Если профиля нет, создаем новый
+      const { data: insertedProfile, error: insertError } = await supabaseAdmin
+        .from('profiles')
+        .insert({
+          id: newUser.user.id,
+          email,
+          full_name,
+          phone: phone || null,
+          role: 'driver',
+          organization_id: user.id,
+          organization_attached_at: new Date().toISOString(),
+          vehicle_type,
+          vehicle_number: vehicle_number || null,
+          license_number,
+        })
+        .select()
+        .single()
+      
+      driverProfile = insertedProfile
+      profileError = insertError
+    }
 
     if (profileError) {
       // Если ошибка создания профиля, пытаемся удалить созданного пользователя
