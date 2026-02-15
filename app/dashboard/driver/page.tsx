@@ -116,13 +116,7 @@ export default async function DriverDashboard() {
         <h1 className="text-3xl font-bold mb-6 text-white">Панель исполнителя</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Доступные заказы */}
-        <div className="bg-gray-800 rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold mb-4 text-white">Доступные заказы</h2>
-          <AvailableOrdersList orders={filteredOrders} driverUserId={user.id} />
-        </div>
-
-        {/* Активные заказы */}
+        {/* Активные заказы - показываем первыми */}
         <div className="bg-gray-800 rounded-lg shadow p-6">
           <h2 className="text-xl font-semibold mb-4 text-white">Активные заказы</h2>
           {myOrders && myOrders.length > 0 ? (
@@ -164,8 +158,14 @@ export default async function DriverDashboard() {
               ))}
             </div>
           ) : (
-            <p className="text-gray-400">У вас пока нет заказов</p>
+            <p className="text-gray-400">У вас пока нет активных заказов</p>
           )}
+        </div>
+
+        {/* Доступные заказы - показываем вторыми */}
+        <div className="bg-gray-800 rounded-lg shadow p-6">
+          <h2 className="text-xl font-semibold mb-4 text-white">Доступные заказы</h2>
+          <AvailableOrdersList orders={filteredOrders} driverUserId={user.id} />
         </div>
       </div>
       
