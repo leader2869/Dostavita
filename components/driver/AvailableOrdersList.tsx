@@ -267,24 +267,35 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
 
   return (
     <div className="space-y-6">
-      {/* Доступные заказы - без заголовка, так как он уже есть в родительском компоненте */}
-      <div>
-        <div className="flex items-center justify-start mb-4">
-          {/* Переключатель для показа скрытых заказов */}
-          {cancelledOrders && cancelledOrders.length > 0 && (
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={showCancelled}
-                onChange={(e) => setShowCancelled(e.target.checked)}
-                className="w-4 h-4 text-green-600 bg-gray-700 border-gray-600 rounded focus:ring-green-500"
-              />
-              <span className="text-sm text-gray-300">
-                Показать скрытые ({cancelledOrders.length})
-              </span>
-            </label>
-          )}
+      {/* Переключатель для показа скрытых заказов - вверху */}
+      <div className="flex items-center justify-start mb-4">
+        {cancelledOrders && cancelledOrders.length > 0 && (
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={showCancelled}
+              onChange={(e) => setShowCancelled(e.target.checked)}
+              className="w-4 h-4 text-green-600 bg-gray-700 border-gray-600 rounded focus:ring-green-500"
+            />
+            <span className="text-sm text-gray-300">
+              Показать скрытые ({cancelledOrders.length})
+            </span>
+          </label>
+        )}
+      </div>
+
+      {/* Скрытые заказы - показываем СВЕРХУ (первыми) */}
+      {showCancelled && uniqueHiddenOrders.length > 0 && (
+        <div>
+          <h3 className="text-lg font-semibold text-white mb-4">Скрытые заказы</h3>
+          <div className="space-y-4">
+            {uniqueHiddenOrders.map((order) => renderOrderCard(order, true))}
+          </div>
         </div>
+      )}
+
+      {/* Доступные заказы - показываем ПОД скрытыми (снизу) */}
+      <div>
         {orders.length > 0 ? (
           <div className="space-y-4">
             {orders.map((order) => renderOrderCard(order, false))}
@@ -293,16 +304,6 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
           <p className="text-gray-400">Нет доступных заказов</p>
         )}
       </div>
-
-      {/* Скрытые заказы - показываем ПОД доступными заказами (внизу) */}
-      {showCancelled && uniqueHiddenOrders.length > 0 && (
-        <div className="mt-6">
-          <h3 className="text-lg font-semibold text-white mb-4">Скрытые заказы</h3>
-          <div className="space-y-4">
-            {uniqueHiddenOrders.map((order) => renderOrderCard(order, true))}
-          </div>
-        </div>
-      )}
     </div>
   )
 }
