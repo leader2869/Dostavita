@@ -52,18 +52,22 @@ export default async function DriverDashboard() {
     .limit(10)
 
   // Получаем отмененные заказы (со статусом cancelled)
+  // Используем .not('cancelled_at', 'is', null) чтобы получить только заказы, которые были отменены
   const { data: cancelledOrders, error: cancelledOrdersError } = await supabase
     .from('orders')
     .select('id, order_number, pickup_address, delivery_address, final_price, item_type, description, created_at, cancelled_at, status')
     .eq('status', 'cancelled')
+    .not('cancelled_at', 'is', null)
     .order('cancelled_at', { ascending: false })
     .limit(10)
 
   if (cancelledOrdersError) {
     console.error('Ошибка загрузки отмененных заказов:', cancelledOrdersError)
+    console.error('Ошибка детали:', JSON.stringify(cancelledOrdersError, null, 2))
   }
   
   console.log('Driver Dashboard - Cancelled orders count:', cancelledOrders?.length || 0)
+  console.log('Driver Dashboard - Cancelled orders:', cancelledOrders)
 
   // Получаем отказы водителя, чтобы исключить их из списка
   const { data: rejections, error: rejectionsError } = await supabase
