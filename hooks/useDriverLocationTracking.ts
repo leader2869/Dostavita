@@ -23,6 +23,8 @@ export function useDriverLocationTracking({
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
+    let isMounted = true
+    
     console.log('useDriverLocationTracking: enabled =', enabled, 'orderId =', orderId)
     
     if (!enabled) {
@@ -33,11 +35,15 @@ export function useDriverLocationTracking({
     if (!navigator.geolocation) {
       const errorMsg = 'Геолокация не поддерживается вашим браузером'
       console.error(errorMsg)
-      setError(errorMsg)
+      if (isMounted) {
+        setError(errorMsg)
+      }
       return
     }
 
     const updateLocation = async (position: GeolocationPosition) => {
+      if (!isMounted) return
+      
       try {
         console.log('Отправка местоположения:', {
           latitude: position.coords.latitude,
@@ -60,6 +66,8 @@ export function useDriverLocationTracking({
           }),
         })
 
+        if (!isMounted) return
+
         if (!response.ok) {
           const data = await response.json()
           console.error('Ошибка ответа API:', response.status, data)
@@ -68,14 +76,19 @@ export function useDriverLocationTracking({
 
         const result = await response.json()
         console.log('Местоположение успешно отправлено:', result)
-        setError(null)
+        if (isMounted) {
+          setError(null)
+        }
       } catch (err: any) {
+        if (!isMounted) return
         console.error('Ошибка обновления местоположения:', err)
         setError(err.message || 'Ошибка обновления местоположения')
       }
     }
 
     const handleError = (error: GeolocationPositionError) => {
+      if (!isMounted) return
+      
       let errorMessage = 'Не удалось получить местоположение'
       switch (error.code) {
         case error.PERMISSION_DENIED:
@@ -133,6 +146,7 @@ export function useDriverLocationTracking({
 
     // Очистка при размонтировании
     return () => {
+      isMounted = false
       if (watchIdRef.current !== null) {
         navigator.geolocation.clearWatch(watchIdRef.current)
         watchIdRef.current = null
@@ -141,7 +155,7 @@ export function useDriverLocationTracking({
         clearInterval(intervalRef.current)
         intervalRef.current = null
       }
-      setIsTracking(false)
+      // Не вызываем setIsTracking(false) здесь, так как компонент уже размонтирован
     }
   }, [enabled, interval, orderId])
 
