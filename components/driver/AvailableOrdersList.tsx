@@ -44,36 +44,10 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId }: Ava
   const router = useRouter()
   const supabase = createClient()
   const [orders, setOrders] = useState(initialOrders)
-  const [rejecting, setRejecting] = useState<string | null>(null)
 
-  const handleReject = async (orderId: string) => {
-    setRejecting(orderId)
-    
-    try {
-      const response = await fetch('/api/driver/reject-order', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ orderId }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        alert(data.error || 'Ошибка при отклонении заказа')
-        setRejecting(null)
-        return
-      }
-
-      // Удаляем заказ из списка
-      setOrders(orders.filter(order => order.id !== orderId))
-    } catch (error: any) {
-      console.error('Ошибка при отклонении заказа:', error)
-      alert('Ошибка при отклонении заказа')
-    } finally {
-      setRejecting(null)
-    }
+  const handleReject = (orderId: string) => {
+    // Просто удаляем заказ из списка без записи в БД
+    setOrders(orders.filter(order => order.id !== orderId))
   }
 
   if (orders.length === 0) {
@@ -131,10 +105,9 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId }: Ava
             </a>
             <button
               onClick={() => handleReject(order.id)}
-              disabled={rejecting === order.id}
-              className="flex-1 bg-red-600 text-white px-4 py-2 rounded text-sm hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 bg-red-600 text-white px-4 py-2 rounded text-sm hover:bg-red-700 transition"
             >
-              {rejecting === order.id ? 'Отклонение...' : 'Отказаться'}
+              Отказаться
             </button>
           </div>
         </div>
