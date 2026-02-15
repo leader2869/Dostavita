@@ -80,24 +80,29 @@ export function useDriverLocationTracking({
       switch (error.code) {
         case error.PERMISSION_DENIED:
           errorMessage = 'Доступ к геолокации запрещен. Разрешите доступ в настройках браузера.'
+          setIsTracking(false) // Останавливаем отслеживание только при отказе в доступе
           break
         case error.POSITION_UNAVAILABLE:
-          errorMessage = 'Информация о местоположении недоступна'
+          errorMessage = 'Информация о местоположении недоступна. Проверьте настройки GPS.'
+          // Не останавливаем отслеживание, продолжаем попытки
           break
         case error.TIMEOUT:
-          errorMessage = 'Превышено время ожидания запроса местоположения'
+          errorMessage = 'Превышено время ожидания. Продолжаем попытки...'
+          // Не останавливаем отслеживание при таймауте, продолжаем попытки
+          console.warn('Таймаут получения местоположения, продолжаем попытки')
           break
       }
       setError(errorMessage)
-      setIsTracking(false)
+      // Не останавливаем отслеживание при временных ошибках
     }
 
     // Начинаем отслеживание местоположения
     const startTracking = () => {
+      // Используем более мягкие настройки для надежности
       const options: PositionOptions = {
-        enableHighAccuracy: true,
-        timeout: 5000,
-        maximumAge: 0,
+        enableHighAccuracy: false, // Отключаем высокую точность для более быстрого получения
+        timeout: 15000, // Увеличиваем таймаут до 15 секунд
+        maximumAge: 60000, // Разрешаем использовать кэшированное местоположение до 1 минуты
       }
 
       // Получаем местоположение сразу
@@ -112,13 +117,18 @@ export function useDriverLocationTracking({
     }
 
     // Запрашиваем разрешение и начинаем отслеживание
+    // Используем более мягкие настройки для первоначального запроса
     navigator.geolocation.getCurrentPosition(
       () => {
         // Разрешение получено, начинаем отслеживание
         startTracking()
       },
       handleError,
-      { enableHighAccuracy: true, timeout: 5000 }
+      { 
+        enableHighAccuracy: false, // Отключаем высокую точность для более быстрого получения
+        timeout: 15000, // Увеличиваем таймаут до 15 секунд
+        maximumAge: 60000, // Разрешаем использовать кэшированное местоположение
+      }
     )
 
     // Очистка при размонтировании
