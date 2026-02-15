@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { BackButton } from '@/components/ui/BackButton'
+import { DriverBottomNavigation } from '@/components/driver/DriverBottomNavigation'
 
 type Period = 'today' | 'week' | 'month' | 'all' | 'custom'
 
