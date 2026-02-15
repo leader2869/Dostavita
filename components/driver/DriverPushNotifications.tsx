@@ -12,22 +12,32 @@ export function DriverPushNotifications({ driverUserId }: DriverPushNotification
   const supabase = createClient()
   const { isSupported, isSubscribed, subscribe } = usePushNotifications()
 
+  // Не запрашиваем подписку автоматически - браузер требует user gesture
+  // Подписка будет запрошена при первом клике пользователя на странице
   useEffect(() => {
     if (!isSupported || isSubscribed) {
       return
     }
 
-    // Автоматически подписываемся на push-уведомления
-    const autoSubscribe = async () => {
+    // Запрашиваем подписку при первом взаимодействии пользователя
+    const handleUserInteraction = async () => {
       const success = await subscribe()
       if (success) {
-        console.log('Автоматическая подписка на push-уведомления успешна')
+        console.log('Подписка на push-уведомления успешна')
+        // Удаляем обработчики после успешной подписки
+        document.removeEventListener('click', handleUserInteraction)
+        document.removeEventListener('touchstart', handleUserInteraction)
       }
     }
 
-    // Запрашиваем подписку через 2 секунды после монтирования
-    const timer = setTimeout(autoSubscribe, 2000)
-    return () => clearTimeout(timer)
+    // Добавляем обработчики для первого клика/тапа
+    document.addEventListener('click', handleUserInteraction, { once: true })
+    document.addEventListener('touchstart', handleUserInteraction, { once: true })
+
+    return () => {
+      document.removeEventListener('click', handleUserInteraction)
+      document.removeEventListener('touchstart', handleUserInteraction)
+    }
   }, [isSupported, isSubscribed, subscribe])
 
   useEffect(() => {
