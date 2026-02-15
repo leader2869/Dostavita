@@ -125,7 +125,7 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
   }
 
   // Фильтруем отмененные заказы, исключая те, от которых водитель отказался
-  const filteredCancelledOrders = showCancelled 
+  const filteredCancelledOrders = showCancelled && cancelledOrders && cancelledOrders.length > 0
     ? cancelledOrders.filter(order => !rejectedOrderIdsRef.current.has(order.id))
     : []
 
