@@ -51,14 +51,23 @@ export default async function DriverDashboard() {
     .limit(10)
 
   // Получаем отказы водителя, чтобы исключить их из списка
-  const { data: rejections } = await supabase
+  const { data: rejections, error: rejectionsError } = await supabase
     .from('order_rejections')
     .select('order_id')
     .eq('driver_user_id', user.id)
 
+  if (rejectionsError) {
+    console.error('Ошибка загрузки отказов:', rejectionsError)
+  }
+
   // Фильтруем заказы, исключая те, от которых водитель отказался
   const rejectedOrderIds = new Set(rejections?.map(r => r.order_id) || [])
   const filteredOrders = availableOrders?.filter(order => !rejectedOrderIds.has(order.id)) || []
+
+  console.log('Driver Dashboard - Rejections count:', rejections?.length || 0)
+  console.log('Driver Dashboard - Rejected order IDs:', Array.from(rejectedOrderIds))
+  console.log('Driver Dashboard - Available orders before filter:', availableOrders?.length || 0)
+  console.log('Driver Dashboard - Filtered orders after rejections:', filteredOrders?.length || 0)
 
   // Получаем активные заказы водителя (где executor_user_id равен ID текущего пользователя)
   // Пробуем сначала без фильтра по статусу, чтобы увидеть все заказы

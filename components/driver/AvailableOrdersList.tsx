@@ -51,14 +51,23 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId }: Ava
     
     // Сохраняем отказ в БД в фоне (для сохранения после перезагрузки)
     try {
-      await fetch('/api/driver/reject-order', {
+      const response = await fetch('/api/driver/reject-order', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ orderId }),
       })
-      // Не обрабатываем ошибки - заказ уже удален из списка
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        console.error('Ошибка сохранения отказа:', data.error || 'Неизвестная ошибка')
+        // Заказ уже удален из списка, но отказ не сохранен
+        // Можно показать предупреждение, но не критично
+      } else {
+        console.log('Отказ успешно сохранен:', orderId)
+      }
     } catch (error) {
       console.error('Ошибка сохранения отказа (не критично):', error)
       // Заказ уже удален из списка, ошибка не критична
