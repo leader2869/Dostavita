@@ -156,20 +156,21 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
 
   return (
     <div className="space-y-4">
-      {/* Переключатель для показа отмененных заказов - всегда показываем, если есть отмененные заказы */}
-      {cancelledOrders && cancelledOrders.length > 0 && (
-        <div className="flex items-center justify-end mb-4">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={showCancelled}
-              onChange={(e) => setShowCancelled(e.target.checked)}
-              className="w-4 h-4 text-green-600 bg-gray-700 border-gray-600 rounded focus:ring-green-500"
-            />
-            <span className="text-sm text-gray-300">Показать отмененные заказы ({cancelledOrders.length})</span>
-          </label>
-        </div>
-      )}
+      {/* Переключатель для показа отмененных заказов - показываем всегда */}
+      <div className="flex items-center justify-end mb-4">
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={showCancelled}
+            onChange={(e) => setShowCancelled(e.target.checked)}
+            disabled={!cancelledOrders || cancelledOrders.length === 0}
+            className="w-4 h-4 text-green-600 bg-gray-700 border-gray-600 rounded focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          />
+          <span className={`text-sm ${cancelledOrders && cancelledOrders.length > 0 ? 'text-gray-300' : 'text-gray-500'}`}>
+            Показать отмененные заказы ({cancelledOrders?.length || 0})
+          </span>
+        </label>
+      </div>
       {allOrdersToShow.map((order) => {
         // Проверяем, является ли заказ отмененным (находится в списке cancelledOrders)
         const isCancelled = cancelledOrders.some(co => co.id === order.id)
