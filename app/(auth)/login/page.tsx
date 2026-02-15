@@ -17,16 +17,12 @@ export default function LoginPage() {
     // Проверяем параметр signedOut в URL
     const signedOut = searchParams.get('signedOut')
     if (signedOut === 'true') {
-      // Принудительно очищаем состояние Supabase на клиенте
-      const supabase = createClient()
-      supabase.auth.signOut().catch(() => {
-        // Игнорируем ошибки при выходе, так как мы уже вышли
-      })
       // Очищаем параметр из URL без перезагрузки
+      // Не вызываем signOut() на клиенте, так как мы уже вышли на сервере
       if (typeof window !== 'undefined') {
         const url = new URL(window.location.href)
         url.searchParams.delete('signedOut')
-        window.history.replaceState({}, '', url.pathname)
+        window.history.replaceState({}, '', url.pathname + (url.search || ''))
       }
     }
 
