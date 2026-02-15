@@ -223,6 +223,24 @@ export default function CreateOrderPage() {
         throw insertError
       }
 
+      // Отправляем push-уведомления водителям о новом заказе
+      try {
+        await fetch('/api/orders/notify-drivers', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            orderId: data.id,
+            orderNumber: data.order_number,
+            finalPrice: data.final_price,
+          }),
+        })
+      } catch (notifyError) {
+        // Не блокируем создание заказа, если уведомления не отправились
+        console.error('Ошибка отправки push-уведомлений:', notifyError)
+      }
+
       router.push('/dashboard/customer')
     } catch (err: any) {
       setError(err.message || 'Ошибка создания заказа')

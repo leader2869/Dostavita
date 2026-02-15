@@ -19,20 +19,49 @@ export async function POST(request: NextRequest) {
     }
 
     // Сохраняем подписку в базе данных
-    // Создаем таблицу push_subscriptions если её нет
-    const { error: insertError } = await supabase
+    // Проверяем, существует ли уже подписка для этого пользователя и endpoint
+    const { data: existingSubscription, error: fetchError } = await supabase
       .from('push_subscriptions')
-      .upsert({
-        user_id: user.id,
-        subscription: subscription,
-        updated_at: new Date().toISOString(),
-      }, {
-        onConflict: 'user_id',
-      })
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('endpoint', subscription.endpoint)
+      .maybeSingle()
 
-    if (insertError) {
-      console.error('Ошибка сохранения push-подписки:', insertError)
-      return NextResponse.json({ error: 'Ошибка сохранения подписки' }, { status: 500 })
+    if (fetchError) {
+      console.error('Ошибка получения существующей подписки:', fetchError)
+      return NextResponse.json({ error: 'Ошибка базы данных' }, { status: 500 })
+    }
+
+    if (existingSubscription) {
+      // Если подписка уже существует, обновляем её
+      const { error: updateError } = await supabase
+        .from('push_subscriptions')
+        .update({
+          p256dh_key: subscription.keys.p256dh,
+          auth_key: subscription.keys.auth,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', existingSubscription.id)
+
+      if (updateError) {
+        console.error('Ошибка обновления push-подписки:', updateError)
+        return NextResponse.json({ error: 'Ошибка обновления подписки' }, { status: 500 })
+      }
+    } else {
+      // Если подписки нет, создаем новую
+      const { error: insertError } = await supabase
+        .from('push_subscriptions')
+        .insert({
+          user_id: user.id,
+          endpoint: subscription.endpoint,
+          p256dh_key: subscription.keys.p256dh,
+          auth_key: subscription.keys.auth,
+        })
+
+      if (insertError) {
+        console.error('Ошибка сохранения push-подписки:', insertError)
+        return NextResponse.json({ error: 'Ошибка сохранения подписки' }, { status: 500 })
+      }
     }
 
     return NextResponse.json({ success: true })
