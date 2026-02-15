@@ -129,18 +129,14 @@ DROP POLICY IF EXISTS "Organizations can view their drivers locations" ON public
 DROP POLICY IF EXISTS "Organizations can view their drivers locations for active orders" ON public.driver_locations;
 
 -- Создаем политику: организация может видеть местоположение своих водителей ВСЕГДА (без ограничения на активные заказы)
+-- ВАЖНО: Используем функцию is_driver_organization для избежания рекурсии RLS
 CREATE POLICY "Organizations can view their drivers locations"
   ON public.driver_locations FOR SELECT
   TO authenticated
   USING (
     -- Организация может видеть местоположение своих водителей ВСЕГДА
-    -- Проверяем только, что водитель принадлежит организации
-    EXISTS (
-      SELECT 1 FROM public.profiles
-      WHERE profiles.id = driver_locations.driver_id
-        AND profiles.organization_id = auth.uid()
-        AND profiles.role = 'driver'
-    )
+    -- Используем функцию is_driver_organization, которая отключает RLS перед SELECT из profiles
+    public.is_driver_organization(driver_locations.driver_id, auth.uid())
   );
 
 -- Обновляем комментарии
