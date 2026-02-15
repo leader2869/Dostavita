@@ -156,8 +156,8 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
 
   return (
     <div className="space-y-4">
-      {/* Переключатель для показа отмененных заказов */}
-      {cancelledOrders.length > 0 && (
+      {/* Переключатель для показа отмененных заказов - всегда показываем, если есть отмененные заказы */}
+      {cancelledOrders && cancelledOrders.length > 0 && (
         <div className="flex items-center justify-end mb-4">
           <label className="flex items-center gap-2 cursor-pointer">
             <input
