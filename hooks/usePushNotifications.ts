@@ -58,15 +58,19 @@ export function usePushNotifications() {
         return false
       }
 
-      // Создаем подписку
-      // Если VAPID ключ не настроен, используем стандартную подписку
+      // Проверяем наличие VAPID ключа
       const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+      if (!vapidKey) {
+        console.warn('VAPID ключ не настроен. Push-подписка недоступна, но уведомления через Service Worker будут работать.')
+        // Уведомления через Service Worker будут работать без push-подписки
+        setIsSubscribed(true) // Помечаем как подписанного, чтобы не запрашивать снова
+        return true
+      }
+
+      // Создаем подписку с VAPID ключом
       const subscribeOptions: PushSubscriptionOptionsInit = {
         userVisibleOnly: true,
-      }
-      
-      if (vapidKey) {
-        subscribeOptions.applicationServerKey = urlBase64ToUint8Array(vapidKey)
+        applicationServerKey: urlBase64ToUint8Array(vapidKey),
       }
 
       const sub = await registration.pushManager.subscribe(subscribeOptions)
@@ -98,6 +102,8 @@ export function usePushNotifications() {
       return true
     } catch (error) {
       console.error('Ошибка подписки на push-уведомления:', error)
+      // Даже если push-подписка не удалась, уведомления через Service Worker будут работать
+      setIsSubscribed(true) // Помечаем как подписанного, чтобы не запрашивать снова
       return false
     }
   }
