@@ -34,15 +34,13 @@ CREATE POLICY "Drivers can view own rejections"
   USING (driver_user_id = auth.uid());
 
 -- Суперадмины могут видеть все отказы
+-- ВАЖНО: Используем функцию check_user_role для избежания рекурсии RLS
 DROP POLICY IF EXISTS "Superadmins can view all rejections" ON public.order_rejections;
 CREATE POLICY "Superadmins can view all rejections"
   ON public.order_rejections FOR SELECT
   TO authenticated
   USING (
-    EXISTS (
-      SELECT 1 FROM public.profiles
-      WHERE id = auth.uid() AND role = 'superadmin'
-    )
+    public.check_user_role(auth.uid(), 'superadmin')
   );
 
 -- Комментарии
