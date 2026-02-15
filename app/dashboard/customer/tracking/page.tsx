@@ -48,97 +48,21 @@ export default function CustomerTrackingPage() {
         setUser(currentUser)
       }
 
-      // Получаем водителей организации только с активными заказами
-      console.log('=== TRACKING PAGE DEBUG ===')
-      console.log('Вызов RPC функции get_organization_drivers_with_active_orders')
-      console.log('Organization User ID:', currentUser.id)
-      console.log('Organization Email:', currentUser.email)
-      
-      // Используем RPC функцию для получения водителей (обходит RLS)
-      const { data: allDrivers, error: allDriversError } = await supabase
-        .rpc('get_organization_drivers', { organization_user_id: currentUser.id })
-      
-      console.log('Все водители организации (через RPC):', allDrivers?.length || 0, allDrivers)
-      
-      // Проверим активные заказы этих водителей
-      if (allDrivers && allDrivers.length > 0) {
-        const driverIds = allDrivers.map((d: any) => d.id)
-        const { data: activeOrders, error: ordersError } = await supabase
-          .from('orders')
-          .select('id, order_number, status, executor_user_id, customer_id, client_id')
-          .in('executor_user_id', driverIds)
-          .in('status', ['courier_coming', 'courier_delivering'])
-        
-        console.log('Активные заказы водителей организации:', activeOrders?.length || 0, activeOrders)
-        console.log('Заказы с customer_id = organization_user_id:', 
-          activeOrders?.filter((o: any) => o.customer_id === currentUser.id) || [])
-      }
-      
+      // Получаем всех водителей организации (не только с активными заказами)
+      // Используем get_organization_drivers, которая возвращает всех водителей
       const { data: driversData, error: driversError } = await supabase
-        .rpc('get_organization_drivers_with_active_orders', { organization_user_id: currentUser.id })
+        .rpc('get_organization_drivers', { organization_user_id: currentUser.id })
 
       if (driversError) {
         console.error('Ошибка загрузки водителей:', driversError)
-        console.error('Детали ошибки:', {
-          code: driversError.code,
-          message: driversError.message,
-          details: driversError.details,
-          hint: driversError.hint
-        })
-        
-        // Если функция не найдена, пробуем альтернативный способ
-        if (driversError.code === '42883' || driversError.message?.includes('function') || driversError.message?.includes('does not exist')) {
-          console.warn('Функция get_organization_drivers_with_active_orders не найдена, используем альтернативный метод')
-          // Пробуем получить водителей через RPC функцию get_organization_drivers
-          const { data: altDrivers, error: altError } = await supabase
-            .rpc('get_organization_drivers', { organization_user_id: currentUser.id })
-          
-          if (!altError && altDrivers) {
-            // Для каждого водителя проверяем активные заказы
-            const driversWithOrders = []
-            for (const driver of altDrivers) {
-              const { data: driverOrders } = await supabase
-                .from('orders')
-                .select('id, status')
-                .eq('executor_user_id', driver.id)
-                .in('status', ['courier_coming', 'courier_delivering'])
-                .limit(1)
-              
-              if (driverOrders && driverOrders.length > 0) {
-                driversWithOrders.push({
-                  ...driver,
-                  active_order_id: driverOrders[0].id,
-                  active_order_status: driverOrders[0].status
-                })
-              }
-            }
-            
-            if (isMounted) {
-              console.log('Водители с активными заказами (альтернативный метод):', driversWithOrders.length)
-              setDrivers(driversWithOrders)
-              if (driversWithOrders.length > 0 && !selectedDriver) {
-                setSelectedDriver(driversWithOrders[0].id)
-              }
-            }
-            return
-          }
-        }
-        
-        // Устанавливаем пустой массив при ошибке, чтобы не ломать UI
         if (isMounted) {
           setDrivers([])
         }
       } else {
-        console.log('Успешно загружено водителей:', driversData?.length || 0)
-        console.log('Данные водителей:', driversData)
         if (isMounted) {
           setDrivers(driversData || [])
           if (driversData && driversData.length > 0 && !selectedDriver) {
             setSelectedDriver(driversData[0].id)
-          } else if (!driversData || driversData.length === 0) {
-            console.warn('Функция вернула пустой массив. Проверьте:')
-            console.warn('1. Привязан ли водитель к организации (organization_id)')
-            console.warn('2. Применена ли миграция 056 в Supabase для обновления функции get_organization_drivers_with_active_orders')
           }
         }
       }
@@ -261,7 +185,7 @@ export default function CustomerTrackingPage() {
             <h2 className="text-xl font-semibold mb-4 text-white">Водители</h2>
             {drivers.length === 0 ? (
               <div className="text-center py-4 text-gray-400 text-sm">
-                Нет водителей с активными заказами
+                Нет водителей в организации
               </div>
             ) : (
               <div className="space-y-2">
@@ -296,6 +220,9 @@ export default function CustomerTrackingPage() {
                           <span className="text-green-400">📍 Активный заказ</span>
                         ) : (
                           <span className="text-gray-500">⚫ Нет активных заказов</span>
+                        )}
+                        {driver.current_location && (
+                          <span className="ml-2 text-blue-400">📍 Есть местоположение</span>
                         )}
                       </p>
                     </div>

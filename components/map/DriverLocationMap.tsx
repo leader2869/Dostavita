@@ -238,11 +238,48 @@ export function DriverLocationMap({
             }
           }
 
-          // Если RPC функция не вернула данные, логируем ошибку
+          // Если RPC функция не вернула данные, пробуем получить из profiles напрямую
           if (rpcError) {
             console.error('Ошибка получения местоположения через RPC:', rpcError)
+            // Пробуем получить из profiles напрямую
+            try {
+              const { data: profileData } = await supabase
+                .from('profiles')
+                .select('current_location')
+                .eq('id', driverId)
+                .single()
+              
+              if (profileData?.current_location) {
+                const parsed = parsePoint(profileData.current_location)
+                if (parsed) {
+                  setLocation(parsed)
+                  setLoading(false)
+                  return
+                }
+              }
+            } catch (profileError) {
+              console.error('Ошибка получения местоположения из profiles:', profileError)
+            }
           } else if (!locationData || locationData.length === 0) {
-            console.warn('RPC функция не вернула данные о местоположении водителя')
+            // Пробуем получить из profiles напрямую
+            try {
+              const { data: profileData } = await supabase
+                .from('profiles')
+                .select('current_location')
+                .eq('id', driverId)
+                .single()
+              
+              if (profileData?.current_location) {
+                const parsed = parsePoint(profileData.current_location)
+                if (parsed) {
+                  setLocation(parsed)
+                  setLoading(false)
+                  return
+                }
+              }
+            } catch (profileError) {
+              console.error('Ошибка получения местоположения из profiles:', profileError)
+            }
           }
         } catch (timeoutError: any) {
           clearTimeout(timeoutId)
