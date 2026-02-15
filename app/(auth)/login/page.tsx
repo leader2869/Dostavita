@@ -107,13 +107,12 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center px-4">
-      <div className="bg-gray-800 p-8 rounded-lg shadow-md w-full max-w-md">
-        <h1 className="text-2xl font-bold text-center mb-6 text-white">Вход в Dostavita</h1>
-        {checkingAuth && (
-          <div className="text-center text-gray-400 text-sm mb-4">Проверка аутентификации...</div>
-        )}
-      
+    <div className="bg-gray-800 p-8 rounded-lg shadow-md w-full">
+      <h1 className="text-2xl font-bold text-center mb-6 text-white">Вход в Dostavita</h1>
+      {checkingAuth && (
+        <div className="text-center text-gray-400 text-sm mb-4">Проверка аутентификации...</div>
+      )}
+    
       <form onSubmit={handleLogin} className="space-y-4">
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-gray-300">
@@ -156,11 +155,10 @@ export default function LoginPage() {
         </button>
       </form>
 
-        <div className="mt-4 text-center">
-          <a href="/register" className="text-sm text-green-500 hover:text-green-500">
-            Нет аккаунта? Зарегистрироваться
-          </a>
-        </div>
+      <div className="mt-4 text-center">
+        <a href="/register" className="text-sm text-green-500 hover:text-green-500">
+          Нет аккаунта? Зарегистрироваться
+        </a>
       </div>
     </div>
   )
