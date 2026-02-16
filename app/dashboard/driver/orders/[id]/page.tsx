@@ -7,6 +7,7 @@ import type { Order } from '@/lib/types'
 import { BackButton } from '@/components/ui/BackButton'
 import { OrderActions } from '@/components/driver/OrderActions'
 import { formatAddressForOrder } from '@/lib/utils/formatAddress'
+import { formatReadyTime } from '@/lib/utils/formatReadyTime'
 
 export default function OrderDetailsPage() {
   const router = useRouter()
