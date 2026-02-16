@@ -325,8 +325,11 @@ export default function CreateOrderPage() {
             .rpc('get_user_profile', { user_id: user.id })
             .single()
           
-          if (!profileError && profile?.phone) {
-            setSenderPhone(profile.phone)
+          if (!profileError && profile && typeof profile === 'object' && profile !== null && 'phone' in profile) {
+            const phone = (profile as { phone?: string }).phone
+            if (phone) {
+              setSenderPhone(phone)
+            }
           } else {
             // Fallback на прямой запрос, если RPC не работает
             const { data: directProfile } = await supabase
@@ -347,7 +350,7 @@ export default function CreateOrderPage() {
 
     loadSenderPhone()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []) // Загружаем только один раз при монтировании
+  }, []) // supabase - стабильный объект, не нужно включать в зависимости
 
   useEffect(() => {
     loadRegions()
