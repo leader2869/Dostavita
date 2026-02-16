@@ -320,20 +320,14 @@ export function OrderActions({ order, onStopPropagation }: OrderActionsProps) {
           <div className="bg-gray-800 rounded-lg p-6 max-w-sm w-full mx-4" onClick={(e) => e.stopPropagation()}>
             <h3 className="text-xl font-semibold text-white mb-4">Кому позвонить?</h3>
             <div className="space-y-3">
-              <button
-                onClick={() => {
-                  if (loadingPhone) return
-                  if (customerPhone) {
-                    handleCall(customerPhone)
-                  } else {
-                    alert('Телефон отправителя не найден')
-                  }
-                }}
-                disabled={loadingPhone}
-                className="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded transition disabled:opacity-50"
-              >
-                {loadingPhone ? 'Загрузка...' : `Отправитель${customerPhone ? `: ${customerPhone}` : ''}`}
-              </button>
+              {order.sender_phone && (
+                <button
+                  onClick={() => handleCall(order.sender_phone!)}
+                  className="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded transition"
+                >
+                  Отправитель: {order.sender_phone}
+                </button>
+              )}
               {order.recipient_phone && (
                 <button
                   onClick={() => handleCall(order.recipient_phone!)}
