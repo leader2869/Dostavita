@@ -36,11 +36,45 @@ export function OrderChat({ orderId, currentUserId, onClose }: OrderChatProps) {
     scrollToBottom()
   }, [messages])
 
-  // Загружаем сообщения
+  // Функция загрузки сообщений
+  const loadMessages = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('order_messages')
+        .select('*')
+        .eq('order_id', orderId)
+        .order('created_at', { ascending: true })
+
+      if (error) throw error
+
+      setMessages(data || [])
+      
+      // Загружаем имена отправителей
+      const uniqueSenderIds = [...new Set((data || []).map(m => m.sender_id))]
+      if (uniqueSenderIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, full_name, email')
+          .in('id', uniqueSenderIds)
+
+        if (profiles) {
+          const names: Record<string, string> = {}
+          profiles.forEach(p => {
+            names[p.id] = p.full_name || p.email || 'Неизвестный'
+          })
+          setSenderNames(prev => ({ ...prev, ...names }))
+        }
+      }
+    } catch (err) {
+      console.error('Ошибка загрузки сообщений:', err)
+    }
+  }
+
+  // Загружаем сообщения при монтировании
   useEffect(() => {
     let isMounted = true
 
-    const loadMessages = async () => {
+    const initialLoad = async () => {
       try {
         const { data, error } = await supabase
           .from('order_messages')
@@ -55,17 +89,19 @@ export function OrderChat({ orderId, currentUserId, onClose }: OrderChatProps) {
           
           // Загружаем имена отправителей
           const uniqueSenderIds = [...new Set((data || []).map(m => m.sender_id))]
-          const { data: profiles } = await supabase
-            .from('profiles')
-            .select('id, full_name, email')
-            .in('id', uniqueSenderIds)
+          if (uniqueSenderIds.length > 0) {
+            const { data: profiles } = await supabase
+              .from('profiles')
+              .select('id, full_name, email')
+              .in('id', uniqueSenderIds)
 
-          if (profiles && isMounted) {
-            const names: Record<string, string> = {}
-            profiles.forEach(p => {
-              names[p.id] = p.full_name || p.email || 'Неизвестный'
-            })
-            setSenderNames(names)
+            if (profiles && isMounted) {
+              const names: Record<string, string> = {}
+              profiles.forEach(p => {
+                names[p.id] = p.full_name || p.email || 'Неизвестный'
+              })
+              setSenderNames(names)
+            }
           }
         }
       } catch (err) {
@@ -77,7 +113,7 @@ export function OrderChat({ orderId, currentUserId, onClose }: OrderChatProps) {
       }
     }
 
-    loadMessages()
+    initialLoad()
 
     // Подписываемся на новые сообщения через Realtime
     const channel = supabase
@@ -124,6 +160,23 @@ export function OrderChat({ orderId, currentUserId, onClose }: OrderChatProps) {
     return () => {
       isMounted = false
       supabase.removeChannel(channel)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orderId])
+
+  // Автоматическое обновление сообщений каждые 3 секунды, пока модальное окно открыто
+  useEffect(() => {
+    // Загружаем сообщения сразу при открытии
+    loadMessages()
+
+    // Устанавливаем интервал для обновления каждые 3 секунды
+    const interval = setInterval(() => {
+      loadMessages()
+    }, 3000)
+
+    // Очищаем интервал при размонтировании компонента
+    return () => {
+      clearInterval(interval)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orderId])
