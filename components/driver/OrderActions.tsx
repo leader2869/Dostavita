@@ -93,7 +93,8 @@ export function OrderActions({ order, onStopPropagation }: OrderActionsProps) {
     }
 
     loadDriverLocation()
-  }, [supabase])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // supabase - стабильный объект, не нужно включать в зависимости
 
   // Загружаем телефон отправителя при первом открытии меню
   const loadCustomerPhone = async () => {
