@@ -186,7 +186,7 @@ export function OrderActions({ order, onStopPropagation }: OrderActionsProps) {
     let navApps: Array<{ name: string; url: string; fallback: string }> = []
 
     if (selectedNavType === 'full') {
-      // Весь маршрут: текущее местоположение → точка А → точка Б
+      // Весь маршрут: текущее местоположение → точка А (промежуточная) → точка Б (конечная)
       if (!driverLocation || !pickupCoords || !deliveryCoords) {
         alert('Не все координаты доступны для построения полного маршрута')
         setShowNavAppMenu(false)
@@ -195,15 +195,17 @@ export function OrderActions({ order, onStopPropagation }: OrderActionsProps) {
       }
 
       // Формируем URL для многоточечного маршрута
+      // Точка А (pickup) - промежуточная точка (via)
+      // Точка Б (delivery) - конечная точка (to)
       navApps = [
         {
           name: 'Яндекс Навигатор',
-          url: `yandexnavi://build_route?lat_from=${driverLocation.lat}&lon_from=${driverLocation.lon}&lat_via=${pickupCoords.lat}&lon_via=${pickupCoords.lon}&lat_to=${deliveryCoords.lat}&lon_to=${deliveryCoords.lon}`,
+          url: `yandexnavi://build_route?lat_from=${driverLocation.lat}&lon_from=${driverLocation.lon}&lat_to=${deliveryCoords.lat}&lon_to=${deliveryCoords.lon}&lat_via=${pickupCoords.lat}&lon_via=${pickupCoords.lon}`,
           fallback: `https://yandex.ru/maps/?rtext=${driverLocation.lat},${driverLocation.lon}~${pickupCoords.lat},${pickupCoords.lon}~${deliveryCoords.lat},${deliveryCoords.lon}&rtt=auto`
         },
         {
           name: 'Яндекс Карты',
-          url: `yandexmaps://build_route?lat_from=${driverLocation.lat}&lon_from=${driverLocation.lon}&lat_via=${pickupCoords.lat}&lon_via=${pickupCoords.lon}&lat_to=${deliveryCoords.lat}&lon_to=${deliveryCoords.lon}`,
+          url: `yandexmaps://build_route?lat_from=${driverLocation.lat}&lon_from=${driverLocation.lon}&lat_to=${deliveryCoords.lat}&lon_to=${deliveryCoords.lon}&lat_via=${pickupCoords.lat}&lon_via=${pickupCoords.lon}`,
           fallback: `https://yandex.ru/maps/?rtext=${driverLocation.lat},${driverLocation.lon}~${pickupCoords.lat},${pickupCoords.lon}~${deliveryCoords.lat},${deliveryCoords.lon}&rtt=auto`
         },
         {
