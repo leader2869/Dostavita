@@ -232,16 +232,9 @@ export default async function DriverDashboard() {
                     </div>
                     <div className="text-right">
                       <p className="font-semibold text-white">{order.final_price} BYN</p>
-                      <Link
-                        href={`/dashboard/driver/orders/${order.id}`}
-                        onClick={(e) => e.stopPropagation()}
-                        className="text-sm text-green-500 hover:text-green-600 block"
-                      >
-                        Детали
-                      </Link>
+                      <p className="text-sm text-green-500 mt-1">Детали</p>
                       <Link
                         href="/dashboard/driver/my-orders"
-                        onClick={(e) => e.stopPropagation()}
                         className="text-sm text-green-500 hover:text-green-600 block mt-1"
                       >
                         Все мои заказы →
