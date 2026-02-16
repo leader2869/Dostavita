@@ -425,6 +425,9 @@ export default function CustomerDriversPage() {
                                   driver.vehicle_type === 'bicycle' ? 'Велосипед' :
                                   driver.vehicle_type === 'walking' ? 'Пешком' : driver.vehicle_type
                                 }
+                                {driver.vehicle_brand && driver.vehicle_model && (
+                                  <span className="ml-1">({driver.vehicle_brand} {driver.vehicle_model})</span>
+                                )}
                               </p>
                             )}
                           </div>
