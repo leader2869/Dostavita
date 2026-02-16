@@ -314,6 +314,41 @@ export default function CreateOrderPage() {
     }
   }, [pickupCoordinates, deliveryCoordinates, calculateRoute])
 
+  // Загружаем телефон отправителя из профиля при монтировании
+  useEffect(() => {
+    const loadSenderPhone = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          // Используем RPC функцию для получения профиля (обходит RLS)
+          const { data: profile, error: profileError } = await supabase
+            .rpc('get_user_profile', { user_id: user.id })
+            .single()
+          
+          if (!profileError && profile?.phone) {
+            setSenderPhone(profile.phone)
+          } else {
+            // Fallback на прямой запрос, если RPC не работает
+            const { data: directProfile } = await supabase
+              .from('profiles')
+              .select('phone')
+              .eq('id', user.id)
+              .maybeSingle()
+            
+            if (directProfile?.phone) {
+              setSenderPhone(directProfile.phone)
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Ошибка загрузки телефона отправителя:', error)
+      }
+    }
+
+    loadSenderPhone()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // Загружаем только один раз при монтировании
+
   useEffect(() => {
     loadRegions()
     loadSavedAddresses()

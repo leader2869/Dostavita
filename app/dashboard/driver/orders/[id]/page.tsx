@@ -146,6 +146,14 @@ export default function OrderDetailsPage() {
                 {order.delivery_apartment && `Квартира ${order.delivery_apartment}`}
               </p>
             )}
+            {order.sender_phone && (
+              <p className="text-sm text-gray-300 mt-1 ml-4">
+                <strong>Телефон отправителя:</strong>{' '}
+                <a href={`tel:${order.sender_phone}`} className="text-green-500 hover:text-green-400 font-medium">
+                  {order.sender_phone}
+                </a>
+              </p>
+            )}
             {order.recipient_phone && (
               <p className="text-sm text-gray-300 mt-1 ml-4">
                 <strong>Телефон получателя:</strong>{' '}
