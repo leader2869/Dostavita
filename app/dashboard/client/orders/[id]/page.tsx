@@ -208,6 +208,74 @@ export default function OrderDetailsPage() {
       <h1 className="text-3xl font-bold mb-6 text-white">Детали заказа</h1>
 
       <div className="bg-gray-800 rounded-lg shadow p-6 space-y-4">
+        {/* Информация о водителе (если заказ принят) - в самом верху */}
+        {order.executor_user_id && (
+          <div className="border-b border-gray-700 pb-4 mb-4">
+            <h2 className="text-xl font-semibold mb-4 text-white">Информация о водителе</h2>
+            
+            {driver ? (
+              <div className="space-y-3 bg-gray-700 rounded-lg p-4">
+                {driver.full_name && (
+                  <div>
+                    <p className="text-sm text-gray-400">Имя водителя</p>
+                    <p className="text-white font-medium">{driver.full_name}</p>
+                  </div>
+                )}
+
+                <div>
+                  <p className="text-sm text-gray-400">Телефон</p>
+                  {driver.phone ? (
+                    <p className="text-white">
+                      <a href={`tel:${driver.phone}`} className="text-green-500 hover:text-green-400 font-medium text-lg">
+                        {driver.phone}
+                      </a>
+                    </p>
+                  ) : (
+                    <p className="text-yellow-400">Телефон не указан водителем</p>
+                  )}
+                </div>
+
+                {driver.vehicle_type && (
+                  <div>
+                    <p className="text-sm text-gray-400">Транспорт</p>
+                    <p className="text-white">
+                      {driver.vehicle_type === 'car' ? 'Легковой автомобиль' :
+                       driver.vehicle_type === 'motorcycle' ? 'Мотоцикл' :
+                       driver.vehicle_type === 'bicycle' ? 'Велосипед' :
+                       driver.vehicle_type === 'walking' ? 'Пешком' :
+                       driver.vehicle_type}
+                      {driver.vehicle_brand && driver.vehicle_model && (
+                        <span className="ml-1 text-gray-300">({driver.vehicle_brand} {driver.vehicle_model})</span>
+                      )}
+                    </p>
+                  </div>
+                )}
+
+                {driver.vehicle_number && (
+                  <div>
+                    <p className="text-sm text-gray-400">Номер транспорта</p>
+                    <p className="text-white font-medium">{driver.vehicle_number}</p>
+                  </div>
+                )}
+
+                {driver.current_location && (
+                  <div className="mt-4">
+                    <p className="text-sm text-gray-400 mb-2">Местоположение водителя</p>
+                    <DriverLocationMap
+                      driverId={order.executor_user_id}
+                      orderId={order.id}
+                      height="300px"
+                      showUserLocation={false}
+                    />
+                  </div>
+                )}
+              </div>
+            ) : (
+              <p className="text-gray-400">Загрузка информации о водителе...</p>
+            )}
+          </div>
+        )}
+
         <div>
           <h2 className="text-xl font-semibold mb-4 text-white">Информация о заказе</h2>
           
