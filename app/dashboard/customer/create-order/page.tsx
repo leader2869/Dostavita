@@ -209,6 +209,7 @@ export default function CreateOrderPage() {
           pickup_coordinates: pickupPoint,
           delivery_address: deliveryAddress,
           delivery_coordinates: deliveryPoint,
+          recipient_phone: recipientPhone,
           description: description,
           region_id: selectedRegion,
           base_price: selectedRegionData.base_price,
