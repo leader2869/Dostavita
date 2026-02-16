@@ -8,8 +8,8 @@ interface OrderActionsProps {
     id: string
     customer_id: string
     recipient_phone: string | null
-    pickup_coordinates: string | { lat: number; lng: number } | { x: number; y: number } | null
-    delivery_coordinates: string | { lat: number; lng: number } | { x: number; y: number } | null
+    pickup_coordinates: any
+    delivery_coordinates: any
   }
   onStopPropagation?: (e: React.MouseEvent) => void
 }
@@ -64,27 +64,55 @@ export function OrderActions({ order, onStopPropagation }: OrderActionsProps) {
   }
 
   // Парсим координаты из разных форматов
-  const parseCoordinates = (coords: string | { lat: number; lng: number } | { x: number; y: number } | null): { lat: number; lon: number } | null => {
+  const parseCoordinates = (coords: any): { lat: number; lon: number } | null => {
     if (!coords) return null
-    
-    // Формат объекта с lat/lng
-    if (typeof coords === 'object' && 'lat' in coords && 'lng' in coords) {
-      return { lat: coords.lat, lon: coords.lng }
-    }
-    
-    // Формат PostgreSQL POINT как объект {x: lon, y: lat}
-    if (typeof coords === 'object' && 'x' in coords && 'y' in coords) {
-      return { lat: coords.y, lon: coords.x }
-    }
-    
-    // Формат строки PostgreSQL POINT: (lon,lat) или POINT(lon lat)
-    if (typeof coords === 'string') {
-      const match = coords.match(/\(?\s*([+-]?\d+\.?\d*)\s*,\s*([+-]?\d+\.?\d*)\s*\)?/)
-      if (match) {
-        return { lat: parseFloat(match[2]), lon: parseFloat(match[1]) }
+
+    try {
+      // Формат объекта с lat/lon
+      if (typeof coords === 'object' && 'lat' in coords && 'lon' in coords) {
+        return { lat: coords.lat, lon: coords.lon }
       }
+
+      // Формат объекта с lat/lng
+      if (typeof coords === 'object' && 'lat' in coords && 'lng' in coords) {
+        return { lat: coords.lat, lon: coords.lng }
+      }
+
+      // Формат PostgreSQL POINT как объект {x: lon, y: lat}
+      if (typeof coords === 'object' && 'x' in coords && 'y' in coords) {
+        return { lat: coords.y, lon: coords.x }
+      }
+
+      // Формат GeoJSON с coordinates массивом [lon, lat]
+      if (typeof coords === 'object' && 'coordinates' in coords && Array.isArray(coords.coordinates)) {
+        return { lat: coords.coordinates[1], lon: coords.coordinates[0] }
+      }
+
+      // Формат строки PostgreSQL POINT: (lon,lat) или POINT(lon lat)
+      if (typeof coords === 'string') {
+        // Пробуем парсить как JSON
+        try {
+          const parsed = JSON.parse(coords)
+          if (typeof parsed === 'object' && 'lat' in parsed && 'lon' in parsed) {
+            return parsed
+          }
+        } catch (e) {
+          // Не JSON, пробуем парсить как "(lon,lat)"
+          const match = coords.match(/\(?\s*([+-]?\d+\.?\d*)\s*,\s*([+-]?\d+\.?\d*)\s*\)?/)
+          if (match) {
+            return { lat: parseFloat(match[2]), lon: parseFloat(match[1]) }
+          }
+          // Пробуем парсить как WKT формат "POINT(lon lat)"
+          const wktMatch = coords.match(/POINT\(([^ ]+) ([^ ]+)\)/)
+          if (wktMatch && wktMatch.length === 3) {
+            return { lat: parseFloat(wktMatch[2]), lon: parseFloat(wktMatch[1]) }
+          }
+        }
+      }
+    } catch (e) {
+      console.error('Ошибка парсинга координат:', e, coords)
     }
-    
+
     return null
   }
 
