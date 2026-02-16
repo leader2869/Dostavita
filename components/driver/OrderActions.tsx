@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
 interface OrderActionsProps {
@@ -19,7 +19,81 @@ export function OrderActions({ order, onStopPropagation }: OrderActionsProps) {
   const [showNavMenu, setShowNavMenu] = useState(false)
   const [customerPhone, setCustomerPhone] = useState<string | null>(null)
   const [loadingPhone, setLoadingPhone] = useState(false)
+  const [driverLocation, setDriverLocation] = useState<{ lat: number; lon: number } | null>(null)
+  const [loadingLocation, setLoadingLocation] = useState(false)
   const supabase = createClient()
+
+  // Получаем текущее местоположение водителя
+  useEffect(() => {
+    const loadDriverLocation = async () => {
+      setLoadingLocation(true)
+      try {
+        // Сначала пробуем получить из браузера (самое точное)
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              setDriverLocation({
+                lat: position.coords.latitude,
+                lon: position.coords.longitude,
+              })
+              setLoadingLocation(false)
+            },
+            async () => {
+              // Если браузер не дал местоположение, пробуем из профиля
+              try {
+                const { data: { user } } = await supabase.auth.getUser()
+                if (user) {
+                  const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('current_location')
+                    .eq('id', user.id)
+                    .single()
+
+                  if (profile?.current_location) {
+                    const parsed = parseCoordinates(profile.current_location)
+                    if (parsed) {
+                      setDriverLocation(parsed)
+                    }
+                  }
+                }
+              } catch (error) {
+                console.error('Ошибка загрузки местоположения из профиля:', error)
+              }
+              setLoadingLocation(false)
+            },
+            { timeout: 5000, maximumAge: 60000 }
+          )
+        } else {
+          // Если Geolocation API не поддерживается, получаем из профиля
+          try {
+            const { data: { user } } = await supabase.auth.getUser()
+            if (user) {
+              const { data: profile } = await supabase
+                .from('profiles')
+                .select('current_location')
+                .eq('id', user.id)
+                .single()
+
+              if (profile?.current_location) {
+                const parsed = parseCoordinates(profile.current_location)
+                if (parsed) {
+                  setDriverLocation(parsed)
+                }
+              }
+            }
+          } catch (error) {
+            console.error('Ошибка загрузки местоположения из профиля:', error)
+          }
+          setLoadingLocation(false)
+        }
+      } catch (error) {
+        console.error('Ошибка получения местоположения:', error)
+        setLoadingLocation(false)
+      }
+    }
+
+    loadDriverLocation()
+  }, [supabase])
 
   // Загружаем телефон отправителя при первом открытии меню
   const loadCustomerPhone = async () => {
@@ -117,9 +191,9 @@ export function OrderActions({ order, onStopPropagation }: OrderActionsProps) {
   }
 
   const [showNavAppMenu, setShowNavAppMenu] = useState(false)
-  const [selectedNavType, setSelectedNavType] = useState<'pickup' | 'delivery' | null>(null)
+  const [selectedNavType, setSelectedNavType] = useState<'pickup' | 'delivery' | 'full' | null>(null)
 
-  const handleNavTypeSelect = (type: 'pickup' | 'delivery') => {
+  const handleNavTypeSelect = (type: 'pickup' | 'delivery' | 'full') => {
     setSelectedNavType(type)
     setShowNavMenu(false)
     setShowNavAppMenu(true)
@@ -128,39 +202,71 @@ export function OrderActions({ order, onStopPropagation }: OrderActionsProps) {
   const openNavigation = (appIndex: number) => {
     if (!selectedNavType) return
 
-    const coords = selectedNavType === 'pickup' 
-      ? parseCoordinates(order.pickup_coordinates)
-      : parseCoordinates(order.delivery_coordinates)
-    
-    if (!coords) {
-      alert('Координаты недоступны')
-      setShowNavAppMenu(false)
-      setSelectedNavType(null)
-      return
-    }
-
-    // Формируем координаты для разных приложений
-    const lat = coords.lat
-    const lon = coords.lon
+    const pickupCoords = parseCoordinates(order.pickup_coordinates)
+    const deliveryCoords = parseCoordinates(order.delivery_coordinates)
 
     // Список приложений навигации с их deep links
-    const navApps = [
-      {
-        name: 'Яндекс Навигатор',
-        url: `yandexnavi://build_route?lat_to=${lat}&lon_to=${lon}`,
-        fallback: `https://yandex.ru/maps/?pt=${lon},${lat}&z=15`
-      },
-      {
-        name: 'Яндекс Карты',
-        url: `yandexmaps://build_route?lat_to=${lat}&lon_to=${lon}`,
-        fallback: `https://yandex.ru/maps/?pt=${lon},${lat}&z=15`
-      },
-      {
-        name: '2ГИС',
-        url: `dgis://2gis.ru/routeSearch/rsType/car/to/${lon},${lat}`,
-        fallback: `https://2gis.ru/routeSearch/rsType/car/to/${lon},${lat}`
+    let navApps: Array<{ name: string; url: string; fallback: string }> = []
+
+    if (selectedNavType === 'full') {
+      // Весь маршрут: текущее местоположение → точка А → точка Б
+      if (!driverLocation || !pickupCoords || !deliveryCoords) {
+        alert('Не все координаты доступны для построения полного маршрута')
+        setShowNavAppMenu(false)
+        setSelectedNavType(null)
+        return
       }
-    ]
+
+      // Формируем URL для многоточечного маршрута
+      navApps = [
+        {
+          name: 'Яндекс Навигатор',
+          url: `yandexnavi://build_route?lat_from=${driverLocation.lat}&lon_from=${driverLocation.lon}&lat_via=${pickupCoords.lat}&lon_via=${pickupCoords.lon}&lat_to=${deliveryCoords.lat}&lon_to=${deliveryCoords.lon}`,
+          fallback: `https://yandex.ru/maps/?rtext=${driverLocation.lat},${driverLocation.lon}~${pickupCoords.lat},${pickupCoords.lon}~${deliveryCoords.lat},${deliveryCoords.lon}&rtt=auto`
+        },
+        {
+          name: 'Яндекс Карты',
+          url: `yandexmaps://build_route?lat_from=${driverLocation.lat}&lon_from=${driverLocation.lon}&lat_via=${pickupCoords.lat}&lon_via=${pickupCoords.lon}&lat_to=${deliveryCoords.lat}&lon_to=${deliveryCoords.lon}`,
+          fallback: `https://yandex.ru/maps/?rtext=${driverLocation.lat},${driverLocation.lon}~${pickupCoords.lat},${pickupCoords.lon}~${deliveryCoords.lat},${deliveryCoords.lon}&rtt=auto`
+        },
+        {
+          name: '2ГИС',
+          url: `dgis://2gis.ru/routeSearch/rsType/car/from/${driverLocation.lon},${driverLocation.lat}/to/${deliveryCoords.lon},${deliveryCoords.lat}/via/${pickupCoords.lon},${pickupCoords.lat}`,
+          fallback: `https://2gis.ru/routeSearch/rsType/car/from/${driverLocation.lon},${driverLocation.lat}/to/${deliveryCoords.lon},${deliveryCoords.lat}/via/${pickupCoords.lon},${pickupCoords.lat}`
+        }
+      ]
+    } else {
+      // Одна точка назначения
+      const coords = selectedNavType === 'pickup' ? pickupCoords : deliveryCoords
+      
+      if (!coords) {
+        alert('Координаты недоступны')
+        setShowNavAppMenu(false)
+        setSelectedNavType(null)
+        return
+      }
+
+      const lat = coords.lat
+      const lon = coords.lon
+
+      navApps = [
+        {
+          name: 'Яндекс Навигатор',
+          url: `yandexnavi://build_route?lat_to=${lat}&lon_to=${lon}`,
+          fallback: `https://yandex.ru/maps/?pt=${lon},${lat}&z=15`
+        },
+        {
+          name: 'Яндекс Карты',
+          url: `yandexmaps://build_route?lat_to=${lat}&lon_to=${lon}`,
+          fallback: `https://yandex.ru/maps/?pt=${lon},${lat}&z=15`
+        },
+        {
+          name: '2ГИС',
+          url: `dgis://2gis.ru/routeSearch/rsType/car/to/${lon},${lat}`,
+          fallback: `https://2gis.ru/routeSearch/rsType/car/to/${lon},${lat}`
+        }
+      ]
+    }
 
     const selectedApp = navApps[appIndex]
 
@@ -276,6 +382,13 @@ export function OrderActions({ order, onStopPropagation }: OrderActionsProps) {
           <div className="bg-gray-800 rounded-lg p-6 max-w-sm w-full mx-4" onClick={(e) => e.stopPropagation()}>
             <h3 className="text-xl font-semibold text-white mb-4">Куда построить маршрут?</h3>
             <div className="space-y-3">
+              <button
+                onClick={() => handleNavTypeSelect('full')}
+                className="w-full bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-3 rounded transition font-semibold"
+                disabled={loadingLocation || !driverLocation}
+              >
+                {loadingLocation ? 'Загрузка местоположения...' : 'Весь маршрут (Я → А → Б)'}
+              </button>
               <button
                 onClick={() => handleNavTypeSelect('pickup')}
                 className="w-full bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-3 rounded transition"
