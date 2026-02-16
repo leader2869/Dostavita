@@ -27,6 +27,8 @@ export default function CustomerDriversPage() {
   const [newDriverFullName, setNewDriverFullName] = useState('')
   const [newDriverPhone, setNewDriverPhone] = useState('')
   const [newDriverVehicleType, setNewDriverVehicleType] = useState('')
+  const [newDriverVehicleBrand, setNewDriverVehicleBrand] = useState('')
+  const [newDriverVehicleModel, setNewDriverVehicleModel] = useState('')
   const [newDriverVehicleNumber, setNewDriverVehicleNumber] = useState('')
   const [newDriverLicenseNumber, setNewDriverLicenseNumber] = useState('')
 
@@ -155,6 +157,8 @@ export default function CustomerDriversPage() {
           full_name: newDriverFullName,
           phone: newDriverPhone,
           vehicle_type: newDriverVehicleType,
+          vehicle_brand: newDriverVehicleBrand,
+          vehicle_model: newDriverVehicleModel,
           vehicle_number: newDriverVehicleNumber,
           license_number: newDriverLicenseNumber,
         }),
@@ -178,6 +182,8 @@ export default function CustomerDriversPage() {
       setNewDriverFullName('')
       setNewDriverPhone('')
       setNewDriverVehicleType('')
+      setNewDriverVehicleBrand('')
+      setNewDriverVehicleModel('')
       setNewDriverVehicleNumber('')
       setNewDriverLicenseNumber('')
       alert('Аккаунт водителя успешно создан и привязан к организации')
@@ -468,6 +474,8 @@ export default function CustomerDriversPage() {
                     setNewDriverFullName('')
                     setNewDriverPhone('')
                     setNewDriverVehicleType('')
+                    setNewDriverVehicleBrand('')
+                    setNewDriverVehicleModel('')
                     setNewDriverVehicleNumber('')
                     setNewDriverLicenseNumber('')
                   }}
@@ -559,6 +567,36 @@ export default function CustomerDriversPage() {
                     <option value="walking">Пешком</option>
                   </select>
                 </div>
+
+                {(newDriverVehicleType === 'car' || newDriverVehicleType === 'motorcycle') && (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-1">
+                        Марка транспорта
+                      </label>
+                      <input
+                        type="text"
+                        value={newDriverVehicleBrand}
+                        onChange={(e) => setNewDriverVehicleBrand(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white"
+                        placeholder="Toyota, BMW, Honda и т.д."
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-1">
+                        Модель транспорта
+                      </label>
+                      <input
+                        type="text"
+                        value={newDriverVehicleModel}
+                        onChange={(e) => setNewDriverVehicleModel(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white"
+                        placeholder="Camry, X5, CBR600 и т.д."
+                      />
+                    </div>
+                  </>
+                )}
 
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-1">

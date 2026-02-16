@@ -25,6 +25,8 @@ export interface User {
   role: UserRole
   avatar_url: string | null
   vehicle_type: string | null
+  vehicle_brand: string | null
+  vehicle_model: string | null
   vehicle_number: string | null
   license_number: string | null
   created_at: string
@@ -43,6 +45,8 @@ export interface Driver {
   id: string
   user_id: string
   vehicle_type: string
+  vehicle_brand: string | null
+  vehicle_model: string | null
   vehicle_number: string | null
   license_number: string
   fleet_id: string | null

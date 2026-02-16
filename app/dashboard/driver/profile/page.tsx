@@ -19,6 +19,8 @@ export default function DriverProfilePage() {
   const [fullName, setFullName] = useState('')
   const [phone, setPhone] = useState('')
   const [vehicleType, setVehicleType] = useState('')
+  const [vehicleBrand, setVehicleBrand] = useState('')
+  const [vehicleModel, setVehicleModel] = useState('')
   const [vehicleNumber, setVehicleNumber] = useState('')
   const [licenseNumber, setLicenseNumber] = useState('')
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
@@ -51,6 +53,8 @@ export default function DriverProfilePage() {
         setFullName(data.full_name || '')
         setPhone(data.phone || '')
         setVehicleType(data.vehicle_type || '')
+        setVehicleBrand(data.vehicle_brand || '')
+        setVehicleModel(data.vehicle_model || '')
         setVehicleNumber(data.vehicle_number || '')
         setLicenseNumber(data.license_number || '')
         setAvatarUrl(data.avatar_url || null)
@@ -325,6 +329,36 @@ export default function DriverProfilePage() {
             <option value="walking">Пешком</option>
           </select>
         </div>
+
+        {(vehicleType === 'car' || vehicleType === 'motorcycle') && (
+          <>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Марка транспорта
+              </label>
+              <input
+                type="text"
+                value={vehicleBrand}
+                onChange={(e) => setVehicleBrand(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white"
+                placeholder="Toyota, BMW, Honda и т.д."
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Модель транспорта
+              </label>
+              <input
+                type="text"
+                value={vehicleModel}
+                onChange={(e) => setVehicleModel(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white"
+                placeholder="Camry, X5, CBR600 и т.д."
+              />
+            </div>
+          </>
+        )}
 
         <div>
           <label className="block text-sm font-medium text-gray-300 mb-1">
