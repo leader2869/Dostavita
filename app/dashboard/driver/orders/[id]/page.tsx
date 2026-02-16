@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import type { Order } from '@/lib/types'
 import { BackButton } from '@/components/ui/BackButton'
+import { OrderActions } from '@/components/driver/OrderActions'
 import { formatAddressForOrder } from '@/lib/utils/formatAddress'
 
 export default function OrderDetailsPage() {
@@ -282,6 +283,13 @@ export default function OrderDetailsPage() {
             </div>
           </div>
         </div>
+
+        {/* Кнопки действий (телефон, навигация, чат) */}
+        {order && (
+          <div className="mt-4 pt-4 border-t border-gray-700">
+            <OrderActions order={order} />
+          </div>
+        )}
 
         {error && (
           <div className="text-red-600 text-sm">{error}</div>

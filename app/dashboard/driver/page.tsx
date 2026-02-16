@@ -176,13 +176,13 @@ export default async function DriverDashboard() {
   // Фильтруем только активные заказы, которые водитель выполняет
   // Статусы: courier_coming (едет за посылкой) и courier_delivering (доставляет заказ)
   // НЕ включаем searching_courier - это статус для доступных заказов, а не для выполняемых
-  const { data: myOrders, error: myOrdersError } = await supabase
-    .from('orders')
-    .select('id, order_number, pickup_address, delivery_address, final_price, item_type, description, created_at, cancelled_at, status, customer_id, sender_phone, recipient_phone, pickup_coordinates, delivery_coordinates')
-    .eq('executor_user_id', user.id)
-    .in('status', ['courier_accepted', 'courier_coming', 'courier_delivering'])
-    .order('created_at', { ascending: false })
-    .limit(10)
+         const { data: myOrders, error: myOrdersError } = await supabase
+           .from('orders')
+           .select('id, order_number, pickup_address, delivery_address, final_price, item_type, description, created_at, cancelled_at, status, customer_id, client_id, executor_user_id, sender_phone, recipient_phone, pickup_coordinates, delivery_coordinates')
+           .eq('executor_user_id', user.id)
+           .in('status', ['courier_accepted', 'courier_coming', 'courier_delivering'])
+           .order('created_at', { ascending: false })
+           .limit(10)
 
   // Логирование для отладки
   if (myOrdersError) {

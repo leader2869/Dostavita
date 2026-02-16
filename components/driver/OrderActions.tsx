@@ -2,11 +2,14 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { OrderChat } from '@/components/chat/OrderChat'
 
 interface OrderActionsProps {
   order: {
     id: string
     customer_id: string
+    client_id?: string | null
+    executor_user_id?: string | null
     sender_phone: string | null
     recipient_phone: string | null
     pickup_coordinates: any
@@ -18,9 +21,22 @@ interface OrderActionsProps {
 export function OrderActions({ order, onStopPropagation }: OrderActionsProps) {
   const [showPhoneMenu, setShowPhoneMenu] = useState(false)
   const [showNavMenu, setShowNavMenu] = useState(false)
+  const [showChat, setShowChat] = useState(false)
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   const [driverLocation, setDriverLocation] = useState<{ lat: number; lon: number } | null>(null)
   const [loadingLocation, setLoadingLocation] = useState(false)
   const supabase = createClient()
+
+  // Получаем текущего пользователя
+  useEffect(() => {
+    const loadUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        setCurrentUserId(user.id)
+      }
+    }
+    loadUser()
+  }, [supabase])
 
   // Получаем текущее местоположение водителя
   useEffect(() => {
@@ -106,6 +122,15 @@ export function OrderActions({ order, onStopPropagation }: OrderActionsProps) {
     if (onStopPropagation) onStopPropagation(e)
     setShowNavMenu(true)
   }
+
+  const handleChatClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (onStopPropagation) onStopPropagation(e)
+    setShowChat(true)
+  }
+
+  // Проверяем, можно ли показывать чат (заказ должен быть принят водителем)
+  const canShowChat = order.executor_user_id !== null && currentUserId !== null
 
   const handleCall = (phone: string) => {
     if (phone) {
@@ -319,7 +344,39 @@ export function OrderActions({ order, onStopPropagation }: OrderActionsProps) {
             />
           </svg>
         </button>
+
+        {/* Кнопка чата (только если заказ принят) */}
+        {canShowChat && (
+          <button
+            onClick={handleChatClick}
+            className="flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition"
+            title="Чат"
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+              />
+            </svg>
+          </button>
+        )}
       </div>
+
+      {/* Чат */}
+      {showChat && currentUserId && (
+        <OrderChat
+          orderId={order.id}
+          currentUserId={currentUserId}
+          onClose={() => setShowChat(false)}
+        />
+      )}
 
       {/* Меню выбора телефона */}
       {showPhoneMenu && (
