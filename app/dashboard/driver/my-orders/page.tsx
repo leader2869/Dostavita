@@ -140,15 +140,6 @@ export default function DriverMyOrdersPage() {
             <p className="text-xl font-bold text-white mb-2">
               {order.final_price} BYN
             </p>
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                router.push(`/dashboard/driver/orders/${order.id}`)
-              }}
-              className="text-sm text-green-500 hover:text-green-400 underline"
-            >
-              Детали →
-            </button>
           </div>
         </div>
       </div>

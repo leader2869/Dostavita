@@ -232,7 +232,6 @@ export default async function DriverDashboard() {
                     </div>
                     <div className="text-right">
                       <p className="font-semibold text-white">{order.final_price} BYN</p>
-                      <p className="text-sm text-green-500 mt-1">Нажмите для деталей</p>
                     </div>
                   </div>
                 </Link>
