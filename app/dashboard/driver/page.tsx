@@ -6,6 +6,7 @@ import { AvailableOrdersList } from '@/components/driver/AvailableOrdersList'
 import { DriverLocationTracker } from '@/components/driver/DriverLocationTracker'
 import { DriverPushNotifications } from '@/components/driver/DriverPushNotifications'
 import { DriverBottomNavigation } from '@/components/driver/DriverBottomNavigation'
+import { OrderActions } from '@/components/driver/OrderActions'
 import { formatAddressForOrder } from '@/lib/utils/formatAddress'
 
 // Отключаем кеширование, чтобы данные всегда были актуальными
@@ -177,7 +178,7 @@ export default async function DriverDashboard() {
   // НЕ включаем searching_courier - это статус для доступных заказов, а не для выполняемых
   const { data: myOrders, error: myOrdersError } = await supabase
     .from('orders')
-    .select('*')
+    .select('id, order_number, pickup_address, delivery_address, final_price, item_type, description, created_at, cancelled_at, status, customer_id, recipient_phone, pickup_coordinates, delivery_coordinates')
     .eq('executor_user_id', user.id)
     .in('status', ['courier_coming', 'courier_delivering'])
     .order('created_at', { ascending: false })
@@ -210,31 +211,36 @@ export default async function DriverDashboard() {
           {myOrders && myOrders.length > 0 ? (
             <div className="space-y-4">
               {myOrders.map((order: any) => (
-                <Link
+                <div
                   key={order.id}
-                  href={`/dashboard/driver/orders/${order.id}`}
-                  className="block border rounded-lg p-4 cursor-pointer hover:bg-gray-700 transition"
+                  className="block border rounded-lg p-4 hover:bg-gray-700 transition"
                 >
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="font-medium text-white">Заказ №{order.order_number || order.id.slice(0, 8)}</p>
-                      <p className="text-sm text-gray-300 mt-1">
-                        а) {formatAddressForOrder(order.pickup_address)}
-                      </p>
-                      <p className="text-sm text-gray-300 mt-1">
-                        б) {formatAddressForOrder(order.delivery_address)}
-                      </p>
-                      <p className="text-sm text-gray-400 mt-1">
-                        Статус: {order.status === 'courier_coming' ? 'Еду за посылкой' :
-                                 order.status === 'courier_delivering' ? 'Доставляю заказ' :
-                                 order.status === 'completed' ? 'Заказ завершен' : order.status}
-                      </p>
+                  <Link
+                    href={`/dashboard/driver/orders/${order.id}`}
+                    className="block"
+                  >
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="font-medium text-white">Заказ №{order.order_number || order.id.slice(0, 8)}</p>
+                        <p className="text-sm text-gray-300 mt-1">
+                          а) {formatAddressForOrder(order.pickup_address)}
+                        </p>
+                        <p className="text-sm text-gray-300 mt-1">
+                          б) {formatAddressForOrder(order.delivery_address)}
+                        </p>
+                        <p className="text-sm text-gray-400 mt-1">
+                          Статус: {order.status === 'courier_coming' ? 'Еду за посылкой' :
+                                   order.status === 'courier_delivering' ? 'Доставляю заказ' :
+                                   order.status === 'completed' ? 'Заказ завершен' : order.status}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold text-white">{order.final_price} BYN</p>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <p className="font-semibold text-white">{order.final_price} BYN</p>
-                    </div>
-                  </div>
-                </Link>
+                  </Link>
+                  <OrderActions order={order} />
+                </div>
               ))}
             </div>
           ) : (
