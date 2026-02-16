@@ -165,11 +165,11 @@ export default function AcceptOrderPage() {
         console.log('executor_user_id:', updatedOrder.executor_user_id)
         console.log('status:', updatedOrder.status)
         console.log('Matches user ID?', updatedOrder.executor_user_id === user.id)
-        console.log('Expected status: courier_coming')
+        console.log('Expected status: courier_accepted')
         console.log('Actual status:', updatedOrder.status)
-        if (updatedOrder.status !== 'courier_coming') {
-          console.error('⚠️ ПРОБЛЕМА: Статус не изменился на courier_coming!')
-          console.error('Возможно, миграция 025 не применена или функция работает неправильно')
+        if (updatedOrder.status !== 'courier_accepted') {
+          console.error('⚠️ ПРОБЛЕМА: Статус не изменился на courier_accepted!')
+          console.error('Возможно, миграция 073 не применена или функция работает неправильно')
         }
         if (updatedOrder.executor_user_id !== user.id) {
           console.error('⚠️ ПРОБЛЕМА: executor_user_id не установлен!')

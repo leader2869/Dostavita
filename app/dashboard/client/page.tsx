@@ -170,10 +170,12 @@ export default function ClientDashboard() {
     switch (status) {
       case 'searching_courier':
         return 'Ищем курьера'
+      case 'courier_accepted':
+        return 'Курьер принял заказ'
       case 'courier_coming':
-        return 'Курьер едет к вам'
+        return 'Курьер едет к отправителю'
       case 'courier_delivering':
-        return 'Курьер доставляет заказ'
+        return 'Курьер едет к получателю'
       case 'completed':
         return 'Заказ завершен'
       case 'cancelled':
@@ -187,6 +189,8 @@ export default function ClientDashboard() {
     switch (status) {
       case 'searching_courier':
         return 'text-yellow-400 bg-yellow-400/20 border-yellow-400/50'
+      case 'courier_accepted':
+        return 'text-orange-400 bg-orange-400/20 border-orange-400/50'
       case 'courier_coming':
         return 'text-blue-400 bg-blue-400/20 border-blue-400/50'
       case 'courier_delivering':
@@ -202,7 +206,7 @@ export default function ClientDashboard() {
 
   const shouldBlink = (status: string) => {
     // Мигают только активные статусы
-    return status === 'searching_courier' || status === 'courier_coming' || status === 'courier_delivering'
+    return status === 'searching_courier' || status === 'courier_accepted' || status === 'courier_coming' || status === 'courier_delivering'
   }
 
   const detectRegionFromAddress = useCallback((addr: string, addressDetails?: any) => {

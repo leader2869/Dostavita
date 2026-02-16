@@ -81,7 +81,7 @@ export default async function AdminDashboard() {
   const { count: activeOrdersCount } = await supabase
     .from('orders')
     .select('*', { count: 'exact', head: true })
-    .in('status', ['searching_courier', 'courier_coming', 'courier_delivering'])
+    .in('status', ['searching_courier', 'courier_accepted', 'courier_coming', 'courier_delivering'])
   
   // 2. Заказы где ищем курьера (searching_courier)
   const { count: searchingCourierCount } = await supabase
@@ -93,7 +93,7 @@ export default async function AdminDashboard() {
   const { count: inProgressCount } = await supabase
     .from('orders')
     .select('*', { count: 'exact', head: true })
-    .in('status', ['courier_coming', 'courier_delivering'])
+    .in('status', ['courier_accepted', 'courier_coming', 'courier_delivering'])
 
   // 4. Статистика отказов от заказов
   const { count: totalRejectionsCount } = await supabase
@@ -149,7 +149,7 @@ export default async function AdminDashboard() {
   let { data: activeOrders, error: activeOrdersError } = await supabase
     .from('orders')
     .select('*')
-    .in('status', ['searching_courier', 'courier_coming', 'courier_delivering'])
+    .in('status', ['searching_courier', 'courier_accepted', 'courier_coming', 'courier_delivering'])
     .order('created_at', { ascending: true })
     .limit(20)
   
@@ -227,15 +227,18 @@ export default async function AdminDashboard() {
               if (order.status === 'searching_courier') {
                 statusTime = new Date(order.created_at)
                 statusLabel = 'Ищем курьера'
+              } else if (order.status === 'courier_accepted') {
+                statusTime = order.accepted_at ? new Date(order.accepted_at) : new Date(order.created_at)
+                statusLabel = 'Курьер принял заказ'
               } else if (order.status === 'courier_coming') {
                 statusTime = order.accepted_at ? new Date(order.accepted_at) : new Date(order.created_at)
-                statusLabel = 'Едем за посылкой'
+                statusLabel = 'Курьер едет к отправителю'
               } else if (order.status === 'courier_delivering') {
                 statusTime = order.picked_up_at ? new Date(order.picked_up_at) : 
                             order.started_delivery_at ? new Date(order.started_delivery_at) :
                             order.accepted_at ? new Date(order.accepted_at) : 
                             new Date(order.created_at)
-                statusLabel = 'Доставляем заказ'
+                statusLabel = 'Курьер едет к получателю'
               }
 
               const timeAgo = statusTime ? formatDistanceToNow(statusTime, {
@@ -250,6 +253,8 @@ export default async function AdminDashboard() {
               let maxMinutes = 0
               if (order.status === 'searching_courier') {
                 maxMinutes = settingsMap['max_searching_courier_minutes'] || 5
+              } else if (order.status === 'courier_accepted') {
+                maxMinutes = settingsMap['max_courier_accepted_minutes'] || 10
               } else if (order.status === 'courier_coming') {
                 maxMinutes = settingsMap['max_courier_coming_minutes'] || 30
               } else if (order.status === 'courier_delivering') {
@@ -280,8 +285,11 @@ export default async function AdminDashboard() {
                       <p className="text-sm text-gray-400 mt-1">
                         Статус: {
                           order.status === 'searching_courier' ? 'Ищем курьера' :
-                          order.status === 'courier_coming' ? 'Курьер едет' :
-                          order.status === 'courier_delivering' ? 'Доставляется' :
+                          order.status === 'courier_accepted' ? 'Курьер принял заказ' :
+                          order.status === 'courier_coming' ? 'Курьер едет к отправителю' :
+                          order.status === 'courier_delivering' ? 'Курьер едет к получателю' :
+                          order.status === 'completed' ? 'Заказ завершен' :
+                          order.status === 'cancelled' ? 'Отменен' :
                           order.status
                         }
                       </p>

@@ -10,8 +10,9 @@ export type UserRole =
 
 export type OrderStatus =
   | 'searching_courier' // Ищем курьера
-  | 'courier_coming' // Курьер едет к вам
-  | 'courier_delivering' // Курьер доставляет заказ
+  | 'courier_accepted' // Курьер принял заказ
+  | 'courier_coming' // Курьер едет к отправителю
+  | 'courier_delivering' // Курьер едет к получателю
   | 'completed' // Заказ завершен
   | 'cancelled' // Отменен
 

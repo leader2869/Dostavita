@@ -90,9 +90,10 @@ export default async function AdminOrdersPage() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
                     {order.status === 'searching_courier' && 'Ищем курьера'}
-                    {order.status === 'courier_coming' && 'Курьер едет'}
-                    {order.status === 'courier_delivering' && 'Доставляется'}
-                    {order.status === 'completed' && 'Завершен'}
+                    {order.status === 'courier_accepted' && 'Курьер принял заказ'}
+                    {order.status === 'courier_coming' && 'Курьер едет к отправителю'}
+                    {order.status === 'courier_delivering' && 'Курьер едет к получателю'}
+                    {order.status === 'completed' && 'Заказ завершен'}
                     {order.status === 'cancelled' && 'Отменен'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-white">

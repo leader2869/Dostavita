@@ -52,10 +52,12 @@ export default function DriverMyOrdersPage() {
 
   const getStatusLabel = (status: string) => {
     switch (status) {
+      case 'courier_accepted':
+        return 'Курьер принял заказ'
       case 'courier_coming':
-        return 'Еду за посылкой'
+        return 'Курьер едет к отправителю'
       case 'courier_delivering':
-        return 'Доставляю заказ'
+        return 'Курьер едет к получателю'
       case 'completed':
         return 'Заказ завершен'
       case 'cancelled':
@@ -67,6 +69,8 @@ export default function DriverMyOrdersPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
+      case 'courier_accepted':
+        return 'text-orange-400 bg-orange-400/20 border-orange-400/50'
       case 'courier_coming':
         return 'text-blue-400 bg-blue-400/20 border-blue-400/50'
       case 'courier_delivering':
@@ -82,7 +86,7 @@ export default function DriverMyOrdersPage() {
 
   const shouldBlink = (status: string) => {
     // Мигают только активные статусы
-    return status === 'courier_coming' || status === 'courier_delivering'
+    return status === 'courier_accepted' || status === 'courier_coming' || status === 'courier_delivering'
   }
 
   // Разделяем заказы на активные и завершенные
@@ -95,7 +99,7 @@ export default function DriverMyOrdersPage() {
 
   const renderOrderCard = (order: any) => {
     // Показываем кнопки только для активных заказов
-    const isActive = order.status === 'courier_coming' || order.status === 'courier_delivering'
+    const isActive = order.status === 'courier_accepted' || order.status === 'courier_coming' || order.status === 'courier_delivering'
     
     return (
       <div

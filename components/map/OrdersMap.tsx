@@ -77,6 +77,8 @@ const getStatusColor = (status: string) => {
   switch (status) {
     case 'searching_courier':
       return '#fbbf24' // желтый
+    case 'courier_accepted':
+      return '#fb923c' // оранжевый
     case 'courier_coming':
       return '#3b82f6' // синий
     case 'courier_delivering':
@@ -94,12 +96,14 @@ const getStatusLabel = (status: string) => {
   switch (status) {
     case 'searching_courier':
       return 'Ищем курьера'
+    case 'courier_accepted':
+      return 'Курьер принял заказ'
     case 'courier_coming':
-      return 'Курьер едет'
+      return 'Курьер едет к отправителю'
     case 'courier_delivering':
-      return 'Доставляется'
+      return 'Курьер едет к получателю'
     case 'completed':
-      return 'Завершен'
+      return 'Заказ завершен'
     case 'cancelled':
       return 'Отменен'
     default:

@@ -96,10 +96,12 @@ export default function OrderDetailsPage() {
     switch (status) {
       case 'searching_courier':
         return 'Ищем курьера'
+      case 'courier_accepted':
+        return 'Курьер принял заказ'
       case 'courier_coming':
-        return 'Курьер едет к вам'
+        return 'Курьер едет к отправителю'
       case 'courier_delivering':
-        return 'Курьер доставляет заказ'
+        return 'Курьер едет к получателю'
       case 'completed':
         return 'Заказ завершен'
       case 'cancelled':

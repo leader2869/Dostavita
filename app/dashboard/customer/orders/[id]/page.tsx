@@ -53,10 +53,12 @@ export default async function CustomerOrderDetailsPage({ params }: { params: { i
     switch (status) {
       case 'searching_courier':
         return 'Ищем курьера'
+      case 'courier_accepted':
+        return 'Курьер принял заказ'
       case 'courier_coming':
-        return 'Курьер едет к вам'
+        return 'Курьер едет к отправителю'
       case 'courier_delivering':
-        return 'Курьер доставляет заказ'
+        return 'Курьер едет к получателю'
       case 'completed':
         return 'Заказ завершен'
       case 'cancelled':
@@ -70,6 +72,8 @@ export default async function CustomerOrderDetailsPage({ params }: { params: { i
     switch (status) {
       case 'searching_courier':
         return 'text-yellow-400 bg-yellow-400/20 border-yellow-400/50'
+      case 'courier_accepted':
+        return 'text-orange-400 bg-orange-400/20 border-orange-400/50'
       case 'courier_coming':
         return 'text-blue-400 bg-blue-400/20 border-blue-400/50'
       case 'courier_delivering':
@@ -189,7 +193,7 @@ export default async function CustomerOrderDetailsPage({ params }: { params: { i
                 <p className="text-sm text-gray-400">Принят водителем</p>
                 <p className="text-white">
                   {new Date(order.accepted_at).toLocaleString('ru-RU')}
-                  {(order.status === 'courier_coming' || order.status === 'courier_delivering') && (
+                  {(order.status === 'courier_accepted' || order.status === 'courier_coming' || order.status === 'courier_delivering') && (
                     <span className="ml-2 text-purple-400 animate-blink">
                       ({formatDistanceToNowStrict(new Date(order.accepted_at), { addSuffix: true, locale: ru })})
                     </span>

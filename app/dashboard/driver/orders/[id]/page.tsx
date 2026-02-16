@@ -47,6 +47,29 @@ export default function OrderDetailsPage() {
     loadOrder()
   }, [loadOrder])
 
+  const handleStartComing = async () => {
+    setProcessing(true)
+    setError(null)
+
+    try {
+      const { data, error: rpcError } = await supabase.rpc('start_coming_to_pickup', {
+        order_uuid: orderId,
+      })
+
+      if (rpcError) throw rpcError
+
+      if (data === false) {
+        throw new Error('Не удалось начать движение к отправителю')
+      }
+
+      await loadOrder()
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setProcessing(false)
+    }
+  }
+
   const handlePickup = async () => {
     setProcessing(true)
     setError(null)
@@ -101,6 +124,7 @@ export default function OrderDetailsPage() {
     return <div className="text-center py-8 text-red-600">Заказ не найден</div>
   }
 
+  const canStartComing = order.status === 'courier_accepted'
   const canPickup = order.status === 'courier_coming'
   const canComplete = order.status === 'courier_delivering'
 
@@ -114,8 +138,9 @@ export default function OrderDetailsPage() {
           <h2 className="font-semibold mb-2 text-white">Статус</h2>
           <p className="text-lg text-white">
             {order.status === 'searching_courier' && 'Ищем курьера'}
-            {order.status === 'courier_coming' && 'Курьер едет к вам'}
-            {order.status === 'courier_delivering' && 'Курьер доставляет заказ'}
+            {order.status === 'courier_accepted' && 'Курьер принял заказ'}
+            {order.status === 'courier_coming' && 'Курьер едет к отправителю'}
+            {order.status === 'courier_delivering' && 'Курьер едет к получателю'}
             {order.status === 'completed' && 'Заказ завершен'}
             {order.status === 'cancelled' && 'Отменен'}
           </p>
@@ -199,6 +224,16 @@ export default function OrderDetailsPage() {
         )}
 
         <div className="flex gap-4 pt-4">
+          {canStartComing && (
+            <button
+              onClick={handleStartComing}
+              disabled={processing}
+              className="flex-1 bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50"
+            >
+              {processing ? 'Обработка...' : 'Начать движение к отправителю'}
+            </button>
+          )}
+
           {canPickup && (
             <button
               onClick={handlePickup}
