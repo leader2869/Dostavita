@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server'
 
+// Отключаем статическую генерацию, так как используем request.url
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
