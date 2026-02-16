@@ -349,6 +349,21 @@ export default function OrderDetailsPage() {
               </div>
             )}
 
+            {order.ready_at && (
+              <div>
+                <p className="text-sm text-gray-400">Заказ будет готов к</p>
+                <p className="text-white">
+                  {new Date(order.ready_at).toLocaleString('ru-RU', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </p>
+              </div>
+            )}
+
             <div>
               <p className="text-sm text-gray-400">Стоимость</p>
               <p className="text-white text-xl font-semibold">{order.final_price} BYN</p>

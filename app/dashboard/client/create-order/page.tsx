@@ -32,6 +32,7 @@ export default function CreateOrderPage() {
   const [senderPhone, setSenderPhone] = useState('')
   const [recipientPhone, setRecipientPhone] = useState('')
   const [description, setDescription] = useState('')
+  const [readyAt, setReadyAt] = useState('') // Время готовности заказа (необязательное)
   const [selectedRegion, setSelectedRegion] = useState('')
   const [itemType, setItemType] = useState<'documents' | 'parcel' | 'flowers' | 'food' | 'other'>('flowers')
   const [regionAutoDetected, setRegionAutoDetected] = useState(false)
@@ -490,6 +491,7 @@ export default function CreateOrderPage() {
           sender_phone: senderPhone.trim(),
           recipient_phone: recipientPhone || null,
           description: description,
+          ready_at: readyAt ? new Date(readyAt).toISOString() : null,
           region_id: selectedRegion,
           base_price: basePrice,
           final_price: basePrice,
@@ -787,6 +789,21 @@ export default function CreateOrderPage() {
             placeholder="+375 (XX) XXX-XX-XX"
           />
           <p className="text-xs text-gray-400 mt-1">Телефон получателя заказа (необязательно)</p>
+        </div>
+
+        <div>
+          <label htmlFor="readyAt" className="block text-sm font-medium text-gray-300 mb-1">
+            Заказ будет готов к
+          </label>
+          <input
+            type="datetime-local"
+            id="readyAt"
+            value={readyAt}
+            onChange={(e) => setReadyAt(e.target.value)}
+            className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
+            min={new Date().toISOString().slice(0, 16)}
+          />
+          <p className="text-xs text-gray-400 mt-1">Время, когда заказ будет готов (необязательно, актуально для доставки еды и т.д.)</p>
         </div>
 
         {/* Информация о маршруте */}

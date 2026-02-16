@@ -202,6 +202,18 @@ export default function OrderDetailsPage() {
           {order.description && (
             <p className="text-white"><strong className="text-white">Описание:</strong> {order.description}</p>
           )}
+          {order.ready_at && (
+            <p className="text-white mt-2">
+              <strong className="text-white">Заказ будет готов к:</strong>{' '}
+              {new Date(order.ready_at).toLocaleString('ru-RU', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              })}
+            </p>
+          )}
           <p className="text-xl font-bold mt-4 text-white">Стоимость: {order.final_price} BYN</p>
           
           {/* Временные метки изменений статусов */}

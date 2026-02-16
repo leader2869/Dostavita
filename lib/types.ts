@@ -92,6 +92,7 @@ export interface Order {
   sender_phone: string | null
   recipient_phone: string | null
   description: string | null
+  ready_at: string | null
   weight: number | null
   volume: number | null
   item_type: 'documents' | 'parcel' | 'flowers' | 'food' | 'other' | null

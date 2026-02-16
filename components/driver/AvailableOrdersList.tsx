@@ -18,6 +18,7 @@ interface Order {
   created_at: string
   cancelled_at?: string | null
   status?: string
+  ready_at?: string | null
 }
 
 interface AvailableOrdersListProps {
@@ -236,6 +237,19 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
               {order.description && (
                 <p className="text-sm text-gray-400 mt-2 italic">
                   {order.description}
+                </p>
+              )}
+              {order.ready_at && (
+                <p className="text-sm text-gray-400 mt-1">
+                  Заказ будет готов к: <span className="text-gray-300">
+                    {new Date(order.ready_at).toLocaleString('ru-RU', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </span>
                 </p>
               )}
             </div>

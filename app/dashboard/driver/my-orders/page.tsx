@@ -146,6 +146,19 @@ export default function DriverMyOrdersPage() {
                   {order.description}
                 </p>
               )}
+              {order.ready_at && (
+                <p className="text-sm text-gray-400 mt-1">
+                  Заказ будет готов к: <span className="text-gray-300">
+                    {new Date(order.ready_at).toLocaleString('ru-RU', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </span>
+                </p>
+              )}
             </div>
             <div className="text-right ml-4">
               <p className="text-xl font-bold text-white mb-2">

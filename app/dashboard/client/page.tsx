@@ -84,7 +84,7 @@ export default function ClientDashboard() {
     // Получаем активные заказы (не completed и не cancelled)
     const { data: ordersData, error } = await supabase
       .from('orders')
-      .select('id, pickup_address, delivery_address, status, executor_user_id, final_price, created_at')
+      .select('id, pickup_address, delivery_address, status, executor_user_id, final_price, created_at, ready_at, item_type, description')
       .or(`customer_id.eq.${user.id},client_id.eq.${user.id}`)
       .not('status', 'in', '(completed,cancelled)')
       .order('created_at', { ascending: false })
@@ -468,6 +468,46 @@ export default function ClientDashboard() {
                           {getStatusLabel(order.status)}
                         </span>
                       </div>
+                      {order.item_type && (
+                        <p className="text-sm text-gray-400 mt-1">
+                          Тип груза: <span className="text-gray-300">
+                            {order.item_type === 'documents' ? 'Документы' :
+                             order.item_type === 'parcel' ? 'Посылка' :
+                             order.item_type === 'flowers' ? 'Цветы' :
+                             order.item_type === 'food' ? 'Еда' :
+                             order.item_type === 'other' ? 'Другое' : 'Не указан'}
+                          </span>
+                        </p>
+                      )}
+                      <p className="text-sm text-gray-400 mt-1">
+                        Создан: <span className="text-gray-300">
+                          {new Date(order.created_at).toLocaleString('ru-RU', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </span>
+                      </p>
+                      {order.description && (
+                        <p className="text-sm text-gray-400 mt-1 italic">
+                          {order.description}
+                        </p>
+                      )}
+                      {order.ready_at && (
+                        <p className="text-sm text-gray-400 mt-1">
+                          Заказ будет готов к: <span className="text-gray-300">
+                            {new Date(order.ready_at).toLocaleString('ru-RU', {
+                              day: '2-digit',
+                              month: '2-digit',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </span>
+                        </p>
+                      )}
                     </div>
                     <div className="text-right ml-4">
                       <p className="font-semibold text-lg text-white">{order.final_price} BYN</p>

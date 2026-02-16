@@ -46,14 +46,14 @@ export default async function DriverDashboard() {
     redirect('/dashboard')
   }
 
-  // Получаем доступные заказы (все заказы со статусом "ищем курьера")
-  // Включаем заказы, которые были отменены, но сейчас снова активны (статус searching_courier)
-  const { data: availableOrders } = await supabase
-    .from('orders')
-    .select('id, order_number, pickup_address, delivery_address, final_price, item_type, description, created_at, cancelled_at')
-    .eq('status', 'searching_courier')
-    .order('created_at', { ascending: false })
-    .limit(10)
+         // Получаем доступные заказы (все заказы со статусом "ищем курьера")
+         // Включаем заказы, которые были отменены, но сейчас снова активны (статус searching_courier)
+         const { data: availableOrders } = await supabase
+           .from('orders')
+           .select('id, order_number, pickup_address, delivery_address, final_price, item_type, description, created_at, cancelled_at, ready_at')
+           .eq('status', 'searching_courier')
+           .order('created_at', { ascending: false })
+           .limit(10)
 
   // Получаем заказы, от которых водитель отказался (скрытые заказы)
   // Это заказы со статусом searching_courier, которые есть в order_rejections для этого водителя
@@ -89,11 +89,11 @@ export default async function DriverDashboard() {
     const rejectionOrderIds = directRejections.map(r => r.order_id)
     console.log('Driver Dashboard - Rejection order IDs:', rejectionOrderIds)
     
-    const { data: rejectedOrdersDirect, error: rejectedOrdersDirectError } = await supabase
-      .from('orders')
-      .select('id, order_number, status, pickup_address, delivery_address, final_price, item_type, description, created_at, cancelled_at')
-      .in('id', rejectionOrderIds)
-      .eq('status', 'searching_courier')
+           const { data: rejectedOrdersDirect, error: rejectedOrdersDirectError } = await supabase
+             .from('orders')
+             .select('id, order_number, status, pickup_address, delivery_address, final_price, item_type, description, created_at, cancelled_at, ready_at')
+             .in('id', rejectionOrderIds)
+             .eq('status', 'searching_courier')
     
     console.log('Driver Dashboard - Direct rejected orders (searching_courier):', rejectedOrdersDirect)
     console.log('Driver Dashboard - Direct rejected orders count:', rejectedOrdersDirect?.length || 0)
@@ -109,11 +109,11 @@ export default async function DriverDashboard() {
   if ((!cancelledOrders || cancelledOrders.length === 0) && directRejections && directRejections.length > 0) {
     console.log('Driver Dashboard - RPC функция не вернула данные, используем fallback')
     const rejectionOrderIds = directRejections.map(r => r.order_id)
-    const { data: fallbackOrders, error: fallbackError } = await supabase
-      .from('orders')
-      .select('id, order_number, pickup_address, delivery_address, final_price, item_type, description, created_at, cancelled_at, status')
-      .in('id', rejectionOrderIds)
-      .eq('status', 'searching_courier')
+           const { data: fallbackOrders, error: fallbackError } = await supabase
+             .from('orders')
+             .select('id, order_number, pickup_address, delivery_address, final_price, item_type, description, created_at, cancelled_at, status, ready_at')
+             .in('id', rejectionOrderIds)
+             .eq('status', 'searching_courier')
     
     if (!fallbackError && fallbackOrders) {
       console.log('Driver Dashboard - Fallback orders found:', fallbackOrders.length)
@@ -178,7 +178,7 @@ export default async function DriverDashboard() {
   // НЕ включаем searching_courier - это статус для доступных заказов, а не для выполняемых
          const { data: myOrders, error: myOrdersError } = await supabase
            .from('orders')
-           .select('id, order_number, pickup_address, delivery_address, final_price, item_type, description, created_at, cancelled_at, status, customer_id, client_id, executor_user_id, sender_phone, recipient_phone, pickup_coordinates, delivery_coordinates')
+           .select('id, order_number, pickup_address, delivery_address, final_price, item_type, description, created_at, cancelled_at, status, customer_id, client_id, executor_user_id, sender_phone, recipient_phone, pickup_coordinates, delivery_coordinates, ready_at')
            .eq('executor_user_id', user.id)
            .in('status', ['courier_accepted', 'courier_coming', 'courier_delivering'])
            .order('created_at', { ascending: false })
@@ -229,11 +229,21 @@ export default async function DriverDashboard() {
                           б) {formatAddressForOrder(order.delivery_address)}
                         </p>
                         <p className="text-sm text-gray-400 mt-1">
-                          Статус: {order.status === 'courier_accepted' ? 'Курьер принял заказ' :
-                                   order.status === 'courier_coming' ? 'Курьер едет к отправителю' :
-                                   order.status === 'courier_delivering' ? 'Курьер едет к получателю' :
-                                   order.status === 'completed' ? 'Заказ завершен' : order.status}
+                          Статус: {ORDER_STATUS_LABELS[order.status as keyof typeof ORDER_STATUS_LABELS] || order.status}
                         </p>
+                        {order.ready_at && (
+                          <p className="text-sm text-gray-400 mt-1">
+                            Заказ будет готов к: <span className="text-gray-300">
+                              {new Date(order.ready_at).toLocaleString('ru-RU', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </span>
+                          </p>
+                        )}
                       </div>
                       <div className="text-right">
                         <p className="font-semibold text-white">{order.final_price} BYN</p>
