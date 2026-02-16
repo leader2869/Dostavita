@@ -91,7 +91,23 @@ export default function OrderDetailsPage() {
 
       await loadOrder()
       // Показываем модальное окно оплаты после того, как заказ забран
-      setShowPaymentModal(true)
+      // Проверяем, что оплата еще не обработана
+      const { data: updatedOrder } = await supabase
+        .from('orders')
+        .select('is_paid')
+        .eq('id', orderId)
+        .single()
+      
+      console.log('=== After pickup_order ===')
+      console.log('showPaymentModal will be set to:', updatedOrder?.is_paid === null)
+      console.log('is_paid value:', updatedOrder?.is_paid)
+      
+      if (updatedOrder && updatedOrder.is_paid === null) {
+        setShowPaymentModal(true)
+        console.log('✅ Payment modal opened')
+      } else {
+        console.log('❌ Payment modal NOT opened - is_paid is not null')
+      }
     } catch (err: any) {
       setError(err.message)
     } finally {
@@ -116,7 +132,23 @@ export default function OrderDetailsPage() {
 
       await loadOrder()
       // Показываем модальное окно оплаты после завершения заказа
-      setShowPaymentModal(true)
+      // Проверяем, что оплата еще не обработана
+      const { data: updatedOrder } = await supabase
+        .from('orders')
+        .select('is_paid')
+        .eq('id', orderId)
+        .single()
+      
+      console.log('=== After complete_order ===')
+      console.log('showPaymentModal will be set to:', updatedOrder?.is_paid === null)
+      console.log('is_paid value:', updatedOrder?.is_paid)
+      
+      if (updatedOrder && updatedOrder.is_paid === null) {
+        setShowPaymentModal(true)
+        console.log('✅ Payment modal opened')
+      } else {
+        console.log('❌ Payment modal NOT opened - is_paid is not null')
+      }
     } catch (err: any) {
       setError(err.message)
     } finally {
