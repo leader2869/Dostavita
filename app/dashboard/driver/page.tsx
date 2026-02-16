@@ -7,7 +7,6 @@ import { DriverLocationTracker } from '@/components/driver/DriverLocationTracker
 import { DriverPushNotifications } from '@/components/driver/DriverPushNotifications'
 import { DriverBottomNavigation } from '@/components/driver/DriverBottomNavigation'
 import { OrderActions } from '@/components/driver/OrderActions'
-import { OrderChatBadge } from '@/components/orders/OrderChatBadge'
 import { formatAddressForOrder } from '@/lib/utils/formatAddress'
 
 // Отключаем кеширование, чтобы данные всегда были актуальными
@@ -222,10 +221,7 @@ export default async function DriverDashboard() {
                   >
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <p className="font-medium text-white">Заказ №{order.order_number || order.id.slice(0, 8)}</p>
-                          <OrderChatBadge orderId={order.id} userId={user.id} />
-                        </div>
+                        <p className="font-medium text-white">Заказ №{order.order_number || order.id.slice(0, 8)}</p>
                         <p className="text-sm text-gray-300 mt-1">
                           а) {formatAddressForOrder(order.pickup_address)}
                         </p>

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { OrderChat } from '@/components/chat/OrderChat'
+import { useOrderUnreadMessagesCount } from '@/hooks/useOrderUnreadMessagesCount'
 
 interface OrderActionsProps {
   order: {
@@ -26,6 +27,12 @@ export function OrderActions({ order, onStopPropagation }: OrderActionsProps) {
   const [driverLocation, setDriverLocation] = useState<{ lat: number; lon: number } | null>(null)
   const [loadingLocation, setLoadingLocation] = useState(false)
   const supabase = createClient()
+  
+  // Получаем количество непрочитанных сообщений для этого заказа
+  const { count: unreadMessagesCount } = useOrderUnreadMessagesCount(
+    order.id,
+    currentUserId
+  )
 
   // Получаем текущего пользователя
   useEffect(() => {
@@ -349,7 +356,7 @@ export function OrderActions({ order, onStopPropagation }: OrderActionsProps) {
         {canShowChat && (
           <button
             onClick={handleChatClick}
-            className="flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition"
+            className="relative flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition"
             title="Чат"
           >
             <svg
@@ -365,6 +372,13 @@ export function OrderActions({ order, onStopPropagation }: OrderActionsProps) {
                 d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
               />
             </svg>
+            {unreadMessagesCount > 0 && (
+              <span className={`absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center ${
+                unreadMessagesCount > 9 ? 'px-1.5 min-w-[1.5rem]' : 'w-5 h-5'
+              }`}>
+                {unreadMessagesCount > 10 ? unreadMessagesCount : unreadMessagesCount >= 10 ? 10 : unreadMessagesCount}
+              </span>
+            )}
           </button>
         )}
       </div>
