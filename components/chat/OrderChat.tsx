@@ -26,6 +26,7 @@ export function OrderChat({ orderId, currentUserId, onClose }: OrderChatProps) {
   const [sending, setSending] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const [senderNames, setSenderNames] = useState<Record<string, string>>({})
+  const [hasMarkedAsRead, setHasMarkedAsRead] = useState(false)
 
   // Прокрутка к последнему сообщению
   const scrollToBottom = () => {
@@ -137,6 +138,23 @@ export function OrderChat({ orderId, currentUserId, onClose }: OrderChatProps) {
               return [...prev, newMessage]
             })
 
+            // Если модальное окно открыто и сообщение от другого пользователя, отмечаем его как прочитанное
+            if (newMessage.sender_id !== currentUserId && newMessage.read_at === null) {
+              const { error } = await supabase
+                .from('order_messages')
+                .update({ read_at: new Date().toISOString() })
+                .eq('id', newMessage.id)
+
+              if (!error) {
+                // Обновляем локальное состояние
+                setMessages(prev => prev.map(m => 
+                  m.id === newMessage.id 
+                    ? { ...m, read_at: new Date().toISOString() }
+                    : m
+                ))
+              }
+            }
+
             // Загружаем имя отправителя, если его еще нет
             if (!senderNames[newMessage.sender_id]) {
               const { data: profile } = await supabase
@@ -164,6 +182,54 @@ export function OrderChat({ orderId, currentUserId, onClose }: OrderChatProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orderId])
 
+  // Отмечаем все непрочитанные сообщения как прочитанные при открытии модального окна
+  useEffect(() => {
+    if (hasMarkedAsRead || loading || messages.length === 0) return
+
+    const markMessagesAsRead = async () => {
+      try {
+        // Находим все непрочитанные сообщения от других пользователей
+        const unreadMessages = messages.filter(
+          m => m.sender_id !== currentUserId && m.read_at === null
+        )
+
+        if (unreadMessages.length === 0) {
+          setHasMarkedAsRead(true)
+          return
+        }
+
+        // Отмечаем их как прочитанные
+        const messageIds = unreadMessages.map(m => m.id)
+        const { error } = await supabase
+          .from('order_messages')
+          .update({ read_at: new Date().toISOString() })
+          .in('id', messageIds)
+
+        if (error) {
+          console.error('Ошибка отметки сообщений как прочитанных:', error)
+        } else {
+          // Обновляем локальное состояние
+          setMessages(prev => prev.map(m => 
+            messageIds.includes(m.id) 
+              ? { ...m, read_at: new Date().toISOString() }
+              : m
+          ))
+          setHasMarkedAsRead(true)
+        }
+      } catch (err) {
+        console.error('Ошибка при отметке сообщений как прочитанных:', err)
+      }
+    }
+
+    // Небольшая задержка, чтобы пользователь успел увидеть сообщения
+    const timer = setTimeout(() => {
+      markMessagesAsRead()
+    }, 500)
+
+    return () => clearTimeout(timer)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages, currentUserId, loading, hasMarkedAsRead])
+
   // Автоматическое обновление сообщений каждые 3 секунды, пока модальное окно открыто
   useEffect(() => {
     // Загружаем сообщения сразу при открытии
@@ -180,6 +246,13 @@ export function OrderChat({ orderId, currentUserId, onClose }: OrderChatProps) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orderId])
+
+  // Сбрасываем флаг при закрытии модального окна
+  useEffect(() => {
+    return () => {
+      setHasMarkedAsRead(false)
+    }
+  }, [])
 
   const handleSend = async () => {
     if (!newMessage.trim() || sending) return

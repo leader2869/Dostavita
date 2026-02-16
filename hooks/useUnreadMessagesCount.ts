@@ -46,12 +46,13 @@ export function useUnreadMessagesCount(userId: string | null) {
 
         const orderIds = orders.map(o => o.id)
 
-        // Получаем все сообщения для активных заказов, отсортированные по времени
+        // Получаем только непрочитанные сообщения от других пользователей в активных заказах
         const { data: messages, error: messagesError } = await supabase
           .from('order_messages')
-          .select('id, order_id, sender_id, created_at')
+          .select('id')
           .in('order_id', orderIds)
-          .order('created_at', { ascending: true })
+          .neq('sender_id', userId) // Только сообщения не от текущего пользователя
+          .is('read_at', null) // Только непрочитанные сообщения
 
         if (messagesError) {
           console.error('Ошибка загрузки сообщений:', messagesError)
@@ -62,52 +63,7 @@ export function useUnreadMessagesCount(userId: string | null) {
           return
         }
 
-        if (!messages || messages.length === 0) {
-          if (isMounted) {
-            setCount(0)
-            setLoading(false)
-          }
-          return
-        }
-
-        // Группируем сообщения по заказам
-        const messagesByOrder: Record<string, typeof messages> = {}
-        messages.forEach(msg => {
-          if (!messagesByOrder[msg.order_id]) {
-            messagesByOrder[msg.order_id] = []
-          }
-          messagesByOrder[msg.order_id].push(msg)
-        })
-
-        // Для каждого заказа считаем непрочитанные сообщения
-        // Непрочитанное = сообщение от другого пользователя, после которого нет ответа от текущего пользователя
-        let unreadCount = 0
-
-        Object.keys(messagesByOrder).forEach(orderId => {
-          const orderMessages = messagesByOrder[orderId]
-          
-          // Находим последнее сообщение от текущего пользователя
-          let lastUserMessageIndex = -1
-          for (let i = orderMessages.length - 1; i >= 0; i--) {
-            if (orderMessages[i].sender_id === userId) {
-              lastUserMessageIndex = i
-              break
-            }
-          }
-
-          // Считаем сообщения от других пользователей, которые пришли после последнего сообщения пользователя
-          if (lastUserMessageIndex === -1) {
-            // Если пользователь еще не писал в этом заказе, все сообщения от других - непрочитанные
-            unreadCount += orderMessages.filter(m => m.sender_id !== userId).length
-          } else {
-            // Считаем только сообщения после последнего сообщения пользователя
-            for (let i = lastUserMessageIndex + 1; i < orderMessages.length; i++) {
-              if (orderMessages[i].sender_id !== userId) {
-                unreadCount++
-              }
-            }
-          }
-        })
+        const unreadCount = messages?.length || 0
 
         if (isMounted) {
           setCount(unreadCount)
