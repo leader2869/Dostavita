@@ -7,6 +7,7 @@ interface OrderActionsProps {
   order: {
     id: string
     customer_id: string
+    sender_phone: string | null
     recipient_phone: string | null
     pickup_coordinates: any
     delivery_coordinates: any
@@ -17,8 +18,6 @@ interface OrderActionsProps {
 export function OrderActions({ order, onStopPropagation }: OrderActionsProps) {
   const [showPhoneMenu, setShowPhoneMenu] = useState(false)
   const [showNavMenu, setShowNavMenu] = useState(false)
-  const [customerPhone, setCustomerPhone] = useState<string | null>(null)
-  const [loadingPhone, setLoadingPhone] = useState(false)
   const [driverLocation, setDriverLocation] = useState<{ lat: number; lon: number } | null>(null)
   const [loadingLocation, setLoadingLocation] = useState(false)
   const supabase = createClient()
@@ -96,32 +95,9 @@ export function OrderActions({ order, onStopPropagation }: OrderActionsProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []) // supabase - стабильный объект, не нужно включать в зависимости
 
-  // Загружаем телефон отправителя при первом открытии меню
-  const loadCustomerPhone = async () => {
-    if (customerPhone !== null) return // Уже загружен
-    
-    setLoadingPhone(true)
-    try {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('phone')
-        .eq('id', order.customer_id)
-        .single()
-      
-      if (profile) {
-        setCustomerPhone(profile.phone)
-      }
-    } catch (error) {
-      console.error('Ошибка загрузки телефона отправителя:', error)
-    } finally {
-      setLoadingPhone(false)
-    }
-  }
-
   const handlePhoneClick = (e: React.MouseEvent) => {
     e.stopPropagation()
     if (onStopPropagation) onStopPropagation(e)
-    loadCustomerPhone()
     setShowPhoneMenu(true)
   }
 
