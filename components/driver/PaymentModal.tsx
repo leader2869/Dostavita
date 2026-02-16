@@ -19,16 +19,16 @@ export function PaymentModal({ order, isOpen, onClose, onSuccess }: PaymentModal
   console.log('=== PaymentModal render ===')
   console.log('isOpen:', isOpen)
   console.log('order.is_paid:', order.is_paid)
-  console.log('Will show modal?', isOpen && order.is_paid === null)
+  console.log('Will show modal?', isOpen && (order.is_paid === false || order.is_paid === null))
 
   if (!isOpen) {
     console.log('❌ Modal not shown - isOpen is false')
     return null
   }
   
-  // Не показываем модальное окно, если оплата уже обработана
-  if (order.is_paid !== null) {
-    console.log('❌ Modal not shown - is_paid is not null:', order.is_paid)
+  // Не показываем модальное окно, если оплата уже обработана (is_paid === true)
+  if (order.is_paid === true) {
+    console.log('❌ Modal not shown - is_paid is already true (payment processed)')
     return null
   }
   

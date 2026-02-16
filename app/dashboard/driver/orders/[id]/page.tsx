@@ -91,22 +91,33 @@ export default function OrderDetailsPage() {
 
       await loadOrder()
       // Показываем модальное окно оплаты после того, как заказ забран
-      // Проверяем, что оплата еще не обработана
-      const { data: updatedOrder } = await supabase
+      // Загружаем актуальные данные заказа для проверки is_paid
+      const { data: orderData, error: orderError } = await supabase
         .from('orders')
         .select('is_paid')
         .eq('id', orderId)
         .single()
       
       console.log('=== After pickup_order ===')
-      console.log('showPaymentModal will be set to:', updatedOrder?.is_paid === null)
-      console.log('is_paid value:', updatedOrder?.is_paid)
+      console.log('orderData:', orderData)
+      console.log('orderError:', orderError)
+      console.log('is_paid value:', orderData?.is_paid)
+      console.log('is_paid type:', typeof orderData?.is_paid)
+      console.log('is_paid === false:', orderData?.is_paid === false)
+      console.log('is_paid === null:', orderData?.is_paid === null)
       
-      if (updatedOrder && updatedOrder.is_paid === null) {
+      // Модальное окно открывается, если оплата еще не обработана (false или null)
+      const shouldOpen = orderData && (orderData.is_paid === false || orderData.is_paid === null)
+      console.log('shouldOpen:', shouldOpen)
+      
+      if (shouldOpen) {
+        console.log('✅ Opening payment modal')
         setShowPaymentModal(true)
-        console.log('✅ Payment modal opened')
       } else {
-        console.log('❌ Payment modal NOT opened - is_paid is not null')
+        console.log('❌ Payment modal NOT opened')
+        console.log('  - orderData exists:', !!orderData)
+        console.log('  - is_paid value:', orderData?.is_paid)
+        console.log('  - is_paid type:', typeof orderData?.is_paid)
       }
     } catch (err: any) {
       setError(err.message)
@@ -132,22 +143,33 @@ export default function OrderDetailsPage() {
 
       await loadOrder()
       // Показываем модальное окно оплаты после завершения заказа
-      // Проверяем, что оплата еще не обработана
-      const { data: updatedOrder } = await supabase
+      // Загружаем актуальные данные заказа для проверки is_paid
+      const { data: orderData, error: orderError } = await supabase
         .from('orders')
         .select('is_paid')
         .eq('id', orderId)
         .single()
       
       console.log('=== After complete_order ===')
-      console.log('showPaymentModal will be set to:', updatedOrder?.is_paid === null)
-      console.log('is_paid value:', updatedOrder?.is_paid)
+      console.log('orderData:', orderData)
+      console.log('orderError:', orderError)
+      console.log('is_paid value:', orderData?.is_paid)
+      console.log('is_paid type:', typeof orderData?.is_paid)
+      console.log('is_paid === false:', orderData?.is_paid === false)
+      console.log('is_paid === null:', orderData?.is_paid === null)
       
-      if (updatedOrder && updatedOrder.is_paid === null) {
+      // Модальное окно открывается, если оплата еще не обработана (false или null)
+      const shouldOpen = orderData && (orderData.is_paid === false || orderData.is_paid === null)
+      console.log('shouldOpen:', shouldOpen)
+      
+      if (shouldOpen) {
+        console.log('✅ Opening payment modal')
         setShowPaymentModal(true)
-        console.log('✅ Payment modal opened')
       } else {
-        console.log('❌ Payment modal NOT opened - is_paid is not null')
+        console.log('❌ Payment modal NOT opened')
+        console.log('  - orderData exists:', !!orderData)
+        console.log('  - is_paid value:', orderData?.is_paid)
+        console.log('  - is_paid type:', typeof orderData?.is_paid)
       }
     } catch (err: any) {
       setError(err.message)

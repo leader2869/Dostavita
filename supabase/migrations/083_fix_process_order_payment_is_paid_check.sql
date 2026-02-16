@@ -1,49 +1,8 @@
--- Миграция 081: Обновление функций заказов и добавление функции обработки оплаты
--- Убираем автоматическое начисление денег из complete_order
--- Добавляем функцию process_order_payment для обработки оплаты
+-- Миграция 083: Исправление проверки is_paid в функции process_order_payment
+-- Проблема: функция проверяла только is_paid IS NULL, но по умолчанию is_paid = false
+-- Решение: изменить проверку, чтобы она работала и с false, и с null
 
--- Обновляем функцию complete_order - убираем автоматическое начисление денег
-CREATE OR REPLACE FUNCTION public.complete_order(order_uuid UUID)
-RETURNS BOOLEAN AS $$
-DECLARE
-  order_record RECORD;
-  driver_user_id UUID;
-BEGIN
-  -- Получаем заказ
-  SELECT * INTO order_record
-  FROM public.orders
-  WHERE id = order_uuid AND status = 'courier_delivering';
-  
-  IF NOT FOUND THEN
-    RETURN FALSE;
-  END IF;
-  
-  -- Получаем user_id водителя
-  driver_user_id := order_record.executor_user_id;
-  
-  IF driver_user_id IS NULL THEN
-    RETURN FALSE;
-  END IF;
-  
-  -- Обновляем заказ (БЕЗ автоматического начисления денег)
-  UPDATE public.orders
-  SET 
-    status = 'completed',
-    completed_at = NOW()
-  WHERE id = order_uuid;
-  
-  -- Делаем водителя снова доступным
-  UPDATE public.drivers
-  SET 
-    is_available = true,
-    total_orders = total_orders + 1
-  WHERE user_id = driver_user_id;
-  
-  RETURN TRUE;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-
--- Функция для обработки оплаты заказа
+-- Обновляем функцию process_order_payment
 CREATE OR REPLACE FUNCTION public.process_order_payment(
   order_uuid UUID,
   is_paid BOOLEAN
@@ -142,5 +101,5 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
-COMMENT ON FUNCTION public.process_order_payment(UUID, BOOLEAN) IS 'Обрабатывает оплату заказа: начисляет деньги водителю или создает дебиторку';
+COMMENT ON FUNCTION public.process_order_payment(UUID, BOOLEAN) IS 'Обрабатывает оплату заказа: начисляет деньги водителю или создает дебиторку. Принимает заказы с is_paid = false или is_paid IS NULL';
 
