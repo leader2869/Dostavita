@@ -400,9 +400,11 @@ export default function ClientDashboard() {
         <div className="grid grid-cols-2 gap-4">
           <a
             href="/dashboard/client/create-order"
-            className="bg-green-600 text-white p-4 rounded-lg text-center hover:bg-green-700 transition"
+            className="bg-green-600 text-white p-4 rounded-lg text-center hover:bg-green-700 transition flex items-center justify-center"
           >
-            Создать заказ
+            <span className="leading-tight">
+              Создать<br />заказ
+            </span>
           </a>
           <button
             onClick={handleCallDriver}
