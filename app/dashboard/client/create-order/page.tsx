@@ -29,6 +29,7 @@ export default function CreateOrderPage() {
   const [deliveryEntrance, setDeliveryEntrance] = useState('')
   const [deliveryFloor, setDeliveryFloor] = useState('')
   const [deliveryApartment, setDeliveryApartment] = useState('')
+  const [senderPhone, setSenderPhone] = useState('')
   const [recipientPhone, setRecipientPhone] = useState('')
   const [description, setDescription] = useState('')
   const [selectedRegion, setSelectedRegion] = useState('')
@@ -313,6 +314,30 @@ export default function CreateOrderPage() {
     }
   }, [pickupCoordinates, deliveryCoordinates, calculateRoute])
 
+  // Загружаем телефон отправителя из профиля
+  useEffect(() => {
+    const loadSenderPhone = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('phone')
+            .eq('id', user.id)
+            .single()
+          
+          if (profile?.phone) {
+            setSenderPhone(profile.phone)
+          }
+        }
+      } catch (error) {
+        console.error('Ошибка загрузки телефона отправителя:', error)
+      }
+    }
+
+    loadSenderPhone()
+  }, [supabase])
+
   useEffect(() => {
     loadRegions()
     loadSavedAddresses()
@@ -401,6 +426,13 @@ export default function CreateOrderPage() {
         return
       }
 
+      // Валидация: проверяем, что телефон отправителя указан
+      if (!senderPhone || senderPhone.trim() === '') {
+        setError('Пожалуйста, укажите телефон отправителя')
+        setLoading(false)
+        return
+      }
+
       // Получаем текущего пользователя
       const { data: { user } } = await supabase.auth.getUser()
       
@@ -441,6 +473,7 @@ export default function CreateOrderPage() {
           delivery_entrance: deliveryEntrance || null,
           delivery_floor: deliveryFloor || null,
           delivery_apartment: deliveryApartment || null,
+          sender_phone: senderPhone.trim(),
           recipient_phone: recipientPhone || null,
           description: description,
           region_id: selectedRegion,
@@ -709,6 +742,22 @@ export default function CreateOrderPage() {
               />
             </div>
           </div>
+        </div>
+
+        <div>
+          <label htmlFor="senderPhone" className="block text-sm font-medium text-gray-300 mb-1">
+            Телефон отправителя <span className="text-red-400">*</span>
+          </label>
+          <input
+            type="tel"
+            id="senderPhone"
+            value={senderPhone}
+            onChange={(e) => setSenderPhone(e.target.value)}
+            className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
+            placeholder="+375 (XX) XXX-XX-XX"
+            required
+          />
+          <p className="text-xs text-gray-400 mt-1">Номер телефона отправителя (обязательно)</p>
         </div>
 
         <div>
