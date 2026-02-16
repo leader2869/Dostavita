@@ -773,7 +773,7 @@ export default function CreateOrderPage() {
 
         <div>
           <label htmlFor="recipientPhone" className="block text-sm font-medium text-gray-300 mb-1">
-            Номер получателя
+            Телефон получателя
           </label>
           <input
             type="tel"
@@ -783,7 +783,7 @@ export default function CreateOrderPage() {
             className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
             placeholder="+375 (XX) XXX-XX-XX"
           />
-          <p className="text-xs text-gray-400 mt-1">Номер телефона получателя заказа (необязательно)</p>
+          <p className="text-xs text-gray-400 mt-1">Телефон получателя заказа (необязательно)</p>
         </div>
 
         {/* Информация о маршруте */}
