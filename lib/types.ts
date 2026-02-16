@@ -88,7 +88,7 @@ export interface Order {
   delivery_entrance: string | null
   delivery_floor: string | null
   delivery_apartment: string | null
-  recipient_phone: string
+  recipient_phone: string | null
   description: string | null
   weight: number | null
   volume: number | null

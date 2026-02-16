@@ -209,7 +209,7 @@ export default function CreateOrderPage() {
           pickup_coordinates: pickupPoint,
           delivery_address: deliveryAddress,
           delivery_coordinates: deliveryPoint,
-          recipient_phone: recipientPhone,
+          recipient_phone: recipientPhone || null,
           description: description,
           region_id: selectedRegion,
           base_price: selectedRegionData.base_price,
@@ -297,17 +297,16 @@ export default function CreateOrderPage() {
 
         <div>
           <label className="block text-sm font-medium text-gray-300 mb-1">
-            Номер получателя *
+            Номер получателя
           </label>
           <input
             type="tel"
             value={recipientPhone}
             onChange={(e) => setRecipientPhone(e.target.value)}
-            required
             className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
             placeholder="+375 (XX) XXX-XX-XX"
           />
-          <p className="text-xs text-gray-400 mt-1">Номер телефона получателя заказа</p>
+          <p className="text-xs text-gray-400 mt-1">Номер телефона получателя заказа (необязательно)</p>
         </div>
 
         <div>
