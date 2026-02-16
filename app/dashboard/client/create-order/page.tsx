@@ -29,6 +29,7 @@ export default function CreateOrderPage() {
   const [deliveryEntrance, setDeliveryEntrance] = useState('')
   const [deliveryFloor, setDeliveryFloor] = useState('')
   const [deliveryApartment, setDeliveryApartment] = useState('')
+  const [recipientPhone, setRecipientPhone] = useState('')
   const [description, setDescription] = useState('')
   const [selectedRegion, setSelectedRegion] = useState('')
   const [itemType, setItemType] = useState<'documents' | 'parcel' | 'flowers' | 'food' | 'other'>('flowers')
@@ -440,6 +441,7 @@ export default function CreateOrderPage() {
           delivery_entrance: deliveryEntrance || null,
           delivery_floor: deliveryFloor || null,
           delivery_apartment: deliveryApartment || null,
+          recipient_phone: recipientPhone,
           description: description,
           region_id: selectedRegion,
           base_price: basePrice,
@@ -707,6 +709,22 @@ export default function CreateOrderPage() {
               />
             </div>
           </div>
+        </div>
+
+        <div>
+          <label htmlFor="recipientPhone" className="block text-sm font-medium text-gray-300 mb-1">
+            Номер получателя *
+          </label>
+          <input
+            type="tel"
+            id="recipientPhone"
+            value={recipientPhone}
+            onChange={(e) => setRecipientPhone(e.target.value)}
+            required
+            className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
+            placeholder="+375 (XX) XXX-XX-XX"
+          />
+          <p className="text-xs text-gray-400 mt-1">Номер телефона получателя заказа</p>
         </div>
 
         {/* Информация о маршруте */}

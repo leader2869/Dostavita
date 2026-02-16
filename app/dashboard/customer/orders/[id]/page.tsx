@@ -144,6 +144,17 @@ export default async function CustomerOrderDetailsPage({ params }: { params: { i
               <p className="text-white">{formatAddressForOrder(order.delivery_address)}</p>
             </div>
 
+            {order.recipient_phone && (
+              <div>
+                <p className="text-sm text-gray-400">Номер получателя</p>
+                <p className="text-white">
+                  <a href={`tel:${order.recipient_phone}`} className="text-green-500 hover:text-green-400 font-medium">
+                    {order.recipient_phone}
+                  </a>
+                </p>
+              </div>
+            )}
+
             <div>
               <p className="text-sm text-gray-400">Тип груза</p>
               <p className="text-white">{getItemTypeLabel(order.item_type)}</p>

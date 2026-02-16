@@ -19,6 +19,7 @@ export default function CreateOrderPage() {
   const [deliveryAddress, setDeliveryAddress] = useState('')
   const [pickupCoordinates, setPickupCoordinates] = useState<{ lat: number; lon: number } | undefined>()
   const [deliveryCoordinates, setDeliveryCoordinates] = useState<{ lat: number; lon: number } | undefined>()
+  const [recipientPhone, setRecipientPhone] = useState('')
   const [description, setDescription] = useState('')
   const [selectedRegion, setSelectedRegion] = useState('')
   const [itemType, setItemType] = useState<'documents' | 'parcel' | 'flowers' | 'food'>('parcel')
