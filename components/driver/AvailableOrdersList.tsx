@@ -191,7 +191,11 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
 
   // Функция для отображения карточки заказа
   const renderOrderCard = (order: Order, isHidden: boolean = false) => (
-    <div key={order.id} className={`border rounded-lg p-4 ${isHidden ? 'border-yellow-600 bg-yellow-900/20' : 'border-gray-700'}`}>
+    <div
+      key={order.id}
+      className={`border rounded-lg p-4 cursor-pointer hover:bg-gray-700 transition ${isHidden ? 'border-yellow-600 bg-yellow-900/20' : 'border-gray-700'}`}
+      onClick={() => window.location.href = `/dashboard/driver/accept-order/${order.id}`}
+    >
           <div className="flex justify-between items-start mb-3">
             <div className="flex-1">
               <div className="flex items-center gap-2">
@@ -241,6 +245,7 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
             {isHidden ? (
               <a
                 href={`/dashboard/driver/accept-order/${order.id}`}
+                onClick={(e) => e.stopPropagation()}
                 className="flex-1 text-center bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700 transition"
               >
                 Принять заказ
@@ -249,12 +254,16 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
               <>
                 <a
                   href={`/dashboard/driver/accept-order/${order.id}`}
+                  onClick={(e) => e.stopPropagation()}
                   className="flex-1 text-center bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700 transition"
                 >
                   Принять заказ
                 </a>
                 <button
-                  onClick={() => handleReject(order.id)}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleReject(order.id)
+                  }}
                   className="flex-1 bg-red-600 text-white px-4 py-2 rounded text-sm hover:bg-red-700 transition"
                 >
                   Скрыть заказ

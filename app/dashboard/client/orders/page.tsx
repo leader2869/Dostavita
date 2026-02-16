@@ -105,7 +105,8 @@ export default function ClientOrdersPage() {
     return (
       <div
         key={order.id}
-        className="border border-gray-700 bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition"
+        className="border border-gray-700 bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition cursor-pointer"
+        onClick={() => router.push(`/dashboard/client/orders/${order.id}`)}
       >
         <div className="flex justify-between items-start">
           <div className="flex-1">

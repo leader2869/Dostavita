@@ -84,7 +84,11 @@ export default async function CustomerOrdersPage() {
             </h2>
             <div className="space-y-4">
               {activeOrders.map((order: any) => (
-                <div key={order.id} className="border border-gray-700 rounded-lg p-4 bg-gray-700 hover:bg-gray-600 transition">
+                <a
+                  key={order.id}
+                  href={`/dashboard/customer/orders/${order.id}`}
+                  className="block border border-gray-700 rounded-lg p-4 bg-gray-700 hover:bg-gray-600 transition cursor-pointer"
+                >
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
                       <p className="font-medium text-white">Заказ №{order.order_number || order.id.slice(0, 8)}</p>
@@ -120,7 +124,7 @@ export default async function CustomerOrdersPage() {
                       </p>
                     </div>
                   </div>
-                </div>
+                </a>
               ))}
             </div>
           </div>
@@ -134,7 +138,11 @@ export default async function CustomerOrdersPage() {
             </h2>
             <div className="space-y-4">
               {completedOrders.map((order: any) => (
-                <div key={order.id} className="border border-gray-700 rounded-lg p-4 bg-gray-700 hover:bg-gray-600 transition">
+                <a
+                  key={order.id}
+                  href={`/dashboard/customer/orders/${order.id}`}
+                  className="block border border-gray-700 rounded-lg p-4 bg-gray-700 hover:bg-gray-600 transition cursor-pointer"
+                >
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
                       <p className="font-medium text-white">Заказ №{order.order_number || order.id.slice(0, 8)}</p>
@@ -172,7 +180,7 @@ export default async function CustomerOrdersPage() {
                       </p>
                     </div>
                   </div>
-                </div>
+                </a>
               ))}
             </div>
           </div>

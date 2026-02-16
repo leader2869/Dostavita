@@ -209,7 +209,11 @@ export default async function DriverDashboard() {
           {myOrders && myOrders.length > 0 ? (
             <div className="space-y-4">
               {myOrders.map((order: any) => (
-                <div key={order.id} className="border rounded-lg p-4">
+                <div
+                  key={order.id}
+                  className="border rounded-lg p-4 cursor-pointer hover:bg-gray-700 transition"
+                  onClick={() => window.location.href = `/dashboard/driver/orders/${order.id}`}
+                >
                   <div className="flex justify-between items-start">
                     <div>
                       <p className="font-medium text-white">Заказ №{order.order_number || order.id.slice(0, 8)}</p>
