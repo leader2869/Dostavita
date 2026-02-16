@@ -6,3 +6,4 @@ CREATE POLICY "Drivers can insert own profile"
   WITH CHECK (user_id = auth.uid());
 
 
+

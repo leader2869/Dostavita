@@ -36,8 +36,13 @@ export function formatReadyTime(readyAt: string): {
       return 'минут'
     }
     
-    // Если последняя цифра 1, 2, 3, 4 → минуты
-    if (lastDigit >= 1 && lastDigit <= 4) {
+    // Если последняя цифра 1 (но не 11) → минуту
+    if (lastDigit === 1) {
+      return 'минуту'
+    }
+    
+    // Если последняя цифра 2, 3, 4 (но не 12, 13, 14) → минуты
+    if (lastDigit >= 2 && lastDigit <= 4) {
       return 'минуты'
     }
     

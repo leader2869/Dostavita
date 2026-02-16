@@ -90,16 +90,8 @@ export default function OrderDetailsPage() {
       }
 
       await loadOrder()
-      // Показываем модальное окно оплаты после того, как заказ забран (только если оплата еще не обработана)
-      const updatedOrder = await supabase
-        .from('orders')
-        .select('is_paid')
-        .eq('id', orderId)
-        .single()
-      
-      if (updatedOrder.data && updatedOrder.data.is_paid === null) {
-        setShowPaymentModal(true)
-      }
+      // Показываем модальное окно оплаты после того, как заказ забран
+      setShowPaymentModal(true)
     } catch (err: any) {
       setError(err.message)
     } finally {
@@ -123,18 +115,11 @@ export default function OrderDetailsPage() {
       }
 
       await loadOrder()
-      // Показываем модальное окно оплаты после завершения заказа (только если оплата еще не обработана)
-      const updatedOrder = await supabase
-        .from('orders')
-        .select('is_paid')
-        .eq('id', orderId)
-        .single()
-      
-      if (updatedOrder.data && updatedOrder.data.is_paid === null) {
-        setShowPaymentModal(true)
-      }
+      // Показываем модальное окно оплаты после завершения заказа
+      setShowPaymentModal(true)
     } catch (err: any) {
       setError(err.message)
+    } finally {
       setProcessing(false)
     }
   }

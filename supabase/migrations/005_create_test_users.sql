@@ -41,3 +41,4 @@ $$ LANGUAGE plpgsql;
 -- Или используйте Supabase Auth API для создания пользователей программно
 
 
+

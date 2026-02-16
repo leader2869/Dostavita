@@ -1,7 +1,11 @@
 -- Миграция 077: Добавление поля ready_at в функцию get_organization_orders
 -- Это поле нужно для отображения времени готовности заказа в деталях заказа для организаций
 
-CREATE OR REPLACE FUNCTION public.get_organization_orders(organization_user_id UUID)
+-- Удаляем старую функцию, чтобы изменить тип возврата
+DROP FUNCTION IF EXISTS public.get_organization_orders(UUID);
+
+-- Создаем функцию заново с новым полем ready_at
+CREATE FUNCTION public.get_organization_orders(organization_user_id UUID)
 RETURNS TABLE (
   id UUID,
   order_number INTEGER,

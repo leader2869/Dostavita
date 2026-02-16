@@ -18,3 +18,4 @@ FROM public.profiles
 WHERE email = 'your-email@example.com'; -- ЗАМЕНИТЕ НА ВАШ EMAIL
 
 
+

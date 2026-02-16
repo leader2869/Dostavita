@@ -58,3 +58,4 @@ LEFT JOIN public.balances b ON u.id = b.user_id
 ORDER BY u.created_at DESC;
 
 
+

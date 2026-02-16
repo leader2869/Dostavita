@@ -17,6 +17,11 @@ export function PaymentModal({ order, isOpen, onClose, onSuccess }: PaymentModal
   const supabase = createClient()
 
   if (!isOpen) return null
+  
+  // Не показываем модальное окно, если оплата уже обработана
+  if (order.is_paid !== null) {
+    return null
+  }
 
   const handlePayment = async (isPaid: boolean) => {
     setProcessing(true)

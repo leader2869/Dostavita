@@ -27,3 +27,4 @@ CREATE POLICY "Drivers can view own rejections"
   USING (driver_user_id = auth.uid());
 
 
+

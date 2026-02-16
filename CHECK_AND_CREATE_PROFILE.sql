@@ -83,3 +83,4 @@ LEFT JOIN public.balances b ON u.id = b.user_id
 WHERE u.email = 'test3@mail.ru';
 
 
+

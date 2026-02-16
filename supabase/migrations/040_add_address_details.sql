@@ -17,3 +17,4 @@ COMMENT ON COLUMN public.orders.delivery_floor IS 'Этаж адреса дос�
 COMMENT ON COLUMN public.orders.delivery_apartment IS 'Номер квартиры адреса доставки';
 
 
+

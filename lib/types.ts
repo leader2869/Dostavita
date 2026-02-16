@@ -100,7 +100,7 @@ export interface Order {
   base_price: number
   region_id: string
   final_price: number
-  is_paid: boolean
+  is_paid: boolean | null
   paid_by?: 'sender' | 'recipient'
   created_at: string
   accepted_at: string | null

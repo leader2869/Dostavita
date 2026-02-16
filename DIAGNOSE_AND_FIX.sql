@@ -91,3 +91,4 @@ LEFT JOIN public.balances b ON u.id = b.user_id
 WHERE u.id = '3efb4975-5bfd-4151-920e-2ce5508f0729';
 
 
+

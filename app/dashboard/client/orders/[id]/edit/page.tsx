@@ -36,6 +36,7 @@ export default function EditOrderPage() {
   const [recipientPhone, setRecipientPhone] = useState('')
   const [description, setDescription] = useState('')
   const [readyAt, setReadyAt] = useState('') // Время готовности заказа (необязательное)
+  const [paidBy, setPaidBy] = useState<'sender' | 'recipient'>('sender') // Кто оплачивает заказ (по умолчанию отправитель)
   const [selectedRegion, setSelectedRegion] = useState('')
   const [itemType, setItemType] = useState<'documents' | 'parcel' | 'flowers' | 'food' | 'other'>('flowers')
   const [canEdit, setCanEdit] = useState(false)
@@ -319,6 +320,7 @@ export default function EditOrderPage() {
       setItemType(order.item_type || 'flowers')
       setSenderPhone(order.sender_phone || '')
       setRecipientPhone(order.recipient_phone || '')
+      setPaidBy(order.paid_by || 'sender')
       
       // Парсим ready_at в формат datetime-local
       if (order.ready_at) {
@@ -524,6 +526,7 @@ export default function EditOrderPage() {
           recipient_phone: recipientPhone || null,
           description: description,
           ready_at: readyAt ? new Date(readyAt).toISOString() : null,
+          paid_by: paidBy,
           region_id: selectedRegion,
           base_price: basePrice,
           final_price: basePrice,
@@ -846,6 +849,23 @@ export default function EditOrderPage() {
             min={new Date().toISOString().slice(0, 16)}
           />
           <p className="text-xs text-gray-400 mt-1">Время, когда заказ будет готов (необязательно, актуально для доставки еды и т.д.)</p>
+        </div>
+
+        <div>
+          <label htmlFor="paidBy" className="block text-sm font-medium text-gray-300 mb-1">
+            Кто оплачивает заказ <span className="text-red-400">*</span>
+          </label>
+          <select
+            id="paidBy"
+            value={paidBy}
+            onChange={(e) => setPaidBy(e.target.value as 'sender' | 'recipient')}
+            required
+            className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
+          >
+            <option value="sender" className="bg-gray-700">Отправитель</option>
+            <option value="recipient" className="bg-gray-700">Получатель</option>
+          </select>
+          <p className="text-xs text-gray-400 mt-1">Укажите, кто будет оплачивать заказ</p>
         </div>
 
         {/* Информация о маршруте */}

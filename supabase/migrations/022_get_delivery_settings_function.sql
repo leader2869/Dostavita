@@ -32,3 +32,4 @@ GRANT EXECUTE ON FUNCTION public.get_delivery_settings() TO authenticated;
 GRANT EXECUTE ON FUNCTION public.get_delivery_settings() TO anon;
 
 
+

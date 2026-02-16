@@ -11,3 +11,4 @@ INSERT INTO public.regions (name, base_price, is_active) VALUES
 ON CONFLICT (name) DO NOTHING;
 
 
+

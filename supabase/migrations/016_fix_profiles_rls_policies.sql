@@ -39,3 +39,4 @@ CREATE POLICY "Users can view own profile"
 -- Админы могут видеть все профили через RPC функции
 
 
+
