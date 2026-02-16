@@ -65,7 +65,7 @@ export default function OrderDetailsPage() {
             // Пробуем прямой запрос как fallback (если RPC не работает)
             const { data: directDriverData, error: directError } = await supabase
               .from('profiles')
-              .select('id, full_name, phone, vehicle_type, vehicle_number')
+              .select('id, full_name, phone, vehicle_type, vehicle_brand, vehicle_model, vehicle_number')
               .eq('id', orderData.executor_user_id)
               .maybeSingle()
             
