@@ -320,11 +320,35 @@ export default function CreateOrderPage() {
       try {
         const { data: { user } } = await supabase.auth.getUser()
         if (user) {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('phone')
-            .eq('id', user.id)
-            .single()
+          // Пробуем использовать RPC функцию для обхода RLS
+          let profile: any = null
+          
+          try {
+            const { data: rpcProfile, error: rpcError } = await supabase
+              .rpc('get_user_profile', { user_id: user.id })
+              .single()
+            
+            if (!rpcError && rpcProfile) {
+              profile = rpcProfile
+            }
+          } catch (rpcErr) {
+            console.warn('RPC функция не сработала, пробуем прямой запрос:', rpcErr)
+          }
+
+          // Fallback на прямой запрос, если RPC не сработал
+          if (!profile) {
+            const { data: directProfile, error: directError } = await supabase
+              .from('profiles')
+              .select('phone')
+              .eq('id', user.id)
+              .maybeSingle()
+            
+            if (!directError && directProfile) {
+              profile = directProfile
+            } else {
+              console.error('Ошибка загрузки профиля:', directError)
+            }
+          }
           
           if (profile?.phone) {
             setSenderPhone(profile.phone)
