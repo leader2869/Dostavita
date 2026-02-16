@@ -818,9 +818,9 @@ export default function ClientDashboard() {
       {/* Модальное окно для выбора заказа для звонка курьеру */}
       {showCallDriverModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-800 rounded-lg shadow-xl max-w-md w-full">
-            <div className="p-6">
-              <div className="flex justify-between items-center mb-4">
+          <div className="bg-gray-800 rounded-lg shadow-xl max-w-md w-full max-h-[90vh] flex flex-col">
+            <div className="p-6 border-b border-gray-700 flex-shrink-0">
+              <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold text-white">Выберите заказ</h2>
                 <button
                   type="button"
@@ -832,7 +832,9 @@ export default function ClientDashboard() {
                   </svg>
                 </button>
               </div>
+            </div>
 
+            <div className="overflow-y-auto flex-1 p-6">
               <div className="space-y-3">
                 {ordersWithDrivers
                   .filter(order => order.driver?.phone) // Показываем только заказы с телефонами
@@ -856,7 +858,7 @@ export default function ClientDashboard() {
                           )}
                         </div>
                         {order.driver?.phone && (
-                          <div className="ml-4">
+                          <div className="ml-4 flex-shrink-0">
                             <a
                               href={`tel:${order.driver.phone}`}
                               onClick={(e) => e.stopPropagation()}
