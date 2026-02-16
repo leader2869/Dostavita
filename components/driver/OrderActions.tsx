@@ -197,20 +197,25 @@ export function OrderActions({ order, onStopPropagation }: OrderActionsProps) {
       // Формируем URL для многоточечного маршрута
       // Точка А (pickup) - промежуточная точка (via)
       // Точка Б (delivery) - конечная точка (to)
+      // Для мобильных приложений используем универсальный формат через веб-версию,
+      // так как deep links могут не поддерживать промежуточные точки
       navApps = [
         {
           name: 'Яндекс Навигатор',
-          url: `yandexnavi://build_route?lat_from=${driverLocation.lat}&lon_from=${driverLocation.lon}&lat_to=${deliveryCoords.lat}&lon_to=${deliveryCoords.lon}&lat_via=${pickupCoords.lat}&lon_via=${pickupCoords.lon}`,
+          // Используем веб-версию для надежной работы с промежуточными точками
+          url: `https://yandex.ru/maps/?rtext=${driverLocation.lat},${driverLocation.lon}~${pickupCoords.lat},${pickupCoords.lon}~${deliveryCoords.lat},${deliveryCoords.lon}&rtt=auto`,
           fallback: `https://yandex.ru/maps/?rtext=${driverLocation.lat},${driverLocation.lon}~${pickupCoords.lat},${pickupCoords.lon}~${deliveryCoords.lat},${deliveryCoords.lon}&rtt=auto`
         },
         {
           name: 'Яндекс Карты',
-          url: `yandexmaps://build_route?lat_from=${driverLocation.lat}&lon_from=${driverLocation.lon}&lat_to=${deliveryCoords.lat}&lon_to=${deliveryCoords.lon}&lat_via=${pickupCoords.lat}&lon_via=${pickupCoords.lon}`,
+          // Используем веб-версию для надежной работы с промежуточными точками
+          url: `https://yandex.ru/maps/?rtext=${driverLocation.lat},${driverLocation.lon}~${pickupCoords.lat},${pickupCoords.lon}~${deliveryCoords.lat},${deliveryCoords.lon}&rtt=auto`,
           fallback: `https://yandex.ru/maps/?rtext=${driverLocation.lat},${driverLocation.lon}~${pickupCoords.lat},${pickupCoords.lon}~${deliveryCoords.lat},${deliveryCoords.lon}&rtt=auto`
         },
         {
           name: '2ГИС',
-          url: `dgis://2gis.ru/routeSearch/rsType/car/from/${driverLocation.lon},${driverLocation.lat}/to/${deliveryCoords.lon},${deliveryCoords.lat}/via/${pickupCoords.lon},${pickupCoords.lat}`,
+          // 2ГИС поддерживает промежуточные точки через /via/
+          url: `https://2gis.ru/routeSearch/rsType/car/from/${driverLocation.lon},${driverLocation.lat}/to/${deliveryCoords.lon},${deliveryCoords.lat}/via/${pickupCoords.lon},${pickupCoords.lat}`,
           fallback: `https://2gis.ru/routeSearch/rsType/car/from/${driverLocation.lon},${driverLocation.lat}/to/${deliveryCoords.lon},${deliveryCoords.lat}/via/${pickupCoords.lon},${pickupCoords.lat}`
         }
       ]
