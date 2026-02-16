@@ -13,6 +13,7 @@ export default function CustomerFinancePage() {
   
   const [user, setUser] = useState<any>(null)
   const [finances, setFinances] = useState<any[]>([])
+  const [receivables, setReceivables] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [period, setPeriod] = useState<Period>('all')
   const [customStartDate, setCustomStartDate] = useState<string>('')
@@ -73,6 +74,20 @@ export default function CustomerFinancePage() {
       } else {
         setFinances(financesData || [])
       }
+
+      // Получаем дебиторку организации
+      const { data: receivablesData, error: receivablesError } = await supabase
+        .rpc('get_organization_receivables', {
+          organization_user_id: currentUser.id,
+          start_date: dateFilter.start,
+          end_date: dateFilter.end
+        })
+
+      if (receivablesError) {
+        console.error('Ошибка загрузки дебиторки:', receivablesError)
+      } else {
+        setReceivables(receivablesData || [])
+      }
     } catch (err: any) {
       console.error('Ошибка загрузки данных:', err)
     } finally {
@@ -89,6 +104,7 @@ export default function CustomerFinancePage() {
   const totalCompletedOrders = finances.reduce((sum, f) => sum + (parseInt(f.completed_orders_count) || 0), 0)
   const totalEarnings = finances.reduce((sum, f) => sum + (parseFloat(f.total_earnings) || 0), 0)
   const totalBalance = finances.reduce((sum, f) => sum + (parseFloat(f.balance) || 0), 0)
+  const totalReceivables = receivables.reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0)
 
   if (loading) {
     return (
@@ -200,7 +216,7 @@ export default function CustomerFinancePage() {
       </div>
 
       {/* Общая статистика */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-6">
         <div className="bg-gray-800 rounded-lg shadow p-6">
           <h3 className="text-sm text-gray-400 mb-2">Водителей</h3>
           <p className="text-3xl font-bold text-white">{totalDrivers}</p>
@@ -217,10 +233,14 @@ export default function CustomerFinancePage() {
           <h3 className="text-sm text-gray-400 mb-2">Общий баланс</h3>
           <p className="text-3xl font-bold text-purple-400">{totalBalance.toFixed(2)} BYN</p>
         </div>
+        <div className="bg-gray-800 rounded-lg shadow p-6">
+          <h3 className="text-sm text-gray-400 mb-2">Дебиторка</h3>
+          <p className="text-3xl font-bold text-red-400">{totalReceivables.toFixed(2)} BYN</p>
+        </div>
       </div>
 
       {/* Финансы по водителям */}
-      <div className="bg-gray-800 rounded-lg shadow p-6">
+      <div className="bg-gray-800 rounded-lg shadow p-6 mb-6">
         <h2 className="text-xl font-semibold mb-4 text-white">Финансы по водителям</h2>
         {finances && finances.length > 0 ? (
           <div className="space-y-4">
@@ -253,6 +273,73 @@ export default function CustomerFinancePage() {
           </div>
         ) : (
           <p className="text-gray-400 text-center py-8">Нет данных за выбранный период</p>
+        )}
+      </div>
+
+      {/* Дебиторка */}
+      <div className="bg-gray-800 rounded-lg shadow p-6">
+        <h2 className="text-xl font-semibold mb-4 text-white">Дебиторка (неоплаченные заказы)</h2>
+        {receivables && receivables.length > 0 ? (
+          <div className="space-y-4">
+            {receivables.map((receivable: any) => (
+              <div key={receivable.id} className="border border-red-500/50 rounded-lg p-4 bg-gray-700/50">
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <p className="font-semibold text-white text-lg">
+                        Заказ {receivable.order_number ? `№${receivable.order_number}` : 'без номера'}
+                      </p>
+                      <span className="px-2 py-1 bg-red-500/20 text-red-400 text-xs rounded">
+                        Не оплачен
+                      </span>
+                    </div>
+                    <div className="mt-2 space-y-1 text-sm">
+                      <p className="text-gray-300">
+                        Сумма: <span className="text-red-400 font-semibold">{parseFloat(receivable.amount || 0).toFixed(2)} BYN</span>
+                      </p>
+                      <p className="text-gray-300">
+                        Должник: <span className="text-white font-semibold capitalize">
+                          {receivable.debtor_type === 'sender' ? 'Отправитель' : 'Получатель'}
+                        </span>
+                        {receivable.debtor_name && (
+                          <span className="text-gray-400 ml-1">({receivable.debtor_name})</span>
+                        )}
+                      </p>
+                      {receivable.debtor_phone && (
+                        <p className="text-gray-300">
+                          Телефон: <a href={`tel:${receivable.debtor_phone}`} className="text-green-400 hover:text-green-300">{receivable.debtor_phone}</a>
+                        </p>
+                      )}
+                      <p className="text-gray-300">
+                        Водитель: <span className="text-white">{receivable.driver_full_name || 'Неизвестно'}</span>
+                      </p>
+                      {receivable.pickup_address && (
+                        <p className="text-gray-400 text-xs mt-1">
+                          Откуда: {receivable.pickup_address}
+                        </p>
+                      )}
+                      {receivable.delivery_address && (
+                        <p className="text-gray-400 text-xs">
+                          Куда: {receivable.delivery_address}
+                        </p>
+                      )}
+                      <p className="text-gray-400 text-xs mt-1">
+                        Дата: {new Date(receivable.created_at).toLocaleString('ru-RU', {
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-400 text-center py-8">Нет дебиторки за выбранный период</p>
         )}
       </div>
 

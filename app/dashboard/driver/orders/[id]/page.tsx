@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import type { Order } from '@/lib/types'
 import { BackButton } from '@/components/ui/BackButton'
 import { OrderActions } from '@/components/driver/OrderActions'
+import { PaymentModal } from '@/components/driver/PaymentModal'
 import { formatAddressForOrder } from '@/lib/utils/formatAddress'
 import { formatReadyTime } from '@/lib/utils/formatReadyTime'
 
@@ -19,6 +20,7 @@ export default function OrderDetailsPage() {
   const [loading, setLoading] = useState(true)
   const [processing, setProcessing] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showPaymentModal, setShowPaymentModal] = useState(false)
 
   const loadOrder = useCallback(async () => {
     try {
@@ -88,6 +90,16 @@ export default function OrderDetailsPage() {
       }
 
       await loadOrder()
+      // Показываем модальное окно оплаты после того, как заказ забран (только если оплата еще не обработана)
+      const updatedOrder = await supabase
+        .from('orders')
+        .select('is_paid')
+        .eq('id', orderId)
+        .single()
+      
+      if (updatedOrder.data && updatedOrder.data.is_paid === null) {
+        setShowPaymentModal(true)
+      }
     } catch (err: any) {
       setError(err.message)
     } finally {
@@ -110,12 +122,26 @@ export default function OrderDetailsPage() {
         throw new Error('Не удалось завершить заказ')
       }
 
-      // После успешного завершения заказа переходим на главную страницу
-      router.push('/dashboard/driver')
+      await loadOrder()
+      // Показываем модальное окно оплаты после завершения заказа (только если оплата еще не обработана)
+      const updatedOrder = await supabase
+        .from('orders')
+        .select('is_paid')
+        .eq('id', orderId)
+        .single()
+      
+      if (updatedOrder.data && updatedOrder.data.is_paid === null) {
+        setShowPaymentModal(true)
+      }
     } catch (err: any) {
       setError(err.message)
       setProcessing(false)
     }
+  }
+
+  const handlePaymentSuccess = () => {
+    // После успешной обработки оплаты переходим на главную страницу
+    router.push('/dashboard/driver')
   }
 
   if (loading) {
@@ -355,6 +381,16 @@ export default function OrderDetailsPage() {
           </button>
         </div>
       </div>
+
+      {/* Модальное окно оплаты */}
+      {order && (
+        <PaymentModal
+          order={order}
+          isOpen={showPaymentModal}
+          onClose={() => setShowPaymentModal(false)}
+          onSuccess={handlePaymentSuccess}
+        />
+      )}
     </div>
   )
 }
