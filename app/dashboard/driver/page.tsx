@@ -8,6 +8,7 @@ import { DriverPushNotifications } from '@/components/driver/DriverPushNotificat
 import { DriverBottomNavigation } from '@/components/driver/DriverBottomNavigation'
 import { OrderActions } from '@/components/driver/OrderActions'
 import { formatAddressForOrder } from '@/lib/utils/formatAddress'
+import { ORDER_STATUS_LABELS } from '@/lib/constants'
 
 // Отключаем кеширование, чтобы данные всегда были актуальными
 export const dynamic = 'force-dynamic'
