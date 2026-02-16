@@ -336,7 +336,8 @@ export default function CreateOrderPage() {
     }
 
     loadSenderPhone()
-  }, [supabase])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // supabase - стабильный объект, не нужно включать в зависимости
 
   useEffect(() => {
     loadRegions()
