@@ -396,19 +396,19 @@ export function OrderActions({ order, onStopPropagation }: OrderActionsProps) {
                 onClick={() => openNavigation(0)}
                 className="w-full bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-3 rounded transition text-left"
               >
-                📱 Яндекс Навигатор
+                Яндекс Навигатор
               </button>
               <button
                 onClick={() => openNavigation(1)}
                 className="w-full bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-3 rounded transition text-left"
               >
-                🗺️ Яндекс Карты
+                Яндекс Карты
               </button>
               <button
                 onClick={() => openNavigation(2)}
                 className="w-full bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-3 rounded transition text-left"
               >
-                📍 2ГИС
+                2ГИС
               </button>
               <button
                 onClick={() => {
