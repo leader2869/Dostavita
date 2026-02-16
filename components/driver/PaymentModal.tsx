@@ -41,7 +41,7 @@ export function PaymentModal({ order, isOpen, onClose, onSuccess }: PaymentModal
     try {
       const { data, error: rpcError } = await supabase.rpc('process_order_payment', {
         order_uuid: order.id,
-        is_paid: isPaid,
+        payment_status: isPaid,
       })
 
       if (rpcError) throw rpcError

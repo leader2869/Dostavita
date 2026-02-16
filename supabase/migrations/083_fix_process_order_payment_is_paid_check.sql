@@ -1,13 +1,20 @@
 -- Миграция 083: Исправление проверки is_paid в функции process_order_payment
 -- Проблема: функция проверяла только is_paid IS NULL, но по умолчанию is_paid = false
 -- Решение: изменить проверку, чтобы она работала и с false, и с null
+-- Также переименовываем параметр is_paid в payment_status, чтобы избежать конфликта с колонкой
 
--- Обновляем функцию process_order_payment
+-- Удаляем старую функцию, чтобы можно было изменить имя параметра
+DROP FUNCTION IF EXISTS public.process_order_payment(UUID, BOOLEAN);
+
+-- Создаем функцию заново с новым именем параметра
 CREATE OR REPLACE FUNCTION public.process_order_payment(
   order_uuid UUID,
-  is_paid BOOLEAN
+  payment_status BOOLEAN
 )
-RETURNS BOOLEAN AS $$
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
 DECLARE
   order_record RECORD;
   driver_user_id UUID;
@@ -16,11 +23,11 @@ BEGIN
   -- Получаем заказ (можно обрабатывать оплату только для заказов в статусе "доставляет" или "завершен")
   -- Оплата еще не обработана, если is_paid IS NULL или is_paid = false
   SELECT * INTO order_record
-  FROM public.orders
-  WHERE id = order_uuid 
-    AND (status = 'courier_delivering' OR status = 'completed')
-    AND executor_user_id = auth.uid()
-    AND (is_paid IS NULL OR is_paid = false); -- Оплата еще не обработана
+  FROM public.orders o
+  WHERE o.id = order_uuid 
+    AND (o.status = 'courier_delivering' OR o.status = 'completed')
+    AND o.executor_user_id = auth.uid()
+    AND (o.is_paid IS NULL OR o.is_paid = false); -- Оплата еще не обработана
   
   IF NOT FOUND THEN
     RETURN FALSE;
@@ -36,11 +43,11 @@ BEGIN
   -- Обновляем статус оплаты заказа
   UPDATE public.orders
   SET 
-    is_paid = is_paid,
+    is_paid = payment_status,
     updated_at = NOW()
-  WHERE id = order_uuid;
+  WHERE orders.id = order_uuid;
   
-  IF is_paid THEN
+  IF payment_status THEN
     -- Если оплата получена, начисляем средства водителю
     -- Убеждаемся, что баланс существует
     INSERT INTO public.balances (user_id, amount, currency, updated_at)
@@ -101,5 +108,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
-COMMENT ON FUNCTION public.process_order_payment(UUID, BOOLEAN) IS 'Обрабатывает оплату заказа: начисляет деньги водителю или создает дебиторку. Принимает заказы с is_paid = false или is_paid IS NULL';
+COMMENT ON FUNCTION public.process_order_payment(UUID, BOOLEAN) IS 'Обрабатывает оплату заказа: начисляет деньги водителю или создает дебиторку. Принимает заказы с is_paid = false или is_paid IS NULL. Параметр payment_status: true - оплата получена, false - оплата не получена';
+
+-- Даем права на выполнение функции
+GRANT EXECUTE ON FUNCTION public.process_order_payment(UUID, BOOLEAN) TO authenticated;
 
