@@ -9,6 +9,7 @@ import { AddressAutocomplete } from '@/components/ui/AddressAutocomplete'
 import { AddressPickerMap } from '@/components/map/AddressPickerMap'
 import { SinglePointMap } from '@/components/map/SinglePointMap'
 import { formatAddressForCard, formatAddressForOrder } from '@/lib/utils/formatAddress'
+import { ClientOrderActions } from '@/components/client/ClientOrderActions'
 import type { Region } from '@/lib/types'
 
 export default function ClientDashboard() {
@@ -35,6 +36,17 @@ export default function ClientDashboard() {
   const [error, setError] = useState<string | null>(null)
   const [showCallDriverModal, setShowCallDriverModal] = useState(false)
   const [ordersWithDrivers, setOrdersWithDrivers] = useState<any[]>([])
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+
+  useEffect(() => {
+    const loadUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        setCurrentUserId(user.id)
+      }
+    }
+    loadUser()
+  }, [supabase])
 
   const loadSavedAddresses = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser()
@@ -461,8 +473,8 @@ export default function ClientDashboard() {
                       <p className="font-semibold text-lg text-white">{order.final_price} BYN</p>
                     </div>
                   </div>
-                  <div className="flex gap-2 mt-3">
-                    {canEdit && (
+                  {canEdit && (
+                    <div className="flex gap-2 mt-3">
                       <button
                         onClick={(e) => {
                           e.stopPropagation()
@@ -472,14 +484,12 @@ export default function ClientDashboard() {
                       >
                         Редактировать
                       </button>
-                    )}
-                    <button
-                      onClick={() => router.push(`/dashboard/client/orders/${order.id}`)}
-                      className={`${canEdit ? 'flex-1' : 'w-full'} bg-blue-600 text-white px-3 py-1.5 rounded text-xs hover:bg-blue-700 transition`}
-                    >
-                      Детали
-                    </button>
-                  </div>
+                    </div>
+                  )}
+                  {/* Кнопки телефона и сообщения для активных заказов с водителем */}
+                  {order.executor_user_id && currentUserId && (
+                    <ClientOrderActions order={order} userId={currentUserId} />
+                  )}
                 </div>
               )
             })}

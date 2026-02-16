@@ -9,6 +9,7 @@ import { useAuthCheck } from '@/hooks/useAuthCheck'
 import { formatAddressForOrder } from '@/lib/utils/formatAddress'
 import { DriverBottomNavigation } from '@/components/driver/DriverBottomNavigation'
 import { OrderActions } from '@/components/driver/OrderActions'
+import { OrderChatBadge } from '@/components/orders/OrderChatBadge'
 
 export default function DriverMyOrdersPage() {
   const router = useRouter()
@@ -116,6 +117,9 @@ export default function DriverMyOrdersPage() {
                 <h3 className="text-lg font-semibold text-white">
                   Заказ №{order.order_number || order.id.slice(0, 8)}
                 </h3>
+                {isActive && (
+                  <OrderChatBadge orderId={order.id} userId={user.id} />
+                )}
                 <span
                   className={`inline-block px-3 py-1 rounded-full text-xs font-semibold border ${
                     getStatusColor(order.status)

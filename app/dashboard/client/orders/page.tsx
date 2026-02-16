@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { ClientBottomNavigation } from '@/components/client/ClientBottomNavigation'
+import { ClientOrderActions } from '@/components/client/ClientOrderActions'
 import { formatAddressForOrder } from '@/lib/utils/formatAddress'
 
 export default function ClientOrdersPage() {
@@ -11,6 +12,7 @@ export default function ClientOrdersPage() {
   const supabase = createClient()
   const [orders, setOrders] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
 
   useEffect(() => {
     let isMounted = true
@@ -23,6 +25,10 @@ export default function ClientOrdersPage() {
           router.push('/login')
         }
         return
+      }
+
+      if (isMounted) {
+        setCurrentUserId(user.id)
       }
 
       // Получаем все заказы, где пользователь является отправителем или получателем
@@ -144,8 +150,8 @@ export default function ClientOrdersPage() {
             </p>
           </div>
         </div>
-        <div className="flex gap-2 mt-3">
-          {canEdit && (
+        {canEdit && (
+          <div className="flex gap-2 mt-3">
             <button
               onClick={(e) => {
                 e.stopPropagation()
@@ -155,14 +161,12 @@ export default function ClientOrdersPage() {
             >
               Редактировать
             </button>
-          )}
-          <button
-            onClick={() => router.push(`/dashboard/client/orders/${order.id}`)}
-            className={`${canEdit ? 'flex-1' : 'w-full'} bg-blue-600 text-white px-3 py-1.5 rounded text-xs hover:bg-blue-700 transition`}
-          >
-            Детали
-          </button>
-        </div>
+          </div>
+        )}
+        {/* Кнопки телефона и сообщения для активных заказов с водителем */}
+        {order.executor_user_id && currentUserId && (
+          <ClientOrderActions order={order} userId={currentUserId} />
+        )}
       </div>
     )
   }
