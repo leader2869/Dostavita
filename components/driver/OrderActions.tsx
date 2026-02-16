@@ -354,23 +354,23 @@ export function OrderActions({ order, onStopPropagation }: OrderActionsProps) {
             <h3 className="text-xl font-semibold text-white mb-4">Куда построить маршрут?</h3>
             <div className="space-y-3">
               <button
-                onClick={() => handleNavTypeSelect('full')}
-                className="w-full bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-3 rounded transition font-semibold"
-                disabled={loadingLocation || !driverLocation}
-              >
-                {loadingLocation ? 'Загрузка местоположения...' : 'Весь маршрут (Я → А → Б)'}
-              </button>
-              <button
                 onClick={() => handleNavTypeSelect('pickup')}
                 className="w-full bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-3 rounded transition"
               >
-                К отправителю (точка А)
+                К отправителю
               </button>
               <button
                 onClick={() => handleNavTypeSelect('delivery')}
                 className="w-full bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-3 rounded transition"
               >
-                К получателю (точка Б)
+                К получателю
+              </button>
+              <button
+                onClick={() => handleNavTypeSelect('full')}
+                className="w-full bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-3 rounded transition font-semibold"
+                disabled={loadingLocation || !driverLocation}
+              >
+                {loadingLocation ? 'Загрузка местоположения...' : 'Весь маршрут'}
               </button>
               <button
                 onClick={() => setShowNavMenu(false)}
