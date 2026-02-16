@@ -771,7 +771,7 @@ export default function CreateOrderPage() {
             placeholder="+375 (XX) XXX-XX-XX"
             required
           />
-          <p className="text-xs text-gray-400 mt-1">Номер телефона отправителя (автоматически подставляется из профиля, можно изменить)</p>
+          <p className="text-xs text-gray-400 mt-1">Номер телефона отправителя (обязательно)</p>
         </div>
 
         <div>
