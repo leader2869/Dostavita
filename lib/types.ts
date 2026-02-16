@@ -102,6 +102,7 @@ export interface Order {
   is_paid: boolean
   created_at: string
   accepted_at: string | null
+  started_coming_at: string | null
   picked_up_at: string | null
   started_delivery_at: string | null
   completed_at: string | null

@@ -108,10 +108,10 @@ export default function OrderDetailsPage() {
         throw new Error('Не удалось завершить заказ')
       }
 
-      await loadOrder()
+      // После успешного завершения заказа переходим на главную страницу
+      router.push('/dashboard/driver')
     } catch (err: any) {
       setError(err.message)
-    } finally {
       setProcessing(false)
     }
   }
@@ -203,20 +203,84 @@ export default function OrderDetailsPage() {
           )}
           <p className="text-xl font-bold mt-4 text-white">Стоимость: {order.final_price} BYN</p>
           
-          {order.accepted_at && (
-            <div className="mt-4">
-              <p className="text-sm text-gray-400">Время принятия заказа</p>
-              <p className="text-white">
-                {new Date(order.accepted_at).toLocaleString('ru-RU', {
-                  day: '2-digit',
-                  month: '2-digit',
-                  year: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })}
-              </p>
+          {/* Временные метки изменений статусов */}
+          <div className="mt-4 pt-4 border-t border-gray-700">
+            <h3 className="text-lg font-semibold mb-3 text-white">История изменений статуса</h3>
+            <div className="space-y-2">
+              <div>
+                <p className="text-sm text-gray-400">Время создания заказа</p>
+                <p className="text-white">
+                  {new Date(order.created_at).toLocaleString('ru-RU', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </p>
+              </div>
+
+              {order.accepted_at && (
+                <div>
+                  <p className="text-sm text-gray-400">Время принятия заказа</p>
+                  <p className="text-white">
+                    {new Date(order.accepted_at).toLocaleString('ru-RU', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </p>
+                </div>
+              )}
+
+              {order.started_coming_at && (
+                <div>
+                  <p className="text-sm text-gray-400">Время начала движения к отправителю</p>
+                  <p className="text-white">
+                    {new Date(order.started_coming_at).toLocaleString('ru-RU', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </p>
+                </div>
+              )}
+
+              {order.picked_up_at && (
+                <div>
+                  <p className="text-sm text-gray-400">Время когда водитель забрал заказ</p>
+                  <p className="text-white">
+                    {new Date(order.picked_up_at).toLocaleString('ru-RU', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </p>
+                </div>
+              )}
+
+              {order.completed_at && (
+                <div>
+                  <p className="text-sm text-gray-400">Время завершения заказа</p>
+                  <p className="text-white">
+                    {new Date(order.completed_at).toLocaleString('ru-RU', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </p>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
 
         {error && (

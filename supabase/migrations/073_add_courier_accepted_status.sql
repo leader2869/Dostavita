@@ -1,5 +1,25 @@
 -- Миграция 073: Добавление нового статуса courier_accepted и обновление функций
 
+-- 0. Обновляем CHECK constraint для поля status в таблице orders
+-- Сначала удаляем старый constraint
+ALTER TABLE public.orders DROP CONSTRAINT IF EXISTS orders_status_check;
+
+-- Создаем новый constraint с добавленным статусом courier_accepted
+ALTER TABLE public.orders ADD CONSTRAINT orders_status_check CHECK (status IN (
+  'searching_courier',    -- Ищем курьера
+  'courier_accepted',     -- Курьер принял заказ (НОВЫЙ)
+  'courier_coming',       -- Курьер едет к отправителю
+  'courier_delivering',   -- Курьер едет к получателю
+  'completed',            -- Заказ завершен
+  'cancelled'             -- Отменен
+));
+
+-- 0.1. Добавляем поле для времени начала движения к отправителю
+ALTER TABLE public.orders
+ADD COLUMN IF NOT EXISTS started_coming_at TIMESTAMPTZ;
+
+COMMENT ON COLUMN public.orders.started_coming_at IS 'Время начала движения водителя к отправителю (переход в статус courier_coming)';
+
 -- 1. Обновляем функцию accept_order - теперь устанавливает courier_accepted вместо courier_coming
 DROP FUNCTION IF EXISTS public.accept_order(UUID, UUID);
 
@@ -57,10 +77,11 @@ BEGIN
     RETURN FALSE;
   END IF;
   
-  -- Обновляем заказ - переводим в статус courier_coming
+  -- Обновляем заказ - переводим в статус courier_coming и устанавливаем время начала движения
   UPDATE public.orders
   SET 
-    status = 'courier_coming'
+    status = 'courier_coming',
+    started_coming_at = NOW()
   WHERE id = order_uuid;
   
   RETURN TRUE;
