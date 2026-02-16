@@ -2,7 +2,11 @@
 -- 1. Исправляет неоднозначную ссылку на колонку "role"
 -- 2. Добавляет vehicle_brand и vehicle_model в возвращаемые поля
 
-CREATE OR REPLACE FUNCTION public.get_driver_profile_for_client(
+-- Удаляем старую функцию, так как меняется тип возвращаемого значения
+DROP FUNCTION IF EXISTS public.get_driver_profile_for_client(UUID, UUID);
+
+-- Создаем функцию заново с обновленными полями
+CREATE FUNCTION public.get_driver_profile_for_client(
   p_driver_id UUID,
   p_order_id UUID DEFAULT NULL
 )
