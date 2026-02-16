@@ -141,6 +141,9 @@ export default async function DriverDetailsPage({ params }: { params: { id: stri
                   driver.vehicle_type === 'bicycle' ? 'Велосипед' :
                   driver.vehicle_type === 'walking' ? 'Пешком' : driver.vehicle_type || 'Не указан'
                 }
+                {driver.vehicle_brand && driver.vehicle_model && (
+                  <span className="ml-1">({driver.vehicle_brand} {driver.vehicle_model})</span>
+                )}
               </p>
               {driver.vehicle_number && (
                 <p className="text-gray-300">
