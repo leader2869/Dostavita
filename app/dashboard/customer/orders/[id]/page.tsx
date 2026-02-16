@@ -146,7 +146,7 @@ export default async function CustomerOrderDetailsPage({ params }: { params: { i
 
             {order.recipient_phone && (
               <div>
-                <p className="text-sm text-gray-400">Номер получателя</p>
+                <p className="text-sm text-gray-400">Телефон получателя</p>
                 <p className="text-white">
                   <a href={`tel:${order.recipient_phone}`} className="text-green-500 hover:text-green-400 font-medium">
                     {order.recipient_phone}
