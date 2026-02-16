@@ -178,7 +178,7 @@ export default async function DriverDashboard() {
   // НЕ включаем searching_courier - это статус для доступных заказов, а не для выполняемых
   const { data: myOrders, error: myOrdersError } = await supabase
     .from('orders')
-    .select('id, order_number, pickup_address, delivery_address, final_price, item_type, description, created_at, cancelled_at, status, customer_id, recipient_phone, pickup_coordinates, delivery_coordinates')
+    .select('id, order_number, pickup_address, delivery_address, final_price, item_type, description, created_at, cancelled_at, status, customer_id, sender_phone, recipient_phone, pickup_coordinates, delivery_coordinates')
     .eq('executor_user_id', user.id)
     .in('status', ['courier_coming', 'courier_delivering'])
     .order('created_at', { ascending: false })
