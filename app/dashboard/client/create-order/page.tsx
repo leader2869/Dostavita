@@ -314,55 +314,6 @@ export default function CreateOrderPage() {
     }
   }, [pickupCoordinates, deliveryCoordinates, calculateRoute])
 
-  // Загружаем телефон отправителя из профиля
-  useEffect(() => {
-    const loadSenderPhone = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (user) {
-          // Пробуем использовать RPC функцию для обхода RLS
-          let profile: any = null
-          
-          try {
-            const { data: rpcProfile, error: rpcError } = await supabase
-              .rpc('get_user_profile', { user_id: user.id })
-              .single()
-            
-            if (!rpcError && rpcProfile) {
-              profile = rpcProfile
-            }
-          } catch (rpcErr) {
-            console.warn('RPC функция не сработала, пробуем прямой запрос:', rpcErr)
-          }
-
-          // Fallback на прямой запрос, если RPC не сработал
-          if (!profile) {
-            const { data: directProfile, error: directError } = await supabase
-              .from('profiles')
-              .select('phone')
-              .eq('id', user.id)
-              .maybeSingle()
-            
-            if (!directError && directProfile) {
-              profile = directProfile
-            } else {
-              console.error('Ошибка загрузки профиля:', directError)
-            }
-          }
-          
-          if (profile?.phone) {
-            setSenderPhone(profile.phone)
-          }
-        }
-      } catch (error) {
-        console.error('Ошибка загрузки телефона отправителя:', error)
-      }
-    }
-
-    loadSenderPhone()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []) // supabase - стабильный объект, не нужно включать в зависимости
-
   useEffect(() => {
     loadRegions()
     loadSavedAddresses()
