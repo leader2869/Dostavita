@@ -1,5 +1,6 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import type { User } from '@/lib/types'
 import { AvailableOrdersList } from '@/components/driver/AvailableOrdersList'
 import { DriverLocationTracker } from '@/components/driver/DriverLocationTracker'
@@ -209,10 +210,10 @@ export default async function DriverDashboard() {
           {myOrders && myOrders.length > 0 ? (
             <div className="space-y-4">
               {myOrders.map((order: any) => (
-                <div
+                <Link
                   key={order.id}
-                  className="border rounded-lg p-4 cursor-pointer hover:bg-gray-700 transition"
-                  onClick={() => window.location.href = `/dashboard/driver/orders/${order.id}`}
+                  href={`/dashboard/driver/orders/${order.id}`}
+                  className="block border rounded-lg p-4 cursor-pointer hover:bg-gray-700 transition"
                 >
                   <div className="flex justify-between items-start">
                     <div>
@@ -245,7 +246,7 @@ export default async function DriverDashboard() {
                       </a>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           ) : (

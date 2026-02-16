@@ -194,7 +194,7 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
     <div
       key={order.id}
       className={`border rounded-lg p-4 cursor-pointer hover:bg-gray-700 transition ${isHidden ? 'border-yellow-600 bg-yellow-900/20' : 'border-gray-700'}`}
-      onClick={() => window.location.href = `/dashboard/driver/accept-order/${order.id}`}
+      onClick={() => router.push(`/dashboard/driver/accept-order/${order.id}`)}
     >
           <div className="flex justify-between items-start mb-3">
             <div className="flex-1">
