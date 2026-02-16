@@ -9,6 +9,7 @@ import { DriverBottomNavigation } from '@/components/driver/DriverBottomNavigati
 import { OrderActions } from '@/components/driver/OrderActions'
 import { formatAddressForOrder } from '@/lib/utils/formatAddress'
 import { ORDER_STATUS_LABELS } from '@/lib/constants'
+import { formatReadyTime } from '@/lib/utils/formatReadyTime'
 
 // Отключаем кеширование, чтобы данные всегда были актуальными
 export const dynamic = 'force-dynamic'
@@ -232,19 +233,19 @@ export default async function DriverDashboard() {
                         <p className="text-sm text-gray-400 mt-1">
                           Статус: {ORDER_STATUS_LABELS[order.status as keyof typeof ORDER_STATUS_LABELS] || order.status}
                         </p>
-                        {order.ready_at && (
-                          <p className="text-sm text-gray-400 mt-1">
-                            Заказ будет готов к: <span className="text-gray-300">
-                              {new Date(order.ready_at).toLocaleString('ru-RU', {
-                                day: '2-digit',
-                                month: '2-digit',
-                                year: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              })}
-                            </span>
-                          </p>
-                        )}
+                        {order.ready_at && (() => {
+                          const { formattedTime, timeStatus, statusType } = formatReadyTime(order.ready_at)
+                          return (
+                            <p className="text-sm text-gray-400 mt-1">
+                              Заказ будет готов к: <span className="text-gray-300">{formattedTime}</span>
+                              {timeStatus && (
+                                <span className={`ml-2 ${statusType === 'waiting' ? 'text-red-400 animate-blink' : statusType === 'upcoming' ? 'text-yellow-400 animate-blink' : 'text-gray-400'}`}>
+                                  ({timeStatus})
+                                </span>
+                              )}
+                            </p>
+                          )
+                        })()}
                       </div>
                       <div className="text-right">
                         <p className="font-semibold text-white">{order.final_price} BYN</p>

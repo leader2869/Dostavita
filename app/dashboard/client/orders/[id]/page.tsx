@@ -8,6 +8,7 @@ import { OrderMap } from '@/components/map/OrderMap'
 import { DriverLocationMap } from '@/components/map/DriverLocationMap'
 import { OrderActions } from '@/components/driver/OrderActions'
 import { formatAddressForOrder } from '@/lib/utils/formatAddress'
+import { formatReadyTime } from '@/lib/utils/formatReadyTime'
 
 export default function OrderDetailsPage() {
   const router = useRouter()
@@ -349,20 +350,22 @@ export default function OrderDetailsPage() {
               </div>
             )}
 
-            {order.ready_at && (
-              <div>
-                <p className="text-sm text-gray-400">Заказ будет готов к</p>
-                <p className="text-white">
-                  {new Date(order.ready_at).toLocaleString('ru-RU', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })}
-                </p>
-              </div>
-            )}
+            {order.ready_at && (() => {
+              const { formattedTime, timeStatus, statusType } = formatReadyTime(order.ready_at)
+              return (
+                <div>
+                  <p className="text-sm text-gray-400">Заказ будет готов к</p>
+                  <p className="text-white">
+                    {formattedTime}
+                    {timeStatus && (
+                      <span className={`ml-2 ${statusType === 'waiting' ? 'text-red-400 animate-blink' : statusType === 'upcoming' ? 'text-yellow-400 animate-blink' : 'text-gray-400'}`}>
+                        ({timeStatus})
+                      </span>
+                    )}
+                  </p>
+                </div>
+              )
+            })()}
 
             <div>
               <p className="text-sm text-gray-400">Стоимость</p>

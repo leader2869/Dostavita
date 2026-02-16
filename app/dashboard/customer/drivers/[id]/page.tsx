@@ -4,6 +4,7 @@ import { BackButton } from '@/components/ui/BackButton'
 import { formatDistanceToNow } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { formatAddressForOrder } from '@/lib/utils/formatAddress'
+import { formatReadyTime } from '@/lib/utils/formatReadyTime'
 
 export default async function DriverDetailsPage({ params }: { params: { id: string } }) {
   const supabase = createServerSupabaseClient()
@@ -266,19 +267,19 @@ export default async function DriverDetailsPage({ params }: { params: { id: stri
                           {order.description}
                         </p>
                       )}
-                      {order.ready_at && (
-                        <p className="text-sm text-gray-400 mt-1">
-                          Заказ будет готов к: <span className="text-gray-300">
-                            {new Date(order.ready_at).toLocaleString('ru-RU', {
-                              day: '2-digit',
-                              month: '2-digit',
-                              year: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
-                          </span>
-                        </p>
-                      )}
+                      {order.ready_at && (() => {
+                        const { formattedTime, timeStatus, statusType } = formatReadyTime(order.ready_at)
+                        return (
+                          <p className="text-sm text-gray-400 mt-1">
+                            Заказ будет готов к: <span className="text-gray-300">{formattedTime}</span>
+                            {timeStatus && (
+                              <span className={`ml-2 ${statusType === 'waiting' ? 'text-red-400 animate-blink' : statusType === 'upcoming' ? 'text-yellow-400 animate-blink' : 'text-gray-400'}`}>
+                                ({timeStatus})
+                              </span>
+                            )}
+                          </p>
+                        )
+                      })()}
                     </div>
                     <div className="text-right ml-4">
                       <p className="font-semibold text-white text-lg">{order.final_price} BYN</p>
