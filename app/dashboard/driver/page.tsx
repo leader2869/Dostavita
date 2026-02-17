@@ -10,6 +10,7 @@ import { OrderActions } from '@/components/driver/OrderActions'
 import { formatAddressForOrder } from '@/lib/utils/formatAddress'
 import { ORDER_STATUS_LABELS } from '@/lib/constants'
 import { formatReadyTime } from '@/lib/utils/formatReadyTime'
+import { DriverOrganizationChatButton } from '@/components/chat/DriverOrganizationChatButton'
 
 // Отключаем кеширование, чтобы данные всегда были актуальными
 export const dynamic = 'force-dynamic'
@@ -204,7 +205,19 @@ export default async function DriverDashboard() {
       <DriverLocationTracker />
       <DriverPushNotifications driverUserId={user.id} />
       <div className="pb-20">
-        <h1 className="text-3xl font-bold mb-6 text-white">Панель исполнителя</h1>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold text-white">Панель исполнителя</h1>
+          {(profile as any)?.organization_id && (
+            <DriverOrganizationChatButton
+              organizationId={(profile as any).organization_id}
+              driverId={null}
+              currentUserId={user.id}
+              currentUserRole="driver"
+              className=""
+              showLabel={true}
+            />
+          )}
+        </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Активные заказы - показываем первыми */}

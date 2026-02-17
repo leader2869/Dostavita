@@ -39,6 +39,18 @@ export default function OrderDetailsPage() {
         .single()
 
       if (fetchError) throw fetchError
+      
+      // Проверяем, что data.id существует и является валидным UUID
+      if (!data || !data.id) {
+        throw new Error('Заказ не найден или не имеет ID')
+      }
+      
+      // Логируем для отладки
+      console.log('=== Order loaded ===')
+      console.log('Order ID:', data.id)
+      console.log('Order ID type:', typeof data.id)
+      console.log('Order data:', data)
+      
       setOrder(data)
     } catch (err: any) {
       setError(err.message)
@@ -94,7 +106,7 @@ export default function OrderDetailsPage() {
       // Загружаем актуальные данные заказа для проверки is_paid
       const { data: orderData, error: orderError } = await supabase
         .from('orders')
-        .select('is_paid')
+        .select('is_paid, id')
         .eq('id', orderId)
         .single()
       
@@ -105,6 +117,8 @@ export default function OrderDetailsPage() {
       console.log('is_paid type:', typeof orderData?.is_paid)
       console.log('is_paid === false:', orderData?.is_paid === false)
       console.log('is_paid === null:', orderData?.is_paid === null)
+      console.log('Current order state:', order)
+      console.log('Current order.id:', order?.id)
       
       // Модальное окно открывается, если оплата еще не обработана (false или null)
       const shouldOpen = orderData && (orderData.is_paid === false || orderData.is_paid === null)
@@ -112,7 +126,22 @@ export default function OrderDetailsPage() {
       
       if (shouldOpen) {
         console.log('✅ Opening payment modal')
-        setShowPaymentModal(true)
+        // Убеждаемся, что order.id существует и валиден перед открытием модального окна
+        if (!order || !order.id || String(order.id).trim() === '0') {
+          console.error('❌ Cannot open payment modal - order or order.id is missing or invalid')
+          console.error('Current order state:', order)
+          // Перезагружаем заказ еще раз
+          await loadOrder()
+          // Проверяем еще раз после перезагрузки
+          if (order && order.id && String(order.id).trim() !== '0') {
+            setShowPaymentModal(true)
+          } else {
+            setError('Ошибка: Не удалось загрузить данные заказа. Пожалуйста, обновите страницу.')
+          }
+        } else {
+          console.log('✅ Order ID is valid:', order.id)
+          setShowPaymentModal(true)
+        }
       } else {
         console.log('❌ Payment modal NOT opened')
         console.log('  - orderData exists:', !!orderData)
@@ -131,46 +160,78 @@ export default function OrderDetailsPage() {
     setError(null)
 
     try {
+      // Проверяем статус оплаты перед попыткой завершения
+      const { data: orderCheck, error: checkError } = await supabase
+        .from('orders')
+        .select('is_paid, id')
+        .eq('id', orderId)
+        .single()
+      
+      if (checkError) throw checkError
+      
+      // Если оплата не обработана, проверяем наличие receivables
+      if (orderCheck.is_paid === false || orderCheck.is_paid === null) {
+        const { data: receivableCheck } = await supabase
+          .from('receivables')
+          .select('id')
+          .eq('order_id', orderId)
+          .maybeSingle()
+        
+        // Если нет ни оплаты, ни receivables - показываем модальное окно
+        if (!receivableCheck) {
+          console.log('⚠️ Заказ не оплачен и нет receivables. Показываем модальное окно оплаты.')
+          if (order && order.id && String(order.id).trim() !== '0') {
+            setShowPaymentModal(true)
+            setProcessing(false)
+            return
+          } else {
+            await loadOrder()
+            if (order && order.id && String(order.id).trim() !== '0') {
+              setShowPaymentModal(true)
+              setProcessing(false)
+              return
+            } else {
+              throw new Error('Не удалось загрузить данные заказа. Пожалуйста, обновите страницу.')
+            }
+          }
+        }
+      }
+      
+      // Если оплата обработана или есть receivables, пытаемся завершить заказ
       const { data, error: rpcError } = await supabase.rpc('complete_order', {
         order_uuid: orderId,
       })
 
       if (rpcError) throw rpcError
 
-      if (data === false) {
+      // Проверяем результат (теперь функция возвращает JSONB)
+      if (typeof data === 'object' && data !== null) {
+        if (data.success === false) {
+          // Если требуется обработка оплаты, показываем модальное окно
+          if (data.error === 'payment_required') {
+            console.log('⚠️ Требуется обработка оплаты. Показываем модальное окно.')
+            if (order && order.id && String(order.id).trim() !== '0') {
+              setShowPaymentModal(true)
+              setProcessing(false)
+              return
+            } else {
+              await loadOrder()
+              if (order && order.id && String(order.id).trim() !== '0') {
+                setShowPaymentModal(true)
+                setProcessing(false)
+                return
+              }
+            }
+          }
+          throw new Error(data.message || data.error || 'Не удалось завершить заказ')
+        }
+      } else if (data === false) {
         throw new Error('Не удалось завершить заказ')
       }
 
+      // Заказ успешно завершен
       await loadOrder()
-      // Показываем модальное окно оплаты после завершения заказа
-      // Загружаем актуальные данные заказа для проверки is_paid
-      const { data: orderData, error: orderError } = await supabase
-        .from('orders')
-        .select('is_paid')
-        .eq('id', orderId)
-        .single()
-      
-      console.log('=== After complete_order ===')
-      console.log('orderData:', orderData)
-      console.log('orderError:', orderError)
-      console.log('is_paid value:', orderData?.is_paid)
-      console.log('is_paid type:', typeof orderData?.is_paid)
-      console.log('is_paid === false:', orderData?.is_paid === false)
-      console.log('is_paid === null:', orderData?.is_paid === null)
-      
-      // Модальное окно открывается, если оплата еще не обработана (false или null)
-      const shouldOpen = orderData && (orderData.is_paid === false || orderData.is_paid === null)
-      console.log('shouldOpen:', shouldOpen)
-      
-      if (shouldOpen) {
-        console.log('✅ Opening payment modal')
-        setShowPaymentModal(true)
-      } else {
-        console.log('❌ Payment modal NOT opened')
-        console.log('  - orderData exists:', !!orderData)
-        console.log('  - is_paid value:', orderData?.is_paid)
-        console.log('  - is_paid type:', typeof orderData?.is_paid)
-      }
+      router.push('/dashboard/driver')
     } catch (err: any) {
       setError(err.message)
     } finally {
@@ -427,7 +488,7 @@ export default function OrderDetailsPage() {
       </div>
 
       {/* Модальное окно оплаты */}
-      {order && (
+      {order && order.id && (
         <PaymentModal
           order={order}
           isOpen={showPaymentModal}

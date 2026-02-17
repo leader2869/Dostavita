@@ -18,11 +18,21 @@ export function PaymentModal({ order, isOpen, onClose, onSuccess }: PaymentModal
 
   console.log('=== PaymentModal render ===')
   console.log('isOpen:', isOpen)
-  console.log('order.is_paid:', order.is_paid)
-  console.log('Will show modal?', isOpen && (order.is_paid === false || order.is_paid === null))
+  console.log('order:', order)
+  console.log('order.id:', order?.id)
+  console.log('order.id type:', typeof order?.id)
+  console.log('order.is_paid:', order?.is_paid)
+  console.log('Will show modal?', isOpen && (order?.is_paid === false || order?.is_paid === null))
 
   if (!isOpen) {
     console.log('❌ Modal not shown - isOpen is false')
+    return null
+  }
+  
+  // Проверяем, что order существует и имеет валидный id
+  if (!order || !order.id) {
+    console.error('❌ Modal not shown - order or order.id is missing')
+    console.error('Order:', order)
     return null
   }
   
@@ -48,24 +58,61 @@ export function PaymentModal({ order, isOpen, onClose, onSuccess }: PaymentModal
     // UUID должен быть строкой длиной 36 символов в формате: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
     
-    if (!order.id || typeof order.id !== 'string' || !uuidRegex.test(order.id)) {
-      console.error('❌ Invalid order ID:', order.id)
+    // Строгая проверка: order.id должен существовать, быть строкой, не быть "0" или пустой строкой, и быть валидным UUID
+    if (!order || !order.id) {
+      console.error('❌ Order or order.id is missing')
+      console.error('Order object:', order)
+      setError('Ошибка: Заказ не найден. Пожалуйста, обновите страницу.')
+      setProcessing(false)
+      return
+    }
+    
+    const orderIdStr = String(order.id).trim()
+    
+    // Проверяем, что это не "0" или пустая строка
+    if (orderIdStr === '0' || orderIdStr === '' || orderIdStr === 'null' || orderIdStr === 'undefined') {
+      console.error('❌ Invalid order ID (0, empty, null, or undefined):', orderIdStr)
       console.error('Order object:', order)
       console.error('Order ID type:', typeof order.id)
-      console.error('Order ID length:', order.id?.length)
-      setError(`Ошибка: Неверный ID заказа (${order.id}). Пожалуйста, обновите страницу.`)
+      setError('Ошибка: Неверный ID заказа. Пожалуйста, обновите страницу.')
+      setProcessing(false)
+      return
+    }
+    
+    // Проверяем формат UUID
+    if (!uuidRegex.test(orderIdStr)) {
+      console.error('❌ Invalid UUID format:', orderIdStr)
+      console.error('Order object:', order)
+      console.error('Order ID type:', typeof order.id)
+      console.error('Order ID length:', orderIdStr.length)
+      setError(`Ошибка: Неверный формат ID заказа (${orderIdStr}). Пожалуйста, обновите страницу.`)
+      setProcessing(false)
       return
     }
 
     try {
-      // Убеждаемся, что передаем UUID, а не order_number
-      // Если по какой-то причине order.id содержит order_number, это будет отловлено выше
-      const orderUuid = String(order.id).trim()
-      console.log('Using order_uuid:', orderUuid)
+      // Финальная проверка перед вызовом RPC - убеждаемся, что это не "0"
+      if (orderIdStr === '0' || orderIdStr.length !== 36) {
+        console.error('❌ Final validation failed before RPC call')
+        console.error('orderIdStr:', orderIdStr)
+        console.error('orderIdStr length:', orderIdStr.length)
+        console.error('orderIdStr === "0":', orderIdStr === '0')
+        setError('Ошибка: Неверный ID заказа. Пожалуйста, обновите страницу.')
+        setProcessing(false)
+        return
+      }
+      
+      console.log('Using order_uuid:', orderIdStr)
       console.log('Order UUID validation passed')
+      console.log('Calling RPC with parameters:', {
+        order_uuid: orderIdStr,
+        payment_status: isPaid,
+        order_uuid_type: typeof orderIdStr,
+        order_uuid_length: orderIdStr.length
+      })
       
       const { data, error: rpcError } = await supabase.rpc('process_order_payment', {
-        order_uuid: orderUuid,
+        order_uuid: orderIdStr,
         payment_status: isPaid,
       })
 
@@ -161,7 +208,11 @@ export function PaymentModal({ order, isOpen, onClose, onSuccess }: PaymentModal
         }
       }
 
+      // После успешной обработки оплаты перезагружаем заказ
       onSuccess()
+      
+      // Если заказ еще не завершен, можно попробовать завершить его автоматически
+      // Но лучше оставить это пользователю
       onClose()
     } catch (err: any) {
       setError(err.message || 'Произошла ошибка при обработке оплаты')

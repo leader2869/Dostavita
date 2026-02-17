@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { BackButton } from '@/components/ui/BackButton'
+import { CustomerBottomNavigation } from '@/components/customer/CustomerBottomNavigation'
 
 type Period = 'today' | 'week' | 'month' | 'all' | 'custom'
 
@@ -156,8 +157,8 @@ export default function CustomerFinancePage() {
       console.log('Прямой запрос к receivables:', directReceivables)
       console.log('Ошибка прямого запроса:', directError)
       
-      // Загружаем запросы на сдачу кассы от водителей
-      const { data: requestsData } = await supabase
+      // Загружаем все запросы на сдачу кассы от водителей (все статусы)
+      const { data: requestsData, error: requestsError } = await supabase
         .from('cash_deposit_requests')
         .select(`
           *,
@@ -165,6 +166,10 @@ export default function CustomerFinancePage() {
         `)
         .eq('organization_id', currentUser.id)
         .order('created_at', { ascending: false })
+      
+      if (requestsError) {
+        console.error('Ошибка загрузки запросов на сдачу кассы:', requestsError)
+      }
       
       setCashDepositRequests(requestsData || [])
     } catch (err: any) {
@@ -304,6 +309,131 @@ export default function CustomerFinancePage() {
           Сумма, полученная от водителей (сдача кассы)
         </p>
       </div>
+
+      {/* Запросы на сдачу кассы от водителей - размещаем сверху */}
+      {/* Показываем блок только если есть pending (активные) запросы */}
+      {cashDepositRequests.some((r: any) => r.status === 'pending') && (
+        <div className="bg-gray-800 rounded-lg shadow p-6 mb-6">
+          <h2 className="text-xl font-semibold mb-4 text-white">Запросы на сдачу кассы</h2>
+          <div className="space-y-3">
+            {/* Показываем только pending (ожидающие принятия) запросы */}
+            {cashDepositRequests.filter((r: any) => r.status === 'pending').map((request: any) => (
+              <div key={request.id} className="border border-blue-500/50 rounded-lg p-4 bg-gray-700/50">
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <p className="font-semibold text-white text-lg">
+                        {request.profiles?.full_name || 'Водитель без имени'}
+                      </p>
+                      <span className={`px-2 py-1 text-xs rounded ${
+                        request.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' :
+                        request.status === 'approved' ? 'bg-green-500/20 text-green-400' :
+                        request.status === 'rejected' ? 'bg-red-500/20 text-red-400' :
+                        'bg-gray-500/20 text-gray-400'
+                      }`}>
+                        {request.status === 'pending' && 'Ожидает принятия'}
+                        {request.status === 'approved' && 'Принято'}
+                        {request.status === 'rejected' && 'Отклонено'}
+                        {request.status === 'cancelled' && 'Отменено'}
+                      </span>
+                    </div>
+                    <p className="text-xl font-bold text-blue-400 mb-2">
+                      {parseFloat(request.amount || 0).toFixed(2)} BYN
+                    </p>
+                    <p className="text-gray-400 text-xs">
+                      Дата запроса: {new Date(request.created_at).toLocaleString('ru-RU', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </p>
+                    {request.approved_at && (
+                      <p className="text-green-400 text-xs mt-1">
+                        Принято: {new Date(request.approved_at).toLocaleString('ru-RU', {
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </p>
+                    )}
+                    {request.rejected_at && (
+                      <p className="text-red-400 text-xs mt-1">
+                        Отклонено: {new Date(request.rejected_at).toLocaleString('ru-RU', {
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </p>
+                    )}
+                  </div>
+                  {request.status === 'pending' && (
+                    <div className="flex gap-2 ml-4">
+                      <button
+                        onClick={async () => {
+                          if (!confirm(`Принять запрос на сдачу кассы от ${request.profiles?.full_name || 'водителя'} на сумму ${request.amount} BYN?`)) {
+                            return
+                          }
+                          try {
+                            const { data, error } = await supabase.rpc('approve_cash_deposit_request', {
+                              request_id: request.id
+                            })
+                            
+                            if (error) {
+                              alert(`Ошибка: ${error.message}`)
+                            } else if (data === false) {
+                              alert('Не удалось принять запрос')
+                            } else {
+                              alert('Запрос принят! Деньги переведены на баланс организации.')
+                              loadData()
+                            }
+                          } catch (err: any) {
+                            alert(`Ошибка: ${err.message || 'Не удалось принять запрос'}`)
+                          }
+                        }}
+                        className="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700 transition"
+                      >
+                        Принять
+                      </button>
+                      <button
+                        onClick={async () => {
+                          if (!confirm(`Отклонить запрос на сдачу кассы от ${request.profiles?.full_name || 'водителя'}?`)) {
+                            return
+                          }
+                          try {
+                            const { data, error } = await supabase.rpc('reject_cash_deposit_request', {
+                              request_id: request.id
+                            })
+                            
+                            if (error) {
+                              alert(`Ошибка: ${error.message}`)
+                            } else if (data === false) {
+                              alert('Не удалось отклонить запрос')
+                            } else {
+                              alert('Запрос отклонен')
+                              loadData()
+                            }
+                          } catch (err: any) {
+                            alert(`Ошибка: ${err.message || 'Не удалось отклонить запрос'}`)
+                          }
+                        }}
+                        className="bg-red-600 text-white px-4 py-2 rounded text-sm hover:bg-red-700 transition"
+                      >
+                        Отклонить
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Общая статистика */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
@@ -672,129 +802,6 @@ export default function CustomerFinancePage() {
         )}
       </div>
 
-      {/* Запросы на сдачу кассы от водителей */}
-      {cashDepositRequests.length > 0 && (
-        <div className="bg-gray-800 rounded-lg shadow p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4 text-white">Запросы на сдачу кассы</h2>
-          <div className="space-y-3">
-            {cashDepositRequests.map((request: any) => (
-              <div key={request.id} className="border border-blue-500/50 rounded-lg p-4 bg-gray-700/50">
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <p className="font-semibold text-white text-lg">
-                        {request.profiles?.full_name || 'Водитель без имени'}
-                      </p>
-                      <span className={`px-2 py-1 text-xs rounded ${
-                        request.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' :
-                        request.status === 'approved' ? 'bg-green-500/20 text-green-400' :
-                        request.status === 'rejected' ? 'bg-red-500/20 text-red-400' :
-                        'bg-gray-500/20 text-gray-400'
-                      }`}>
-                        {request.status === 'pending' && 'Ожидает принятия'}
-                        {request.status === 'approved' && 'Принято'}
-                        {request.status === 'rejected' && 'Отклонено'}
-                        {request.status === 'cancelled' && 'Отменено'}
-                      </span>
-                    </div>
-                    <p className="text-xl font-bold text-blue-400 mb-2">
-                      {parseFloat(request.amount || 0).toFixed(2)} BYN
-                    </p>
-                    <p className="text-gray-400 text-xs">
-                      Дата запроса: {new Date(request.created_at).toLocaleString('ru-RU', {
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
-                    </p>
-                    {request.approved_at && (
-                      <p className="text-green-400 text-xs mt-1">
-                        Принято: {new Date(request.approved_at).toLocaleString('ru-RU', {
-                          day: '2-digit',
-                          month: '2-digit',
-                          year: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}
-                      </p>
-                    )}
-                    {request.rejected_at && (
-                      <p className="text-red-400 text-xs mt-1">
-                        Отклонено: {new Date(request.rejected_at).toLocaleString('ru-RU', {
-                          day: '2-digit',
-                          month: '2-digit',
-                          year: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}
-                      </p>
-                    )}
-                  </div>
-                  {request.status === 'pending' && (
-                    <div className="flex gap-2 ml-4">
-                      <button
-                        onClick={async () => {
-                          if (!confirm(`Принять запрос на сдачу кассы от ${request.profiles?.full_name || 'водителя'} на сумму ${request.amount} BYN?`)) {
-                            return
-                          }
-                          try {
-                            const { data, error } = await supabase.rpc('approve_cash_deposit_request', {
-                              request_id: request.id
-                            })
-                            
-                            if (error) {
-                              alert(`Ошибка: ${error.message}`)
-                            } else if (data === false) {
-                              alert('Не удалось принять запрос')
-                            } else {
-                              alert('Запрос принят! Деньги переведены на баланс организации.')
-                              loadData()
-                            }
-                          } catch (err: any) {
-                            alert(`Ошибка: ${err.message || 'Не удалось принять запрос'}`)
-                          }
-                        }}
-                        className="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700 transition"
-                      >
-                        Принять
-                      </button>
-                      <button
-                        onClick={async () => {
-                          if (!confirm(`Отклонить запрос на сдачу кассы от ${request.profiles?.full_name || 'водителя'}?`)) {
-                            return
-                          }
-                          try {
-                            const { data, error } = await supabase.rpc('reject_cash_deposit_request', {
-                              request_id: request.id
-                            })
-                            
-                            if (error) {
-                              alert(`Ошибка: ${error.message}`)
-                            } else if (data === false) {
-                              alert('Не удалось отклонить запрос')
-                            } else {
-                              alert('Запрос отклонен')
-                              loadData()
-                            }
-                          } catch (err: any) {
-                            alert(`Ошибка: ${err.message || 'Не удалось отклонить запрос'}`)
-                          }
-                        }}
-                        className="bg-red-600 text-white px-4 py-2 rounded text-sm hover:bg-red-700 transition"
-                      >
-                        Отклонить
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Модальное окно информации о должнике */}
       {showDebtorModal && selectedDebtor && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -889,57 +896,7 @@ export default function CustomerFinancePage() {
         </div>
       )}
 
-      {/* Нижняя навигация */}
-      <div className="fixed bottom-0 left-0 right-0 bg-gray-800 border-t border-gray-700 z-50">
-        <div className="flex justify-around items-center h-16">
-          <a
-            href="/dashboard/customer"
-            className="flex flex-col items-center justify-center flex-1 h-full text-gray-400 hover:text-green-400 transition"
-          >
-            <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-            </svg>
-            <span className="text-xs">Главная</span>
-          </a>
-          <a
-            href="/dashboard/customer/drivers"
-            className="flex flex-col items-center justify-center flex-1 h-full text-gray-400 hover:text-green-400 transition"
-          >
-            <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
-            <span className="text-xs">Водители</span>
-          </a>
-          <a
-            href="/dashboard/customer/orders"
-            className="flex flex-col items-center justify-center flex-1 h-full text-gray-400 hover:text-green-400 transition"
-          >
-            <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-            </svg>
-            <span className="text-xs">Заказы</span>
-          </a>
-          <a
-            href="/dashboard/customer/finance"
-            className="flex flex-col items-center justify-center flex-1 h-full text-green-400 hover:text-green-300 transition"
-          >
-            <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span className="text-xs">Финансы</span>
-          </a>
-          <a
-            href="/dashboard/customer/tracking"
-            className="flex flex-col items-center justify-center flex-1 h-full text-gray-400 hover:text-green-400 transition"
-          >
-            <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-            <span className="text-xs">Отслеживание</span>
-          </a>
-        </div>
-      </div>
+      <CustomerBottomNavigation />
     </div>
   )
 }
