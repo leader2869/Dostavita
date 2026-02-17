@@ -10,6 +10,7 @@ import { OrderActions } from '@/components/driver/OrderActions'
 import { formatAddressForOrder } from '@/lib/utils/formatAddress'
 import { ORDER_STATUS_LABELS } from '@/lib/constants'
 import { formatReadyTime } from '@/lib/utils/formatReadyTime'
+import { DriverChatSection } from '@/components/driver/DriverChatSection'
 
 // Отключаем кеширование, чтобы данные всегда были актуальными
 export const dynamic = 'force-dynamic'
@@ -271,6 +272,16 @@ export default async function DriverDashboard() {
           />
         </div>
       </div>
+
+      {/* Секция чатов с организацией */}
+      {(profile as any)?.organization_id && (
+        <div className="mt-6">
+          <DriverChatSection
+            driverUserId={user.id}
+            organizationId={(profile as any).organization_id}
+          />
+        </div>
+      )}
       
       {/* Нижняя навигация */}
       <DriverBottomNavigation />

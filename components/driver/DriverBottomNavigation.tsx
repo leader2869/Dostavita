@@ -5,16 +5,13 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useAvailableOrdersCount } from '@/hooks/useAvailableOrdersCount'
-import { useDriverOrganizationChatUnreadCount } from '@/hooks/useDriverOrganizationChatUnreadCount'
 
 export function DriverBottomNavigation() {
   const pathname = usePathname()
   const supabase = createClient()
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0)
   const [driverUserId, setDriverUserId] = useState<string | null>(null)
-  const [organizationId, setOrganizationId] = useState<string | null>(null)
   const { count: availableOrdersCount } = useAvailableOrdersCount(driverUserId)
-  const { count: chatUnreadCount } = useDriverOrganizationChatUnreadCount(driverUserId, organizationId)
 
   const isActive = (path: string) => {
     if (path === '/dashboard/driver') {
@@ -32,17 +29,6 @@ export function DriverBottomNavigation() {
         if (!user || !isMounted) return
 
         setDriverUserId(user.id)
-
-        // Получаем organization_id водителя
-        const { data: profileData } = await supabase
-          .from('profiles')
-          .select('organization_id')
-          .eq('id', user.id)
-          .single()
-
-        if (profileData?.organization_id) {
-          setOrganizationId(profileData.organization_id)
-        }
 
         const { data: requestsData, error: requestsError } = await supabase
           .rpc('get_driver_requests', { driver_user_id: user.id })
@@ -121,37 +107,6 @@ export function DriverBottomNavigation() {
             />
           </svg>
           <span className="text-xs">Заказы</span>
-        </Link>
-
-        <Link
-          href="/dashboard/driver/chat"
-          className={`flex flex-col items-center justify-center flex-1 h-full relative ${
-            isActive('/dashboard/driver/chat') ? 'text-green-400' : 'text-gray-400'
-          } hover:text-green-400 transition`}
-        >
-          <div className="relative">
-            <svg
-              className="w-6 h-6 mb-1"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-              />
-            </svg>
-            {chatUnreadCount > 0 && (
-              <span className={`absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center ${
-                chatUnreadCount > 9 ? 'px-1.5 min-w-[1.5rem]' : 'w-5 h-5'
-              }`}>
-                {chatUnreadCount > 10 ? chatUnreadCount : chatUnreadCount >= 10 ? 10 : chatUnreadCount}
-              </span>
-            )}
-          </div>
-          <span className="text-xs">Чаты</span>
         </Link>
 
         <Link
