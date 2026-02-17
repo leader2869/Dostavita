@@ -196,19 +196,21 @@ export default function DriverFinancePage() {
       // Получаем данные заказов для receivables
       let receivablesWithOrders: any[] = []
       if (receivablesData && receivablesData.length > 0) {
-        const orderIds = receivablesData.map((r: any) => r.order_id).filter((id: any) => {
-          // Фильтруем только валидные UUID
-          if (!id) {
-            console.warn('⚠️ receivable без order_id:', r)
-            return false
-          }
-          const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-          const isValid = uuidRegex.test(String(id))
-          if (!isValid) {
-            console.warn('⚠️ receivable с невалидным order_id:', id, 'receivable:', r)
-          }
-          return isValid
-        })
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+        const orderIds = receivablesData
+          .map((r: any) => {
+            if (!r.order_id) {
+              console.warn('⚠️ receivable без order_id:', r)
+              return null
+            }
+            const isValid = uuidRegex.test(String(r.order_id))
+            if (!isValid) {
+              console.warn('⚠️ receivable с невалидным order_id:', r.order_id, 'receivable:', r)
+              return null
+            }
+            return r.order_id
+          })
+          .filter((id: any): id is string => id !== null)
         
         console.log('orderIds для загрузки:', orderIds)
         console.log('orderIds count:', orderIds.length)
