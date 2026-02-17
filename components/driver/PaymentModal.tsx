@@ -40,12 +40,32 @@ export function PaymentModal({ order, isOpen, onClose, onSuccess }: PaymentModal
 
     console.log('=== Processing payment ===')
     console.log('Order ID:', order.id)
+    console.log('Order ID type:', typeof order.id)
     console.log('isPaid (payment_status):', isPaid)
     console.log('Order final_price:', order.final_price)
 
+    // Проверяем, что order.id является валидным UUID
+    // UUID должен быть строкой длиной 36 символов в формате: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+    
+    if (!order.id || typeof order.id !== 'string' || !uuidRegex.test(order.id)) {
+      console.error('❌ Invalid order ID:', order.id)
+      console.error('Order object:', order)
+      console.error('Order ID type:', typeof order.id)
+      console.error('Order ID length:', order.id?.length)
+      setError(`Ошибка: Неверный ID заказа (${order.id}). Пожалуйста, обновите страницу.`)
+      return
+    }
+
     try {
+      // Убеждаемся, что передаем UUID, а не order_number
+      // Если по какой-то причине order.id содержит order_number, это будет отловлено выше
+      const orderUuid = String(order.id).trim()
+      console.log('Using order_uuid:', orderUuid)
+      console.log('Order UUID validation passed')
+      
       const { data, error: rpcError } = await supabase.rpc('process_order_payment', {
-        order_uuid: order.id,
+        order_uuid: orderUuid,
         payment_status: isPaid,
       })
 

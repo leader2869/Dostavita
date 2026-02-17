@@ -22,6 +22,10 @@ export default function CustomerFinancePage() {
   const [showWithdrawModal, setShowWithdrawModal] = useState(false)
   const [selectedDriver, setSelectedDriver] = useState<any>(null)
   const [withdrawAmount, setWithdrawAmount] = useState<string>('')
+  const [cashDepositRequests, setCashDepositRequests] = useState<any[]>([])
+  const [showDebtorModal, setShowDebtorModal] = useState(false)
+  const [selectedDebtor, setSelectedDebtor] = useState<any>(null)
+  const [debtorReceivables, setDebtorReceivables] = useState<any[]>([])
 
   const getDateFilter = useCallback((period: Period) => {
     const now = new Date()
@@ -106,6 +110,10 @@ export default function CustomerFinancePage() {
       }
 
       // Получаем дебиторку организации
+      console.log('=== Загрузка дебиторки ===')
+      console.log('Organization user ID:', currentUser.id)
+      console.log('Date filter:', dateFilter)
+      
       const { data: receivablesData, error: receivablesError } = await supabase
         .rpc('get_organization_receivables', {
           organization_user_id: currentUser.id,
@@ -113,11 +121,52 @@ export default function CustomerFinancePage() {
           end_date: dateFilter.end
         })
 
+      console.log('=== Результат загрузки дебиторки ===')
+      console.log('Receivables data:', receivablesData)
+      console.log('Receivables count:', receivablesData?.length || 0)
+      console.log('Receivables error:', receivablesError)
+
       if (receivablesError) {
-        console.error('Ошибка загрузки дебиторки:', receivablesError)
+        console.error('❌ Ошибка загрузки дебиторки:', receivablesError)
+        console.error('Детали ошибки:', {
+          message: receivablesError.message,
+          code: receivablesError.code,
+          details: receivablesError.details,
+          hint: receivablesError.hint
+        })
+        // Устанавливаем пустой массив при ошибке, чтобы не показывать ошибку пользователю
+        setReceivables([])
       } else {
+        console.log('✅ Дебиторка загружена успешно')
+        console.log('Количество записей:', receivablesData?.length || 0)
+        if (receivablesData && receivablesData.length > 0) {
+          console.log('Первая запись:', receivablesData[0])
+        }
         setReceivables(receivablesData || [])
       }
+      
+      // Дополнительная проверка: пытаемся получить дебиторку напрямую из таблицы
+      console.log('=== Прямая проверка таблицы receivables ===')
+      const { data: directReceivables, error: directError } = await supabase
+        .from('receivables')
+        .select('*, orders(order_number), profiles!receivables_driver_user_id_fkey(full_name, organization_id)')
+        .eq('status', 'unpaid')
+        .limit(10)
+      
+      console.log('Прямой запрос к receivables:', directReceivables)
+      console.log('Ошибка прямого запроса:', directError)
+      
+      // Загружаем запросы на сдачу кассы от водителей
+      const { data: requestsData } = await supabase
+        .from('cash_deposit_requests')
+        .select(`
+          *,
+          profiles!cash_deposit_requests_driver_user_id_fkey(full_name)
+        `)
+        .eq('organization_id', currentUser.id)
+        .order('created_at', { ascending: false })
+      
+      setCashDepositRequests(requestsData || [])
     } catch (err: any) {
       console.error('Ошибка загрузки данных:', err)
     } finally {
@@ -270,7 +319,15 @@ export default function CustomerFinancePage() {
           <h3 className="text-sm text-gray-400 mb-2">Общая сумма</h3>
           <p className="text-3xl font-bold text-blue-400">{totalEarnings.toFixed(2)} BYN</p>
         </div>
-        <div className="bg-gray-800 rounded-lg shadow p-6">
+        <div 
+          className="bg-gray-800 rounded-lg shadow p-6 cursor-pointer hover:bg-gray-700 transition"
+          onClick={() => {
+            const receivablesSection = document.getElementById('receivables-section')
+            if (receivablesSection) {
+              receivablesSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            }
+          }}
+        >
           <h3 className="text-sm text-gray-400 mb-2">Дебиторка</h3>
           <p className="text-3xl font-bold text-red-400">{totalReceivables.toFixed(2)} BYN</p>
         </div>
@@ -296,6 +353,25 @@ export default function CustomerFinancePage() {
                       <p className="text-gray-300">
                         Баланс: <span className="text-blue-400 font-semibold">{parseFloat(finance.balance || 0).toFixed(2)} BYN</span>
                       </p>
+                      {(() => {
+                        // Фильтруем дебиторку по driver_user_id
+                        const driverReceivables = receivables.filter((r: any) => {
+                          // Проверяем, что driver_user_id совпадает с driver_id водителя
+                          return r.driver_user_id === finance.driver_id
+                        })
+                        const driverReceivablesTotal = driverReceivables.reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0)
+                        if (driverReceivablesTotal > 0) {
+                          return (
+                            <p className="text-gray-300">
+                              Дебиторка: <span className="text-red-400 font-semibold">{driverReceivablesTotal.toFixed(2)} BYN</span>
+                              <span className="text-gray-500 text-xs ml-1">
+                                ({driverReceivables.length} {driverReceivables.length === 1 ? 'заказ' : 'заказов'})
+                              </span>
+                            </p>
+                          )
+                        }
+                        return null
+                      })()}
                     </div>
                   </div>
                   <div className="flex gap-2">
@@ -415,7 +491,7 @@ export default function CustomerFinancePage() {
       )}
 
       {/* Дебиторка */}
-      <div className="bg-gray-800 rounded-lg shadow p-6">
+      <div id="receivables-section" className="bg-gray-800 rounded-lg shadow p-6">
         <h2 className="text-xl font-semibold mb-4 text-white">Дебиторка (неоплаченные заказы)</h2>
         {receivables && receivables.length > 0 ? (
           <div className="space-y-4">
@@ -424,7 +500,14 @@ export default function CustomerFinancePage() {
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
-                      <p className="font-semibold text-white text-lg">
+                      <p 
+                        className="font-semibold text-white text-lg cursor-pointer hover:text-blue-400 transition"
+                        onClick={() => {
+                          if (receivable.order_id) {
+                            router.push(`/dashboard/customer/orders/${receivable.order_id}`)
+                          }
+                        }}
+                      >
                         Заказ {receivable.order_number ? `№${receivable.order_number}` : 'без номера'}
                       </p>
                       <span className="px-2 py-1 bg-red-500/20 text-red-400 text-xs rounded">
@@ -440,7 +523,33 @@ export default function CustomerFinancePage() {
                           {receivable.debtor_type === 'sender' ? 'Отправитель' : 'Получатель'}
                         </span>
                         {receivable.debtor_name && (
-                          <span className="text-gray-400 ml-1">({receivable.debtor_name})</span>
+                          <span 
+                            className="text-blue-400 ml-1 cursor-pointer hover:text-blue-300 underline"
+                            onClick={async () => {
+                              // Загружаем все неоплаченные заказы этого должника
+                              const { data: debtorReceivablesData } = await supabase
+                                .rpc('get_organization_receivables', {
+                                  organization_user_id: user.id,
+                                  start_date: null,
+                                  end_date: null
+                                })
+                              
+                              const filtered = (debtorReceivablesData || []).filter((r: any) => 
+                                r.debtor_user_id === receivable.debtor_user_id
+                              )
+                              
+                              setDebtorReceivables(filtered)
+                              setSelectedDebtor({
+                                name: receivable.debtor_name,
+                                phone: receivable.debtor_phone,
+                                type: receivable.debtor_type,
+                                user_id: receivable.debtor_user_id
+                              })
+                              setShowDebtorModal(true)
+                            }}
+                          >
+                            ({receivable.debtor_name})
+                          </span>
                         )}
                       </p>
                       {receivable.debtor_phone && (
@@ -472,14 +581,313 @@ export default function CustomerFinancePage() {
                       </p>
                     </div>
                   </div>
+                  <div className="ml-4 flex flex-col items-end">
+                    <p className="text-xl font-bold text-red-400 mb-2">
+                      {parseFloat(receivable.amount || 0).toFixed(2)} BYN
+                    </p>
+                    <button
+                      onClick={async () => {
+                        if (!confirm(`Провести оплату заказа №${receivable.order_number || 'без номера'}? Деньги будут начислены на баланс организации.`)) {
+                          return
+                        }
+                        try {
+                          console.log('=== ПРОВЕДЕНИЕ ОПЛАТЫ (ОРГАНИЗАЦИЯ) ===')
+                          console.log('Полный объект receivable:', JSON.stringify(receivable, null, 2))
+                          console.log('receivable.order_id:', receivable.order_id)
+                          console.log('receivable.order_id type:', typeof receivable.order_id)
+                          console.log('receivable.order_id length:', receivable.order_id?.length)
+                          console.log('receivable.id:', receivable.id)
+                          console.log('receivable.order_number:', receivable.order_number)
+                          
+                          if (!receivable.order_id) {
+                            console.error('❌ receivable.order_id отсутствует!')
+                            alert('Ошибка: Нет ID заказа. Пожалуйста, обновите страницу.')
+                            return
+                          }
+                          
+                          const orderUuid = String(receivable.order_id).trim()
+                          console.log('orderUuid после String().trim():', orderUuid)
+                          console.log('orderUuid length:', orderUuid.length)
+                          console.log('orderUuid type:', typeof orderUuid)
+                          
+                          // Проверяем, что UUID валиден
+                          const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+                          const isValidUuid = uuidRegex.test(orderUuid)
+                          console.log('UUID валиден:', isValidUuid)
+                          
+                          if (!isValidUuid) {
+                            console.error('❌ UUID невалиден!')
+                            console.error('orderUuid:', orderUuid)
+                            console.error('orderUuid length:', orderUuid.length)
+                            alert(`Ошибка: Невалидный ID заказа (${orderUuid}). Пожалуйста, обновите страницу.`)
+                            return
+                          }
+                          
+                          console.log('✅ UUID валиден, вызываем RPC')
+                          console.log('Параметры RPC:', {
+                            order_uuid: orderUuid,
+                            payment_status: true
+                          })
+                          
+                          // Передаем только 2 параметра: order_uuid и payment_status
+                          const { data, error } = await supabase.rpc('process_order_payment', {
+                            order_uuid: orderUuid,
+                            payment_status: true
+                          })
+                          
+                          console.log('RPC результат:', { data, error })
+                          
+                          if (error) {
+                            console.error('RPC error details:', error)
+                            alert(`Ошибка: ${error.message}`)
+                          } else if (data === false) {
+                            alert('Не удалось обработать оплату. Возможно, заказ уже обработан или не найден.')
+                          } else {
+                            alert('Оплата успешно проведена! Деньги начислены на баланс организации.')
+                            setTimeout(() => {
+                              loadData()
+                            }, 2000)
+                          }
+                        } catch (err: any) {
+                          console.error('Ошибка обработки оплаты:', err)
+                          alert(`Ошибка: ${err.message || 'Не удалось обработать оплату'}`)
+                        }
+                      }}
+                      className="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700 transition"
+                    >
+                      Провести оплату
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <p className="text-gray-400 text-center py-8">Нет дебиторки за выбранный период</p>
+          <div className="text-center py-8">
+            <p className="text-gray-400 mb-2">Нет дебиторки за выбранный период</p>
+            <p className="text-gray-500 text-sm">
+              Дебиторка появляется, когда водитель отмечает заказ как "не оплачен" после завершения доставки
+            </p>
+          </div>
         )}
       </div>
+
+      {/* Запросы на сдачу кассы от водителей */}
+      {cashDepositRequests.length > 0 && (
+        <div className="bg-gray-800 rounded-lg shadow p-6 mb-6">
+          <h2 className="text-xl font-semibold mb-4 text-white">Запросы на сдачу кассы</h2>
+          <div className="space-y-3">
+            {cashDepositRequests.map((request: any) => (
+              <div key={request.id} className="border border-blue-500/50 rounded-lg p-4 bg-gray-700/50">
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <p className="font-semibold text-white text-lg">
+                        {request.profiles?.full_name || 'Водитель без имени'}
+                      </p>
+                      <span className={`px-2 py-1 text-xs rounded ${
+                        request.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' :
+                        request.status === 'approved' ? 'bg-green-500/20 text-green-400' :
+                        request.status === 'rejected' ? 'bg-red-500/20 text-red-400' :
+                        'bg-gray-500/20 text-gray-400'
+                      }`}>
+                        {request.status === 'pending' && 'Ожидает принятия'}
+                        {request.status === 'approved' && 'Принято'}
+                        {request.status === 'rejected' && 'Отклонено'}
+                        {request.status === 'cancelled' && 'Отменено'}
+                      </span>
+                    </div>
+                    <p className="text-xl font-bold text-blue-400 mb-2">
+                      {parseFloat(request.amount || 0).toFixed(2)} BYN
+                    </p>
+                    <p className="text-gray-400 text-xs">
+                      Дата запроса: {new Date(request.created_at).toLocaleString('ru-RU', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </p>
+                    {request.approved_at && (
+                      <p className="text-green-400 text-xs mt-1">
+                        Принято: {new Date(request.approved_at).toLocaleString('ru-RU', {
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </p>
+                    )}
+                    {request.rejected_at && (
+                      <p className="text-red-400 text-xs mt-1">
+                        Отклонено: {new Date(request.rejected_at).toLocaleString('ru-RU', {
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </p>
+                    )}
+                  </div>
+                  {request.status === 'pending' && (
+                    <div className="flex gap-2 ml-4">
+                      <button
+                        onClick={async () => {
+                          if (!confirm(`Принять запрос на сдачу кассы от ${request.profiles?.full_name || 'водителя'} на сумму ${request.amount} BYN?`)) {
+                            return
+                          }
+                          try {
+                            const { data, error } = await supabase.rpc('approve_cash_deposit_request', {
+                              request_id: request.id
+                            })
+                            
+                            if (error) {
+                              alert(`Ошибка: ${error.message}`)
+                            } else if (data === false) {
+                              alert('Не удалось принять запрос')
+                            } else {
+                              alert('Запрос принят! Деньги переведены на баланс организации.')
+                              loadData()
+                            }
+                          } catch (err: any) {
+                            alert(`Ошибка: ${err.message || 'Не удалось принять запрос'}`)
+                          }
+                        }}
+                        className="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700 transition"
+                      >
+                        Принять
+                      </button>
+                      <button
+                        onClick={async () => {
+                          if (!confirm(`Отклонить запрос на сдачу кассы от ${request.profiles?.full_name || 'водителя'}?`)) {
+                            return
+                          }
+                          try {
+                            const { data, error } = await supabase.rpc('reject_cash_deposit_request', {
+                              request_id: request.id
+                            })
+                            
+                            if (error) {
+                              alert(`Ошибка: ${error.message}`)
+                            } else if (data === false) {
+                              alert('Не удалось отклонить запрос')
+                            } else {
+                              alert('Запрос отклонен')
+                              loadData()
+                            }
+                          } catch (err: any) {
+                            alert(`Ошибка: ${err.message || 'Не удалось отклонить запрос'}`)
+                          }
+                        }}
+                        className="bg-red-600 text-white px-4 py-2 rounded text-sm hover:bg-red-700 transition"
+                      >
+                        Отклонить
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Модальное окно информации о должнике */}
+      {showDebtorModal && selectedDebtor && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-800 rounded-lg shadow-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold text-white">Информация о должнике</h2>
+              <button
+                onClick={() => {
+                  setShowDebtorModal(false)
+                  setSelectedDebtor(null)
+                  setDebtorReceivables([])
+                }}
+                className="text-gray-400 hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm text-gray-400">Имя</p>
+                <p className="text-white font-semibold text-lg">{selectedDebtor.name || 'Не указано'}</p>
+              </div>
+              
+              {selectedDebtor.phone && (
+                <div>
+                  <p className="text-sm text-gray-400">Телефон</p>
+                  <p className="text-white">
+                    <a href={`tel:${selectedDebtor.phone}`} className="text-green-400 hover:text-green-300 font-medium">
+                      {selectedDebtor.phone}
+                    </a>
+                  </p>
+                </div>
+              )}
+              
+              <div>
+                <p className="text-sm text-gray-400">Тип</p>
+                <p className="text-white capitalize">
+                  {selectedDebtor.type === 'sender' ? 'Отправитель' : 'Получатель'}
+                </p>
+              </div>
+              
+              <div className="border-t border-gray-700 pt-4">
+                <p className="text-sm text-gray-400 mb-2">Общая сумма задолженности</p>
+                <p className="text-3xl font-bold text-red-400">
+                  {debtorReceivables.reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0).toFixed(2)} BYN
+                </p>
+                <p className="text-gray-400 text-sm mt-1">
+                  ({debtorReceivables.length} {debtorReceivables.length === 1 ? 'неоплаченный заказ' : 'неоплаченных заказов'})
+                </p>
+              </div>
+              
+              {debtorReceivables.length > 0 && (
+                <div className="border-t border-gray-700 pt-4">
+                  <h3 className="text-lg font-semibold text-white mb-3">Неоплаченные заказы</h3>
+                  <div className="space-y-2">
+                    {debtorReceivables.map((r: any) => (
+                      <div 
+                        key={r.id} 
+                        className="bg-gray-700/50 rounded p-3 cursor-pointer hover:bg-gray-700 transition"
+                        onClick={() => {
+                          if (r.order_id) {
+                            router.push(`/dashboard/customer/orders/${r.order_id}`)
+                          }
+                        }}
+                      >
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <p className="text-white font-medium">
+                              Заказ {r.order_number ? `№${r.order_number}` : 'без номера'}
+                            </p>
+                            {r.pickup_address && r.delivery_address && (
+                              <p className="text-gray-400 text-xs mt-1">
+                                {r.pickup_address} → {r.delivery_address}
+                              </p>
+                            )}
+                            <p className="text-gray-400 text-xs mt-1">
+                              {new Date(r.created_at).toLocaleDateString('ru-RU')}
+                            </p>
+                          </div>
+                          <p className="text-red-400 font-semibold">
+                            {parseFloat(r.amount || 0).toFixed(2)} BYN
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Нижняя навигация */}
       <div className="fixed bottom-0 left-0 right-0 bg-gray-800 border-t border-gray-700 z-50">
