@@ -53,7 +53,7 @@ export function DriverChatSection({ driverUserId, organizationId }: DriverChatSe
 
     loadUnreadCount()
 
-    // Подписываемся на изменения сообщений
+    // Подписываемся на изменения сообщений (включая обновления read_at)
     const channel = supabase
       .channel(`driver_chat_unread_${driverUserId}`)
       .on(
@@ -65,13 +65,16 @@ export function DriverChatSection({ driverUserId, organizationId }: DriverChatSe
           filter: `organization_id=eq.${organizationId}`
         },
         () => {
-          loadUnreadCount()
+          // Небольшая задержка, чтобы дать время базе данных обновиться
+          setTimeout(() => {
+            loadUnreadCount()
+          }, 500)
         }
       )
       .subscribe()
 
-    // Обновляем каждые 30 секунд
-    const interval = setInterval(loadUnreadCount, 30000)
+    // Обновляем каждые 10 секунд для более быстрого обновления
+    const interval = setInterval(loadUnreadCount, 10000)
 
     return () => {
       isMounted = false
