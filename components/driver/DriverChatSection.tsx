@@ -147,7 +147,7 @@ export function DriverChatSection({ driverUserId, organizationId }: DriverChatSe
       </div>
 
       {/* Модальное окно чата */}
-      {activeChat && (
+      {activeChat && organizationId && (
         <DriverOrganizationChat
           organizationId={organizationId}
           driverId={activeChat === 'general' ? null : driverUserId}
