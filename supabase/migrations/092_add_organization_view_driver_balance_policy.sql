@@ -1,6 +1,9 @@
 -- Миграция 092: Добавление RLS политики для организаций - просмотр балансов своих водителей
 -- Организации должны видеть балансы водителей, которые к ним привязаны
 
+-- Удаляем политику, если она уже существует (на случай повторного применения)
+DROP POLICY IF EXISTS "Organizations can view their drivers' balances" ON public.balances;
+
 -- Добавляем политику для организаций: они могут видеть балансы своих водителей
 CREATE POLICY "Organizations can view their drivers' balances"
   ON public.balances FOR SELECT
