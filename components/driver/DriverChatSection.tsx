@@ -149,7 +149,7 @@ export function DriverChatSection({ driverUserId, organizationId }: DriverChatSe
       {/* Модальное окно чата */}
       {activeChat && organizationId && (
         <DriverOrganizationChat
-          organizationId={organizationId}
+          organizationId={organizationId as string}
           driverId={activeChat === 'general' ? null : driverUserId}
           currentUserId={driverUserId}
           currentUserRole="driver"
