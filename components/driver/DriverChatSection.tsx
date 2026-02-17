@@ -80,13 +80,15 @@ export function DriverChatSection({ driverUserId, organizationId }: DriverChatSe
     }
   }, [driverUserId, organizationId])
 
-  if (!organizationId) {
-    return null
-  }
-
   return (
     <>
       <div className="bg-gray-800 rounded-lg shadow p-6">
+        {!organizationId && (
+          <div className="mb-4 p-3 bg-yellow-900/30 border border-yellow-500/50 rounded text-yellow-200 text-sm">
+            Вы не привязаны к организации. Чаты будут доступны после привязки к организации.
+          </div>
+        )}
+        {organizationId && (
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold text-white">Чаты с организацией</h2>
           {unreadCount > 0 && (

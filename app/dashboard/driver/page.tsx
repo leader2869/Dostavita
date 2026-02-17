@@ -45,6 +45,20 @@ export default async function DriverDashboard() {
     }
   }
 
+  // Если organization_id не в профиле, получаем его отдельно
+  let organizationId = (profile as any)?.organization_id
+  if (!organizationId) {
+    const { data: orgData } = await supabase
+      .from('profiles')
+      .select('organization_id')
+      .eq('id', user.id)
+      .single()
+    
+    if (orgData) {
+      organizationId = orgData.organization_id
+    }
+  }
+
   if (!profile || (profile as User).role !== 'driver') {
     redirect('/dashboard')
   }
@@ -274,14 +288,12 @@ export default async function DriverDashboard() {
       </div>
 
       {/* Секция чатов с организацией */}
-      {(profile as any)?.organization_id && (
-        <div className="mt-6">
-          <DriverChatSection
-            driverUserId={user.id}
-            organizationId={(profile as any).organization_id}
-          />
-        </div>
-      )}
+      <div className="mt-6">
+        <DriverChatSection
+          driverUserId={user.id}
+          organizationId={organizationId || null}
+        />
+      </div>
       
       {/* Нижняя навигация */}
       <DriverBottomNavigation />
