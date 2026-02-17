@@ -63,11 +63,14 @@ export default async function DriverDetailsPage({ params }: { params: { id: stri
   const driverFinance = finances?.find((f: any) => f.driver_id === driverId)
 
   // Получаем баланс водителя
-  const { data: balance } = await supabase
+  const { data: balance, error: balanceError } = await supabase
     .from('balances')
     .select('amount, currency')
     .eq('user_id', driverId)
-    .single()
+    .maybeSingle()
+  
+  // Если баланса нет, создаем нулевой баланс для отображения
+  const displayBalance = balance || { amount: 0, currency: 'BYN' }
 
   const getStatusLabel = (status: string) => {
     switch (status) {
@@ -193,7 +196,7 @@ export default async function DriverDetailsPage({ params }: { params: { id: stri
         <div className="bg-gray-800 rounded-lg shadow p-6">
           <h3 className="text-sm text-gray-400 mb-2">Баланс</h3>
           <p className="text-3xl font-bold text-white">
-            {balance?.amount || 0} {balance?.currency || 'BYN'}
+            {displayBalance.amount ? parseFloat(displayBalance.amount).toFixed(2) : '0.00'} {displayBalance.currency || 'BYN'}
           </p>
         </div>
         <div className="bg-gray-800 rounded-lg shadow p-6">

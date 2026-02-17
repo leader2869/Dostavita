@@ -19,6 +19,9 @@ export default function CustomerFinancePage() {
   const [period, setPeriod] = useState<Period>('all')
   const [customStartDate, setCustomStartDate] = useState<string>('')
   const [customEndDate, setCustomEndDate] = useState<string>('')
+  const [showWithdrawModal, setShowWithdrawModal] = useState(false)
+  const [selectedDriver, setSelectedDriver] = useState<any>(null)
+  const [withdrawAmount, setWithdrawAmount] = useState<string>('')
 
   const getDateFilter = useCallback((period: Period) => {
     const now = new Date()
@@ -295,12 +298,26 @@ export default function CustomerFinancePage() {
                       </p>
                     </div>
                   </div>
-                  <a
-                    href={`/dashboard/customer/drivers/${finance.driver_id}`}
-                    className="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700 transition"
-                  >
-                    Подробнее
-                  </a>
+                  <div className="flex gap-2">
+                    {parseFloat(finance.balance || 0) > 0 && (
+                      <button
+                        onClick={() => {
+                          setSelectedDriver(finance)
+                          setWithdrawAmount('')
+                          setShowWithdrawModal(true)
+                        }}
+                        className="bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700 transition"
+                      >
+                        Забрать кассу
+                      </button>
+                    )}
+                    <a
+                      href={`/dashboard/customer/drivers/${finance.driver_id}`}
+                      className="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700 transition"
+                    >
+                      Подробнее
+                    </a>
+                  </div>
                 </div>
               </div>
             ))}
@@ -309,6 +326,93 @@ export default function CustomerFinancePage() {
           <p className="text-gray-400 text-center py-8">Нет данных за выбранный период</p>
         )}
       </div>
+
+      {/* Модальное окно изъятия кассы */}
+      {showWithdrawModal && selectedDriver && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-800 rounded-lg shadow-xl p-6 max-w-md w-full">
+            <h2 className="text-2xl font-bold mb-4 text-white">Забрать кассу у водителя</h2>
+            <p className="text-gray-300 mb-2">
+              Водитель: <span className="text-white font-semibold">{selectedDriver.driver_full_name || 'Без имени'}</span>
+            </p>
+            <p className="text-gray-300 mb-4">
+              Доступный баланс водителя: <span className="text-green-400 font-semibold">
+                {parseFloat(selectedDriver.balance || 0).toFixed(2)} BYN
+              </span>
+            </p>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Сумма для изъятия
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                min="0.01"
+                max={selectedDriver.balance || 0}
+                value={withdrawAmount}
+                onChange={(e) => setWithdrawAmount(e.target.value)}
+                placeholder="0.00"
+                className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={async () => {
+                  const amount = parseFloat(withdrawAmount)
+                  if (!amount || amount <= 0) {
+                    alert('Введите корректную сумму')
+                    return
+                  }
+                  if (amount > parseFloat(selectedDriver.balance || 0)) {
+                    alert('Недостаточно средств на балансе водителя')
+                    return
+                  }
+                  
+                  try {
+                    const { data, error } = await supabase.rpc('withdraw_cash_from_driver', {
+                      organization_user_id: user.id,
+                      driver_user_id: selectedDriver.driver_id,
+                      amount_to_withdraw: amount
+                    })
+                    
+                    if (error) {
+                      console.error('Ошибка изъятия кассы:', error)
+                      alert(`Ошибка: ${error.message}`)
+                    } else if (data === false) {
+                      alert('Не удалось забрать кассу. Проверьте, что водитель привязан к вашей организации.')
+                    } else {
+                      alert('Касса успешно изъята!')
+                      setShowWithdrawModal(false)
+                      setSelectedDriver(null)
+                      setWithdrawAmount('')
+                      // Обновляем данные через 2 секунды
+                      setTimeout(() => {
+                        loadData()
+                      }, 2000)
+                    }
+                  } catch (err: any) {
+                    console.error('Ошибка изъятия кассы:', err)
+                    alert(`Ошибка: ${err.message || 'Не удалось забрать кассу'}`)
+                  }
+                }}
+                className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+              >
+                Забрать кассу
+              </button>
+              <button
+                onClick={() => {
+                  setShowWithdrawModal(false)
+                  setSelectedDriver(null)
+                  setWithdrawAmount('')
+                }}
+                className="flex-1 bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition"
+              >
+                Отмена
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Дебиторка */}
       <div className="bg-gray-800 rounded-lg shadow p-6">
