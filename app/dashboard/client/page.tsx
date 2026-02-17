@@ -500,7 +500,7 @@ export default function ClientDashboard() {
                         const { formattedTime, timeStatus, statusType } = formatReadyTime(order.ready_at)
                         return (
                           <p className="text-sm text-gray-400 mt-1">
-                            Заказ будет готов к: <span className="text-gray-300">{formattedTime}</span>
+                            Заказ будет готов к выдаче: <span className="text-gray-300">{formattedTime}</span>
                             {timeStatus && (
                               <span className={`ml-2 ${statusType === 'waiting' ? 'text-red-400 animate-blink' : statusType === 'upcoming' ? 'text-yellow-400 animate-blink' : 'text-gray-400'}`}>
                                 ({timeStatus})
@@ -524,6 +524,32 @@ export default function ClientDashboard() {
                         className="flex-1 bg-green-600 text-white px-3 py-1.5 rounded text-xs hover:bg-green-700 transition"
                       >
                         Редактировать
+                      </button>
+                      <button
+                        onClick={async (e) => {
+                          e.stopPropagation()
+                          if (!confirm('Вы уверены, что хотите отменить этот заказ?')) {
+                            return
+                          }
+                          try {
+                            const response = await fetch(`/api/orders/${order.id}/cancel`, {
+                              method: 'POST',
+                            })
+                            const data = await response.json()
+                            if (response.ok) {
+                              alert('Заказ успешно отменен')
+                              window.location.reload()
+                            } else {
+                              alert(data.error || 'Не удалось отменить заказ')
+                            }
+                          } catch (error) {
+                            console.error('Ошибка отмены заказа:', error)
+                            alert('Произошла ошибка при отмене заказа')
+                          }
+                        }}
+                        className="flex-1 bg-red-600 text-white px-3 py-1.5 rounded text-xs hover:bg-red-700 transition"
+                      >
+                        Отменить заказ
                       </button>
                     </div>
                   )}

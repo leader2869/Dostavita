@@ -93,7 +93,12 @@ export function useAvailableOrdersCount(driverUserId: string | null) {
           }
         }
       )
-      .subscribe()
+      .subscribe((status) => {
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+          // Ошибки WebSocket не критичны - данные обновляются через polling
+          console.warn('Realtime subscription error (не критично):', status)
+        }
+      })
 
     // Обновляем каждые 30 секунд
     const interval = setInterval(() => {

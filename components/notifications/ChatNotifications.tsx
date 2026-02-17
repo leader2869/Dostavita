@@ -21,18 +21,43 @@ export function ChatNotifications({ userId, userRole }: ChatNotificationsProps) 
 
     const checkActiveOrders = async () => {
       try {
-        const { data: orders } = await supabase
-          .from('orders')
-          .select('id')
-          .or(`customer_id.eq.${userId},client_id.eq.${userId},executor_user_id.eq.${userId}`)
-          .in('status', ['courier_accepted', 'courier_coming', 'courier_delivering'])
-          .limit(1)
+        // Делаем три отдельных запроса из-за RLS политик
+        const activeStatuses = ['courier_accepted', 'courier_coming', 'courier_delivering']
+        
+        const [ordersAsCustomer, ordersAsClient, ordersAsDriver] = await Promise.all([
+          supabase
+            .from('orders')
+            .select('id')
+            .eq('customer_id', userId)
+            .in('status', activeStatuses)
+            .limit(1),
+          supabase
+            .from('orders')
+            .select('id')
+            .eq('client_id', userId)
+            .in('status', activeStatuses)
+            .limit(1),
+          supabase
+            .from('orders')
+            .select('id')
+            .eq('executor_user_id', userId)
+            .in('status', activeStatuses)
+            .limit(1)
+        ])
+
+        const hasOrders = 
+          (ordersAsCustomer.data?.length || 0) > 0 ||
+          (ordersAsClient.data?.length || 0) > 0 ||
+          (ordersAsDriver.data?.length || 0) > 0
 
         if (isMounted) {
-          setHasActiveOrders((orders?.length || 0) > 0)
+          setHasActiveOrders(hasOrders)
         }
       } catch (err) {
         console.error('Ошибка проверки активных заказов:', err)
+        if (isMounted) {
+          setHasActiveOrders(false)
+        }
       }
     }
 
@@ -54,7 +79,12 @@ export function ChatNotifications({ userId, userRole }: ChatNotificationsProps) 
           }
         }
       )
-      .subscribe()
+      .subscribe((status) => {
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+          // Ошибки WebSocket не критичны - данные обновляются через polling
+          console.warn('Realtime subscription error (не критично):', status)
+        }
+      })
 
     return () => {
       isMounted = false

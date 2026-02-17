@@ -13,6 +13,7 @@ export default function DriverFinancePage() {
   const supabase = createClient()
   
   const [user, setUser] = useState<any>(null)
+  const [profile, setProfile] = useState<any>(null)
   const [balance, setBalance] = useState<any>(null)
   const [transactions, setTransactions] = useState<any[]>([])
   const [completedOrders, setCompletedOrders] = useState<any[]>([])
@@ -20,6 +21,8 @@ export default function DriverFinancePage() {
   const [period, setPeriod] = useState<Period>('all')
   const [customStartDate, setCustomStartDate] = useState<string>('')
   const [customEndDate, setCustomEndDate] = useState<string>('')
+  const [depositAmount, setDepositAmount] = useState<string>('')
+  const [showDepositModal, setShowDepositModal] = useState(false)
 
   const getDateFilter = useCallback((period: Period) => {
     const now = new Date()
@@ -72,6 +75,17 @@ export default function DriverFinancePage() {
 
       if (isMounted) {
         setUser(currentUser)
+      }
+
+      // Получаем профиль водителя (для проверки organization_id)
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('id, organization_id, role')
+        .eq('id', currentUser.id)
+        .single()
+      
+      if (isMounted && profileData) {
+        setProfile(profileData)
       }
 
       // Получаем баланс
@@ -129,9 +143,10 @@ export default function DriverFinancePage() {
       }
 
       // Получаем завершенные заказы с фильтром по периоду
+      // Включаем is_paid и order_number для отображения статистики и списка неоплаченных
       let ordersQuery = supabase
         .from('orders')
-        .select('id, final_price, completed_at')
+        .select('id, order_number, final_price, completed_at, is_paid, pickup_address, delivery_address, created_at')
         .eq('executor_user_id', currentUser.id)
         .eq('status', 'completed')
 
@@ -154,15 +169,21 @@ export default function DriverFinancePage() {
         setLoading(false)
       }
     }
-  }, [period, getDateFilter, customStartDate, customEndDate]) // Убрали supabase и router из зависимостей
+  }, [period, getDateFilter, customStartDate, customEndDate, supabase, router]) // Добавили supabase и router обратно
 
   useEffect(() => {
     loadData()
   }, [loadData])
 
   // Подсчитываем статистику
-  const completedOrdersCount = completedOrders?.length || 0
-  const totalEarnings = completedOrders?.reduce((sum, order) => sum + (parseFloat(order.final_price) || 0), 0) || 0
+  const allOrders = completedOrders || []
+  const totalOrdersAmount = allOrders.reduce((sum, order) => sum + (parseFloat(order.final_price) || 0), 0) || 0
+  
+  const paidOrders = allOrders.filter(order => order.is_paid === true) || []
+  const paidAmount = paidOrders.reduce((sum, order) => sum + (parseFloat(order.final_price) || 0), 0) || 0
+  
+  const unpaidOrders = allOrders.filter(order => order.is_paid === false || order.is_paid === null) || []
+  const unpaidAmount = unpaidOrders.reduce((sum, order) => sum + (parseFloat(order.final_price) || 0), 0) || 0
 
   if (loading) {
     return (
@@ -274,13 +295,21 @@ export default function DriverFinancePage() {
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         {/* Баланс */}
         <div className="bg-gray-800 rounded-lg shadow p-6">
           <h2 className="text-xl font-semibold mb-4 text-white">Баланс</h2>
           <p className="text-3xl font-bold text-green-600">
-            {balance?.amount || 0} {balance?.currency || 'BYN'}
+            {balance?.amount ? parseFloat(balance.amount).toFixed(2) : '0.00'} {balance?.currency || 'BYN'}
           </p>
+          {profile?.organization_id && (
+            <button
+              onClick={() => setShowDepositModal(true)}
+              className="mt-4 w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+            >
+              Сдать кассу организации
+            </button>
+          )}
         </div>
 
         {/* Статистика */}
@@ -288,10 +317,13 @@ export default function DriverFinancePage() {
           <h2 className="text-xl font-semibold mb-4 text-white">Статистика</h2>
           <div className="space-y-2">
             <p className="text-gray-300">
-              Завершенных заказов: <span className="text-white font-semibold">{completedOrdersCount}</span>
+              Общая сумма заказов: <span className="text-white font-semibold">{totalOrdersAmount.toFixed(2)} BYN</span>
             </p>
             <p className="text-gray-300">
-              Общая сумма: <span className="text-green-400 font-semibold">{totalEarnings.toFixed(2)} BYN</span>
+              Оплачено: <span className="text-green-400 font-semibold">{paidAmount.toFixed(2)} BYN</span>
+            </p>
+            <p className="text-gray-300">
+              Неоплачено: <span className="text-red-400 font-semibold">{unpaidAmount.toFixed(2)} BYN</span>
             </p>
             <p className="text-gray-300">
               Всего транзакций: <span className="text-white font-semibold">{transactions?.length || 0}</span>
@@ -299,6 +331,163 @@ export default function DriverFinancePage() {
           </div>
         </div>
       </div>
+
+      {/* Неоплаченные заказы */}
+      {unpaidOrders.length > 0 && (
+        <div className="bg-gray-800 rounded-lg shadow p-6 mb-6">
+          <h2 className="text-xl font-semibold mb-4 text-white">Неоплаченные заказы</h2>
+          <div className="space-y-3">
+            {unpaidOrders.map((order: any) => (
+              <div key={order.id} className="border border-red-700 rounded-lg p-4 bg-red-900/20">
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <p className="font-medium text-white">
+                      Заказ №{order.order_number || order.id.slice(0, 8)}
+                    </p>
+                    <p className="text-sm text-gray-300 mt-1">
+                      {order.pickup_address} → {order.delivery_address}
+                    </p>
+                    <p className="text-sm text-gray-400 mt-1">
+                      Завершен: {new Date(order.completed_at).toLocaleString('ru-RU', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </p>
+                  </div>
+                  <div className="text-right ml-4">
+                    <p className="text-xl font-bold text-red-400">{order.final_price} BYN</p>
+                    <button
+                      onClick={async () => {
+                        if (!confirm(`Отметить заказ №${order.order_number || order.id.slice(0, 8)} как оплаченный?`)) {
+                          return
+                        }
+                        try {
+                          console.log('=== Processing payment for order ===')
+                          console.log('Order ID:', order.id)
+                          console.log('Order number:', order.order_number)
+                          console.log('Final price:', order.final_price)
+                          console.log('Current is_paid:', order.is_paid)
+                          
+                          const { data, error } = await supabase.rpc('process_order_payment', {
+                            order_uuid: order.id,
+                            payment_status: true,
+                          })
+                          
+                          console.log('RPC result:', { data, error })
+                          
+                          if (error) {
+                            console.error('RPC error details:', error)
+                            alert(`Ошибка: ${error.message}`)
+                          } else if (data === false) {
+                            alert('Не удалось обработать оплату. Возможно, заказ уже обработан или не найден.')
+                          } else {
+                            console.log('✅ Payment processed successfully')
+                            alert('Оплата успешно обработана!')
+                            // Задержка перед перезагрузкой, чтобы триггер успел обновить баланс и транзакции
+                            setTimeout(() => {
+                              loadData()
+                            }, 2000)
+                          }
+                        } catch (err: any) {
+                          console.error('Ошибка обработки оплаты:', err)
+                          alert(`Ошибка: ${err.message || 'Не удалось обработать оплату'}`)
+                        }
+                      }}
+                      className="mt-2 bg-green-600 text-white px-3 py-1.5 rounded text-sm hover:bg-green-700 transition"
+                    >
+                      Отметить как оплаченный
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Модальное окно сдачи кассы */}
+      {showDepositModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-800 rounded-lg shadow-xl p-6 max-w-md w-full">
+            <h2 className="text-2xl font-bold mb-4 text-white">Сдача кассы организации</h2>
+            <p className="text-gray-300 mb-4">
+              Доступный баланс: <span className="text-green-400 font-semibold">
+                {balance?.amount ? parseFloat(balance.amount).toFixed(2) : '0.00'} BYN
+              </span>
+            </p>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Сумма для сдачи
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                min="0.01"
+                max={balance?.amount || 0}
+                value={depositAmount}
+                onChange={(e) => setDepositAmount(e.target.value)}
+                placeholder="0.00"
+                className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={async () => {
+                  const amount = parseFloat(depositAmount)
+                  if (!amount || amount <= 0) {
+                    alert('Введите корректную сумму')
+                    return
+                  }
+                  if (amount > parseFloat(balance?.amount || 0)) {
+                    alert('Недостаточно средств на балансе')
+                    return
+                  }
+                  
+                  try {
+                    const { data, error } = await supabase.rpc('deposit_cash_to_organization', {
+                      driver_user_id: user.id,
+                      amount_to_deposit: amount
+                    })
+                    
+                    if (error) {
+                      console.error('Ошибка сдачи кассы:', error)
+                      alert(`Ошибка: ${error.message}`)
+                    } else if (data === false) {
+                      alert('Не удалось сдать кассу. Проверьте, что вы привязаны к организации.')
+                    } else {
+                      alert('Касса успешно сдана!')
+                      setShowDepositModal(false)
+                      setDepositAmount('')
+                      // Обновляем данные через 2 секунды
+                      setTimeout(() => {
+                        loadData()
+                      }, 2000)
+                    }
+                  } catch (err: any) {
+                    console.error('Ошибка сдачи кассы:', err)
+                    alert(`Ошибка: ${err.message || 'Не удалось сдать кассу'}`)
+                  }
+                }}
+                className="flex-1 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition"
+              >
+                Сдать кассу
+              </button>
+              <button
+                onClick={() => {
+                  setShowDepositModal(false)
+                  setDepositAmount('')
+                }}
+                className="flex-1 bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition"
+              >
+                Отмена
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Транзакции */}
       <div className="bg-gray-800 rounded-lg shadow p-6 mt-6">

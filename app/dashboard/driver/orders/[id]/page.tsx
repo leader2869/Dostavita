@@ -178,8 +178,13 @@ export default function OrderDetailsPage() {
     }
   }
 
-  const handlePaymentSuccess = () => {
-    // После успешной обработки оплаты переходим на главную страницу
+  const handlePaymentSuccess = async () => {
+    console.log('=== handlePaymentSuccess called ===')
+    // Перезагружаем заказ, чтобы получить обновленный is_paid
+    await loadOrder()
+    console.log('Order reloaded after payment')
+    // После успешной обработки оплаты обновляем заказ и переходим на главную страницу
+    await loadOrder()
     router.push('/dashboard/driver')
   }
 
@@ -272,7 +277,7 @@ export default function OrderDetailsPage() {
             const { formattedTime, timeStatus, statusType } = formatReadyTime(order.ready_at)
             return (
               <p className="text-white mt-2">
-                <strong className="text-white">Заказ будет готов к:</strong>{' '}
+                <strong className="text-white">Заказ будет готов к выдаче:</strong>{' '}
                 <span className="text-white">{formattedTime}</span>
                 {timeStatus && (
                   <span className={`ml-2 ${statusType === 'waiting' ? 'text-red-400 animate-blink' : statusType === 'upcoming' ? 'text-yellow-400 animate-blink' : 'text-gray-400'}`}>

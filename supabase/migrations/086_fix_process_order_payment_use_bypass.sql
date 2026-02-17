@@ -1,12 +1,12 @@
--- Миграция 083: Исправление проверки is_paid в функции process_order_payment
--- Проблема: функция проверяла только is_paid IS NULL, но по умолчанию is_paid = false
--- Решение: изменить проверку, чтобы она работала и с false, и с null
--- Также переименовываем параметр is_paid в payment_status, чтобы избежать конфликта с колонкой
+-- Миграция 086: Исправление функции process_order_payment для работы с RLS
+-- Проблема: set_config('row_security', 'off', true) не работает для INSERT/UPDATE в Supabase
+-- Решение: используем прямой доступ через SECURITY DEFINER без set_config
+-- SECURITY DEFINER функции должны автоматически обходить RLS в Supabase
 
--- Удаляем старую функцию, чтобы можно было изменить имя параметра
+-- Удаляем старую функцию
 DROP FUNCTION IF EXISTS public.process_order_payment(UUID, BOOLEAN);
 
--- Создаем функцию заново с новым именем параметра
+-- Создаем функцию заново без set_config, полагаясь на SECURITY DEFINER
 CREATE OR REPLACE FUNCTION public.process_order_payment(
   order_uuid UUID,
   payment_status BOOLEAN
@@ -14,6 +14,7 @@ CREATE OR REPLACE FUNCTION public.process_order_payment(
 RETURNS BOOLEAN
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 DECLARE
   order_record RECORD;
@@ -57,24 +58,30 @@ BEGIN
   
   IF payment_status THEN
     -- Если оплата получена, начисляем средства водителю
-    -- Убеждаемся, что баланс существует
-    -- Используем SET LOCAL для временного отключения RLS проверки
-    INSERT INTO public.balances (user_id, amount, currency, updated_at)
-    VALUES (driver_user_id, 0, 'BYN', NOW())
-    ON CONFLICT (user_id) DO NOTHING;
+    -- SECURITY DEFINER должен автоматически обходить RLS в Supabase
     
-    -- Проверяем, что INSERT выполнился (или баланс уже существовал)
-    -- Получаем текущий баланс для проверки
+    -- Получаем текущий баланс (если существует)
     SELECT COALESCE(amount, 0) INTO current_balance
     FROM public.balances
     WHERE user_id = driver_user_id;
     
+    -- Если баланса нет, создаем его
     IF current_balance IS NULL THEN
-      RAISE EXCEPTION 'Не удалось создать или найти баланс для пользователя %', driver_user_id;
+      INSERT INTO public.balances (user_id, amount, currency, updated_at)
+      VALUES (driver_user_id, 0, 'BYN', NOW())
+      ON CONFLICT (user_id) DO NOTHING;
+      
+      -- Проверяем, что баланс создан
+      SELECT COALESCE(amount, 0) INTO current_balance
+      FROM public.balances
+      WHERE user_id = driver_user_id;
+      
+      IF current_balance IS NULL THEN
+        RAISE EXCEPTION 'Не удалось создать баланс для пользователя %', driver_user_id;
+      END IF;
     END IF;
     
     -- Начисляем средства
-    -- Используем GET DIAGNOSTICS для проверки, что UPDATE действительно выполнился
     UPDATE public.balances
     SET 
       amount = amount + order_record.final_price,
@@ -108,10 +115,6 @@ BEGIN
       'Начисление за выполнение Заказа №' || order_record.order_number::TEXT
     );
     
-    -- Проверяем, что транзакция создана
-    IF NOT FOUND THEN
-      RAISE WARNING 'Не удалось создать транзакцию для заказа %', order_uuid;
-    END IF;
   ELSE
     -- Если оплата не получена, создаем запись о дебиторке
     -- Определяем, кто должен платить
@@ -150,7 +153,7 @@ BEGIN
 END;
 $$;
 
-COMMENT ON FUNCTION public.process_order_payment(UUID, BOOLEAN) IS 'Обрабатывает оплату заказа: начисляет деньги водителю или создает дебиторку. Принимает заказы с is_paid = false или is_paid IS NULL. Параметр payment_status: true - оплата получена, false - оплата не получена';
+COMMENT ON FUNCTION public.process_order_payment(UUID, BOOLEAN) IS 'Обрабатывает оплату заказа: начисляет деньги водителю или создает дебиторку. Принимает заказы с is_paid = false или is_paid IS NULL. Параметр payment_status: true - оплата получена, false - оплата не получена. Использует SECURITY DEFINER для обхода RLS.';
 
 -- Даем права на выполнение функции
 GRANT EXECUTE ON FUNCTION public.process_order_payment(UUID, BOOLEAN) TO authenticated;

@@ -12,6 +12,7 @@ export default function CustomerFinancePage() {
   const supabase = createClient()
   
   const [user, setUser] = useState<any>(null)
+  const [balance, setBalance] = useState<any>(null)
   const [finances, setFinances] = useState<any[]>([])
   const [receivables, setReceivables] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -58,6 +59,32 @@ export default function CustomerFinancePage() {
       }
 
       setUser(currentUser)
+
+      // Получаем баланс организации
+      const { data: balanceData, error: balanceError } = await supabase
+        .from('balances')
+        .select('*')
+        .eq('user_id', currentUser.id)
+        .maybeSingle()
+      
+      if (balanceError) {
+        console.error('Ошибка загрузки баланса:', balanceError)
+        // Если баланс не найден, создаем его с нулевым значением
+        if (balanceError.code === 'PGRST116') {
+          const { data: newBalance } = await supabase
+            .from('balances')
+            .insert({
+              user_id: currentUser.id,
+              amount: 0.00,
+              currency: 'BYN',
+            })
+            .select()
+            .single()
+          setBalance(newBalance)
+        }
+      } else {
+        setBalance(balanceData)
+      }
 
       const dateFilter = getDateFilter(period as Period)
       
@@ -215,8 +242,19 @@ export default function CustomerFinancePage() {
         )}
       </div>
 
+      {/* Баланс организации */}
+      <div className="bg-gray-800 rounded-lg shadow p-6 mb-6">
+        <h2 className="text-xl font-semibold mb-4 text-white">Баланс организации</h2>
+        <p className="text-3xl font-bold text-green-600">
+          {balance?.amount ? parseFloat(balance.amount).toFixed(2) : '0.00'} {balance?.currency || 'BYN'}
+        </p>
+        <p className="text-sm text-gray-400 mt-2">
+          Сумма, полученная от водителей (сдача кассы)
+        </p>
+      </div>
+
       {/* Общая статистика */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
         <div className="bg-gray-800 rounded-lg shadow p-6">
           <h3 className="text-sm text-gray-400 mb-2">Водителей</h3>
           <p className="text-3xl font-bold text-white">{totalDrivers}</p>
@@ -228,10 +266,6 @@ export default function CustomerFinancePage() {
         <div className="bg-gray-800 rounded-lg shadow p-6">
           <h3 className="text-sm text-gray-400 mb-2">Общая сумма</h3>
           <p className="text-3xl font-bold text-blue-400">{totalEarnings.toFixed(2)} BYN</p>
-        </div>
-        <div className="bg-gray-800 rounded-lg shadow p-6">
-          <h3 className="text-sm text-gray-400 mb-2">Общий баланс</h3>
-          <p className="text-3xl font-bold text-purple-400">{totalBalance.toFixed(2)} BYN</p>
         </div>
         <div className="bg-gray-800 rounded-lg shadow p-6">
           <h3 className="text-sm text-gray-400 mb-2">Дебиторка</h3>

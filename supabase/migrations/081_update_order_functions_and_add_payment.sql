@@ -81,8 +81,7 @@ BEGIN
   -- Обновляем статус оплаты заказа
   UPDATE public.orders
   SET 
-    is_paid = payment_status,
-    updated_at = NOW()
+    is_paid = payment_status
   WHERE orders.id = order_uuid;
   
   IF payment_status THEN

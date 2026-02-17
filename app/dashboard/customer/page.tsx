@@ -191,47 +191,84 @@ export default async function CustomerDashboard() {
                   bgColor = 'bg-yellow-900/30'
                 }
                 
+                const canCancel = order.status === 'searching_courier' && !order.executor_user_id
+                
                 return (
-                  <Link
+                  <div
                     key={order.id}
-                    href={`/dashboard/customer/orders/${order.id}`}
-                    className={`block border ${borderColor} rounded-lg p-4 ${bgColor} hover:opacity-80 transition cursor-pointer`}
+                    className={`border ${borderColor} rounded-lg p-4 ${bgColor} hover:opacity-80 transition`}
                   >
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <p className="font-medium text-white">Заказ №{order.order_number || order.id.slice(0, 8)}</p>
-                          {hasRejections && (
-                            <span className="px-2 py-1 bg-red-500 text-white text-xs rounded">
-                              Есть отказы
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-sm text-gray-300 mt-1">
-                          {order.pickup_address} → {order.delivery_address}
-                        </p>
-                        <p className="text-sm text-gray-400 mt-1">
-                          Статус: {order.status === 'searching_courier' ? 'Ищем курьера' :
-                                   order.status === 'courier_accepted' ? 'Курьер принял заказ' :
-                                   order.status === 'courier_coming' ? 'Курьер едет к отправителю' :
-                                   order.status === 'courier_delivering' ? 'Курьер едет к получателю' :
-                                   order.status === 'completed' ? 'Заказ завершен' : 
-                                   order.status === 'cancelled' ? 'Отменен' : order.status}
-                        </p>
-                        {order.driver_full_name && (
-                          <p className="text-sm text-gray-400 mt-1">
-                            Водитель: {order.driver_full_name}
+                    <Link
+                      href={`/dashboard/customer/orders/${order.id}`}
+                      className="block cursor-pointer"
+                    >
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <p className="font-medium text-white">Заказ №{order.order_number || order.id.slice(0, 8)}</p>
+                            {hasRejections && (
+                              <span className="px-2 py-1 bg-red-500 text-white text-xs rounded">
+                                Есть отказы
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-sm text-gray-300 mt-1">
+                            {order.pickup_address} → {order.delivery_address}
                           </p>
-                        )}
-                        <p className="text-xs text-gray-500 mt-1">
-                          Создан: {new Date(order.created_at).toLocaleString('ru-RU')}
-                        </p>
+                          <p className="text-sm text-gray-400 mt-1">
+                            Статус: {order.status === 'searching_courier' ? 'Ищем курьера' :
+                                     order.status === 'courier_accepted' ? 'Курьер принял заказ' :
+                                     order.status === 'courier_coming' ? 'Курьер едет к отправителю' :
+                                     order.status === 'courier_delivering' ? 'Курьер едет к получателю' :
+                                     order.status === 'completed' ? 'Заказ завершен' : 
+                                     order.status === 'cancelled' ? 'Отменен' : order.status}
+                          </p>
+                          {order.driver_full_name && (
+                            <p className="text-sm text-gray-400 mt-1">
+                              Водитель: {order.driver_full_name}
+                            </p>
+                          )}
+                          <p className="text-xs text-gray-500 mt-1">
+                            Создан: {new Date(order.created_at).toLocaleString('ru-RU')}
+                          </p>
+                        </div>
+                        <div className="text-right ml-4">
+                          <p className="font-semibold text-white">{order.final_price} BYN</p>
+                        </div>
                       </div>
-                      <div className="text-right ml-4">
-                        <p className="font-semibold text-white">{order.final_price} BYN</p>
+                    </Link>
+                    {canCancel && (
+                      <div className="mt-3">
+                        <button
+                          onClick={async (e) => {
+                            e.preventDefault()
+                            e.stopPropagation()
+                            if (!confirm('Вы уверены, что хотите отменить этот заказ?')) {
+                              return
+                            }
+                            try {
+                              const response = await fetch(`/api/orders/${order.id}/cancel`, {
+                                method: 'POST',
+                              })
+                              const data = await response.json()
+                              if (response.ok) {
+                                alert('Заказ успешно отменен')
+                                window.location.reload()
+                              } else {
+                                alert(data.error || 'Не удалось отменить заказ')
+                              }
+                            } catch (error) {
+                              console.error('Ошибка отмены заказа:', error)
+                              alert('Произошла ошибка при отмене заказа')
+                            }
+                          }}
+                          className="w-full bg-red-600 text-white px-3 py-1.5 rounded text-xs hover:bg-red-700 transition"
+                        >
+                          Отменить заказ
+                        </button>
                       </div>
-                    </div>
-                  </Link>
+                    )}
+                  </div>
                 )
               })}
           </div>

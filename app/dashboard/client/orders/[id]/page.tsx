@@ -354,7 +354,7 @@ export default function OrderDetailsPage() {
               const { formattedTime, timeStatus, statusType } = formatReadyTime(order.ready_at)
               return (
                 <div>
-                  <p className="text-sm text-gray-400">Заказ будет готов к</p>
+                  <p className="text-sm text-gray-400">Заказ будет готов к выдаче</p>
                   <p className="text-white">
                     {formattedTime}
                     {timeStatus && (

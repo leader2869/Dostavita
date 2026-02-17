@@ -795,7 +795,7 @@ export default function CreateOrderPage() {
 
         <div>
           <label htmlFor="readyAt" className="block text-sm font-medium text-gray-300 mb-1">
-            Заказ будет готов к
+            Заказ будет готов к выдаче
           </label>
           <input
             type="datetime-local"

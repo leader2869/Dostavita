@@ -21,14 +21,38 @@ export function useUnreadMessagesCount(userId: string | null) {
       try {
         // Получаем только активные заказы пользователя (где он заказчик или водитель)
         // Исключаем завершенные заказы
-        const { data: orders, error: ordersError } = await supabase
-          .from('orders')
-          .select('id')
-          .or(`customer_id.eq.${userId},client_id.eq.${userId},executor_user_id.eq.${userId}`)
-          .in('status', ['courier_accepted', 'courier_coming', 'courier_delivering'])
+        // Делаем три отдельных запроса из-за RLS политик
+        const activeStatuses = ['courier_accepted', 'courier_coming', 'courier_delivering']
+        
+        const [ordersAsCustomer, ordersAsClient, ordersAsDriver] = await Promise.all([
+          // Заказы где пользователь - заказчик (customer)
+          supabase
+            .from('orders')
+            .select('id')
+            .eq('customer_id', userId)
+            .in('status', activeStatuses),
+          // Заказы где пользователь - клиент (client)
+          supabase
+            .from('orders')
+            .select('id')
+            .eq('client_id', userId)
+            .in('status', activeStatuses),
+          // Заказы где пользователь - водитель (executor)
+          supabase
+            .from('orders')
+            .select('id')
+            .eq('executor_user_id', userId)
+            .in('status', activeStatuses)
+        ])
 
-        if (ordersError) {
-          console.error('Ошибка загрузки заказов для подсчета сообщений:', ordersError)
+        // Объединяем результаты и убираем дубликаты
+        const allOrderIds = new Set<string>()
+        
+        ordersAsCustomer.data?.forEach(o => allOrderIds.add(o.id))
+        ordersAsClient.data?.forEach(o => allOrderIds.add(o.id))
+        ordersAsDriver.data?.forEach(o => allOrderIds.add(o.id))
+
+        if (allOrderIds.size === 0) {
           if (isMounted) {
             setCount(0)
             setLoading(false)
@@ -36,15 +60,7 @@ export function useUnreadMessagesCount(userId: string | null) {
           return
         }
 
-        if (!orders || orders.length === 0) {
-          if (isMounted) {
-            setCount(0)
-            setLoading(false)
-          }
-          return
-        }
-
-        const orderIds = orders.map(o => o.id)
+        const orderIds = Array.from(allOrderIds)
 
         // Получаем только непрочитанные сообщения от других пользователей в активных заказах
         const { data: messages, error: messagesError } = await supabase
@@ -97,7 +113,12 @@ export function useUnreadMessagesCount(userId: string | null) {
           }
         }
       )
-      .subscribe()
+      .subscribe((status) => {
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+          // Ошибки WebSocket не критичны - данные обновляются через polling
+          console.warn('Realtime subscription error (не критично):', status)
+        }
+      })
 
     // Обновляем каждые 5 секунд
     const interval = setInterval(() => {

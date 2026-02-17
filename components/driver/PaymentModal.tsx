@@ -38,16 +38,107 @@ export function PaymentModal({ order, isOpen, onClose, onSuccess }: PaymentModal
     setProcessing(true)
     setError(null)
 
+    console.log('=== Processing payment ===')
+    console.log('Order ID:', order.id)
+    console.log('isPaid (payment_status):', isPaid)
+    console.log('Order final_price:', order.final_price)
+
     try {
       const { data, error: rpcError } = await supabase.rpc('process_order_payment', {
         order_uuid: order.id,
         payment_status: isPaid,
       })
 
-      if (rpcError) throw rpcError
+      console.log('RPC result:', { data, error: rpcError })
+
+      if (rpcError) {
+        console.error('RPC error:', rpcError)
+        console.error('RPC error details:', JSON.stringify(rpcError, null, 2))
+        throw rpcError
+      }
 
       if (data === false) {
-        throw new Error('Не удалось обработать оплату')
+        console.error('Function returned false - payment processing failed')
+        console.error('Possible reasons:')
+        console.error('1. Миграция 087 не применена (вспомогательные функции не созданы)')
+        console.error('2. Заказ уже обработан (is_paid = true)')
+        console.error('3. Заказ не в правильном статусе (должен быть courier_delivering или completed)')
+        console.error('4. Вспомогательные функции не могут обойти RLS')
+        console.error('5. Заказ не принадлежит текущему водителю')
+        
+        // Проверяем статус заказа
+        const { data: orderCheck } = await supabase
+          .from('orders')
+          .select('id, status, is_paid, executor_user_id')
+          .eq('id', order.id)
+          .single()
+        
+        console.error('Order check:', orderCheck)
+        
+        throw new Error('Не удалось обработать оплату. Проверьте логи в консоли для деталей.')
+      }
+
+      console.log('✅ Payment processed successfully, isPaid:', isPaid)
+
+      // Проверяем баланс после обработки оплаты
+      if (isPaid) {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          // Увеличиваем задержку, чтобы дать время триггеру выполниться
+          await new Promise(resolve => setTimeout(resolve, 2000))
+          
+          // Проверяем баланс через обычный запрос
+          const { data: balanceData, error: balanceError } = await supabase
+            .from('balances')
+            .select('amount, currency, updated_at')
+            .eq('user_id', user.id)
+            .maybeSingle()
+          
+          console.log('=== Balance check after payment ===')
+          console.log('User ID:', user.id)
+          console.log('Balance data:', balanceData)
+          console.log('Balance error:', balanceError)
+          console.log('Balance amount:', balanceData?.amount)
+          
+          // Если баланс не найден, проверяем через прямой запрос к базе
+          if (!balanceData && !balanceError) {
+            console.warn('⚠️ Баланс не найден после обработки оплаты!')
+            console.warn('Это может означать, что:')
+            console.warn('1. Миграция 085 не применена')
+            console.warn('2. RLS все еще блокирует создание баланса')
+            console.warn('3. Функция process_order_payment не смогла создать баланс')
+          }
+          
+          // Проверяем транзакции
+          const { data: transactionsData, error: transactionsError } = await supabase
+            .from('transactions')
+            .select('*')
+            .eq('order_id', order.id)
+            .order('created_at', { ascending: false })
+            .limit(5)
+          
+          console.log('=== Transaction check after payment ===')
+          console.log('Transactions data:', transactionsData)
+          console.log('Transactions count:', transactionsData?.length || 0)
+          console.log('Transactions error:', transactionsError)
+          
+          if (!transactionsData || transactionsData.length === 0) {
+            console.warn('⚠️ Транзакции не найдены после обработки оплаты!')
+            console.warn('Это может означать, что функция не создала транзакцию')
+          }
+          
+          // Проверяем, обновился ли заказ
+          const { data: orderData, error: orderError } = await supabase
+            .from('orders')
+            .select('is_paid, final_price')
+            .eq('id', order.id)
+            .single()
+          
+          console.log('=== Order check after payment ===')
+          console.log('Order is_paid:', orderData?.is_paid)
+          console.log('Order final_price:', orderData?.final_price)
+          console.log('Order error:', orderError)
+        }
       }
 
       onSuccess()
