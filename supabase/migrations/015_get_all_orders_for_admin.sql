@@ -76,3 +76,4 @@ GRANT EXECUTE ON FUNCTION public.get_all_orders_for_admin(INTEGER) TO anon;
 
 
 
+

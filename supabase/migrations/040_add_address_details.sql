@@ -18,3 +18,4 @@ COMMENT ON COLUMN public.orders.delivery_apartment IS 'Номер квартир
 
 
 
+
