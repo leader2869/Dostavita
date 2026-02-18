@@ -422,7 +422,7 @@ export default function ClientDashboard() {
           </a>
           <button
             onClick={handleCallDriver}
-            className="bg-purple-300 text-gray-900 p-4 rounded-lg text-center hover:bg-purple-400 transition flex items-center justify-center"
+            className="bg-cyan-300 text-gray-900 p-4 rounded-lg text-center hover:bg-cyan-400 transition flex items-center justify-center"
           >
             <span className="leading-tight">
               Позвонить<br />курьеру
