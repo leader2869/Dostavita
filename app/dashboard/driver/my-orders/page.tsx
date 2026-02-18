@@ -37,7 +37,11 @@ export default function DriverMyOrdersPage() {
         console.error('Ошибка загрузки заказов:', error)
         setOrders([])
       } else {
-        setOrders(ordersData || [])
+        const loadedOrders = ordersData || []
+        console.log('Загружено заказов:', loadedOrders.length)
+        console.log('Активные заказы:', loadedOrders.filter(o => o.status !== 'completed' && o.status !== 'cancelled').length)
+        console.log('Завершенные заказы:', loadedOrders.filter(o => o.status === 'completed' || o.status === 'cancelled').length)
+        setOrders(loadedOrders)
       }
       
       setLoading(false)
@@ -101,11 +105,25 @@ export default function DriverMyOrdersPage() {
   const renderOrderCard = (order: any) => {
     // Показываем кнопки только для активных заказов
     const isActive = order.status === 'courier_accepted' || order.status === 'courier_coming' || order.status === 'courier_delivering'
+    // Легкая зеленая заливка для завершенных оплаченных заказов
+    const isCompletedAndPaid = order.status === 'completed' && order.is_paid === true
+    // Легкая желтая заливка для неоплаченных заказов
+    const isUnpaid = order.status === 'completed' && (order.is_paid === false || order.is_paid === null)
+    // Легкая красная заливка для отмененных заказов
+    const isCancelled = order.status === 'cancelled'
     
     return (
       <div
         key={order.id}
-        className="bg-gray-50 rounded-lg shadow p-6 border border-gray-200 hover:border-green-500 transition"
+        className={`rounded-lg shadow p-6 border border-gray-200 hover:border-green-500 transition ${
+          isCancelled
+            ? 'bg-red-50/20'
+            : isCompletedAndPaid 
+            ? 'bg-green-50/20' 
+            : isUnpaid 
+            ? 'bg-yellow-50/20' 
+            : 'bg-gray-50'
+        }`}
       >
         <div
           className="cursor-pointer"
@@ -147,7 +165,7 @@ export default function DriverMyOrdersPage() {
                   {order.description}
                 </p>
               )}
-              {order.ready_at && (() => {
+              {order.ready_at && order.status !== 'completed' && order.status !== 'cancelled' && (() => {
                 const { formattedTime, timeStatus, statusType } = formatReadyTime(order.ready_at)
                 return (
                   <p className="text-sm text-gray-600 mt-1">
@@ -200,18 +218,6 @@ export default function DriverMyOrdersPage() {
         </div>
       ) : (
         <div className="space-y-6">
-          {/* Активные заказы */}
-          {activeOrders.length > 0 && (
-            <div className="bg-gray-50 rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
-                Активные заказы ({activeOrders.length})
-              </h2>
-              <div className="space-y-4">
-                {activeOrders.map(renderOrderCard)}
-              </div>
-            </div>
-          )}
-
           {/* История заказов */}
           {completedOrders.length > 0 && (
             <div className="bg-gray-50 rounded-lg shadow p-6">

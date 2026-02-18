@@ -10,6 +10,7 @@ interface DriverOrganizationChatProps {
   currentUserId: string
   currentUserRole: 'driver' | 'customer'
   onClose: () => void
+  onMessagesRead?: () => void
 }
 
 interface Message {
@@ -28,7 +29,8 @@ export function DriverOrganizationChat({
   driverId,
   currentUserId,
   currentUserRole,
-  onClose
+  onClose,
+  onMessagesRead
 }: DriverOrganizationChatProps) {
   const supabase = createClient()
   const [messages, setMessages] = useState<Message[]>([])
@@ -53,56 +55,61 @@ export function DriverOrganizationChat({
     scrollToBottom()
   }, [messages])
 
-  // Функция загрузки сообщений
-  const loadMessages = async () => {
-    try {
-      let query = supabase
-        .from('driver_organization_messages')
-        .select('*')
-        .eq('organization_id', organizationId)
-
-      if (driverId) {
-        // Личный чат
-        query = query.eq('driver_id', driverId)
-      } else {
-        // Общий чат
-        query = query.is('driver_id', null)
-      }
-
-      query = query.order('created_at', { ascending: true })
-
-      const { data, error } = await query
-
-      if (error) throw error
-
-      setMessages(data || [])
-      
-      // Загружаем имена отправителей
-      const uniqueSenderIds = [...new Set((data || []).map(m => m.sender_id))]
-      if (uniqueSenderIds.length > 0) {
-        const { data: profiles } = await supabase
-          .from('profiles')
-          .select('id, full_name, email')
-          .in('id', uniqueSenderIds)
-
-        if (profiles) {
-          const names: Record<string, string> = {}
-          profiles.forEach(p => {
-            names[p.id] = p.full_name || p.email || 'Неизвестный'
-          })
-          setSenderNames(prev => ({ ...prev, ...names }))
-        }
-      }
-    } catch (err) {
-      console.error('Ошибка загрузки сообщений:', err)
-    } finally {
-      setLoading(false)
-    }
-  }
-
   // Загружаем сообщения при монтировании
   useEffect(() => {
-    loadMessages()
+    let isMounted = true
+
+    const initialLoad = async () => {
+      try {
+        let query = supabase
+          .from('driver_organization_messages')
+          .select('*')
+          .eq('organization_id', organizationId)
+
+        if (driverId) {
+          // Личный чат
+          query = query.eq('driver_id', driverId)
+        } else {
+          // Общий чат
+          query = query.is('driver_id', null)
+        }
+
+        query = query.order('created_at', { ascending: true })
+
+        const { data, error } = await query
+
+        if (error) throw error
+
+        if (isMounted) {
+          setMessages(data || [])
+          
+          // Загружаем имена отправителей
+          const uniqueSenderIds = [...new Set((data || []).map(m => m.sender_id))]
+          if (uniqueSenderIds.length > 0) {
+            const { data: profiles } = await supabase
+              .from('profiles')
+              .select('id, full_name, email')
+              .in('id', uniqueSenderIds)
+
+            if (profiles && isMounted) {
+              const names: Record<string, string> = {}
+              profiles.forEach(p => {
+                names[p.id] = p.full_name || p.email || 'Неизвестный'
+              })
+              setSenderNames(names)
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Ошибка загрузки сообщений:', err)
+      } finally {
+        if (isMounted) {
+          setLoading(false)
+        }
+      }
+    }
+
+    initialLoad()
 
     // Подписываемся на новые сообщения
     const channel = supabase
@@ -117,41 +124,62 @@ export function DriverOrganizationChat({
             ? `organization_id=eq.${organizationId},driver_id=eq.${driverId}`
             : `organization_id=eq.${organizationId},driver_id=is.null`
         },
-        (payload) => {
+        async (payload) => {
           if (payload.eventType === 'INSERT') {
             const newMessage = payload.new as Message
-            setMessages(prev => [...prev, newMessage])
             
-            // Загружаем имя отправителя, если его еще нет
-            if (!senderNames[newMessage.sender_id]) {
-              supabase
-                .from('profiles')
-                .select('id, full_name, email')
-                .eq('id', newMessage.sender_id)
-                .single()
-                .then(({ data: profile }) => {
-                  if (profile) {
-                    setSenderNames(prev => ({
-                      ...prev,
-                      [newMessage.sender_id]: profile.full_name || profile.email || 'Неизвестный'
-                    }))
-                  }
-                })
+            if (isMounted) {
+              // Проверяем, нет ли уже этого сообщения в списке (чтобы избежать дубликатов)
+              setMessages(prev => {
+                const exists = prev.some(m => m.id === newMessage.id)
+                if (exists) return prev
+                return [...prev, newMessage]
+              })
+              
+              // Загружаем имя отправителя, если его еще нет
+              setSenderNames(prev => {
+                if (prev[newMessage.sender_id]) {
+                  return prev // Имя уже есть
+                }
+                
+                // Загружаем имя асинхронно
+                supabase
+                  .from('profiles')
+                  .select('id, full_name, email')
+                  .eq('id', newMessage.sender_id)
+                  .single()
+                  .then(({ data: profile }) => {
+                    if (profile && isMounted) {
+                      setSenderNames(current => ({
+                        ...current,
+                        [newMessage.sender_id]: profile.full_name || profile.email || 'Неизвестный'
+                      }))
+                    }
+                  })
+                  .catch(err => {
+                    console.error('Ошибка загрузки профиля:', err)
+                  })
+                
+                return prev
+              })
             }
           } else if (payload.eventType === 'UPDATE') {
             const updatedMessage = payload.new as Message
-            setMessages(prev =>
-              prev.map(m => m.id === updatedMessage.id ? updatedMessage : m)
-            )
+            if (isMounted) {
+              setMessages(prev =>
+                prev.map(m => m.id === updatedMessage.id ? updatedMessage : m)
+              )
+            }
           }
         }
       )
       .subscribe()
 
     return () => {
+      isMounted = false
       channel.unsubscribe()
     }
-  }, [organizationId, driverId])
+  }, [organizationId, driverId, supabase])
 
   // Отмечаем все непрочитанные сообщения как прочитанные при открытии модального окна
   useEffect(() => {
@@ -186,6 +214,10 @@ export function DriverOrganizationChat({
               : m
           ))
           setHasMarkedAsRead(true)
+          // Вызываем callback для обновления счетчика непрочитанных сообщений
+          if (onMessagesRead) {
+            onMessagesRead()
+          }
         }
       } catch (err) {
         console.error('Ошибка при отметке сообщений как прочитанных:', err)
@@ -400,8 +432,8 @@ export function DriverOrganizationChat({
                   key={message.id}
                   className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
                 >
-                  <div className={`max-w-[75%] ${isOwn ? 'bg-blue-600' : 'bg-gray-100'} rounded-lg p-3`}>
-                    <div className={`text-xs mb-1 ${isOwn ? 'text-blue-200' : 'text-gray-700'}`}>
+                  <div className="max-w-[75%] bg-gray-200 rounded-lg p-3">
+                    <div className="text-xs mb-1 text-gray-900">
                       {senderName}
                     </div>
                     {message.photo_url && (
@@ -417,11 +449,11 @@ export function DriverOrganizationChat({
                       </div>
                     )}
                     {message.message && (
-                      <div className={`text-sm ${isOwn ? 'text-gray-900' : 'text-gray-100'}`}>
+                      <div className="text-sm text-gray-900">
                         {message.message}
                       </div>
                     )}
-                    <div className={`text-xs mt-1 ${isOwn ? 'text-blue-200' : 'text-gray-600'}`}>
+                    <div className="text-xs mt-1 text-gray-600">
                       {new Date(message.created_at).toLocaleTimeString('ru-RU', {
                         hour: '2-digit',
                         minute: '2-digit'
@@ -473,7 +505,7 @@ export function DriverOrganizationChat({
             <button
               onClick={handleSend}
               disabled={(!newMessage.trim() && !uploadingPhoto) || sending || uploadingPhoto}
-              className="bg-blue-600 hover:bg-blue-700 text-gray-900 px-4 py-2 rounded transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {sending ? (
                 <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -481,7 +513,7 @@ export function DriverOrganizationChat({
                 </svg>
               ) : (
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
                 </svg>
               )}
             </button>

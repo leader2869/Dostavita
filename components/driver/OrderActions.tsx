@@ -325,33 +325,6 @@ export function OrderActions({ order, onStopPropagation }: OrderActionsProps) {
           </svg>
         </button>
 
-        {/* Кнопка навигации */}
-        <button
-          onClick={handleNavClick}
-          className="w-12 h-12 rounded-full flex items-center justify-center bg-purple-500/20 hover:bg-purple-500/40 text-purple-600 hover:text-purple-700 transition-all"
-          title="Навигация"
-        >
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-            />
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-            />
-          </svg>
-        </button>
-
         {/* Кнопка чата (только если заказ принят) */}
         {canShowChat && (
           <button
@@ -381,6 +354,33 @@ export function OrderActions({ order, onStopPropagation }: OrderActionsProps) {
             )}
           </button>
         )}
+
+        {/* Кнопка навигации */}
+        <button
+          onClick={handleNavClick}
+          className="w-12 h-12 rounded-full flex items-center justify-center bg-purple-500/20 hover:bg-purple-500/40 text-purple-600 hover:text-purple-700 transition-all"
+          title="Навигация"
+        >
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+            />
+          </svg>
+        </button>
       </div>
 
       {/* Чат */}

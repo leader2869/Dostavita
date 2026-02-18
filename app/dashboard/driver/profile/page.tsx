@@ -14,6 +14,7 @@ export default function DriverProfilePage() {
   const [profile, setProfile] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const [fullName, setFullName] = useState('')
@@ -108,10 +109,11 @@ export default function DriverProfilePage() {
         },
         body: JSON.stringify({
           full_name: fullName,
-          phone: phone,
+          // Телефон не отправляем - его можно изменить только через админа
           vehicle_type: vehicleType,
+          vehicle_brand: vehicleBrand,
+          vehicle_model: vehicleModel,
           vehicle_number: vehicleNumber,
-          license_number: licenseNumber,
         }),
       })
 
@@ -121,9 +123,17 @@ export default function DriverProfilePage() {
         throw new Error(data.error || 'Ошибка сохранения профиля')
       }
 
-      router.push('/dashboard/driver')
+      // Перезагружаем профиль для обновления данных
+      await loadProfile()
+      
+      // Показываем сообщение об успешном сохранении
+      setSaved(true)
+      setTimeout(() => {
+        setSaved(false)
+      }, 3000)
     } catch (err: any) {
       setError(err.message)
+    } finally {
       setSaving(false)
     }
   }
@@ -203,7 +213,6 @@ export default function DriverProfilePage() {
   return (
     <div className="max-w-2xl mx-auto pb-20">
       <BackButton />
-      <h1 className="text-3xl font-bold mb-6 text-gray-900">Профиль водителя</h1>
 
       <form onSubmit={handleSubmit} className="bg-gray-50 rounded-lg shadow p-6 space-y-4">
         {/* Аватар */}
@@ -277,22 +286,22 @@ export default function DriverProfilePage() {
         {/* Телефон */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Телефон *
+            Телефон
           </label>
           <input
             type="tel"
             value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-900"
+            disabled
+            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-600"
             placeholder="+375 (XX) XXX-XX-XX"
           />
+          <p className="text-xs text-gray-600 mt-1">Телефон нельзя изменить. Для изменения обратитесь к администратору.</p>
         </div>
 
         {/* Информация об организации */}
         {organization && (
-          <div className="bg-green-900/30 border border-green-500/50 rounded-lg p-4">
-            <h3 className="text-sm font-semibold text-brand-light mb-2">Организация</h3>
+          <div className="bg-blue-50/30 border border-blue-200/50 rounded-lg p-4">
+            <h3 className="text-sm font-semibold text-gray-700 mb-2">Привязанная организация</h3>
             <p className="text-gray-900 font-medium">{organization.organization_name || 'Организация'}</p>
             {organization.organization_email && (
               <p className="text-gray-700 text-sm mt-1">Email: {organization.organization_email}</p>
@@ -331,33 +340,29 @@ export default function DriverProfilePage() {
         </div>
 
         {(vehicleType === 'car' || vehicleType === 'motorcycle') && (
-          <>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Марка транспорта
-              </label>
-              <input
-                type="text"
-                value={vehicleBrand}
-                onChange={(e) => setVehicleBrand(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-900"
-                placeholder="Toyota, BMW, Honda и т.д."
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Модель транспорта
-              </label>
-              <input
-                type="text"
-                value={vehicleModel}
-                onChange={(e) => setVehicleModel(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-900"
-                placeholder="Camry, X5, CBR600 и т.д."
-              />
-            </div>
-          </>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Марка и модель транспорта
+            </label>
+            <input
+              type="text"
+              value={`${vehicleBrand}${vehicleBrand && vehicleModel ? ' ' : ''}${vehicleModel}`.trim()}
+              onChange={(e) => {
+                const value = e.target.value.trim()
+                // Разделяем: первое слово - марка, остальное - модель
+                const parts = value.split(/\s+/)
+                if (parts.length > 0 && parts[0]) {
+                  setVehicleBrand(parts[0])
+                  setVehicleModel(parts.slice(1).join(' '))
+                } else {
+                  setVehicleBrand('')
+                  setVehicleModel('')
+                }
+              }}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-900"
+              placeholder="Toyota Camry, BMW X5, Honda CBR600"
+            />
+          </div>
         )}
 
         <div>
@@ -373,20 +378,6 @@ export default function DriverProfilePage() {
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Номер водительского удостоверения *
-          </label>
-          <input
-            type="text"
-            value={licenseNumber}
-            onChange={(e) => setLicenseNumber(e.target.value)}
-            required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-900"
-            placeholder="AB1234567"
-          />
-        </div>
-
         {error && (
           <div className="text-red-600 text-sm">{error}</div>
         )}
@@ -395,9 +386,9 @@ export default function DriverProfilePage() {
           <button
             type="submit"
             disabled={saving}
-            className="flex-1 bg-brand-light text-gray-900 px-6 py-2 rounded-md hover:bg-brand-dark disabled:opacity-50"
+            className="flex-1 bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 disabled:opacity-50"
           >
-            {saving ? 'Сохранение...' : 'Сохранить'}
+            {saving ? 'Сохранение...' : saved ? 'Изменения сохранены' : 'Сохранить'}
           </button>
           <button
             type="button"

@@ -28,6 +28,7 @@ export default function CustomerFinancePage() {
   const [showDebtorModal, setShowDebtorModal] = useState(false)
   const [selectedDebtor, setSelectedDebtor] = useState<any>(null)
   const [debtorReceivables, setDebtorReceivables] = useState<any[]>([])
+  const [transactions, setTransactions] = useState<any[]>([])
 
   const getDateFilter = useCallback((period: Period) => {
     const now = new Date()
@@ -173,12 +174,36 @@ export default function CustomerFinancePage() {
       }
       
       setCashDepositRequests(requestsData || [])
+      
+      // Загружаем транзакции всех водителей организации
+      const dateFilter = getDateFilter(period as Period)
+      let transactionsQuery = supabase
+        .from('transactions')
+        .select('*, profiles!transactions_user_id_fkey(id, full_name)')
+        .order('created_at', { ascending: false })
+        .limit(100)
+
+      if (dateFilter.start) {
+        transactionsQuery = transactionsQuery.gte('created_at', dateFilter.start)
+      }
+      if (dateFilter.end) {
+        transactionsQuery = transactionsQuery.lte('created_at', dateFilter.end)
+      }
+
+      const { data: transactionsData, error: transactionsError } = await transactionsQuery
+      
+      if (transactionsError) {
+        console.error('Ошибка загрузки транзакций:', transactionsError)
+      } else {
+        console.log('Загружено транзакций для организации:', transactionsData?.length || 0)
+        setTransactions(transactionsData || [])
+      }
     } catch (err: any) {
       console.error('Ошибка загрузки данных:', err)
     } finally {
       setLoading(false)
     }
-  }, [supabase, router, period, customStartDate, customEndDate])
+  }, [supabase, router, period, customStartDate, customEndDate, getDateFilter])
 
   useEffect(() => {
     loadData()
@@ -935,9 +960,59 @@ export default function CustomerFinancePage() {
               )}
             </div>
           </div>
-        </div>
+      </div>
       )}
 
+      {/* Транзакции */}
+      <div className="bg-gray-50 rounded-lg shadow p-6 mt-6">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold text-gray-900">История транзакций</h2>
+          <button
+            onClick={() => {
+              const filename = `Транзакции_${period}_${new Date().toISOString().split('T')[0]}`
+              exportTransactionsToExcel(transactions, filename)
+            }}
+            className="bg-brand-light hover:bg-brand-dark text-white px-3 py-1.5 rounded text-xs font-medium transition flex items-center gap-1"
+            title="Экспорт транзакций в Excel"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Экспорт
+          </button>
+        </div>
+        {transactions && transactions.length > 0 ? (
+          <div className="space-y-2">
+            {transactions.map((transaction: any) => (
+              <div key={transaction.id} className="border-b border-gray-200 pb-2">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="font-medium text-gray-900">
+                      {transaction.description}
+                      {transaction.profiles && (
+                        <span className="text-sm text-gray-600 ml-2">
+                          ({transaction.profiles.full_name || 'Водитель'})
+                        </span>
+                      )}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      {new Date(transaction.created_at).toLocaleString('ru-RU')}
+                    </p>
+                  </div>
+                  <p className={`font-semibold ${
+                    transaction.type === 'credit' ? 'text-green-600' : 'text-red-400'
+                  }`}>
+                    {transaction.type === 'credit' ? '+' : '-'}{transaction.amount} BYN
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-600">Нет транзакций</p>
+        )}
+      </div>
+      
       <CustomerBottomNavigation />
     </div>
   )

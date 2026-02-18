@@ -7,7 +7,7 @@ import { BackButton } from '@/components/ui/BackButton'
 import { DriverBottomNavigation } from '@/components/driver/DriverBottomNavigation'
 import { exportFinanceReportToExcel, exportOrdersToExcel, exportTransactionsToExcel } from '@/lib/utils/exportToExcel'
 
-type Period = 'today' | 'week' | 'month' | 'all' | 'custom'
+type Period = 'today' | 'yesterday' | 'week' | 'month' | 'all' | 'custom'
 
 export default function DriverFinancePage() {
   const router = useRouter()
@@ -20,12 +20,13 @@ export default function DriverFinancePage() {
   const [completedOrders, setCompletedOrders] = useState<any[]>([])
   const [unpaidOrdersFromReceivables, setUnpaidOrdersFromReceivables] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [period, setPeriod] = useState<Period>('all')
+  const [period, setPeriod] = useState<Period>('today')
   const [customStartDate, setCustomStartDate] = useState<string>('')
   const [customEndDate, setCustomEndDate] = useState<string>('')
   const [depositAmount, setDepositAmount] = useState<string>('')
   const [showDepositModal, setShowDepositModal] = useState(false)
   const [cashDepositRequests, setCashDepositRequests] = useState<any[]>([])
+  const [transactionFilter, setTransactionFilter] = useState<'all' | 'credit' | 'debit'>('all')
 
   const getDateFilter = useCallback((period: Period) => {
     const now = new Date()
@@ -34,6 +35,12 @@ export default function DriverFinancePage() {
         const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0)
         const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999)
         return { start: todayStart.toISOString(), end: todayEnd.toISOString() }
+      case 'yesterday':
+        const yesterday = new Date(now)
+        yesterday.setDate(now.getDate() - 1)
+        const yesterdayStart = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate(), 0, 0, 0, 0)
+        const yesterdayEnd = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate(), 23, 59, 59, 999)
+        return { start: yesterdayStart.toISOString(), end: yesterdayEnd.toISOString() }
       case 'week':
         const weekStart = new Date(now)
         weekStart.setDate(now.getDate() - 7)
@@ -139,10 +146,15 @@ export default function DriverFinancePage() {
         transactionsQuery = transactionsQuery.lte('created_at', dateFilter.end)
       }
 
-      const { data: transactionsData } = await transactionsQuery
+      const { data: transactionsData, error: transactionsError } = await transactionsQuery
+      
+      if (transactionsError) {
+        console.error('Ошибка загрузки транзакций:', transactionsError)
+      }
       
       if (isMounted) {
         setTransactions(transactionsData || [])
+        console.log('Загружено транзакций:', transactionsData?.length || 0)
       }
 
       // Получаем завершенные заказы с фильтром по периоду для статистики
@@ -412,6 +424,16 @@ export default function DriverFinancePage() {
             Сегодня
           </button>
           <button
+            onClick={() => setPeriod('yesterday')}
+            className={`px-4 py-2 rounded-md transition ${
+              period === 'yesterday'
+                ? 'bg-brand-light text-gray-900'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-100'
+            }`}
+          >
+            Вчера
+          </button>
+          <button
             onClick={() => setPeriod('week')}
             className={`px-4 py-2 rounded-md transition ${
               period === 'week'
@@ -497,14 +519,14 @@ export default function DriverFinancePage() {
         {/* Баланс */}
         <div className="bg-gray-50 rounded-lg shadow p-6">
           <h2 className="text-xl font-semibold mb-4 text-gray-900">Баланс</h2>
-          <p className="text-3xl font-bold text-brand-light">
+          <p className="text-3xl font-bold text-green-600">
             {balance?.amount ? parseFloat(balance.amount).toFixed(2) : '0.00'} {balance?.currency || 'BYN'}
           </p>
           {profile?.organization_id && (
             <>
               <button
                 onClick={() => setShowDepositModal(true)}
-                className="mt-4 w-full bg-blue-600 text-gray-900 px-4 py-2 rounded-md hover:bg-blue-700 transition"
+                className="mt-4 w-full bg-green-300 text-gray-900 px-4 py-2 rounded-md hover:bg-green-400 transition"
               >
                 Отправить запрос на сдачу кассы
               </button>
@@ -569,7 +591,7 @@ export default function DriverFinancePage() {
               Общая сумма заказов: <span className="text-gray-900 font-semibold">{totalOrdersAmount.toFixed(2)} BYN</span>
             </p>
             <p className="text-gray-700">
-              Оплачено: <span className="text-brand-light font-semibold">{paidAmount.toFixed(2)} BYN</span>
+              Оплачено: <span className="text-green-600 font-semibold">{paidAmount.toFixed(2)} BYN</span>
             </p>
             <p className="text-gray-700">
               Неоплачено: <span className="text-red-400 font-semibold">{unpaidAmount.toFixed(2)} BYN</span>
@@ -602,7 +624,7 @@ export default function DriverFinancePage() {
           </div>
           <div className="space-y-3">
             {unpaidOrders.map((order: any) => (
-              <div key={order.id} className="border border-red-700 rounded-lg p-4 bg-red-900/20">
+              <div key={order.id} className="border border-red-700 rounded-lg p-4 bg-red-900/10">
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <p className="font-medium text-gray-900">
@@ -625,7 +647,7 @@ export default function DriverFinancePage() {
                     <p className="text-xl font-bold text-red-400">{order.final_price} BYN</p>
                     <button
                       onClick={async () => {
-                        if (!confirm(`Провести оплату заказа №${order.order_number || order.id?.slice(0, 8) || 'N/A'}? Деньги будут начислены на ваш баланс.`)) {
+                        if (!confirm(`Принять оплату заказа №${order.order_number || order.id?.slice(0, 8) || 'N/A'}? Деньги будут начислены на ваш баланс.`)) {
                           return
                         }
                         try {
@@ -648,7 +670,7 @@ export default function DriverFinancePage() {
                           } else if (data === false) {
                             alert('Не удалось обработать оплату. Возможно, заказ уже обработан или не найден.')
                           } else {
-                            alert('Оплата успешно проведена! Деньги начислены на ваш баланс.')
+                            alert('Оплата успешно принята! Деньги начислены на ваш баланс.')
                             setTimeout(() => {
                               loadData()
                             }, 2000)
@@ -657,9 +679,9 @@ export default function DriverFinancePage() {
                           alert(`Ошибка: ${err.message || 'Не удалось обработать оплату'}`)
                         }
                       }}
-                      className="mt-2 bg-brand-light text-gray-900 px-3 py-1.5 rounded text-sm hover:bg-brand-dark transition"
+                      className="mt-2 bg-green-500 text-white px-3 py-1.5 rounded text-sm hover:bg-green-600 transition"
                     >
-                      Провести оплату
+                      Принять оплату
                     </button>
                   </div>
                 </div>
@@ -766,9 +788,52 @@ export default function DriverFinancePage() {
             Экспорт
           </button>
         </div>
-        {transactions && transactions.length > 0 ? (
-          <div className="space-y-2">
-            {transactions.map((transaction: any) => (
+        
+        {/* Фильтр транзакций */}
+        <div className="flex gap-2 mb-4">
+          <button
+            onClick={() => setTransactionFilter('all')}
+            className={`px-4 py-2 rounded-md transition text-sm ${
+              transactionFilter === 'all'
+                ? 'bg-brand-light text-gray-900'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            Все операции
+          </button>
+          <button
+            onClick={() => setTransactionFilter('credit')}
+            className={`px-4 py-2 rounded-md transition text-sm ${
+              transactionFilter === 'credit'
+                ? 'bg-green-500 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            Только приход
+          </button>
+          <button
+            onClick={() => setTransactionFilter('debit')}
+            className={`px-4 py-2 rounded-md transition text-sm ${
+              transactionFilter === 'debit'
+                ? 'bg-red-500 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            Только расходы
+          </button>
+        </div>
+        
+        {(() => {
+          const filteredTransactions = transactions.filter((t: any) => {
+            if (transactionFilter === 'all') return true
+            if (transactionFilter === 'credit') return t.type === 'credit'
+            if (transactionFilter === 'debit') return t.type === 'debit'
+            return true
+          })
+          
+          return filteredTransactions && filteredTransactions.length > 0 ? (
+            <div className="space-y-2">
+              {filteredTransactions.map((transaction: any) => (
               <div key={transaction.id} className="border-b border-gray-200 pb-2">
                 <div className="flex justify-between items-center">
                   <div>
@@ -778,17 +843,22 @@ export default function DriverFinancePage() {
                     </p>
                   </div>
                   <p className={`font-semibold ${
-                    transaction.type === 'credit' ? 'text-brand-light' : 'text-red-400'
+                    transaction.type === 'credit' ? 'text-green-600' : 'text-red-400'
                   }`}>
                     {transaction.type === 'credit' ? '+' : '-'}{transaction.amount} BYN
                   </p>
                 </div>
               </div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-gray-600">Нет транзакций</p>
-        )}
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-600">
+              {transactions && transactions.length > 0 
+                ? 'Нет транзакций по выбранному фильтру' 
+                : 'Нет транзакций'}
+            </p>
+          )
+        })()}
       </div>
       
       <DriverBottomNavigation />

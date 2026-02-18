@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { DriverOrganizationChat } from '@/components/chat/DriverOrganizationChat'
 
@@ -14,6 +14,48 @@ export function DriverChatSection({ driverUserId, organizationId }: DriverChatSe
   const [activeChat, setActiveChat] = useState<'general' | 'personal' | null>(null)
   const [unreadCount, setUnreadCount] = useState(0)
 
+  // Функция для загрузки счетчика непрочитанных сообщений
+  const loadUnreadCount = useCallback(async () => {
+    if (!organizationId) {
+      setUnreadCount(0)
+      return
+    }
+
+    try {
+      // Подсчитываем непрочитанные сообщения в общем чате
+      const { count: generalUnread, error: generalError } = await supabase
+        .from('driver_organization_messages')
+        .select('*', { count: 'exact', head: true })
+        .eq('organization_id', organizationId)
+        .is('driver_id', null)
+        .neq('sender_id', driverUserId)
+        .is('read_at', null)
+
+      if (generalError) {
+        console.error('Ошибка подсчета непрочитанных в общем чате:', generalError)
+      }
+
+      // Подсчитываем непрочитанные сообщения в личном чате
+      const { count: personalUnread, error: personalError } = await supabase
+        .from('driver_organization_messages')
+        .select('*', { count: 'exact', head: true })
+        .eq('organization_id', organizationId)
+        .eq('driver_id', driverUserId)
+        .neq('sender_id', driverUserId)
+        .is('read_at', null)
+
+      if (personalError) {
+        console.error('Ошибка подсчета непрочитанных в личном чате:', personalError)
+      }
+
+      const total = (generalUnread || 0) + (personalUnread || 0)
+      console.log('Непрочитанные сообщения - общий:', generalUnread, 'личный:', personalUnread, 'всего:', total)
+      setUnreadCount(total)
+    } catch (err) {
+      console.error('Ошибка подсчета непрочитанных сообщений:', err)
+    }
+  }, [organizationId, driverUserId, supabase])
+
   useEffect(() => {
     if (!organizationId) {
       setUnreadCount(0)
@@ -21,35 +63,6 @@ export function DriverChatSection({ driverUserId, organizationId }: DriverChatSe
     }
 
     let isMounted = true
-
-    const loadUnreadCount = async () => {
-      try {
-        // Подсчитываем непрочитанные сообщения в общем чате
-        const { count: generalUnread } = await supabase
-          .from('driver_organization_messages')
-          .select('*', { count: 'exact', head: true })
-          .eq('organization_id', organizationId)
-          .is('driver_id', null)
-          .neq('sender_id', driverUserId)
-          .is('read_at', null)
-
-        // Подсчитываем непрочитанные сообщения в личном чате
-        const { count: personalUnread } = await supabase
-          .from('driver_organization_messages')
-          .select('*', { count: 'exact', head: true })
-          .eq('organization_id', organizationId)
-          .eq('driver_id', driverUserId)
-          .neq('sender_id', driverUserId)
-          .is('read_at', null)
-
-        if (isMounted) {
-          const total = (generalUnread || 0) + (personalUnread || 0)
-          setUnreadCount(total)
-        }
-      } catch (err) {
-        console.error('Ошибка подсчета непрочитанных сообщений:', err)
-      }
-    }
 
     loadUnreadCount()
 
@@ -67,21 +80,27 @@ export function DriverChatSection({ driverUserId, organizationId }: DriverChatSe
         () => {
           // Небольшая задержка, чтобы дать время базе данных обновиться
           setTimeout(() => {
-            loadUnreadCount()
+            if (isMounted) {
+              loadUnreadCount()
+            }
           }, 500)
         }
       )
       .subscribe()
 
-    // Обновляем каждые 10 секунд для более быстрого обновления
-    const interval = setInterval(loadUnreadCount, 10000)
+    // Обновляем каждые 5 секунд для более быстрого обновления
+    const interval = setInterval(() => {
+      if (isMounted) {
+        loadUnreadCount()
+      }
+    }, 5000)
 
     return () => {
       isMounted = false
       channel.unsubscribe()
       clearInterval(interval)
     }
-  }, [driverUserId, organizationId])
+  }, [driverUserId, organizationId, loadUnreadCount])
 
   return (
     <>
@@ -109,7 +128,7 @@ export function DriverChatSection({ driverUserId, organizationId }: DriverChatSe
                 className="bg-gray-100 hover:bg-gray-100 rounded-lg p-4 transition text-left"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 rounded-full bg-brand-light flex items-center justify-center flex-shrink-0">
                     <svg className="w-6 h-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
@@ -159,6 +178,7 @@ export function DriverChatSection({ driverUserId, organizationId }: DriverChatSe
           onClose={() => {
             setActiveChat(null)
             // Обновляем счетчик непрочитанных сообщений после закрытия чата
+            // Увеличиваем задержку, чтобы дать время базе данных обновиться
             setTimeout(() => {
               const loadUnreadCount = async () => {
                 try {
@@ -180,12 +200,27 @@ export function DriverChatSection({ driverUserId, organizationId }: DriverChatSe
 
                   const total = (generalUnread || 0) + (personalUnread || 0)
                   setUnreadCount(total)
+                  console.log('Счетчик обновлен после закрытия чата:', total)
                 } catch (err) {
                   console.error('Ошибка обновления счетчика:', err)
                 }
               }
               loadUnreadCount()
-            }, 500)
+            }, 1000)
+          }}
+          onMessagesRead={() => {
+            // Обновляем счетчик сразу после того, как сообщения отмечены как прочитанные
+            // Используем функцию loadUnreadCount из useCallback
+            console.log('onMessagesRead вызван, обновляем счетчик...')
+            setTimeout(() => {
+              loadUnreadCount()
+            }, 300)
+            setTimeout(() => {
+              loadUnreadCount()
+            }, 1000)
+            setTimeout(() => {
+              loadUnreadCount()
+            }, 2000)
           }}
         />
       )}

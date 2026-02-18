@@ -5,11 +5,11 @@ export async function POST(request: Request) {
   try {
     const supabase = createServerSupabaseClient()
     const body = await request.json()
-    const { full_name, phone, vehicle_type, vehicle_brand, vehicle_model, vehicle_number, license_number } = body
+    const { full_name, vehicle_type, vehicle_brand, vehicle_model, vehicle_number } = body
 
-    if (!vehicle_type || !license_number || !phone) {
+    if (!vehicle_type) {
       return NextResponse.json(
-        { error: 'Телефон, тип транспорта и номер лицензии обязательны' },
+        { error: 'Тип транспорта обязателен' },
         { status: 400 }
       )
     }
@@ -32,12 +32,11 @@ export async function POST(request: Request) {
       .from('profiles')
       .update({
         full_name: full_name || null,
-        phone: phone,
+        // Телефон не обновляем - его можно изменить только через админа
         vehicle_type,
         vehicle_brand: vehicle_brand || null,
         vehicle_model: vehicle_model || null,
         vehicle_number: vehicle_number || null,
-        license_number,
       })
       .eq('id', user.id)
       .select()

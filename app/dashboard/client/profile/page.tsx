@@ -89,7 +89,7 @@ export default function ClientProfilePage() {
         .from('profiles')
         .update({
           full_name: fullName,
-          phone: phone,
+          // Телефон не обновляем - его можно изменить только через админа
         })
         .eq('id', user.id)
 
@@ -234,10 +234,11 @@ export default function ClientProfilePage() {
             id="phone"
             type="tel"
             value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            className="w-full px-3 py-2 bg-gray-100 text-gray-900 border border-gray-300 rounded-md focus:outline-none focus:ring-brand-light focus:border-brand-light"
+            disabled
+            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-600"
             placeholder="+375 (XX) XXX-XX-XX"
           />
+          <p className="text-xs text-gray-600 mt-1">Телефон нельзя изменить. Для изменения обратитесь к администратору.</p>
         </div>
 
         {error && (

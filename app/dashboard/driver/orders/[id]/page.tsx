@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import type { Order } from '@/lib/types'
 import { BackButton } from '@/components/ui/BackButton'
 import { OrderActions } from '@/components/driver/OrderActions'
 import { PaymentModal } from '@/components/driver/PaymentModal'
+import { DriverBottomNavigation } from '@/components/driver/DriverBottomNavigation'
 import { formatAddressForOrder } from '@/lib/utils/formatAddress'
 import { formatReadyTime } from '@/lib/utils/formatReadyTime'
 
@@ -21,6 +22,11 @@ export default function OrderDetailsPage() {
   const [processing, setProcessing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showPaymentModal, setShowPaymentModal] = useState(false)
+  const [swipeProgress, setSwipeProgress] = useState(0)
+  const [isSwiping, setIsSwiping] = useState(false)
+  const [swipeStartX, setSwipeStartX] = useState(0)
+  const sliderRef = useRef<HTMLDivElement>(null)
+  const nextActionRef = useRef<(() => Promise<void>) | null>(null)
 
   const loadOrder = useCallback(async () => {
     try {
@@ -63,7 +69,7 @@ export default function OrderDetailsPage() {
     loadOrder()
   }, [loadOrder])
 
-  const handleStartComing = async () => {
+  const handleStartComing = useCallback(async () => {
     setProcessing(true)
     setError(null)
 
@@ -84,9 +90,9 @@ export default function OrderDetailsPage() {
     } finally {
       setProcessing(false)
     }
-  }
+  }, [orderId, supabase, loadOrder])
 
-  const handlePickup = async () => {
+  const handlePickup = useCallback(async () => {
     setProcessing(true)
     setError(null)
 
@@ -153,9 +159,9 @@ export default function OrderDetailsPage() {
     } finally {
       setProcessing(false)
     }
-  }
+  }, [orderId, supabase, loadOrder, order])
 
-  const handleComplete = async () => {
+  const handleComplete = useCallback(async () => {
     setProcessing(true)
     setError(null)
 
@@ -237,15 +243,122 @@ export default function OrderDetailsPage() {
     } finally {
       setProcessing(false)
     }
-  }
+  }, [orderId, supabase, router, loadOrder, order])
+
+  // Обновляем ref с текущим действием (должно быть до условных возвратов!)
+  useEffect(() => {
+    if (order?.status === 'courier_accepted') {
+      nextActionRef.current = handleStartComing
+    } else if (order?.status === 'courier_coming') {
+      nextActionRef.current = handlePickup
+    } else if (order?.status === 'courier_delivering') {
+      nextActionRef.current = handleComplete
+    } else {
+      nextActionRef.current = null
+    }
+  }, [order?.status, handleStartComing, handlePickup, handleComplete])
+
+  const getNextStatusLabel = useCallback(() => {
+    if (order?.status === 'courier_accepted') return 'Начать движение к отправителю'
+    if (order?.status === 'courier_coming') return 'Забрал заказ'
+    if (order?.status === 'courier_delivering') return 'Завершить заказ'
+    return ''
+  }, [order?.status])
+
+  const canStartComing = order?.status === 'courier_accepted'
+  const canPickup = order?.status === 'courier_coming'
+  const canComplete = order?.status === 'courier_delivering'
+  const hasNextStatus = canStartComing || canPickup || canComplete
+
+  // Обработчики свайпа
+  const handleSwipeStart = useCallback((e: React.TouchEvent | React.MouseEvent) => {
+    if (!hasNextStatus || processing) return
+    e.preventDefault()
+    setIsSwiping(true)
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX
+    if (sliderRef.current) {
+      const rect = sliderRef.current.getBoundingClientRect()
+      setSwipeStartX(clientX - rect.left)
+    }
+    setSwipeProgress(0)
+  }, [hasNextStatus, processing])
+
+  const handleSwipeMove = useCallback((e: React.TouchEvent) => {
+    if (!isSwiping || !hasNextStatus || processing || !sliderRef.current) return
+    e.preventDefault()
+    const clientX = e.touches[0].clientX
+    const rect = sliderRef.current.getBoundingClientRect()
+    const currentX = clientX - rect.left
+    const sliderWidth = sliderRef.current.offsetWidth
+    const diff = currentX - swipeStartX
+    const progress = Math.min(Math.max((diff / sliderWidth) * 100, 0), 100)
+    setSwipeProgress(progress)
+  }, [isSwiping, hasNextStatus, processing, swipeStartX])
+
+  const handleSwipeEnd = useCallback(async () => {
+    if (!isSwiping || !hasNextStatus || processing) return
+    
+    const finalProgress = swipeProgress
+    setIsSwiping(false)
+    
+    // Если свайпнули больше чем на 80%, выполняем действие
+    if (finalProgress >= 80 && nextActionRef.current) {
+      await nextActionRef.current()
+    }
+    
+    setSwipeProgress(0)
+  }, [isSwiping, hasNextStatus, processing, swipeProgress])
+
+  // Глобальные обработчики для мыши
+  useEffect(() => {
+    if (!isSwiping || !sliderRef.current || !hasNextStatus) return
+
+    let currentProgress = swipeProgress
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (processing || !sliderRef.current) return
+      const rect = sliderRef.current.getBoundingClientRect()
+      const currentX = e.clientX - rect.left
+      const sliderWidth = sliderRef.current.offsetWidth
+      const diff = currentX - swipeStartX
+      const progress = Math.min(Math.max((diff / sliderWidth) * 100, 0), 100)
+      currentProgress = progress
+      setSwipeProgress(progress)
+    }
+
+    const handleMouseUp = async () => {
+      if (processing) return
+      setIsSwiping(false)
+      
+      if (currentProgress >= 80 && nextActionRef.current) {
+        await nextActionRef.current()
+      }
+      
+      setSwipeProgress(0)
+    }
+
+    document.addEventListener('mousemove', handleMouseMove)
+    document.addEventListener('mouseup', handleMouseUp)
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+    }
+  }, [isSwiping, swipeStartX, swipeProgress, hasNextStatus, processing])
 
   const handlePaymentSuccess = async () => {
     console.log('=== handlePaymentSuccess called ===')
+    // Закрываем модальное окно
+    setShowPaymentModal(false)
+    
+    // Небольшая задержка для обновления данных в базе
+    await new Promise(resolve => setTimeout(resolve, 500))
+    
     // Перезагружаем заказ, чтобы получить обновленный is_paid
     await loadOrder()
     console.log('Order reloaded after payment')
-    // После успешной обработки оплаты обновляем заказ и переходим на главную страницу
-    await loadOrder()
+    
+    // После успешной обработки оплаты переходим на главную страницу
     router.push('/dashboard/driver')
   }
 
@@ -257,14 +370,16 @@ export default function OrderDetailsPage() {
     return <div className="text-center py-8 text-red-600">Заказ не найден</div>
   }
 
-  const canStartComing = order.status === 'courier_accepted'
-  const canPickup = order.status === 'courier_coming'
-  const canComplete = order.status === 'courier_delivering'
-
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto pb-24">
       <BackButton />
-      <h1 className="text-3xl font-bold mb-6 text-gray-900">Детали заказа</h1>
+      
+      {/* Кнопки действий (телефон, навигация, чат) */}
+      {order && (
+        <div className="mb-4">
+          <OrderActions order={order} />
+        </div>
+      )}
 
       <div className="bg-gray-50 rounded-lg shadow p-6 space-y-4">
         <div>
@@ -430,54 +545,67 @@ export default function OrderDetailsPage() {
           </div>
         </div>
 
-        {/* Кнопки действий (телефон, навигация, чат) */}
-        {order && (
-          <div className="mt-4 pt-4 border-t border-gray-200">
-            <OrderActions order={order} />
-          </div>
-        )}
-
         {error && (
           <div className="text-red-600 text-sm">{error}</div>
         )}
 
-        <div className="flex gap-4 pt-4">
-          {canStartComing && (
-            <button
-              onClick={handleStartComing}
-              disabled={processing}
-              className="flex-1 bg-blue-600 text-gray-900 px-6 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50"
-            >
-              {processing ? 'Обработка...' : 'Начать движение к отправителю'}
-            </button>
-          )}
-
-          {canPickup && (
-            <button
-              onClick={handlePickup}
-              disabled={processing}
-              className="flex-1 bg-brand-light text-gray-900 px-6 py-2 rounded-md hover:bg-brand-dark disabled:opacity-50"
-            >
-              {processing ? 'Обработка...' : 'Забрал заказ'}
-            </button>
-          )}
-
-          {canComplete && (
-            <button
-              onClick={handleComplete}
-              disabled={processing}
-              className="flex-1 bg-brand-light text-gray-900 px-6 py-2 rounded-md hover:bg-brand-dark disabled:opacity-50"
-            >
-              {processing ? 'Обработка...' : 'Завершить заказ'}
-            </button>
-          )}
-
-          {order.status === 'completed' && (
-            <div className="flex-1 bg-brand-light/20 border border-green-500 rounded p-4 text-center">
-              <p className="text-brand-light font-semibold">Заказ завершен</p>
+        {/* Ползунок для смены статуса - закреплен внизу, выше навигации */}
+        {hasNextStatus && (
+          <div className="fixed bottom-20 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg z-40">
+            <div className="max-w-2xl mx-auto">
+              <p className="text-xs text-gray-600 mb-2 text-center">Смахните ползунок вправо для смены статуса</p>
+              
+              <div 
+                ref={sliderRef}
+                className="swipe-slider relative bg-gray-200 rounded-full h-16 cursor-grab active:cursor-grabbing select-none w-1/2 mx-auto"
+                onTouchStart={handleSwipeStart}
+                onTouchMove={handleSwipeMove}
+                onTouchEnd={handleSwipeEnd}
+                onMouseDown={handleSwipeStart}
+              >
+                {/* Фон прогресса */}
+                <div 
+                  className="absolute left-0 top-0 h-full bg-green-500 rounded-full transition-all duration-200"
+                  style={{ width: `${swipeProgress}%` }}
+                ></div>
+                
+                {/* Ползунок */}
+                <div 
+                  className="absolute left-0 top-0 h-full w-16 bg-white border-4 border-green-500 rounded-full flex items-center justify-center shadow-lg z-10"
+                  style={{ 
+                    transform: `translateX(${Math.min(swipeProgress * (100 - 16) / 100, 100 - 16)}%)`,
+                    transition: isSwiping ? 'none' : 'transform 0.2s ease-out'
+                  }}
+                >
+                  <svg className="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+                
+                {/* Текст */}
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none px-2">
+                  <span className={`text-xs font-semibold transition-colors truncate ${swipeProgress >= 80 ? 'text-white' : 'text-gray-700'}`}>
+                    {swipeProgress >= 80 ? 'Отпустите' : getNextStatusLabel()}
+                  </span>
+                </div>
+              </div>
+              
+              {processing && (
+                <p className="text-center text-xs text-gray-600 mt-2">Обработка...</p>
+              )}
             </div>
-          )}
+          </div>
+        )}
 
+        {order.status === 'completed' && (
+          <div className="pt-4 border-t border-gray-200">
+            <div className="bg-green-50 border border-green-500 rounded-lg p-4 text-center">
+              <p className="text-green-600 font-semibold text-lg">Заказ завершен</p>
+            </div>
+          </div>
+        )}
+
+        <div className="flex gap-4 pt-4">
           <button
             onClick={() => router.back()}
             className="px-6 py-2 border border-gray-300 rounded-md hover:bg-white text-gray-900"
@@ -496,6 +624,9 @@ export default function OrderDetailsPage() {
           onSuccess={handlePaymentSuccess}
         />
       )}
+
+      {/* Нижняя навигация */}
+      <DriverBottomNavigation />
     </div>
   )
 }
