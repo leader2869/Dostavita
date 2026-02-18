@@ -54,6 +54,22 @@ body {
   animation: slide 20s linear infinite;
 }
 
+/* Стили для автозаполнения (autofill) - светло-голубая заливка */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px rgba(135, 206, 235, 0.1) inset !important;
+  -webkit-text-fill-color: #000000 !important;
+  box-shadow: 0 0 0 30px rgba(135, 206, 235, 0.1) inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+input:-webkit-autofill::first-line {
+  -webkit-text-fill-color: #000000 !important;
+  color: #000000 !important;
+}
+
 /* Анимация движения кругов */
 @keyframes float {
   0%, 100% {

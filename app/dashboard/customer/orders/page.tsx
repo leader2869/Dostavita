@@ -4,6 +4,7 @@ import { BackButton } from '@/components/ui/BackButton'
 import { formatAddressForOrder } from '@/lib/utils/formatAddress'
 import { formatReadyTime } from '@/lib/utils/formatReadyTime'
 import { CustomerBottomNavigation } from '@/components/customer/CustomerBottomNavigation'
+import { ExportOrdersButton } from '@/components/customer/ExportOrdersButton'
 
 export default async function CustomerOrdersPage() {
   const supabase = createServerSupabaseClient()
@@ -76,10 +77,15 @@ export default async function CustomerOrdersPage() {
     }
   }
 
+  const allOrders = [...activeOrders, ...completedOrders]
+
   return (
     <div className="pb-20">
       <BackButton />
-      <h1 className="text-3xl font-bold mb-6 text-gray-900">История заказов</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-gray-900">История заказов</h1>
+        <ExportOrdersButton orders={allOrders} />
+      </div>
 
       <div className="space-y-6">
         {/* Активные заказы */}

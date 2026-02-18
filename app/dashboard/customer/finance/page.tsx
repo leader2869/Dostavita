@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { BackButton } from '@/components/ui/BackButton'
 import { CustomerBottomNavigation } from '@/components/customer/CustomerBottomNavigation'
+import { exportFinanceReportToExcel, exportOrdersToExcel, exportReceivablesToExcel, exportTransactionsToExcel } from '@/lib/utils/exportToExcel'
 
 type Period = 'today' | 'week' | 'month' | 'all' | 'custom'
 
@@ -200,10 +201,38 @@ export default function CustomerFinancePage() {
     )
   }
 
+  const handleExportAll = () => {
+    const filename = `Финансовый_отчет_организации_${period}_${new Date().toISOString().split('T')[0]}`
+    exportFinanceReportToExcel({
+      receivables: receivables,
+      summary: {
+        'Баланс организации': balance?.amount ? parseFloat(balance.amount).toFixed(2) + ' BYN' : '0.00 BYN',
+        'Общая дебиторка': totalReceivables.toFixed(2) + ' BYN',
+        'Количество неоплаченных заказов': receivables.length,
+        'Количество водителей': totalDrivers,
+        'Завершенных заказов': totalCompletedOrders,
+        'Общая сумма заказов': totalEarnings.toFixed(2) + ' BYN',
+        'Период': period === 'all' ? 'Все время' : period === 'today' ? 'Сегодня' : period === 'week' ? 'Неделя' : period === 'month' ? 'Месяц' : 'Выбранный период',
+      }
+    }, filename)
+  }
+
   return (
     <div className="pb-20">
       <BackButton />
-      <h1 className="text-3xl font-bold mb-6 text-gray-900">Финансы</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-gray-900">Финансы</h1>
+        <button
+          onClick={handleExportAll}
+          className="bg-brand-light hover:bg-brand-dark text-white px-4 py-2 rounded-md text-sm font-medium transition flex items-center gap-2"
+          title="Экспорт всех данных в Excel"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          Экспорт в Excel
+        </button>
+      </div>
 
       {/* Выбор периода */}
       <div className="bg-gray-50 rounded-lg shadow p-4 mb-6">
@@ -622,7 +651,22 @@ export default function CustomerFinancePage() {
 
       {/* Дебиторка */}
       <div id="receivables-section" className="bg-gray-50 rounded-lg shadow p-6">
-        <h2 className="text-xl font-semibold mb-4 text-gray-900">Дебиторка (неоплаченные заказы)</h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold text-gray-900">Дебиторка (неоплаченные заказы)</h2>
+          <button
+            onClick={() => {
+              const filename = `Дебиторка_${new Date().toISOString().split('T')[0]}`
+              exportReceivablesToExcel(receivables, filename)
+            }}
+            className="bg-brand-light hover:bg-brand-dark text-white px-3 py-1.5 rounded text-xs font-medium transition flex items-center gap-1"
+            title="Экспорт дебиторки в Excel"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Экспорт
+          </button>
+        </div>
         {receivables && receivables.length > 0 ? (
           <div className="space-y-4">
             {receivables.map((receivable: any) => (

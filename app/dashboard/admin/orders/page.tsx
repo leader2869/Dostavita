@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { BackButton } from '@/components/ui/BackButton'
 import type { User } from '@/lib/types'
 import { formatAddressForOrder } from '@/lib/utils/formatAddress'
+import { ExportOrdersButton } from '@/components/admin/ExportOrdersButton'
 
 export default async function AdminOrdersPage() {
   const supabase = createServerSupabaseClient()
@@ -61,7 +62,10 @@ export default async function AdminOrdersPage() {
   return (
     <div>
       <BackButton />
-      <h1 className="text-3xl font-bold mb-6 text-gray-900">Управление заказами</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-gray-900">Управление заказами</h1>
+        <ExportOrdersButton orders={orders || []} filename="Все_заказы" />
+      </div>
 
       <div className="bg-gray-50 rounded-lg shadow overflow-hidden">
         <table className="min-w-full divide-y divide-gray-700">
