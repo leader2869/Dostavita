@@ -179,7 +179,6 @@ export default function DriverMyOrdersPage() {
     return (
       <div className="pb-20">
         <BackButton />
-        <h1 className="text-3xl font-bold mb-6 text-gray-900">Мои заказы</h1>
         <div className="bg-gray-50 rounded-lg shadow p-6">
           <p className="text-gray-600 text-center">Проверка аутентификации...</p>
         </div>
@@ -194,7 +193,6 @@ export default function DriverMyOrdersPage() {
   return (
     <div className="pb-20">
       <BackButton />
-      <h1 className="text-3xl font-bold mb-6 text-gray-900">Мои заказы</h1>
 
       {loading ? (
         <div className="bg-gray-50 rounded-lg shadow p-6">

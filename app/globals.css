@@ -86,6 +86,39 @@ input:-webkit-autofill::first-line {
   }
 }
 
+/* Анимация столкновения пузыриков */
+@keyframes bubbleCollide {
+  0% {
+    transform: translateX(-20px) scale(1);
+  }
+  50% {
+    transform: translateX(10px) scale(1.02);
+  }
+  100% {
+    transform: translateX(-20px) scale(1);
+  }
+}
+
+@keyframes bubbleCollideReverse {
+  0% {
+    transform: translateX(20px) scale(1);
+  }
+  50% {
+    transform: translateX(-10px) scale(1.02);
+  }
+  100% {
+    transform: translateX(20px) scale(1);
+  }
+}
+
+.animate-bubble-collide {
+  animation: bubbleCollide 8s ease-in-out infinite;
+}
+
+.animate-bubble-collide-reverse {
+  animation: bubbleCollideReverse 8s ease-in-out infinite;
+}
+
 @keyframes floatSlow {
   0%, 100% {
     transform: translate(0, 0) rotate(0deg);
