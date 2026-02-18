@@ -176,18 +176,18 @@ export default function CustomerFinancePage() {
       setCashDepositRequests(requestsData || [])
       
       // Загружаем транзакции всех водителей организации
-      const dateFilter = getDateFilter(period as Period)
+      const transactionsDateFilter = getDateFilter(period as Period)
       let transactionsQuery = supabase
         .from('transactions')
         .select('*, profiles!transactions_user_id_fkey(id, full_name)')
         .order('created_at', { ascending: false })
         .limit(100)
 
-      if (dateFilter.start) {
-        transactionsQuery = transactionsQuery.gte('created_at', dateFilter.start)
+      if (transactionsDateFilter.start) {
+        transactionsQuery = transactionsQuery.gte('created_at', transactionsDateFilter.start)
       }
-      if (dateFilter.end) {
-        transactionsQuery = transactionsQuery.lte('created_at', dateFilter.end)
+      if (transactionsDateFilter.end) {
+        transactionsQuery = transactionsQuery.lte('created_at', transactionsDateFilter.end)
       }
 
       const { data: transactionsData, error: transactionsError } = await transactionsQuery
