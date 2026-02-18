@@ -153,34 +153,53 @@ export function DriverOrganizationChat({
     }
   }, [organizationId, driverId])
 
-  // Отмечаем сообщения как прочитанные при открытии чата
+  // Отмечаем все непрочитанные сообщения как прочитанные при открытии модального окна
   useEffect(() => {
-    if (!hasMarkedAsRead && messages.length > 0) {
-      const unreadMessages = messages.filter(
-        m => m.sender_id !== currentUserId && !m.read_at
-      )
+    if (hasMarkedAsRead || loading || messages.length === 0) return
 
-      if (unreadMessages.length > 0) {
-        // Обновляем read_at для непрочитанных сообщений
+    const markMessagesAsRead = async () => {
+      try {
+        // Находим все непрочитанные сообщения от других пользователей
+        const unreadMessages = messages.filter(
+          m => m.sender_id !== currentUserId && m.read_at === null
+        )
+
+        if (unreadMessages.length === 0) {
+          setHasMarkedAsRead(true)
+          return
+        }
+
+        // Отмечаем их как прочитанные
         const messageIds = unreadMessages.map(m => m.id)
-        supabase
+        const { error } = await supabase
           .from('driver_organization_messages')
           .update({ read_at: new Date().toISOString() })
           .in('id', messageIds)
-          .then(() => {
-            setHasMarkedAsRead(true)
-            // Обновляем локальное состояние
-            setMessages(prev =>
-              prev.map(m =>
-                messageIds.includes(m.id) ? { ...m, read_at: new Date().toISOString() } : m
-              )
-            )
-          })
-      } else {
-        setHasMarkedAsRead(true)
+
+        if (error) {
+          console.error('Ошибка отметки сообщений как прочитанных:', error)
+        } else {
+          // Обновляем локальное состояние
+          setMessages(prev => prev.map(m => 
+            messageIds.includes(m.id) 
+              ? { ...m, read_at: new Date().toISOString() }
+              : m
+          ))
+          setHasMarkedAsRead(true)
+        }
+      } catch (err) {
+        console.error('Ошибка при отметке сообщений как прочитанных:', err)
       }
     }
-  }, [messages, currentUserId, hasMarkedAsRead])
+
+    // Небольшая задержка, чтобы пользователь успел увидеть сообщения
+    const timer = setTimeout(() => {
+      markMessagesAsRead()
+    }, 500)
+
+    return () => clearTimeout(timer)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages, currentUserId, loading, hasMarkedAsRead])
 
   const handleSend = async () => {
     if ((!newMessage.trim() && !uploadingPhoto) || sending) return
@@ -381,9 +400,9 @@ export function DriverOrganizationChat({
                   className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
                 >
                   <div className={`max-w-[75%] ${isOwn ? 'bg-blue-600' : 'bg-gray-100'} rounded-lg p-3`}>
-                    {!isOwn && (
-                      <div className="text-xs text-gray-700 mb-1">{senderName}</div>
-                    )}
+                    <div className={`text-xs mb-1 ${isOwn ? 'text-blue-200' : 'text-gray-700'}`}>
+                      {senderName}
+                    </div>
                     {message.photo_url && (
                       <div className="mb-2">
                         <Image

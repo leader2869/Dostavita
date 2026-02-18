@@ -156,7 +156,37 @@ export function DriverChatSection({ driverUserId, organizationId }: DriverChatSe
           driverId={activeChat === 'general' ? null : driverUserId}
           currentUserId={driverUserId}
           currentUserRole="driver"
-          onClose={() => setActiveChat(null)}
+          onClose={() => {
+            setActiveChat(null)
+            // Обновляем счетчик непрочитанных сообщений после закрытия чата
+            setTimeout(() => {
+              const loadUnreadCount = async () => {
+                try {
+                  const { count: generalUnread } = await supabase
+                    .from('driver_organization_messages')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('organization_id', organizationId)
+                    .is('driver_id', null)
+                    .neq('sender_id', driverUserId)
+                    .is('read_at', null)
+
+                  const { count: personalUnread } = await supabase
+                    .from('driver_organization_messages')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('organization_id', organizationId)
+                    .eq('driver_id', driverUserId)
+                    .neq('sender_id', driverUserId)
+                    .is('read_at', null)
+
+                  const total = (generalUnread || 0) + (personalUnread || 0)
+                  setUnreadCount(total)
+                } catch (err) {
+                  console.error('Ошибка обновления счетчика:', err)
+                }
+              }
+              loadUnreadCount()
+            }, 500)
+          }}
         />
       )}
     </>
