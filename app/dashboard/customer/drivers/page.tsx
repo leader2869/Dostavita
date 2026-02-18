@@ -230,7 +230,6 @@ export default function CustomerDriversPage() {
     return (
       <div className="pb-20">
         <BackButton />
-        <h1 className="text-3xl font-bold mb-6 text-gray-900">Управление водителями</h1>
         <div className="text-center py-8 text-gray-600">Загрузка...</div>
       </div>
     )

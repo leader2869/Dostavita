@@ -112,7 +112,6 @@ export default async function CustomerOrderDetailsPage({ params }: { params: { i
   return (
     <div className="pb-20">
       <BackButton />
-      <h1 className="text-3xl font-bold mb-6 text-gray-900">Детали заказа</h1>
 
       <div className="bg-gray-50 rounded-lg shadow p-6 space-y-6">
         {/* Статус заказа */}

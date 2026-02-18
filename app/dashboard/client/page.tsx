@@ -410,10 +410,7 @@ export default function ClientDashboard() {
 
   return (
     <div className="pb-20">
-      <h1 className="text-3xl font-bold mb-6 text-gray-900">Главная</h1>
-
       <div className="bg-gray-50 rounded-lg shadow p-6 mb-6">
-        <h2 className="text-xl font-semibold mb-4 text-gray-900">Быстрые действия</h2>
         <div className="grid grid-cols-2 gap-4">
           <a
             href="/dashboard/client/create-order"

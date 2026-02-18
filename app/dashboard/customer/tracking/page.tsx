@@ -169,7 +169,6 @@ export default function CustomerTrackingPage() {
     return (
       <div className="pb-20">
         <BackButton />
-        <h1 className="text-3xl font-bold mb-6 text-gray-900">Отслеживание водителей</h1>
         <div className="text-center py-8 text-gray-600">Загрузка...</div>
       </div>
     )
@@ -178,7 +177,6 @@ export default function CustomerTrackingPage() {
   return (
     <div className="pb-20">
       <BackButton />
-      <h1 className="text-3xl font-bold mb-6 text-gray-900">Отслеживание водителей</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Список водителей */}

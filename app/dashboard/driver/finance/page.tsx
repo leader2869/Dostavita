@@ -336,7 +336,6 @@ export default function DriverFinancePage() {
       <div className="pb-20">
         <BackButton />
         <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Финансы</h1>
         <button
           onClick={() => {
             const filename = `Финансовый_отчет_водителя_${period}_${new Date().toISOString().split('T')[0]}`
@@ -372,7 +371,6 @@ export default function DriverFinancePage() {
     <div className="pb-20">
       <BackButton />
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Финансы</h1>
         <button
           onClick={() => {
             const filename = `Финансовый_отчет_водителя_${period}_${new Date().toISOString().split('T')[0]}`

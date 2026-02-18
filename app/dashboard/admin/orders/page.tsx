@@ -63,7 +63,6 @@ export default async function AdminOrdersPage() {
     <div>
       <BackButton />
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Управление заказами</h1>
         <ExportOrdersButton orders={orders || []} filename="Все_заказы" />
       </div>
 

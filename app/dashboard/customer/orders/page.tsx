@@ -83,7 +83,6 @@ export default async function CustomerOrdersPage() {
     <div className="pb-20">
       <BackButton />
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">История заказов</h1>
         <ExportOrdersButton orders={allOrders} />
       </div>
 

@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import type { User } from '@/lib/types'
 import { DashboardNav } from '@/components/navigation/DashboardNav'
+import { PageTitle } from '@/components/navigation/PageTitle'
 
 export const dynamic = 'force-dynamic'
 
@@ -157,6 +158,7 @@ export default async function DashboardLayout({
           <div className="flex justify-between h-16">
             <div className="flex items-center">
               <h1 className="text-4xl font-bold text-brand-light" style={{ fontFamily: 'var(--font-amatic-sc), cursive' }}>Просто!</h1>
+              <PageTitle />
             </div>
             <DashboardNav profile={profile as User} userId={user.id} />
           </div>

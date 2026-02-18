@@ -234,7 +234,6 @@ export default function ClientOrdersPage() {
   return (
     <div className="pb-20">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Мои заказы</h1>
         <button
           onClick={() => {
             const filename = `Мои_заказы_${new Date().toISOString().split('T')[0]}`

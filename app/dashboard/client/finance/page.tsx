@@ -146,7 +146,6 @@ export default function ClientFinancePage() {
     return (
       <div className="pb-20">
         <BackButton />
-        <h1 className="text-3xl font-bold mb-6 text-gray-900">Финансы</h1>
         <div className="text-center py-8 text-gray-600">Загрузка...</div>
       </div>
     )
@@ -183,7 +182,6 @@ export default function ClientFinancePage() {
     <div className="pb-20">
       <BackButton />
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Финансы</h1>
         <button
           onClick={handleExportAll}
           className="bg-brand-light hover:bg-brand-dark text-white px-4 py-2 rounded-md text-sm font-medium transition flex items-center gap-2"

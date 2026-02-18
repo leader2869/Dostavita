@@ -69,7 +69,6 @@ export default async function CustomerDashboard() {
   return (
     <div className="pb-20">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Панель организации</h1>
         <GeneralChatButton
           organizationId={user.id}
           currentUserId={user.id}

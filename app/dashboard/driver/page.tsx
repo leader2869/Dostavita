@@ -220,7 +220,6 @@ export default async function DriverDashboard() {
       <DriverLocationTracker />
       <DriverPushNotifications driverUserId={user.id} />
       <div className="pb-20">
-        <h1 className="text-3xl font-bold mb-6 text-gray-900">Панель исполнителя</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Активные заказы - показываем первыми */}

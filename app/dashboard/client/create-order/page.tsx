@@ -538,7 +538,6 @@ export default function CreateOrderPage() {
 
   return (
     <div className="pb-20">
-      <h1 className="text-3xl font-bold mb-6 text-gray-900">Создать заказ</h1>
 
       <form onSubmit={handleSubmit} className="bg-gray-50 rounded-lg shadow p-6 space-y-4">
         <div>
