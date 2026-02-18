@@ -22,7 +22,7 @@ export function PageTitle() {
       return 'Профиль'
     }
     if (pathname.startsWith('/dashboard/client/create-order')) {
-      return 'Создать заказ'
+      return 'Отправить'
     }
     if (pathname.startsWith('/dashboard/client/orders/') && pathname.includes('/edit')) {
       return 'Редактировать заказ'
@@ -58,7 +58,7 @@ export function PageTitle() {
       return 'Профиль водителя'
     }
     if (pathname.startsWith('/dashboard/customer/create-order')) {
-      return 'Создать заказ'
+      return 'Отправить'
     }
     if (pathname.startsWith('/dashboard/customer/finance')) {
       return 'Финансы'
