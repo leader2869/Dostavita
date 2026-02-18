@@ -303,11 +303,11 @@ export function OrderActions({ order, onStopPropagation }: OrderActionsProps) {
 
   return (
     <>
-      <div className="flex gap-2 mt-3" onClick={(e) => e.stopPropagation()}>
+      <div className="flex gap-2 mt-3 justify-start" onClick={(e) => e.stopPropagation()}>
         {/* Кнопка телефона */}
         <button
           onClick={handlePhoneClick}
-          className="flex items-center justify-center bg-brand-light hover:bg-brand-dark text-gray-900 px-4 py-2 rounded transition"
+          className="w-12 h-12 rounded-full flex items-center justify-center bg-green-500/20 hover:bg-green-500/40 text-green-600 hover:text-green-700 transition-all"
           title="Позвонить"
         >
           <svg
@@ -328,7 +328,7 @@ export function OrderActions({ order, onStopPropagation }: OrderActionsProps) {
         {/* Кнопка навигации */}
         <button
           onClick={handleNavClick}
-          className="flex items-center justify-center bg-yellow-500 hover:bg-yellow-600 text-gray-900 px-4 py-2 rounded transition"
+          className="w-12 h-12 rounded-full flex items-center justify-center bg-purple-500/20 hover:bg-purple-500/40 text-purple-600 hover:text-purple-700 transition-all"
           title="Навигация"
         >
           <svg
@@ -356,7 +356,7 @@ export function OrderActions({ order, onStopPropagation }: OrderActionsProps) {
         {canShowChat && (
           <button
             onClick={handleChatClick}
-            className="relative flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-gray-900 px-4 py-2 rounded transition"
+            className="w-12 h-12 rounded-full relative flex items-center justify-center bg-yellow-500/20 hover:bg-yellow-500/40 text-yellow-600 hover:text-yellow-700 transition-all"
             title="Чат"
           >
             <svg
@@ -373,8 +373,8 @@ export function OrderActions({ order, onStopPropagation }: OrderActionsProps) {
               />
             </svg>
             {unreadMessagesCount > 0 && (
-              <span className={`absolute -top-1 -right-1 bg-red-500 text-gray-900 text-xs font-bold rounded-full flex items-center justify-center ${
-                unreadMessagesCount > 9 ? 'px-1.5 min-w-[1.5rem]' : 'w-5 h-5'
+              <span className={`absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center ${
+                unreadMessagesCount > 9 ? 'px-1.5 min-w-[1.5rem] h-5' : 'w-5 h-5'
               }`}>
                 {unreadMessagesCount > 10 ? unreadMessagesCount : unreadMessagesCount >= 10 ? 10 : unreadMessagesCount}
               </span>

@@ -100,7 +100,7 @@ export function ClientOrderActions({ order, userId }: ClientOrderActionsProps) {
           <button
             onClick={handlePhoneClick}
             disabled={!driverPhone || loadingPhone}
-            className="w-10 h-10 rounded-full flex items-center justify-center bg-green-500/20 hover:bg-green-500/40 text-green-600 hover:text-green-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-12 h-12 rounded-full flex items-center justify-center bg-green-500/20 hover:bg-green-500/40 text-green-600 hover:text-green-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             title={driverPhone ? `Позвонить водителю: ${driverPhone}` : 'Телефон водителя не указан'}
           >
             <svg
@@ -123,7 +123,7 @@ export function ClientOrderActions({ order, userId }: ClientOrderActionsProps) {
         {order.executor_user_id && (
           <button
             onClick={handleChatClick}
-            className="w-10 h-10 rounded-full relative flex items-center justify-center bg-yellow-500/20 hover:bg-yellow-500/40 text-yellow-600 hover:text-yellow-700 transition-all"
+            className="w-12 h-12 rounded-full relative flex items-center justify-center bg-yellow-500/20 hover:bg-yellow-500/40 text-yellow-600 hover:text-yellow-700 transition-all"
             title="Открыть чат"
           >
             <svg
@@ -152,7 +152,7 @@ export function ClientOrderActions({ order, userId }: ClientOrderActionsProps) {
         {/* Кнопка поделиться - для всех активных заказов */}
         <button
           onClick={handleShareClick}
-          className="w-10 h-10 rounded-full flex items-center justify-center bg-brand-light/20 hover:bg-brand-light/40 text-brand-light hover:text-brand-dark transition-all"
+          className="w-12 h-12 rounded-full flex items-center justify-center bg-brand-light/20 hover:bg-brand-light/40 text-brand-light hover:text-brand-dark transition-all"
           title="Поделиться заказом"
         >
           <svg
