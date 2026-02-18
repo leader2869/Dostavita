@@ -148,16 +148,17 @@ export function DriverOrganizationChat({
                   .select('id, full_name, email')
                   .eq('id', newMessage.sender_id)
                   .single()
-                  .then(({ data: profile }) => {
+                  .then(({ data: profile, error }) => {
+                    if (error) {
+                      console.error('Ошибка загрузки профиля:', error)
+                      return
+                    }
                     if (profile && isMounted) {
                       setSenderNames(current => ({
                         ...current,
                         [newMessage.sender_id]: profile.full_name || profile.email || 'Неизвестный'
                       }))
                     }
-                  })
-                  .catch(err => {
-                    console.error('Ошибка загрузки профиля:', err)
                   })
                 
                 return prev

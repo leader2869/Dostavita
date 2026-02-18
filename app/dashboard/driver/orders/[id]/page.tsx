@@ -563,24 +563,24 @@ export default function OrderDetailsPage() {
                 onTouchEnd={handleSwipeEnd}
                 onMouseDown={handleSwipeStart}
               >
-                {/* Фон прогресса */}
-                <div 
-                  className="absolute left-0 top-0 h-full bg-green-500 rounded-full transition-all duration-200"
-                  style={{ width: `${swipeProgress}%` }}
-                ></div>
-                
-                {/* Ползунок */}
-                <div 
-                  className="absolute left-0 top-0 h-full w-16 bg-white border-4 border-green-500 rounded-full flex items-center justify-center shadow-lg z-10"
-                  style={{ 
-                    transform: `translateX(${Math.min(swipeProgress * (100 - 16) / 100, 100 - 16)}%)`,
-                    transition: isSwiping ? 'none' : 'transform 0.2s ease-out'
-                  }}
-                >
-                  <svg className="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </div>
+              {/* Фон прогресса */}
+              <div 
+                className="absolute left-0 top-0 h-full bg-brand-light rounded-full transition-all duration-200"
+                style={{ width: `${swipeProgress}%` }}
+              ></div>
+              
+              {/* Ползунок */}
+              <div 
+                className="absolute left-0 top-0 h-full w-16 bg-white border-4 border-brand-light rounded-full flex items-center justify-center shadow-lg z-10"
+                style={{ 
+                  transform: `translateX(${Math.min(swipeProgress * (100 - 16) / 100, 100 - 16)}%)`,
+                  transition: isSwiping ? 'none' : 'transform 0.2s ease-out'
+                }}
+              >
+                <svg className="w-6 h-6 text-brand-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
                 
                 {/* Текст */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none px-2">

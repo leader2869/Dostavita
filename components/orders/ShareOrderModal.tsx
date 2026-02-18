@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { formatAddressForOrder } from '@/lib/utils/formatAddress'
 
@@ -16,15 +16,7 @@ export function ShareOrderModal({ order, isOpen, onClose }: ShareOrderModalProps
   const [loading, setLoading] = useState(false)
   const supabase = createClient()
 
-  useEffect(() => {
-    if (isOpen && order?.executor_user_id && shareType === 'driver') {
-      loadDriverInfo()
-    } else if (isOpen && shareType === 'full' && order?.executor_user_id) {
-      loadDriverInfo()
-    }
-  }, [isOpen, order, shareType])
-
-  const loadDriverInfo = async () => {
+  const loadDriverInfo = useCallback(async () => {
     if (!order?.executor_user_id) return
     
     setLoading(true)
@@ -43,7 +35,15 @@ export function ShareOrderModal({ order, isOpen, onClose }: ShareOrderModalProps
     } finally {
       setLoading(false)
     }
-  }
+  }, [order?.executor_user_id, supabase])
+
+  useEffect(() => {
+    if (isOpen && order?.executor_user_id && shareType === 'driver') {
+      loadDriverInfo()
+    } else if (isOpen && shareType === 'full' && order?.executor_user_id) {
+      loadDriverInfo()
+    }
+  }, [isOpen, order, shareType, loadDriverInfo])
 
   const formatShareText = () => {
     if (shareType === 'full') {
