@@ -94,13 +94,13 @@ export function ClientOrderActions({ order, userId }: ClientOrderActionsProps) {
 
   return (
     <>
-      <div className="flex gap-2 mt-3" onClick={(e) => e.stopPropagation()}>
+      <div className="flex gap-2 mt-3 justify-start" onClick={(e) => e.stopPropagation()}>
         {/* Кнопка телефона - только если заказ принят водителем */}
         {order.executor_user_id && (
           <button
             onClick={handlePhoneClick}
             disabled={!driverPhone || loadingPhone}
-            className="flex-1 flex items-center justify-center bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-10 h-10 rounded-full flex items-center justify-center bg-green-500/20 hover:bg-green-500/40 text-green-600 hover:text-green-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             title={driverPhone ? `Позвонить водителю: ${driverPhone}` : 'Телефон водителя не указан'}
           >
             <svg
@@ -123,7 +123,7 @@ export function ClientOrderActions({ order, userId }: ClientOrderActionsProps) {
         {order.executor_user_id && (
           <button
             onClick={handleChatClick}
-            className="flex-1 relative flex items-center justify-center bg-yellow-500 hover:bg-yellow-600 text-gray-900 px-4 py-2 rounded transition"
+            className="w-10 h-10 rounded-full relative flex items-center justify-center bg-yellow-500/20 hover:bg-yellow-500/40 text-yellow-600 hover:text-yellow-700 transition-all"
             title="Открыть чат"
           >
             <svg
@@ -140,8 +140,8 @@ export function ClientOrderActions({ order, userId }: ClientOrderActionsProps) {
               />
             </svg>
             {unreadCount > 0 && (
-              <span className={`absolute -top-1 -right-1 bg-red-500 text-gray-900 text-xs font-bold rounded-full flex items-center justify-center ${
-                unreadCount > 9 ? 'px-1.5 min-w-[1.5rem]' : 'w-5 h-5'
+              <span className={`absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center ${
+                unreadCount > 9 ? 'px-1.5 min-w-[1.5rem] h-5' : 'w-5 h-5'
               }`}>
                 {unreadCount > 10 ? unreadCount : unreadCount >= 10 ? 10 : unreadCount}
               </span>
@@ -152,7 +152,7 @@ export function ClientOrderActions({ order, userId }: ClientOrderActionsProps) {
         {/* Кнопка поделиться - для всех активных заказов */}
         <button
           onClick={handleShareClick}
-          className="flex-1 flex items-center justify-center bg-brand-light hover:bg-brand-dark text-gray-900 px-4 py-2 rounded transition"
+          className="w-10 h-10 rounded-full flex items-center justify-center bg-brand-light/20 hover:bg-brand-light/40 text-brand-light hover:text-brand-dark transition-all"
           title="Поделиться заказом"
         >
           <svg
