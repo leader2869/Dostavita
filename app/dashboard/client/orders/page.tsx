@@ -88,11 +88,11 @@ export default function ClientOrdersPage() {
       case 'courier_delivering':
         return 'text-purple-400 bg-purple-400/20 border-purple-400/50'
       case 'completed':
-        return 'text-green-400 bg-green-400/20 border-green-400/50'
+        return 'text-brand-light bg-brand-light/20 border-green-400/50'
       case 'cancelled':
         return 'text-red-400 bg-red-400/20 border-red-400/50'
       default:
-        return 'text-gray-400 bg-gray-400/20 border-gray-400/50'
+        return 'text-gray-600 bg-gray-400/20 border-gray-400/50'
     }
   }
 
@@ -116,20 +116,20 @@ export default function ClientOrdersPage() {
     return (
       <div
         key={order.id}
-        className="border border-gray-700 bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition cursor-pointer"
+        className="border border-gray-200 bg-gray-100 rounded-lg p-4 hover:bg-gray-100 transition cursor-pointer"
         onClick={() => router.push(`/dashboard/client/orders/${order.id}`)}
       >
         <div className="flex justify-between items-start">
           <div className="flex-1">
-            <p className="font-medium text-white">Заказ №{order.order_number || order.id.slice(0, 8)}</p>
-            <p className="text-sm text-gray-300 mt-1">
+            <p className="font-medium text-gray-900">Заказ №{order.order_number || order.id.slice(0, 8)}</p>
+            <p className="text-sm text-gray-700 mt-1">
               а) {formatAddressForOrder(order.pickup_address)}
             </p>
-            <p className="text-sm text-gray-300 mt-1">
+            <p className="text-sm text-gray-700 mt-1">
               б) {formatAddressForOrder(order.delivery_address)}
             </p>
             <div className="mt-2">
-              <span className="text-sm text-gray-400">Статус: </span>
+              <span className="text-sm text-gray-600">Статус: </span>
               <span
                 className={`inline-block px-3 py-1 rounded-full text-xs font-semibold border ${
                   getStatusColor(order.status)
@@ -139,8 +139,8 @@ export default function ClientOrdersPage() {
               </span>
             </div>
             {order.item_type && (
-              <p className="text-sm text-gray-400 mt-1">
-                Тип груза: <span className="text-gray-300">
+              <p className="text-sm text-gray-600 mt-1">
+                Тип груза: <span className="text-gray-700">
                   {order.item_type === 'documents' ? 'Документы' :
                    order.item_type === 'parcel' ? 'Посылка' :
                    order.item_type === 'flowers' ? 'Цветы' :
@@ -149,8 +149,8 @@ export default function ClientOrdersPage() {
                 </span>
               </p>
             )}
-            <p className="text-sm text-gray-400 mt-1">
-              Создан: <span className="text-gray-300">
+            <p className="text-sm text-gray-600 mt-1">
+              Создан: <span className="text-gray-700">
                 {new Date(order.created_at).toLocaleString('ru-RU', {
                   day: '2-digit',
                   month: '2-digit',
@@ -161,17 +161,17 @@ export default function ClientOrdersPage() {
               </span>
             </p>
             {order.description && (
-              <p className="text-sm text-gray-400 mt-1 italic">
+              <p className="text-sm text-gray-600 mt-1 italic">
                 {order.description}
               </p>
             )}
             {order.ready_at && (() => {
               const { formattedTime, timeStatus, statusType } = formatReadyTime(order.ready_at)
               return (
-                <p className="text-sm text-gray-400 mt-1">
-                  Заказ будет готов к выдаче: <span className="text-gray-300">{formattedTime}</span>
+                <p className="text-sm text-gray-600 mt-1">
+                  Заказ будет готов к выдаче: <span className="text-gray-700">{formattedTime}</span>
                   {timeStatus && (
-                    <span className={`ml-2 ${statusType === 'waiting' ? 'text-red-400 animate-blink' : statusType === 'upcoming' ? 'text-yellow-400 animate-blink' : 'text-gray-400'}`}>
+                    <span className={`ml-2 ${statusType === 'waiting' ? 'text-red-400 animate-blink' : statusType === 'upcoming' ? 'text-yellow-400 animate-blink' : 'text-gray-600'}`}>
                       ({timeStatus})
                     </span>
                   )}
@@ -180,7 +180,7 @@ export default function ClientOrdersPage() {
             })()}
           </div>
           <div className="text-right ml-4">
-            <p className="font-semibold text-lg text-white">{order.final_price} BYN</p>
+            <p className="font-semibold text-lg text-gray-900">{order.final_price} BYN</p>
           </div>
         </div>
         {canEdit && (
@@ -190,7 +190,7 @@ export default function ClientOrdersPage() {
                 e.stopPropagation()
                 router.push(`/dashboard/client/orders/${order.id}/edit`)
               }}
-              className="flex-1 bg-green-600 text-white px-3 py-1.5 rounded text-xs hover:bg-green-700 transition"
+              className="flex-1 bg-brand-light text-gray-900 px-3 py-1.5 rounded text-xs hover:bg-brand-dark transition"
             >
               Редактировать
             </button>
@@ -216,7 +216,7 @@ export default function ClientOrdersPage() {
                   alert('Произошла ошибка при отмене заказа')
                 }
               }}
-              className="flex-1 bg-red-600 text-white px-3 py-1.5 rounded text-xs hover:bg-red-700 transition"
+              className="flex-1 bg-red-600 text-gray-900 px-3 py-1.5 rounded text-xs hover:bg-red-700 transition"
             >
               Отменить заказ
             </button>
@@ -232,18 +232,18 @@ export default function ClientOrdersPage() {
 
   return (
     <div className="pb-20">
-      <h1 className="text-3xl font-bold mb-6 text-white">Мои заказы</h1>
+      <h1 className="text-3xl font-bold mb-6 text-gray-900">Мои заказы</h1>
 
       {loading ? (
-        <div className="bg-gray-800 rounded-lg shadow p-6">
-          <p className="text-gray-400">Загрузка...</p>
+        <div className="bg-gray-50 rounded-lg shadow p-6">
+          <p className="text-gray-600">Загрузка...</p>
         </div>
       ) : (
         <div className="space-y-6">
           {/* Активные заказы */}
           {activeOrders.length > 0 && (
-            <div className="bg-gray-800 rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold text-white mb-4 pb-2 border-b border-gray-700">
+            <div className="bg-gray-50 rounded-lg shadow p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
                 Активные заказы ({activeOrders.length})
               </h2>
               <div className="space-y-4">
@@ -254,8 +254,8 @@ export default function ClientOrdersPage() {
 
           {/* Завершенные заказы */}
           {completedOrders.length > 0 && (
-            <div className="bg-gray-800 rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold text-white mb-4 pb-2 border-b border-gray-700">
+            <div className="bg-gray-50 rounded-lg shadow p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
                 Завершенные заказы ({completedOrders.length})
               </h2>
               <div className="space-y-4">
@@ -266,8 +266,8 @@ export default function ClientOrdersPage() {
 
           {/* Если нет заказов вообще */}
           {orders.length === 0 && (
-            <div className="bg-gray-800 rounded-lg shadow p-6">
-              <p className="text-gray-400">У вас пока нет заказов</p>
+            <div className="bg-gray-50 rounded-lg shadow p-6">
+              <p className="text-gray-600">У вас пока нет заказов</p>
             </div>
           )}
         </div>

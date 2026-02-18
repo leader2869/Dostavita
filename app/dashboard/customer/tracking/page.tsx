@@ -169,8 +169,8 @@ export default function CustomerTrackingPage() {
     return (
       <div className="pb-20">
         <BackButton />
-        <h1 className="text-3xl font-bold mb-6 text-white">Отслеживание водителей</h1>
-        <div className="text-center py-8 text-gray-400">Загрузка...</div>
+        <h1 className="text-3xl font-bold mb-6 text-gray-900">Отслеживание водителей</h1>
+        <div className="text-center py-8 text-gray-600">Загрузка...</div>
       </div>
     )
   }
@@ -178,15 +178,15 @@ export default function CustomerTrackingPage() {
   return (
     <div className="pb-20">
       <BackButton />
-      <h1 className="text-3xl font-bold mb-6 text-white">Отслеживание водителей</h1>
+      <h1 className="text-3xl font-bold mb-6 text-gray-900">Отслеживание водителей</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Список водителей */}
         <div className="lg:col-span-1">
-          <div className="bg-gray-800 rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold mb-4 text-white">Водители</h2>
+          <div className="bg-gray-50 rounded-lg shadow p-6">
+            <h2 className="text-xl font-semibold mb-4 text-gray-900">Водители</h2>
             {drivers.length === 0 ? (
-              <div className="text-center py-4 text-gray-400 text-sm">
+              <div className="text-center py-4 text-gray-600 text-sm">
                 Нет водителей в организации
               </div>
             ) : (
@@ -197,8 +197,8 @@ export default function CustomerTrackingPage() {
                   onClick={() => setSelectedDriver(driver.id)}
                   className={`w-full text-left p-3 rounded-lg transition ${
                     selectedDriver === driver.id
-                      ? 'bg-green-600 text-white'
-                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                      ? 'bg-brand-light text-gray-900'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-100'
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -210,7 +210,7 @@ export default function CustomerTrackingPage() {
                       />
                     ) : (
                       <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center">
-                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
                       </div>
@@ -219,7 +219,7 @@ export default function CustomerTrackingPage() {
                       <p className="font-medium">{driver.full_name || 'Без имени'}</p>
                       <p className="text-xs opacity-75">
                         {driver.active_order_id ? (
-                          <span className="text-green-400">📍 Активный заказ</span>
+                          <span className="text-brand-light">📍 Активный заказ</span>
                         ) : (
                           <span className="text-gray-500">⚫ Нет активных заказов</span>
                         )}
@@ -244,19 +244,19 @@ export default function CustomerTrackingPage() {
               if (!driver) return null
 
               return (
-                <div className="bg-gray-800 rounded-lg shadow p-6">
-                  <h2 className="text-xl font-semibold mb-4 text-white">
+                <div className="bg-gray-50 rounded-lg shadow p-6">
+                  <h2 className="text-xl font-semibold mb-4 text-gray-900">
                     {driver.full_name || 'Без имени'}
                   </h2>
 
                   <div className="space-y-4">
                     {/* Выбор даты и времени для просмотра трека */}
-                    <div className="bg-gray-700 rounded-lg p-4">
-                      <h3 className="text-sm font-medium text-gray-400 mb-3">Просмотр трека</h3>
+                    <div className="bg-gray-100 rounded-lg p-4">
+                      <h3 className="text-sm font-medium text-gray-600 mb-3">Просмотр трека</h3>
                       
                       {/* Выбор даты */}
                       <div className="mb-4">
-                        <label className="block text-xs text-gray-400 mb-2">Выберите день:</label>
+                        <label className="block text-xs text-gray-600 mb-2">Выберите день:</label>
                         <input
                           type="date"
                           value={selectedDate}
@@ -265,14 +265,14 @@ export default function CustomerTrackingPage() {
                             setSelectedTime('')
                           }}
                           max={new Date().toISOString().split('T')[0]}
-                          className="w-full bg-gray-600 text-white px-3 py-2 rounded-lg border border-gray-500 focus:border-green-400 focus:outline-none"
+                          className="w-full bg-gray-600 text-gray-900 px-3 py-2 rounded-lg border border-gray-500 focus:border-green-400 focus:outline-none"
                         />
                       </div>
 
                       {/* Шкала времени */}
                       {trackPoints.length > 0 && (
                         <div className="mb-4">
-                          <label className="block text-xs text-gray-400 mb-2">
+                          <label className="block text-xs text-gray-600 mb-2">
                             Время: {selectedTime || trackPoints[0]?.time || 'Не выбрано'}
                           </label>
                           <input
@@ -299,7 +299,7 @@ export default function CustomerTrackingPage() {
                       {selectedTime && (
                         <button
                           onClick={() => setSelectedTime('')}
-                          className="text-xs text-green-400 hover:text-green-300"
+                          className="text-xs text-brand-light hover:text-brand-dark"
                         >
                           Показать весь трек
                         </button>
@@ -308,18 +308,18 @@ export default function CustomerTrackingPage() {
 
                     {/* Местоположение - показываем всегда для всех водителей организации */}
                     <div>
-                      <h3 className="text-sm font-medium text-gray-400 mb-2">
+                      <h3 className="text-sm font-medium text-gray-600 mb-2">
                         {selectedTime ? `Местоположение в ${selectedTime}` : 'Текущее местоположение'}
                       </h3>
                       {(currentPosition || driver.current_location) ? (
-                        <div className="bg-gray-700 rounded-lg p-4">
+                        <div className="bg-gray-100 rounded-lg p-4">
                           {currentPosition && (
-                            <p className="text-white font-mono text-sm mb-2">
+                            <p className="text-gray-900 font-mono text-sm mb-2">
                               Широта: {currentPosition.lat.toFixed(6)}, Долгота: {currentPosition.lon.toFixed(6)}
                             </p>
                           )}
                           {driver.location_updated_at && !selectedTime && (
-                            <p className="text-gray-400 text-xs mt-2">
+                            <p className="text-gray-600 text-xs mt-2">
                               Обновлено: {new Date(driver.location_updated_at).toLocaleString('ru-RU')}
                             </p>
                           )}
@@ -346,8 +346,8 @@ export default function CustomerTrackingPage() {
                           </div>
                         </div>
                       ) : (
-                        <div className="bg-gray-700 rounded-lg p-4">
-                          <p className="text-gray-400">Местоположение не определено</p>
+                        <div className="bg-gray-100 rounded-lg p-4">
+                          <p className="text-gray-600">Местоположение не определено</p>
                           <p className="text-gray-500 text-xs mt-2">
                             {selectedDate === new Date().toISOString().split('T')[0] 
                               ? 'Водитель не передает данные о местоположении'
@@ -359,13 +359,13 @@ export default function CustomerTrackingPage() {
 
                     {/* Информация о водителе */}
                     <div>
-                      <h3 className="text-sm font-medium text-gray-400 mb-2">Информация</h3>
-                      <div className="bg-gray-700 rounded-lg p-4 space-y-2 text-sm">
-                        <p className="text-gray-300">
-                          <span className="text-gray-400">Телефон:</span> {driver.phone || 'Не указан'}
+                      <h3 className="text-sm font-medium text-gray-600 mb-2">Информация</h3>
+                      <div className="bg-gray-100 rounded-lg p-4 space-y-2 text-sm">
+                        <p className="text-gray-700">
+                          <span className="text-gray-600">Телефон:</span> {driver.phone || 'Не указан'}
                         </p>
-                        <p className="text-gray-300">
-                          <span className="text-gray-400">Транспорт:</span> {
+                        <p className="text-gray-700">
+                          <span className="text-gray-600">Транспорт:</span> {
                             driver.vehicle_type === 'car' ? 'Автомобиль' :
                             driver.vehicle_type === 'motorcycle' ? 'Мотоцикл' :
                             driver.vehicle_type === 'bicycle' ? 'Велосипед' :
@@ -376,8 +376,8 @@ export default function CustomerTrackingPage() {
                           )}
                         </p>
                         {driver.vehicle_number && (
-                          <p className="text-gray-300">
-                            <span className="text-gray-400">Номер:</span> {driver.vehicle_number}
+                          <p className="text-gray-700">
+                            <span className="text-gray-600">Номер:</span> {driver.vehicle_number}
                           </p>
                         )}
                       </div>
@@ -387,8 +387,8 @@ export default function CustomerTrackingPage() {
               )
             })()
           ) : (
-            <div className="bg-gray-800 rounded-lg shadow p-6">
-              <p className="text-gray-400 text-center py-8">Выберите водителя для отслеживания</p>
+            <div className="bg-gray-50 rounded-lg shadow p-6">
+              <p className="text-gray-600 text-center py-8">Выберите водителя для отслеживания</p>
             </div>
           )}
         </div>

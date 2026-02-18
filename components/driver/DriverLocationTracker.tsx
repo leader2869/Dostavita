@@ -70,7 +70,7 @@ export function DriverLocationTracker() {
   // Показываем ошибку, если есть проблема с отслеживанием местоположения
   if (error) {
     return (
-      <div className="fixed bottom-20 left-4 right-4 bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm z-50">
+      <div className="fixed bottom-20 left-4 right-4 bg-yellow-600 text-gray-900 px-4 py-2 rounded-lg text-sm z-50">
         <p>⚠️ {error}</p>
       </div>
     )

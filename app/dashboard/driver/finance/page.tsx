@@ -334,8 +334,8 @@ export default function DriverFinancePage() {
     return (
       <div className="pb-20">
         <BackButton />
-        <h1 className="text-3xl font-bold mb-6 text-white">Финансы</h1>
-        <div className="text-center py-8 text-gray-400">Загрузка...</div>
+        <h1 className="text-3xl font-bold mb-6 text-gray-900">Финансы</h1>
+        <div className="text-center py-8 text-gray-600">Загрузка...</div>
       </div>
     )
   }
@@ -343,17 +343,17 @@ export default function DriverFinancePage() {
   return (
     <div className="pb-20">
       <BackButton />
-      <h1 className="text-3xl font-bold mb-6 text-white">Финансы</h1>
+      <h1 className="text-3xl font-bold mb-6 text-gray-900">Финансы</h1>
 
       {/* Выбор периода */}
-      <div className="bg-gray-800 rounded-lg shadow p-4 mb-6">
+      <div className="bg-gray-50 rounded-lg shadow p-4 mb-6">
         <div className="flex gap-2 flex-wrap mb-4">
           <button
             onClick={() => setPeriod('today')}
             className={`px-4 py-2 rounded-md transition ${
               period === 'today'
-                ? 'bg-green-600 text-white'
-                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                ? 'bg-brand-light text-gray-900'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-100'
             }`}
           >
             Сегодня
@@ -362,8 +362,8 @@ export default function DriverFinancePage() {
             onClick={() => setPeriod('week')}
             className={`px-4 py-2 rounded-md transition ${
               period === 'week'
-                ? 'bg-green-600 text-white'
-                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                ? 'bg-brand-light text-gray-900'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-100'
             }`}
           >
             Неделя
@@ -372,8 +372,8 @@ export default function DriverFinancePage() {
             onClick={() => setPeriod('month')}
             className={`px-4 py-2 rounded-md transition ${
               period === 'month'
-                ? 'bg-green-600 text-white'
-                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                ? 'bg-brand-light text-gray-900'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-100'
             }`}
           >
             Месяц
@@ -382,8 +382,8 @@ export default function DriverFinancePage() {
             onClick={() => setPeriod('all')}
             className={`px-4 py-2 rounded-md transition ${
               period === 'all'
-                ? 'bg-green-600 text-white'
-                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                ? 'bg-brand-light text-gray-900'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-100'
             }`}
           >
             Все время
@@ -392,8 +392,8 @@ export default function DriverFinancePage() {
             onClick={() => setPeriod('custom')}
             className={`px-4 py-2 rounded-md transition ${
               period === 'custom'
-                ? 'bg-green-600 text-white'
-                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                ? 'bg-brand-light text-gray-900'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-100'
             }`}
           >
             Произвольная дата
@@ -404,25 +404,25 @@ export default function DriverFinancePage() {
         {period === 'custom' && (
           <div className="flex gap-4 items-end flex-wrap">
             <div className="flex-1 min-w-[200px]">
-              <label className="block text-sm font-medium text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 Дата начала
               </label>
               <input
                 type="date"
                 value={customStartDate}
                 onChange={(e) => setCustomStartDate(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-900"
               />
             </div>
             <div className="flex-1 min-w-[200px]">
-              <label className="block text-sm font-medium text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 Дата окончания
               </label>
               <input
                 type="date"
                 value={customEndDate}
                 onChange={(e) => setCustomEndDate(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-900"
               />
             </div>
             <button
@@ -432,7 +432,7 @@ export default function DriverFinancePage() {
                 }
               }}
               disabled={!customStartDate || !customEndDate}
-              className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+              className="px-6 py-2 bg-brand-light text-gray-900 rounded-md hover:bg-brand-dark disabled:opacity-50 disabled:cursor-not-allowed transition"
             >
               Применить
             </button>
@@ -442,16 +442,16 @@ export default function DriverFinancePage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         {/* Баланс */}
-        <div className="bg-gray-800 rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold mb-4 text-white">Баланс</h2>
-          <p className="text-3xl font-bold text-green-600">
+        <div className="bg-gray-50 rounded-lg shadow p-6">
+          <h2 className="text-xl font-semibold mb-4 text-gray-900">Баланс</h2>
+          <p className="text-3xl font-bold text-brand-light">
             {balance?.amount ? parseFloat(balance.amount).toFixed(2) : '0.00'} {balance?.currency || 'BYN'}
           </p>
           {profile?.organization_id && (
             <>
               <button
                 onClick={() => setShowDepositModal(true)}
-                className="mt-4 w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+                className="mt-4 w-full bg-blue-600 text-gray-900 px-4 py-2 rounded-md hover:bg-blue-700 transition"
               >
                 Отправить запрос на сдачу кассы
               </button>
@@ -459,14 +459,14 @@ export default function DriverFinancePage() {
               {/* Запросы на сдачу кассы */}
               {cashDepositRequests.length > 0 && (
                 <div className="mt-4">
-                  <h3 className="text-sm font-medium text-gray-300 mb-2">Запросы на сдачу кассы</h3>
+                  <h3 className="text-sm font-medium text-gray-700 mb-2">Запросы на сдачу кассы</h3>
                   <div className="space-y-2">
                     {cashDepositRequests.map((request: any) => (
-                      <div key={request.id} className="bg-gray-700 rounded p-3 text-sm">
+                      <div key={request.id} className="bg-gray-100 rounded p-3 text-sm">
                         <div className="flex justify-between items-center">
                           <div>
-                            <p className="text-white font-medium">{request.amount} BYN</p>
-                            <p className="text-gray-400 text-xs">
+                            <p className="text-gray-900 font-medium">{request.amount} BYN</p>
+                            <p className="text-gray-600 text-xs">
                               {request.status === 'pending' && '⏳ Ожидает принятия'}
                               {request.status === 'approved' && '✅ Принято'}
                               {request.status === 'rejected' && '❌ Отклонено'}
@@ -509,20 +509,20 @@ export default function DriverFinancePage() {
         </div>
 
         {/* Статистика */}
-        <div className="bg-gray-800 rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold mb-4 text-white">Статистика</h2>
+        <div className="bg-gray-50 rounded-lg shadow p-6">
+          <h2 className="text-xl font-semibold mb-4 text-gray-900">Статистика</h2>
           <div className="space-y-2">
-            <p className="text-gray-300">
-              Общая сумма заказов: <span className="text-white font-semibold">{totalOrdersAmount.toFixed(2)} BYN</span>
+            <p className="text-gray-700">
+              Общая сумма заказов: <span className="text-gray-900 font-semibold">{totalOrdersAmount.toFixed(2)} BYN</span>
             </p>
-            <p className="text-gray-300">
-              Оплачено: <span className="text-green-400 font-semibold">{paidAmount.toFixed(2)} BYN</span>
+            <p className="text-gray-700">
+              Оплачено: <span className="text-brand-light font-semibold">{paidAmount.toFixed(2)} BYN</span>
             </p>
-            <p className="text-gray-300">
+            <p className="text-gray-700">
               Неоплачено: <span className="text-red-400 font-semibold">{unpaidAmount.toFixed(2)} BYN</span>
             </p>
-            <p className="text-gray-300">
-              Всего транзакций: <span className="text-white font-semibold">{transactions?.length || 0}</span>
+            <p className="text-gray-700">
+              Всего транзакций: <span className="text-gray-900 font-semibold">{transactions?.length || 0}</span>
             </p>
           </div>
         </div>
@@ -530,20 +530,20 @@ export default function DriverFinancePage() {
 
       {/* Неоплаченные заказы */}
       {unpaidOrders.length > 0 && (
-        <div className="bg-gray-800 rounded-lg shadow p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4 text-white">Неоплаченные заказы</h2>
+        <div className="bg-gray-50 rounded-lg shadow p-6 mb-6">
+          <h2 className="text-xl font-semibold mb-4 text-gray-900">Неоплаченные заказы</h2>
           <div className="space-y-3">
             {unpaidOrders.map((order: any) => (
               <div key={order.id} className="border border-red-700 rounded-lg p-4 bg-red-900/20">
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
-                    <p className="font-medium text-white">
+                    <p className="font-medium text-gray-900">
                       Заказ №{order.order_number || order.id.slice(0, 8)}
                     </p>
-                    <p className="text-sm text-gray-300 mt-1">
+                    <p className="text-sm text-gray-700 mt-1">
                       {order.pickup_address} → {order.delivery_address}
                     </p>
-                    <p className="text-sm text-gray-400 mt-1">
+                    <p className="text-sm text-gray-600 mt-1">
                       Завершен: {new Date(order.completed_at).toLocaleString('ru-RU', {
                         day: '2-digit',
                         month: '2-digit',
@@ -589,7 +589,7 @@ export default function DriverFinancePage() {
                           alert(`Ошибка: ${err.message || 'Не удалось обработать оплату'}`)
                         }
                       }}
-                      className="mt-2 bg-green-600 text-white px-3 py-1.5 rounded text-sm hover:bg-green-700 transition"
+                      className="mt-2 bg-brand-light text-gray-900 px-3 py-1.5 rounded text-sm hover:bg-brand-dark transition"
                     >
                       Провести оплату
                     </button>
@@ -604,18 +604,18 @@ export default function DriverFinancePage() {
       {/* Модальное окно сдачи кассы */}
       {showDepositModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-800 rounded-lg shadow-xl p-6 max-w-md w-full">
-            <h2 className="text-2xl font-bold mb-4 text-white">Запрос на сдачу кассы</h2>
-            <p className="text-gray-300 mb-2">
-              Доступный баланс: <span className="text-green-400 font-semibold">
+          <div className="bg-gray-50 rounded-lg shadow-xl p-6 max-w-md w-full">
+            <h2 className="text-2xl font-bold mb-4 text-gray-900">Запрос на сдачу кассы</h2>
+            <p className="text-gray-700 mb-2">
+              Доступный баланс: <span className="text-brand-light font-semibold">
                 {balance?.amount ? parseFloat(balance.amount).toFixed(2) : '0.00'} BYN
               </span>
             </p>
-            <p className="text-gray-400 text-sm mb-4">
+            <p className="text-gray-600 text-sm mb-4">
               После отправки запроса деньги останутся на вашем балансе до принятия запроса организацией.
             </p>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Сумма для сдачи
               </label>
               <input
@@ -626,7 +626,7 @@ export default function DriverFinancePage() {
                 value={depositAmount}
                 onChange={(e) => setDepositAmount(e.target.value)}
                 placeholder="0.00"
-                className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-light"
               />
             </div>
             <div className="flex gap-3">
@@ -662,7 +662,7 @@ export default function DriverFinancePage() {
                     alert(`Ошибка: ${err.message || 'Не удалось создать запрос'}`)
                   }
                 }}
-                className="flex-1 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition"
+                className="flex-1 bg-brand-light text-gray-900 px-4 py-2 rounded-md hover:bg-brand-dark transition"
               >
                 Отправить запрос
               </button>
@@ -671,7 +671,7 @@ export default function DriverFinancePage() {
                   setShowDepositModal(false)
                   setDepositAmount('')
                 }}
-                className="flex-1 bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition"
+                className="flex-1 bg-gray-600 text-gray-900 px-4 py-2 rounded-md hover:bg-gray-100 transition"
               >
                 Отмена
               </button>
@@ -681,21 +681,21 @@ export default function DriverFinancePage() {
       )}
 
       {/* Транзакции */}
-      <div className="bg-gray-800 rounded-lg shadow p-6 mt-6">
-        <h2 className="text-xl font-semibold mb-4 text-white">История транзакций</h2>
+      <div className="bg-gray-50 rounded-lg shadow p-6 mt-6">
+        <h2 className="text-xl font-semibold mb-4 text-gray-900">История транзакций</h2>
         {transactions && transactions.length > 0 ? (
           <div className="space-y-2">
             {transactions.map((transaction: any) => (
-              <div key={transaction.id} className="border-b border-gray-700 pb-2">
+              <div key={transaction.id} className="border-b border-gray-200 pb-2">
                 <div className="flex justify-between items-center">
                   <div>
-                    <p className="font-medium text-white">{transaction.description}</p>
-                    <p className="text-sm text-gray-400">
+                    <p className="font-medium text-gray-900">{transaction.description}</p>
+                    <p className="text-sm text-gray-600">
                       {new Date(transaction.created_at).toLocaleString('ru-RU')}
                     </p>
                   </div>
                   <p className={`font-semibold ${
-                    transaction.type === 'credit' ? 'text-green-400' : 'text-red-400'
+                    transaction.type === 'credit' ? 'text-brand-light' : 'text-red-400'
                   }`}>
                     {transaction.type === 'credit' ? '+' : '-'}{transaction.amount} BYN
                   </p>
@@ -704,7 +704,7 @@ export default function DriverFinancePage() {
             ))}
           </div>
         ) : (
-          <p className="text-gray-400">Нет транзакций</p>
+          <p className="text-gray-600">Нет транзакций</p>
         )}
       </div>
       

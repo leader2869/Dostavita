@@ -151,12 +151,12 @@ export default async function DashboardLayout({
   console.log('========================================')
 
   return (
-    <div className="min-h-screen bg-gray-900">
-      <nav className="bg-gray-800 shadow-sm border-b border-gray-700">
+    <div className="min-h-screen bg-white">
+      <nav className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
-              <h1 className="text-xl font-bold text-white">Dostavita</h1>
+              <h1 className="text-4xl font-bold text-brand-light" style={{ fontFamily: 'var(--font-amatic-sc), cursive' }}>Просто!</h1>
             </div>
             <DashboardNav profile={profile as User} userId={user.id} />
           </div>

@@ -145,8 +145,8 @@ export default function ClientFinancePage() {
     return (
       <div className="pb-20">
         <BackButton />
-        <h1 className="text-3xl font-bold mb-6 text-white">Финансы</h1>
-        <div className="text-center py-8 text-gray-400">Загрузка...</div>
+        <h1 className="text-3xl font-bold mb-6 text-gray-900">Финансы</h1>
+        <div className="text-center py-8 text-gray-600">Загрузка...</div>
       </div>
     )
   }
@@ -154,31 +154,31 @@ export default function ClientFinancePage() {
   return (
     <div className="pb-20">
       <BackButton />
-      <h1 className="text-3xl font-bold mb-6 text-white">Финансы</h1>
+      <h1 className="text-3xl font-bold mb-6 text-gray-900">Финансы</h1>
 
       {/* Общая статистика */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        <div className="bg-gray-800 rounded-lg shadow p-6">
-          <h3 className="text-sm text-gray-400 mb-2">Выполненных заказов</h3>
-          <p className="text-3xl font-bold text-green-400">{completedOrders.length}</p>
+        <div className="bg-gray-50 rounded-lg shadow p-6">
+          <h3 className="text-sm text-gray-600 mb-2">Выполненных заказов</h3>
+          <p className="text-3xl font-bold text-brand-light">{completedOrders.length}</p>
         </div>
-        <div className="bg-gray-800 rounded-lg shadow p-6">
-          <h3 className="text-sm text-gray-400 mb-2">Общая сумма заказов</h3>
+        <div className="bg-gray-50 rounded-lg shadow p-6">
+          <h3 className="text-sm text-gray-600 mb-2">Общая сумма заказов</h3>
           <p className="text-3xl font-bold text-blue-400">{totalCompletedAmount.toFixed(2)} BYN</p>
         </div>
-        <div className="bg-gray-800 rounded-lg shadow p-6">
-          <h3 className="text-sm text-gray-400 mb-2">Долги</h3>
+        <div className="bg-gray-50 rounded-lg shadow p-6">
+          <h3 className="text-sm text-gray-600 mb-2">Долги</h3>
           <p className="text-3xl font-bold text-red-400">{totalReceivables.toFixed(2)} BYN</p>
         </div>
       </div>
 
       {/* Фильтр по периоду */}
-      <div className="bg-gray-800 rounded-lg shadow p-4 mb-6">
+      <div className="bg-gray-50 rounded-lg shadow p-4 mb-6">
         <div className="flex flex-wrap gap-2">
           <button
             onClick={() => setPeriod('today')}
             className={`px-4 py-2 rounded text-sm transition ${
-              period === 'today' ? 'bg-green-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+              period === 'today' ? 'bg-brand-light text-gray-900' : 'bg-gray-100 text-gray-700 hover:bg-gray-100'
             }`}
           >
             Сегодня
@@ -186,7 +186,7 @@ export default function ClientFinancePage() {
           <button
             onClick={() => setPeriod('week')}
             className={`px-4 py-2 rounded text-sm transition ${
-              period === 'week' ? 'bg-green-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+              period === 'week' ? 'bg-brand-light text-gray-900' : 'bg-gray-100 text-gray-700 hover:bg-gray-100'
             }`}
           >
             Неделя
@@ -194,7 +194,7 @@ export default function ClientFinancePage() {
           <button
             onClick={() => setPeriod('month')}
             className={`px-4 py-2 rounded text-sm transition ${
-              period === 'month' ? 'bg-green-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+              period === 'month' ? 'bg-brand-light text-gray-900' : 'bg-gray-100 text-gray-700 hover:bg-gray-100'
             }`}
           >
             Месяц
@@ -202,7 +202,7 @@ export default function ClientFinancePage() {
           <button
             onClick={() => setPeriod('all')}
             className={`px-4 py-2 rounded text-sm transition ${
-              period === 'all' ? 'bg-green-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+              period === 'all' ? 'bg-brand-light text-gray-900' : 'bg-gray-100 text-gray-700 hover:bg-gray-100'
             }`}
           >
             Все
@@ -210,7 +210,7 @@ export default function ClientFinancePage() {
           <button
             onClick={() => setPeriod('custom')}
             className={`px-4 py-2 rounded text-sm transition ${
-              period === 'custom' ? 'bg-green-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+              period === 'custom' ? 'bg-brand-light text-gray-900' : 'bg-gray-100 text-gray-700 hover:bg-gray-100'
             }`}
           >
             Период
@@ -219,21 +219,21 @@ export default function ClientFinancePage() {
         {period === 'custom' && (
           <div className="mt-4 flex gap-4">
             <div className="flex-1">
-              <label className="block text-sm text-gray-400 mb-1">От</label>
+              <label className="block text-sm text-gray-600 mb-1">От</label>
               <input
                 type="date"
                 value={customStartDate}
                 onChange={(e) => setCustomStartDate(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-900"
               />
             </div>
             <div className="flex-1">
-              <label className="block text-sm text-gray-400 mb-1">До</label>
+              <label className="block text-sm text-gray-600 mb-1">До</label>
               <input
                 type="date"
                 value={customEndDate}
                 onChange={(e) => setCustomEndDate(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-900"
               />
             </div>
           </div>
@@ -242,15 +242,15 @@ export default function ClientFinancePage() {
 
       {/* Долги по организациям */}
       {Object.keys(receivablesByOrganization).length > 0 && (
-        <div className="bg-gray-800 rounded-lg shadow p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4 text-white">Долги по организациям</h2>
+        <div className="bg-gray-50 rounded-lg shadow p-6 mb-6">
+          <h2 className="text-xl font-semibold mb-4 text-gray-900">Долги по организациям</h2>
           <div className="space-y-4">
             {Object.values(receivablesByOrganization).map((orgData: any) => (
-              <div key={orgData.organization_id || 'unknown'} className="border border-red-500/50 rounded-lg p-4 bg-gray-700/50">
+              <div key={orgData.organization_id || 'unknown'} className="border border-red-500/50 rounded-lg p-4 bg-gray-100/50">
                 <div className="flex justify-between items-start mb-3">
                   <div>
-                    <p className="font-semibold text-white text-lg">{orgData.organization_name}</p>
-                    <p className="text-gray-400 text-sm mt-1">
+                    <p className="font-semibold text-gray-900 text-lg">{orgData.organization_name}</p>
+                    <p className="text-gray-600 text-sm mt-1">
                       {orgData.receivables.length} {orgData.receivables.length === 1 ? 'неоплаченный заказ' : 'неоплаченных заказов'}
                     </p>
                   </div>
@@ -262,7 +262,7 @@ export default function ClientFinancePage() {
                   {orgData.receivables.map((r: any) => (
                     <div 
                       key={r.id} 
-                      className="bg-gray-600/50 rounded p-3 cursor-pointer hover:bg-gray-600 transition"
+                      className="bg-gray-600/50 rounded p-3 cursor-pointer hover:bg-gray-100 transition"
                       onClick={() => {
                         if (r.order_id) {
                           router.push(`/dashboard/client/orders/${r.order_id}`)
@@ -271,16 +271,16 @@ export default function ClientFinancePage() {
                     >
                       <div className="flex justify-between items-center">
                         <div>
-                          <p className="text-white font-medium">
+                          <p className="text-gray-900 font-medium">
                             Заказ {r.order_number ? `№${r.order_number}` : 'без номера'}
                           </p>
                           {r.pickup_address && r.delivery_address && (
-                            <p className="text-gray-400 text-xs mt-1">
+                            <p className="text-gray-600 text-xs mt-1">
                               {formatAddressForOrder(r.pickup_address)} → {formatAddressForOrder(r.delivery_address)}
                             </p>
                           )}
                           {r.driver_full_name && (
-                            <p className="text-gray-400 text-xs mt-1">
+                            <p className="text-gray-600 text-xs mt-1">
                               Водитель: {r.driver_full_name}
                             </p>
                           )}
@@ -308,44 +308,44 @@ export default function ClientFinancePage() {
       )}
 
       {/* Выполненные заказы */}
-      <div className="bg-gray-800 rounded-lg shadow p-6">
-        <h2 className="text-xl font-semibold mb-4 text-white">Выполненные заказы</h2>
+      <div className="bg-gray-50 rounded-lg shadow p-6">
+        <h2 className="text-xl font-semibold mb-4 text-gray-900">Выполненные заказы</h2>
         {completedOrders.length > 0 ? (
           <div className="space-y-4">
             {completedOrders.map((order: any) => (
               <div 
                 key={order.id} 
-                className="border border-gray-700 rounded-lg p-4 bg-gray-700/50 cursor-pointer hover:bg-gray-700 transition"
+                className="border border-gray-200 rounded-lg p-4 bg-gray-100/50 cursor-pointer hover:bg-gray-100 transition"
                 onClick={() => router.push(`/dashboard/client/orders/${order.id}`)}
               >
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
-                      <p className="font-semibold text-white text-lg">
+                      <p className="font-semibold text-gray-900 text-lg">
                         Заказ {order.order_number ? `№${order.order_number}` : 'без номера'}
                       </p>
                       <span className={`px-2 py-1 text-xs rounded ${
-                        order.is_paid ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
+                        order.is_paid ? 'bg-brand-light/20 text-brand-light' : 'bg-red-500/20 text-red-400'
                       }`}>
                         {order.is_paid ? 'Оплачен' : 'Не оплачен'}
                       </span>
                     </div>
                     <div className="mt-2 space-y-1 text-sm">
-                      <p className="text-gray-300">
-                        Сумма: <span className="text-white font-semibold">{parseFloat(order.final_price || 0).toFixed(2)} BYN</span>
+                      <p className="text-gray-700">
+                        Сумма: <span className="text-gray-900 font-semibold">{parseFloat(order.final_price || 0).toFixed(2)} BYN</span>
                       </p>
                       {order.pickup_address && order.delivery_address && (
-                        <p className="text-gray-400 text-xs">
+                        <p className="text-gray-600 text-xs">
                           {formatAddressForOrder(order.pickup_address)} → {formatAddressForOrder(order.delivery_address)}
                         </p>
                       )}
                       {order.executor && order.executor.full_name && (
-                        <p className="text-gray-300">
-                          Организация: <span className="text-white">{order.executor.full_name}</span>
+                        <p className="text-gray-700">
+                          Организация: <span className="text-gray-900">{order.executor.full_name}</span>
                         </p>
                       )}
                       {order.completed_at && (
-                        <p className="text-gray-400 text-xs mt-1">
+                        <p className="text-gray-600 text-xs mt-1">
                           Завершен: {new Date(order.completed_at).toLocaleDateString('ru-RU', {
                             day: '2-digit',
                             month: '2-digit',
@@ -358,7 +358,7 @@ export default function ClientFinancePage() {
                     </div>
                   </div>
                   <div className="ml-4">
-                    <p className="text-xl font-bold text-green-400">
+                    <p className="text-xl font-bold text-brand-light">
                       {parseFloat(order.final_price || 0).toFixed(2)} BYN
                     </p>
                   </div>
@@ -368,7 +368,7 @@ export default function ClientFinancePage() {
           </div>
         ) : (
           <div className="text-center py-8">
-            <p className="text-gray-400">Нет выполненных заказов за выбранный период</p>
+            <p className="text-gray-600">Нет выполненных заказов за выбранный период</p>
           </div>
         )}
       </div>

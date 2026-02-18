@@ -307,7 +307,7 @@ export function OrderActions({ order, onStopPropagation }: OrderActionsProps) {
         {/* Кнопка телефона */}
         <button
           onClick={handlePhoneClick}
-          className="flex items-center justify-center bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition"
+          className="flex items-center justify-center bg-brand-light hover:bg-brand-dark text-gray-900 px-4 py-2 rounded transition"
           title="Позвонить"
         >
           <svg
@@ -328,7 +328,7 @@ export function OrderActions({ order, onStopPropagation }: OrderActionsProps) {
         {/* Кнопка навигации */}
         <button
           onClick={handleNavClick}
-          className="flex items-center justify-center bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded transition"
+          className="flex items-center justify-center bg-yellow-500 hover:bg-yellow-600 text-gray-900 px-4 py-2 rounded transition"
           title="Навигация"
         >
           <svg
@@ -356,7 +356,7 @@ export function OrderActions({ order, onStopPropagation }: OrderActionsProps) {
         {canShowChat && (
           <button
             onClick={handleChatClick}
-            className="relative flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition"
+            className="relative flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-gray-900 px-4 py-2 rounded transition"
             title="Чат"
           >
             <svg
@@ -373,7 +373,7 @@ export function OrderActions({ order, onStopPropagation }: OrderActionsProps) {
               />
             </svg>
             {unreadMessagesCount > 0 && (
-              <span className={`absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center ${
+              <span className={`absolute -top-1 -right-1 bg-red-500 text-gray-900 text-xs font-bold rounded-full flex items-center justify-center ${
                 unreadMessagesCount > 9 ? 'px-1.5 min-w-[1.5rem]' : 'w-5 h-5'
               }`}>
                 {unreadMessagesCount > 10 ? unreadMessagesCount : unreadMessagesCount >= 10 ? 10 : unreadMessagesCount}
@@ -395,13 +395,13 @@ export function OrderActions({ order, onStopPropagation }: OrderActionsProps) {
       {/* Меню выбора телефона */}
       {showPhoneMenu && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setShowPhoneMenu(false)}>
-          <div className="bg-gray-800 rounded-lg p-6 max-w-sm w-full mx-4" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-xl font-semibold text-white mb-4">Кому позвонить?</h3>
+          <div className="bg-gray-50 rounded-lg p-6 max-w-sm w-full mx-4" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-xl font-semibold text-gray-900 mb-4">Кому позвонить?</h3>
             <div className="space-y-3">
               {order.sender_phone && (
                 <button
                   onClick={() => handleCall(order.sender_phone!)}
-                  className="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded transition"
+                  className="w-full bg-brand-light hover:bg-brand-dark text-gray-900 px-4 py-3 rounded transition"
                 >
                   Отправитель: {order.sender_phone}
                 </button>
@@ -409,14 +409,14 @@ export function OrderActions({ order, onStopPropagation }: OrderActionsProps) {
               {order.recipient_phone && (
                 <button
                   onClick={() => handleCall(order.recipient_phone!)}
-                  className="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded transition"
+                  className="w-full bg-brand-light hover:bg-brand-dark text-gray-900 px-4 py-3 rounded transition"
                 >
                   Получатель: {order.recipient_phone}
                 </button>
               )}
               <button
                 onClick={() => setShowPhoneMenu(false)}
-                className="w-full bg-gray-600 hover:bg-gray-700 text-white px-4 py-3 rounded transition"
+                className="w-full bg-gray-600 hover:bg-gray-100 text-gray-900 px-4 py-3 rounded transition"
               >
                 Отмена
               </button>
@@ -428,31 +428,31 @@ export function OrderActions({ order, onStopPropagation }: OrderActionsProps) {
       {/* Меню выбора навигации */}
       {showNavMenu && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setShowNavMenu(false)}>
-          <div className="bg-gray-800 rounded-lg p-6 max-w-sm w-full mx-4" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-xl font-semibold text-white mb-4">Куда построить маршрут?</h3>
+          <div className="bg-gray-50 rounded-lg p-6 max-w-sm w-full mx-4" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-xl font-semibold text-gray-900 mb-4">Куда построить маршрут?</h3>
             <div className="space-y-3">
               <button
                 onClick={() => handleNavTypeSelect('pickup')}
-                className="w-full bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-3 rounded transition"
+                className="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 px-4 py-3 rounded transition"
               >
                 К отправителю
               </button>
               <button
                 onClick={() => handleNavTypeSelect('delivery')}
-                className="w-full bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-3 rounded transition"
+                className="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 px-4 py-3 rounded transition"
               >
                 К получателю
               </button>
               <button
                 onClick={() => handleNavTypeSelect('full')}
-                className="w-full bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-3 rounded transition font-semibold"
+                className="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 px-4 py-3 rounded transition font-semibold"
                 disabled={loadingLocation || !driverLocation}
               >
                 {loadingLocation ? 'Загрузка местоположения...' : 'Весь маршрут'}
               </button>
               <button
                 onClick={() => setShowNavMenu(false)}
-                className="w-full bg-gray-600 hover:bg-gray-700 text-white px-4 py-3 rounded transition"
+                className="w-full bg-gray-600 hover:bg-gray-100 text-gray-900 px-4 py-3 rounded transition"
               >
                 Отмена
               </button>
@@ -467,24 +467,24 @@ export function OrderActions({ order, onStopPropagation }: OrderActionsProps) {
           setShowNavAppMenu(false)
           setSelectedNavType(null)
         }}>
-          <div className="bg-gray-800 rounded-lg p-6 max-w-sm w-full mx-4" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-xl font-semibold text-white mb-4">Выберите приложение навигации</h3>
+          <div className="bg-gray-50 rounded-lg p-6 max-w-sm w-full mx-4" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-xl font-semibold text-gray-900 mb-4">Выберите приложение навигации</h3>
             <div className="space-y-3">
               <button
                 onClick={() => openNavigation(0)}
-                className="w-full bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-3 rounded transition text-left"
+                className="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 px-4 py-3 rounded transition text-left"
               >
                 Яндекс Навигатор
               </button>
               <button
                 onClick={() => openNavigation(1)}
-                className="w-full bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-3 rounded transition text-left"
+                className="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 px-4 py-3 rounded transition text-left"
               >
                 Яндекс Карты
               </button>
               <button
                 onClick={() => openNavigation(2)}
-                className="w-full bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-3 rounded transition text-left"
+                className="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 px-4 py-3 rounded transition text-left"
               >
                 2ГИС
               </button>
@@ -493,7 +493,7 @@ export function OrderActions({ order, onStopPropagation }: OrderActionsProps) {
                   setShowNavAppMenu(false)
                   setSelectedNavType(null)
                 }}
-                className="w-full bg-gray-600 hover:bg-gray-700 text-white px-4 py-3 rounded transition"
+                className="w-full bg-gray-600 hover:bg-gray-100 text-gray-900 px-4 py-3 rounded transition"
               >
                 Отмена
               </button>

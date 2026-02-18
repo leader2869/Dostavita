@@ -81,7 +81,7 @@ export function ClientOrderActions({ order, userId }: ClientOrderActionsProps) {
         <button
           onClick={handlePhoneClick}
           disabled={!driverPhone || loadingPhone}
-          className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center justify-center gap-2 bg-brand-light hover:bg-brand-dark text-gray-900 px-4 py-2 rounded transition disabled:opacity-50 disabled:cursor-not-allowed"
           title={driverPhone ? `Позвонить водителю: ${driverPhone}` : 'Телефон водителя не указан'}
         >
           <svg
@@ -103,7 +103,7 @@ export function ClientOrderActions({ order, userId }: ClientOrderActionsProps) {
         {/* Кнопка сообщения */}
         <button
           onClick={handleChatClick}
-          className="relative flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition"
+          className="relative flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-gray-900 px-4 py-2 rounded transition"
           title="Открыть чат"
         >
           <svg
@@ -121,7 +121,7 @@ export function ClientOrderActions({ order, userId }: ClientOrderActionsProps) {
           </svg>
           <span className="text-sm">Сообщение</span>
           {unreadCount > 0 && (
-            <span className={`absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center ${
+            <span className={`absolute -top-1 -right-1 bg-red-500 text-gray-900 text-xs font-bold rounded-full flex items-center justify-center ${
               unreadCount > 9 ? 'px-1.5 min-w-[1.5rem]' : 'w-5 h-5'
             }`}>
               {unreadCount > 10 ? unreadCount : unreadCount >= 10 ? 10 : unreadCount}

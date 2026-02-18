@@ -170,43 +170,43 @@ export default async function AdminDashboard() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-6 text-white">
+      <h1 className="text-3xl font-bold mb-6 text-gray-900">
         Панель администратора
         {(profile as User).role === 'superadmin' && ' (Суперадмин)'}
       </h1>
 
       {/* Статистика заказов */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-        <div className="bg-gray-800 rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold mb-2 text-white">Активные заказы</h2>
-          <p className="text-3xl font-bold text-white">{activeOrdersCount || 0}</p>
-          <p className="text-sm text-gray-400 mt-1">Ищем курьера, в пути, доставляется</p>
+        <div className="bg-gray-50 rounded-lg shadow p-6">
+          <h2 className="text-lg font-semibold mb-2 text-gray-900">Активные заказы</h2>
+          <p className="text-3xl font-bold text-gray-900">{activeOrdersCount || 0}</p>
+          <p className="text-sm text-gray-600 mt-1">Ищем курьера, в пути, доставляется</p>
         </div>
-        <div className="bg-gray-800 rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold mb-2 text-white">Ищем курьера</h2>
-          <p className="text-3xl font-bold text-white">{searchingCourierCount || 0}</p>
-          <p className="text-sm text-gray-400 mt-1">Ожидают принятия водителем</p>
+        <div className="bg-gray-50 rounded-lg shadow p-6">
+          <h2 className="text-lg font-semibold mb-2 text-gray-900">Ищем курьера</h2>
+          <p className="text-3xl font-bold text-gray-900">{searchingCourierCount || 0}</p>
+          <p className="text-sm text-gray-600 mt-1">Ожидают принятия водителем</p>
         </div>
-        <div className="bg-gray-800 rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold mb-2 text-white">Выполняются</h2>
-          <p className="text-3xl font-bold text-white">{inProgressCount || 0}</p>
-          <p className="text-sm text-gray-400 mt-1">Курьер едет, доставляется</p>
+        <div className="bg-gray-50 rounded-lg shadow p-6">
+          <h2 className="text-lg font-semibold mb-2 text-gray-900">Выполняются</h2>
+          <p className="text-3xl font-bold text-gray-900">{inProgressCount || 0}</p>
+          <p className="text-sm text-gray-600 mt-1">Курьер едет, доставляется</p>
         </div>
-        <div className="bg-gray-800 rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold mb-2 text-white">Всего отказов</h2>
+        <div className="bg-gray-50 rounded-lg shadow p-6">
+          <h2 className="text-lg font-semibold mb-2 text-gray-900">Всего отказов</h2>
           <p className="text-3xl font-bold text-red-400">{totalRejectionsCount || 0}</p>
-          <p className="text-sm text-gray-400 mt-1">Отказов водителей от заказов</p>
+          <p className="text-sm text-gray-600 mt-1">Отказов водителей от заказов</p>
         </div>
       </div>
 
       {/* Статистика отказов по заказам */}
       {ordersWithMostRejections.length > 0 && (
-        <div className="bg-gray-800 rounded-lg shadow p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4 text-white">Заказы с наибольшим количеством отказов</h2>
+        <div className="bg-gray-50 rounded-lg shadow p-6 mb-6">
+          <h2 className="text-xl font-semibold mb-4 text-gray-900">Заказы с наибольшим количеством отказов</h2>
           <div className="space-y-2">
             {ordersWithMostRejections.map(({ orderId, count }) => (
-              <div key={orderId} className="flex justify-between items-center p-3 bg-gray-700 rounded">
-                <span className="text-white">Заказ {orderId.slice(0, 8)}...</span>
+              <div key={orderId} className="flex justify-between items-center p-3 bg-gray-100 rounded">
+                <span className="text-gray-900">Заказ {orderId.slice(0, 8)}...</span>
                 <span className="text-red-400 font-semibold">{count} отказ(ов)</span>
               </div>
             ))}
@@ -215,8 +215,8 @@ export default async function AdminDashboard() {
       )}
 
       {/* Активные заказы */}
-      <div className="bg-gray-800 rounded-lg shadow p-6 mb-6">
-        <h2 className="text-xl font-semibold mb-4 text-white">Активные заказы</h2>
+      <div className="bg-gray-50 rounded-lg shadow p-6 mb-6">
+        <h2 className="text-xl font-semibold mb-4 text-gray-900">Активные заказы</h2>
         {activeOrders && activeOrders.length > 0 ? (
           <div className="space-y-3">
             {activeOrders.map((order: any) => {
@@ -270,19 +270,19 @@ export default async function AdminDashboard() {
                   className={`border rounded-lg p-4 ${
                     isOverdue 
                       ? 'border-red-600 bg-red-900 bg-opacity-20' 
-                      : 'border-gray-700 bg-gray-700'
+                      : 'border-gray-200 bg-gray-100'
                   }`}
                 >
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
-                      <p className="font-medium text-white">Заказ №{order.order_number || order.id.slice(0, 8)}</p>
-                      <p className="text-sm text-gray-300 mt-1">
+                      <p className="font-medium text-gray-900">Заказ №{order.order_number || order.id.slice(0, 8)}</p>
+                      <p className="text-sm text-gray-700 mt-1">
                         а) {formatAddressForOrder(order.pickup_address)}
                       </p>
-                      <p className="text-sm text-gray-300 mt-1">
+                      <p className="text-sm text-gray-700 mt-1">
                         б) {formatAddressForOrder(order.delivery_address)}
                       </p>
-                      <p className="text-sm text-gray-400 mt-1">
+                      <p className="text-sm text-gray-600 mt-1">
                         Статус: {
                           order.status === 'searching_courier' ? 'Ищем курьера' :
                           order.status === 'courier_accepted' ? 'Курьер принял заказ' :
@@ -295,7 +295,7 @@ export default async function AdminDashboard() {
                       </p>
                     </div>
                     <div className="text-right ml-4">
-                      <p className="font-semibold text-white">{order.final_price} BYN</p>
+                      <p className="font-semibold text-gray-900">{order.final_price} BYN</p>
                       {statusTime && timeAgo && (
                         <p className="text-xs text-purple-400 mt-1 font-medium animate-blink">
                           {statusLabel} {timeAgo}
@@ -308,7 +308,7 @@ export default async function AdminDashboard() {
             })}
           </div>
         ) : (
-          <p className="text-gray-400">Нет активных заказов</p>
+          <p className="text-gray-600">Нет активных заказов</p>
         )}
       </div>
 
@@ -316,38 +316,38 @@ export default async function AdminDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <a
           href="/dashboard/admin/orders"
-          className="bg-gray-800 rounded-lg shadow p-6 hover:shadow-lg transition"
+          className="bg-gray-50 rounded-lg shadow p-6 hover:shadow-lg transition"
         >
-          <h3 className="font-semibold text-white">Управление заказами</h3>
+          <h3 className="font-semibold text-gray-900">Управление заказами</h3>
         </a>
 
         <a
           href="/dashboard/admin/users"
-          className="bg-gray-800 rounded-lg shadow p-6 hover:shadow-lg transition"
+          className="bg-gray-50 rounded-lg shadow p-6 hover:shadow-lg transition"
         >
-          <h3 className="font-semibold text-white">Управление пользователями</h3>
+          <h3 className="font-semibold text-gray-900">Управление пользователями</h3>
         </a>
 
         <a
           href="/dashboard/admin/personnel"
-          className="bg-gray-800 rounded-lg shadow p-6 hover:shadow-lg transition"
+          className="bg-gray-50 rounded-lg shadow p-6 hover:shadow-lg transition"
         >
-          <h3 className="font-semibold text-white">Управление персоналом</h3>
+          <h3 className="font-semibold text-gray-900">Управление персоналом</h3>
         </a>
 
         {(profile as User).role === 'superadmin' && (
           <>
             <a
               href="/dashboard/admin/tariffs"
-              className="bg-gray-800 rounded-lg shadow p-6 hover:shadow-lg transition"
+              className="bg-gray-50 rounded-lg shadow p-6 hover:shadow-lg transition"
             >
-              <h3 className="font-semibold text-white">Управление тарифами</h3>
+              <h3 className="font-semibold text-gray-900">Управление тарифами</h3>
             </a>
             <a
               href="/dashboard/admin/delivery-settings"
-              className="bg-gray-800 rounded-lg shadow p-6 hover:shadow-lg transition"
+              className="bg-gray-50 rounded-lg shadow p-6 hover:shadow-lg transition"
             >
-              <h3 className="font-semibold text-white">Настройки доставки</h3>
+              <h3 className="font-semibold text-gray-900">Настройки доставки</h3>
             </a>
           </>
         )}

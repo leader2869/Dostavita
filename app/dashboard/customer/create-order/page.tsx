@@ -257,11 +257,11 @@ export default function CreateOrderPage() {
   return (
     <div className="max-w-2xl mx-auto">
       <BackButton />
-      <h1 className="text-3xl font-bold mb-6 text-white">Создать заказ</h1>
+      <h1 className="text-3xl font-bold mb-6 text-gray-900">Создать заказ</h1>
 
-      <form onSubmit={handleSubmit} className="bg-gray-800 rounded-lg shadow p-6 space-y-4">
+      <form onSubmit={handleSubmit} className="bg-gray-50 rounded-lg shadow p-6 space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             Адрес отправления
           </label>
           <AddressAutocomplete
@@ -279,12 +279,12 @@ export default function CreateOrderPage() {
             }}
             placeholder="Начните вводить адрес отправления"
             required
-            className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
+            className="w-full px-3 py-2 bg-gray-100 text-gray-900 border border-gray-300 rounded-md focus:outline-none focus:ring-brand-light focus:border-brand-light"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             Адрес доставки
           </label>
           <AddressAutocomplete
@@ -295,26 +295,26 @@ export default function CreateOrderPage() {
             }}
             placeholder="Начните вводить адрес доставки"
             required
-            className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
+            className="w-full px-3 py-2 bg-gray-100 text-gray-900 border border-gray-300 rounded-md focus:outline-none focus:ring-brand-light focus:border-brand-light"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             Телефон получателя
           </label>
           <input
             type="tel"
             value={recipientPhone}
             onChange={(e) => setRecipientPhone(e.target.value)}
-            className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
+            className="w-full px-3 py-2 bg-gray-100 text-gray-900 border border-gray-300 rounded-md focus:outline-none focus:ring-brand-light focus:border-brand-light"
             placeholder="+375 (XX) XXX-XX-XX"
           />
-          <p className="text-xs text-gray-400 mt-1">Номер телефона получателя заказа (необязательно)</p>
+          <p className="text-xs text-gray-600 mt-1">Номер телефона получателя заказа (необязательно)</p>
         </div>
 
         <div>
-          <label htmlFor="readyAt" className="block text-sm font-medium text-gray-300 mb-1">
+          <label htmlFor="readyAt" className="block text-sm font-medium text-gray-700 mb-1">
             Заказ будет готов к выдаче
           </label>
           <input
@@ -322,14 +322,14 @@ export default function CreateOrderPage() {
             id="readyAt"
             value={readyAt}
             onChange={(e) => setReadyAt(e.target.value)}
-            className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
+            className="w-full px-3 py-2 bg-gray-100 text-gray-900 border border-gray-300 rounded-md focus:outline-none focus:ring-brand-light focus:border-brand-light"
             min={new Date().toISOString().slice(0, 16)}
           />
-          <p className="text-xs text-gray-400 mt-1">Время, когда заказ будет готов (необязательно, актуально для доставки еды и т.д.)</p>
+          <p className="text-xs text-gray-600 mt-1">Время, когда заказ будет готов (необязательно, актуально для доставки еды и т.д.)</p>
         </div>
 
         <div>
-          <label htmlFor="paidBy" className="block text-sm font-medium text-gray-300 mb-1">
+          <label htmlFor="paidBy" className="block text-sm font-medium text-gray-700 mb-1">
             Кто оплачивает заказ <span className="text-red-400">*</span>
           </label>
           <select
@@ -337,16 +337,16 @@ export default function CreateOrderPage() {
             value={paidBy}
             onChange={(e) => setPaidBy(e.target.value as 'sender' | 'recipient')}
             required
-            className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
+            className="w-full px-3 py-2 bg-gray-100 text-gray-900 border border-gray-300 rounded-md focus:outline-none focus:ring-brand-light focus:border-brand-light"
           >
-            <option value="sender" className="bg-gray-700">Отправитель</option>
-            <option value="recipient" className="bg-gray-700">Получатель</option>
+            <option value="sender" className="bg-gray-100">Отправитель</option>
+            <option value="recipient" className="bg-gray-100">Получатель</option>
           </select>
-          <p className="text-xs text-gray-400 mt-1">Укажите, кто будет оплачивать заказ</p>
+          <p className="text-xs text-gray-600 mt-1">Укажите, кто будет оплачивать заказ</p>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             Регион
           </label>
           <select
@@ -354,7 +354,7 @@ export default function CreateOrderPage() {
             onChange={(e) => setSelectedRegion(e.target.value)}
             disabled={!pickupAddress || regionAutoDetected}
             required
-            className={`w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 ${(!pickupAddress || regionAutoDetected) ? 'opacity-60 cursor-not-allowed' : ''}`}
+            className={`w-full px-3 py-2 bg-gray-100 text-gray-900 border border-gray-300 rounded-md focus:outline-none focus:ring-brand-light focus:border-brand-light ${(!pickupAddress || regionAutoDetected) ? 'opacity-60 cursor-not-allowed' : ''}`}
           >
             {regions.map((region) => (
               <option key={region.id} value={region.id}>
@@ -365,13 +365,13 @@ export default function CreateOrderPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             Тип груза
           </label>
           <select
             value={itemType}
             onChange={(e) => setItemType(e.target.value as any)}
-            className="w-full px-3 py-2 border border-gray-600 rounded-md"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md"
           >
             <option value="documents">Документы</option>
             <option value="parcel">Посылка</option>
@@ -381,13 +381,13 @@ export default function CreateOrderPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             Описание
           </label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-600 rounded-md"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md"
             rows={3}
             placeholder="Дополнительная информация о заказе"
           />
@@ -401,14 +401,14 @@ export default function CreateOrderPage() {
           <button
             type="submit"
             disabled={loading}
-            className="flex-1 bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 disabled:opacity-50"
+            className="flex-1 bg-brand-light text-gray-900 px-6 py-2 rounded-md hover:bg-brand-dark disabled:opacity-50"
           >
             {loading ? 'Создание...' : 'Создать заказ'}
           </button>
           <button
             type="button"
             onClick={() => router.back()}
-            className="px-6 py-2 border border-gray-600 rounded-md hover:bg-gray-900"
+            className="px-6 py-2 border border-gray-300 rounded-md hover:bg-white"
           >
             Отмена
           </button>

@@ -225,39 +225,39 @@ export function PaymentModal({ order, isOpen, onClose, onSuccess }: PaymentModal
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
-        <h2 className="text-2xl font-bold mb-4 text-white">Оплата заказа</h2>
+      <div className="bg-gray-50 rounded-lg shadow-xl max-w-md w-full p-6">
+        <h2 className="text-2xl font-bold mb-4 text-gray-900">Оплата заказа</h2>
 
         {/* Информация о заказе */}
         <div className="space-y-3 mb-6">
           <div>
-            <p className="text-sm text-gray-400">Номер заказа</p>
-            <p className="text-white font-semibold">
+            <p className="text-sm text-gray-600">Номер заказа</p>
+            <p className="text-gray-900 font-semibold">
               {order.order_number ? `№${order.order_number}` : 'Без номера'}
             </p>
           </div>
 
           <div>
-            <p className="text-sm text-gray-400">Сумма заказа</p>
-            <p className="text-2xl font-bold text-green-400">{order.final_price} BYN</p>
+            <p className="text-sm text-gray-600">Сумма заказа</p>
+            <p className="text-2xl font-bold text-brand-light">{order.final_price} BYN</p>
           </div>
 
           <div>
-            <p className="text-sm text-gray-400">Оплачивает</p>
-            <p className="text-white capitalize">{paidByText}</p>
+            <p className="text-sm text-gray-600">Оплачивает</p>
+            <p className="text-gray-900 capitalize">{paidByText}</p>
           </div>
 
           {order.pickup_address && (
             <div>
-              <p className="text-sm text-gray-400">Откуда</p>
-              <p className="text-white text-sm">{order.pickup_address}</p>
+              <p className="text-sm text-gray-600">Откуда</p>
+              <p className="text-gray-900 text-sm">{order.pickup_address}</p>
             </div>
           )}
 
           {order.delivery_address && (
             <div>
-              <p className="text-sm text-gray-400">Куда</p>
-              <p className="text-white text-sm">{order.delivery_address}</p>
+              <p className="text-sm text-gray-600">Куда</p>
+              <p className="text-gray-900 text-sm">{order.delivery_address}</p>
             </div>
           )}
         </div>
@@ -273,7 +273,7 @@ export function PaymentModal({ order, isOpen, onClose, onSuccess }: PaymentModal
           <button
             onClick={() => handlePayment(true)}
             disabled={processing}
-            className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-md transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 bg-brand-light hover:bg-brand-dark text-gray-900 font-semibold py-3 px-4 rounded-md transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {processing ? 'Обработка...' : 'Принял оплату'}
           </button>
@@ -281,7 +281,7 @@ export function PaymentModal({ order, isOpen, onClose, onSuccess }: PaymentModal
           <button
             onClick={() => handlePayment(false)}
             disabled={processing}
-            className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-4 rounded-md transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 bg-red-600 hover:bg-red-700 text-gray-900 font-semibold py-3 px-4 rounded-md transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {processing ? 'Обработка...' : 'Заказ не оплачен'}
           </button>
@@ -290,7 +290,7 @@ export function PaymentModal({ order, isOpen, onClose, onSuccess }: PaymentModal
         <button
           onClick={onClose}
           disabled={processing}
-          className="mt-4 w-full px-4 py-2 border border-gray-600 rounded-md hover:bg-gray-700 text-white transition disabled:opacity-50"
+          className="mt-4 w-full px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100 text-gray-900 transition disabled:opacity-50"
         >
           Отмена
         </button>

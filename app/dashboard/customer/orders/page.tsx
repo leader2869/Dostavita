@@ -68,24 +68,24 @@ export default async function CustomerOrdersPage() {
       case 'courier_delivering':
         return 'text-purple-400 bg-purple-400/20 border-purple-400/50'
       case 'completed':
-        return 'text-green-400 bg-green-400/20 border-green-400/50'
+        return 'text-brand-light bg-brand-light/20 border-green-400/50'
       case 'cancelled':
         return 'text-red-400 bg-red-400/20 border-red-400/50'
       default:
-        return 'text-gray-400 bg-gray-400/20 border-gray-400/50'
+        return 'text-gray-600 bg-gray-400/20 border-gray-400/50'
     }
   }
 
   return (
     <div className="pb-20">
       <BackButton />
-      <h1 className="text-3xl font-bold mb-6 text-white">История заказов</h1>
+      <h1 className="text-3xl font-bold mb-6 text-gray-900">История заказов</h1>
 
       <div className="space-y-6">
         {/* Активные заказы */}
         {activeOrders.length > 0 && (
-          <div className="bg-gray-800 rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-white mb-4 pb-2 border-b border-gray-700">
+          <div className="bg-gray-50 rounded-lg shadow p-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
               Активные заказы ({activeOrders.length})
             </h2>
             <div className="space-y-4">
@@ -93,19 +93,19 @@ export default async function CustomerOrdersPage() {
                 <a
                   key={order.id}
                   href={`/dashboard/customer/orders/${order.id}`}
-                  className="block border border-gray-700 rounded-lg p-4 bg-gray-700 hover:bg-gray-600 transition cursor-pointer"
+                  className="block border border-gray-200 rounded-lg p-4 bg-gray-100 hover:bg-gray-100 transition cursor-pointer"
                 >
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
-                      <p className="font-medium text-white">Заказ №{order.order_number || order.id.slice(0, 8)}</p>
-                      <p className="text-sm text-gray-300 mt-1">
+                      <p className="font-medium text-gray-900">Заказ №{order.order_number || order.id.slice(0, 8)}</p>
+                      <p className="text-sm text-gray-700 mt-1">
                         а) {order.pickup_address}
                       </p>
-                      <p className="text-sm text-gray-300 mt-1">
+                      <p className="text-sm text-gray-700 mt-1">
                         б) {order.delivery_address}
                       </p>
                       <div className="mt-2">
-                        <span className="text-sm text-gray-400">Статус: </span>
+                        <span className="text-sm text-gray-600">Статус: </span>
                         <span
                           className={`inline-block px-3 py-1 rounded-full text-xs font-semibold border ${
                             getStatusColor(order.status)
@@ -115,8 +115,8 @@ export default async function CustomerOrdersPage() {
                         </span>
                       </div>
                       {order.item_type && (
-                        <p className="text-sm text-gray-400 mt-1">
-                          Тип груза: <span className="text-gray-300">
+                        <p className="text-sm text-gray-600 mt-1">
+                          Тип груза: <span className="text-gray-700">
                             {order.item_type === 'documents' ? 'Документы' :
                              order.item_type === 'parcel' ? 'Посылка' :
                              order.item_type === 'flowers' ? 'Цветы' :
@@ -125,8 +125,8 @@ export default async function CustomerOrdersPage() {
                           </span>
                         </p>
                       )}
-                      <p className="text-sm text-gray-400 mt-1">
-                        Создан: <span className="text-gray-300">
+                      <p className="text-sm text-gray-600 mt-1">
+                        Создан: <span className="text-gray-700">
                           {new Date(order.created_at).toLocaleString('ru-RU', {
                             day: '2-digit',
                             month: '2-digit',
@@ -137,17 +137,17 @@ export default async function CustomerOrdersPage() {
                         </span>
                       </p>
                       {order.description && (
-                        <p className="text-sm text-gray-400 mt-1 italic">
+                        <p className="text-sm text-gray-600 mt-1 italic">
                           {order.description}
                         </p>
                       )}
                       {order.ready_at && (() => {
                         const { formattedTime, timeStatus, statusType } = formatReadyTime(order.ready_at)
                         return (
-                          <p className="text-sm text-gray-400 mt-1">
-                            Заказ будет готов к выдаче: <span className="text-gray-300">{formattedTime}</span>
+                          <p className="text-sm text-gray-600 mt-1">
+                            Заказ будет готов к выдаче: <span className="text-gray-700">{formattedTime}</span>
                             {timeStatus && (
-                              <span className={`ml-2 ${statusType === 'waiting' ? 'text-red-400 animate-blink' : statusType === 'upcoming' ? 'text-yellow-400 animate-blink' : 'text-gray-400'}`}>
+                              <span className={`ml-2 ${statusType === 'waiting' ? 'text-red-400 animate-blink' : statusType === 'upcoming' ? 'text-yellow-400 animate-blink' : 'text-gray-600'}`}>
                                 ({timeStatus})
                               </span>
                             )}
@@ -155,16 +155,16 @@ export default async function CustomerOrdersPage() {
                         )
                       })()}
                       {order.driver_full_name && (
-                        <p className="text-sm text-gray-400 mt-2">
-                          Водитель: <span className="text-gray-300">{order.driver_full_name}</span>
+                        <p className="text-sm text-gray-600 mt-2">
+                          Водитель: <span className="text-gray-700">{order.driver_full_name}</span>
                           {order.driver_phone && (
-                            <span className="text-gray-400 ml-2">({order.driver_phone})</span>
+                            <span className="text-gray-600 ml-2">({order.driver_phone})</span>
                           )}
                         </p>
                       )}
                     </div>
                     <div className="text-right ml-4">
-                      <p className="font-semibold text-white text-lg">{order.final_price} BYN</p>
+                      <p className="font-semibold text-gray-900 text-lg">{order.final_price} BYN</p>
                     </div>
                   </div>
                 </a>
@@ -175,8 +175,8 @@ export default async function CustomerOrdersPage() {
 
         {/* История заказов */}
         {completedOrders.length > 0 && (
-          <div className="bg-gray-800 rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-white mb-4 pb-2 border-b border-gray-700">
+          <div className="bg-gray-50 rounded-lg shadow p-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
               История заказов ({completedOrders.length})
             </h2>
             <div className="space-y-4">
@@ -184,19 +184,19 @@ export default async function CustomerOrdersPage() {
                 <a
                   key={order.id}
                   href={`/dashboard/customer/orders/${order.id}`}
-                  className="block border border-gray-700 rounded-lg p-4 bg-gray-700 hover:bg-gray-600 transition cursor-pointer"
+                  className="block border border-gray-200 rounded-lg p-4 bg-gray-100 hover:bg-gray-100 transition cursor-pointer"
                 >
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
-                      <p className="font-medium text-white">Заказ №{order.order_number || order.id.slice(0, 8)}</p>
-                      <p className="text-sm text-gray-300 mt-1">
+                      <p className="font-medium text-gray-900">Заказ №{order.order_number || order.id.slice(0, 8)}</p>
+                      <p className="text-sm text-gray-700 mt-1">
                         а) {order.pickup_address}
                       </p>
-                      <p className="text-sm text-gray-300 mt-1">
+                      <p className="text-sm text-gray-700 mt-1">
                         б) {order.delivery_address}
                       </p>
                       <div className="mt-2">
-                        <span className="text-sm text-gray-400">Статус: </span>
+                        <span className="text-sm text-gray-600">Статус: </span>
                         <span
                           className={`inline-block px-3 py-1 rounded-full text-xs font-semibold border ${
                             getStatusColor(order.status)
@@ -206,19 +206,19 @@ export default async function CustomerOrdersPage() {
                         </span>
                       </div>
                       {order.driver_full_name && (
-                        <p className="text-sm text-gray-400 mt-2">
-                          Водитель: <span className="text-gray-300">{order.driver_full_name}</span>
+                        <p className="text-sm text-gray-600 mt-2">
+                          Водитель: <span className="text-gray-700">{order.driver_full_name}</span>
                         </p>
                       )}
                       {order.completed_at && (
-                        <p className="text-sm text-gray-400 mt-1">
+                        <p className="text-sm text-gray-600 mt-1">
                           Завершен: {new Date(order.completed_at).toLocaleString('ru-RU')}
                         </p>
                       )}
                     </div>
                     <div className="text-right ml-4">
-                      <p className="font-semibold text-white text-lg">{order.final_price} BYN</p>
-                      <p className="text-xs text-gray-400 mt-1">
+                      <p className="font-semibold text-gray-900 text-lg">{order.final_price} BYN</p>
+                      <p className="text-xs text-gray-600 mt-1">
                         {new Date(order.created_at).toLocaleDateString('ru-RU')}
                       </p>
                     </div>
@@ -230,8 +230,8 @@ export default async function CustomerOrdersPage() {
         )}
 
         {orders?.length === 0 && (
-          <div className="bg-gray-800 rounded-lg shadow p-6">
-            <p className="text-gray-400 text-center">Пока нет заказов</p>
+          <div className="bg-gray-50 rounded-lg shadow p-6">
+            <p className="text-gray-600 text-center">Пока нет заказов</p>
           </div>
         )}
       </div>

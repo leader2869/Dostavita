@@ -82,44 +82,44 @@ export default async function AdminPersonnelPage() {
   return (
     <div>
       <BackButton />
-      <h1 className="text-3xl font-bold mb-6 text-white">Управление персоналом</h1>
+      <h1 className="text-3xl font-bold mb-6 text-gray-900">Управление персоналом</h1>
 
-      <div className="bg-gray-800 rounded-lg shadow overflow-hidden">
+      <div className="bg-gray-50 rounded-lg shadow overflow-hidden">
         <table className="min-w-full divide-y divide-gray-700">
-          <thead className="bg-gray-900">
+          <thead className="bg-white">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Водитель</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Транспорт</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Номер</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Статус</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Заказов</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Рейтинг</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">Водитель</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">Транспорт</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">Номер</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">Статус</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">Заказов</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">Рейтинг</th>
             </tr>
           </thead>
-          <tbody className="bg-gray-800 divide-y divide-gray-700">
+          <tbody className="bg-gray-50 divide-y divide-gray-700">
             {drivers && drivers.length > 0 ? (
               drivers.map((driver: any) => (
                 <tr key={driver.id}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <div>
-                      <p className="font-medium text-white">{driver.profiles?.full_name || driver.profiles?.email}</p>
-                      <p className="text-xs text-gray-400">{driver.profiles?.phone || '-'}</p>
+                      <p className="font-medium text-gray-900">{driver.profiles?.full_name || driver.profiles?.email}</p>
+                      <p className="text-xs text-gray-600">{driver.profiles?.phone || '-'}</p>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {driver.vehicle_type === 'car' && 'Автомобиль'}
                     {driver.vehicle_type === 'motorcycle' && 'Мотоцикл'}
                     {driver.vehicle_type === 'bicycle' && 'Велосипед'}
                     {driver.vehicle_type === 'walking' && 'Пешком'}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                     {driver.vehicle_number || '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <span className={`px-2 py-1 rounded text-xs ${
-                      driver.shift_status === 'online' ? 'bg-green-600 text-white' :
-                      driver.shift_status === 'offline' ? 'bg-gray-700 text-white' :
-                      'bg-yellow-600 text-white'
+                      driver.shift_status === 'online' ? 'bg-brand-light text-gray-900' :
+                      driver.shift_status === 'offline' ? 'bg-gray-100 text-gray-900' :
+                      'bg-yellow-600 text-gray-900'
                     }`}>
                       {driver.shift_status === 'online' && 'Онлайн'}
                       {driver.shift_status === 'offline' && 'Офлайн'}
@@ -127,17 +127,17 @@ export default async function AdminPersonnelPage() {
                       {driver.shift_status === 'shift_closed' && 'Смена закрыта'}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {driver.total_orders}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {driver.rating.toFixed(2)}
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={6} className="px-6 py-4 text-center text-gray-400">
+                <td colSpan={6} className="px-6 py-4 text-center text-gray-600">
                   Нет водителей
                 </td>
               </tr>

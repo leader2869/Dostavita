@@ -152,16 +152,16 @@ export default function ClientProfilePage() {
   if (loading) {
     return (
       <div className="pb-20">
-        <p className="text-gray-400">Загрузка...</p>
+        <p className="text-gray-600">Загрузка...</p>
       </div>
     )
   }
 
   return (
     <div className="pb-20">
-      <h1 className="text-3xl font-bold mb-6 text-white">Профиль</h1>
+      <h1 className="text-3xl font-bold mb-6 text-gray-900">Профиль</h1>
 
-      <form onSubmit={handleSubmit} className="bg-gray-800 rounded-lg shadow p-6 space-y-4">
+      <form onSubmit={handleSubmit} className="bg-gray-50 rounded-lg shadow p-6 space-y-4">
         {/* Аватар */}
         <div className="flex flex-col items-center mb-6">
           <div className="relative">
@@ -169,18 +169,18 @@ export default function ClientProfilePage() {
               <img
                 src={avatarUrl}
                 alt="Аватар"
-                className="w-24 h-24 rounded-full object-cover border-2 border-gray-600"
+                className="w-24 h-24 rounded-full object-cover border-2 border-gray-300"
               />
             ) : (
-              <div className="w-24 h-24 rounded-full bg-gray-700 border-2 border-gray-600 flex items-center justify-center">
-                <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-24 h-24 rounded-full bg-gray-100 border-2 border-gray-300 flex items-center justify-center">
+                <svg className="w-12 h-12 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
               </div>
             )}
             <label
               htmlFor="avatar-upload"
-              className="absolute bottom-0 right-0 bg-green-600 text-white rounded-full p-2 cursor-pointer hover:bg-green-700 transition"
+              className="absolute bottom-0 right-0 bg-brand-light text-gray-900 rounded-full p-2 cursor-pointer hover:bg-brand-dark transition"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -196,11 +196,11 @@ export default function ClientProfilePage() {
             </label>
           </div>
           {uploadingAvatar && (
-            <p className="text-sm text-gray-400 mt-2">Загрузка...</p>
+            <p className="text-sm text-gray-600 mt-2">Загрузка...</p>
           )}
         </div>
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-1">
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
             Email
           </label>
           <input
@@ -208,13 +208,13 @@ export default function ClientProfilePage() {
             type="email"
             value={email}
             disabled
-            className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-900 text-gray-400"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-600"
           />
-          <p className="text-xs text-gray-400 mt-1">Email нельзя изменить</p>
+          <p className="text-xs text-gray-600 mt-1">Email нельзя изменить</p>
         </div>
 
         <div>
-          <label htmlFor="fullName" className="block text-sm font-medium text-gray-300 mb-1">
+          <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
             ФИО
           </label>
           <input
@@ -222,13 +222,13 @@ export default function ClientProfilePage() {
             type="text"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
-            className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
+            className="w-full px-3 py-2 bg-gray-100 text-gray-900 border border-gray-300 rounded-md focus:outline-none focus:ring-brand-light focus:border-brand-light"
             placeholder="Введите ваше ФИО"
           />
         </div>
 
         <div>
-          <label htmlFor="phone" className="block text-sm font-medium text-gray-300 mb-1">
+          <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
             Телефон
           </label>
           <input
@@ -236,7 +236,7 @@ export default function ClientProfilePage() {
             type="tel"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
+            className="w-full px-3 py-2 bg-gray-100 text-gray-900 border border-gray-300 rounded-md focus:outline-none focus:ring-brand-light focus:border-brand-light"
             placeholder="+375 (XX) XXX-XX-XX"
           />
         </div>
@@ -249,7 +249,7 @@ export default function ClientProfilePage() {
           <button
             type="submit"
             disabled={saving}
-            className="flex-1 bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 disabled:opacity-50"
+            className="flex-1 bg-brand-light text-gray-900 px-6 py-2 rounded-md hover:bg-brand-dark disabled:opacity-50"
           >
             {saving ? 'Сохранение...' : 'Сохранить'}
           </button>

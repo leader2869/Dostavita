@@ -61,34 +61,34 @@ export default async function AdminOrdersPage() {
   return (
     <div>
       <BackButton />
-      <h1 className="text-3xl font-bold mb-6 text-white">Управление заказами</h1>
+      <h1 className="text-3xl font-bold mb-6 text-gray-900">Управление заказами</h1>
 
-      <div className="bg-gray-800 rounded-lg shadow overflow-hidden">
+      <div className="bg-gray-50 rounded-lg shadow overflow-hidden">
         <table className="min-w-full divide-y divide-gray-700">
-          <thead className="bg-gray-900">
+          <thead className="bg-white">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">ID</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Откуда</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Куда</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Статус</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Стоимость</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Дата</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">ID</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">Откуда</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">Куда</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">Статус</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">Стоимость</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">Дата</th>
             </tr>
           </thead>
-          <tbody className="bg-gray-800 divide-y divide-gray-700">
+          <tbody className="bg-gray-50 divide-y divide-gray-700">
             {orders && orders.length > 0 ? (
               orders.map((order: any) => (
                 <tr key={order.id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     {order.order_number || order.id.slice(0, 8)}
                   </td>
-                  <td className="px-6 py-4 text-sm text-white">
+                  <td className="px-6 py-4 text-sm text-gray-900">
                     {formatAddressForOrder(order.pickup_address)}
                   </td>
-                  <td className="px-6 py-4 text-sm text-white">
+                  <td className="px-6 py-4 text-sm text-gray-900">
                     {formatAddressForOrder(order.delivery_address)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {order.status === 'searching_courier' && 'Ищем курьера'}
                     {order.status === 'courier_accepted' && 'Курьер принял заказ'}
                     {order.status === 'courier_coming' && 'Курьер едет к отправителю'}
@@ -96,10 +96,10 @@ export default async function AdminOrdersPage() {
                     {order.status === 'completed' && 'Заказ завершен'}
                     {order.status === 'cancelled' && 'Отменен'}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-white">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
                     {order.final_price} BYN
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                     {new Date(order.created_at).toLocaleString('ru-RU', {
                       day: '2-digit',
                       month: '2-digit',
@@ -112,7 +112,7 @@ export default async function AdminOrdersPage() {
               ))
             ) : (
               <tr>
-                <td colSpan={6} className="px-6 py-4 text-center text-gray-400">
+                <td colSpan={6} className="px-6 py-4 text-center text-gray-600">
                   Нет заказов
                 </td>
               </tr>

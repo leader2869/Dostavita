@@ -125,7 +125,7 @@ export default function DeliverySettingsPage() {
     return (
       <div>
         <BackButton />
-        <div className="text-center py-8 text-gray-400">Загрузка...</div>
+        <div className="text-center py-8 text-gray-600">Загрузка...</div>
       </div>
     )
   }
@@ -133,7 +133,7 @@ export default function DeliverySettingsPage() {
   return (
     <div>
       <BackButton />
-      <h1 className="text-3xl font-bold mb-6 text-white">Настройки доставки</h1>
+      <h1 className="text-3xl font-bold mb-6 text-gray-900">Настройки доставки</h1>
 
       {error && (
         <div className="mb-4 text-red-400 text-sm bg-red-900 bg-opacity-30 p-3 rounded border border-red-800">
@@ -142,21 +142,21 @@ export default function DeliverySettingsPage() {
       )}
 
       {success && (
-        <div className="mb-4 text-green-400 text-sm bg-green-900 bg-opacity-30 p-3 rounded border border-green-800">
+        <div className="mb-4 text-brand-light text-sm bg-green-900 bg-opacity-30 p-3 rounded border border-green-800">
           {success}
         </div>
       )}
 
-      <div className="bg-gray-800 rounded-lg shadow p-6 space-y-6">
+      <div className="bg-gray-50 rounded-lg shadow p-6 space-y-6">
         {settings.map((setting) => (
-          <div key={setting.id} className="border-b border-gray-700 pb-6 last:border-b-0 last:pb-0">
+          <div key={setting.id} className="border-b border-gray-200 pb-6 last:border-b-0 last:pb-0">
             <div className="flex items-center justify-between">
               <div className="flex-1">
-                <h3 className="text-lg font-semibold text-white mb-1">
+                <h3 className="text-lg font-semibold text-gray-900 mb-1">
                   {getSettingLabel(setting.setting_key)}
                 </h3>
                 {setting.description && (
-                  <p className="text-sm text-gray-400">{setting.description}</p>
+                  <p className="text-sm text-gray-600">{setting.description}</p>
                 )}
               </div>
               <div className="flex items-center gap-4 ml-6">
@@ -178,18 +178,18 @@ export default function DeliverySettingsPage() {
                       }
                     }
                   }}
-                  className="w-24 px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
+                  className="w-24 px-3 py-2 bg-gray-100 text-gray-900 border border-gray-300 rounded-md focus:outline-none focus:ring-brand-light focus:border-brand-light"
                 />
-                <span className="text-gray-400">минут</span>
+                <span className="text-gray-600">минут</span>
               </div>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="mt-6 bg-gray-800 rounded-lg shadow p-6">
-        <h2 className="text-xl font-semibold mb-4 text-white">Как это работает</h2>
-        <ul className="space-y-2 text-gray-300">
+      <div className="mt-6 bg-gray-50 rounded-lg shadow p-6">
+        <h2 className="text-xl font-semibold mb-4 text-gray-900">Как это работает</h2>
+        <ul className="space-y-2 text-gray-700">
           <li>• Заказы, у которых время превышает установленный лимит, будут отображаться красным цветом</li>
           <li>• Это помогает быстро находить заказы, требующие внимания</li>
           <li>• Изменения применяются сразу после сохранения</li>

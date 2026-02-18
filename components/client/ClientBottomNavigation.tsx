@@ -62,7 +62,7 @@ export function ClientBottomNavigation() {
   ]
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-gray-800 border-t border-gray-700 shadow-lg z-50">
+    <div className="fixed bottom-0 left-0 right-0 bg-gray-50 border-t border-gray-200 shadow-lg z-50">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-around items-center h-16">
           {navItems.map((item) => {
@@ -73,11 +73,11 @@ export function ClientBottomNavigation() {
                 onClick={() => router.push(item.path)}
                 className={`flex flex-col items-center justify-center flex-1 h-full transition-colors ${
                   active
-                    ? 'text-green-500'
-                    : 'text-gray-400 hover:text-gray-300'
+                    ? 'text-brand-light'
+                    : 'text-gray-600 hover:text-gray-700'
                 }`}
               >
-                <div className={active ? 'text-green-500' : 'text-gray-400'}>
+                <div className={active ? 'text-brand-light' : 'text-gray-600'}>
                   {item.icon}
                 </div>
                 <span className="text-xs mt-1 font-medium">{item.label}</span>

@@ -69,7 +69,7 @@ export default async function CustomerDashboard() {
   return (
     <div className="pb-20">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-white">Панель организации</h1>
+        <h1 className="text-3xl font-bold text-gray-900">Панель организации</h1>
         <GeneralChatButton
           organizationId={user.id}
           currentUserId={user.id}
@@ -78,27 +78,27 @@ export default async function CustomerDashboard() {
 
       {/* Статистика */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        <div className="bg-gray-800 rounded-lg shadow p-6">
-          <h3 className="text-sm text-gray-400 mb-2">Водителей в организации</h3>
-          <p className="text-3xl font-bold text-white">{drivers?.length || 0}</p>
+        <div className="bg-gray-50 rounded-lg shadow p-6">
+          <h3 className="text-sm text-gray-600 mb-2">Водителей в организации</h3>
+          <p className="text-3xl font-bold text-gray-900">{drivers?.length || 0}</p>
         </div>
-        <div className="bg-gray-800 rounded-lg shadow p-6">
-          <h3 className="text-sm text-gray-400 mb-2">Активных заказов</h3>
-          <p className="text-3xl font-bold text-green-400">{activeOrdersCount}</p>
+        <div className="bg-gray-50 rounded-lg shadow p-6">
+          <h3 className="text-sm text-gray-600 mb-2">Активных заказов</h3>
+          <p className="text-3xl font-bold text-brand-light">{activeOrdersCount}</p>
         </div>
-        <div className="bg-gray-800 rounded-lg shadow p-6">
-          <h3 className="text-sm text-gray-400 mb-2">Завершенных заказов</h3>
+        <div className="bg-gray-50 rounded-lg shadow p-6">
+          <h3 className="text-sm text-gray-600 mb-2">Завершенных заказов</h3>
           <p className="text-3xl font-bold text-blue-400">{completedOrdersCount}</p>
         </div>
       </div>
 
       {/* Водители */}
-      <div className="bg-gray-800 rounded-lg shadow p-6 mb-6">
+      <div className="bg-gray-50 rounded-lg shadow p-6 mb-6">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-white">Мои водители</h2>
+          <h2 className="text-xl font-semibold text-gray-900">Мои водители</h2>
           <a
             href="/dashboard/customer/drivers"
-            className="text-green-400 hover:text-green-300 text-sm"
+            className="text-brand-light hover:text-brand-dark text-sm"
           >
             Все водители →
           </a>
@@ -106,7 +106,7 @@ export default async function CustomerDashboard() {
         {drivers && drivers.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {drivers.slice(0, 6).map((driver: any) => (
-              <div key={driver.id} className="border border-gray-700 rounded-lg p-4 bg-gray-700 hover:bg-gray-600 transition">
+              <div key={driver.id} className="border border-gray-200 rounded-lg p-4 bg-gray-100 hover:bg-gray-100 transition">
                 <div className="flex items-center gap-3 mb-3">
                   {driver.avatar_url ? (
                     <img
@@ -116,19 +116,19 @@ export default async function CustomerDashboard() {
                     />
                   ) : (
                     <div className="w-12 h-12 rounded-full bg-gray-600 flex items-center justify-center">
-                      <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                       </svg>
                     </div>
                   )}
                   <div className="flex-1">
-                    <p className="font-medium text-white">{driver.full_name || 'Без имени'}</p>
-                    <p className="text-sm text-gray-400">{driver.phone || 'Телефон не указан'}</p>
+                    <p className="font-medium text-gray-900">{driver.full_name || 'Без имени'}</p>
+                    <p className="text-sm text-gray-600">{driver.phone || 'Телефон не указан'}</p>
                   </div>
                 </div>
                 <div className="space-y-1 text-sm">
-                  <p className="text-gray-300">
-                    <span className="text-gray-400">Транспорт:</span> {
+                  <p className="text-gray-700">
+                    <span className="text-gray-600">Транспорт:</span> {
                       driver.vehicle_type === 'car' ? 'Автомобиль' :
                       driver.vehicle_type === 'motorcycle' ? 'Мотоцикл' :
                       driver.vehicle_type === 'bicycle' ? 'Велосипед' :
@@ -139,14 +139,14 @@ export default async function CustomerDashboard() {
                     )}
                   </p>
                   {driver.vehicle_number && (
-                    <p className="text-gray-300">
-                      <span className="text-gray-400">Номер:</span> {driver.vehicle_number}
+                    <p className="text-gray-700">
+                      <span className="text-gray-600">Номер:</span> {driver.vehicle_number}
                     </p>
                   )}
                 </div>
                 <a
                   href={`/dashboard/customer/drivers/${driver.id}`}
-                  className="mt-3 block text-center bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700 transition"
+                  className="mt-3 block text-center bg-brand-light text-gray-900 px-4 py-2 rounded text-sm hover:bg-brand-dark transition"
                 >
                   Подробнее
                 </a>
@@ -154,17 +154,17 @@ export default async function CustomerDashboard() {
             ))}
           </div>
         ) : (
-          <p className="text-gray-400">У вас пока нет водителей. Добавьте водителей в разделе "Водители"</p>
+          <p className="text-gray-600">У вас пока нет водителей. Добавьте водителей в разделе "Водители"</p>
         )}
       </div>
 
       {/* Последние заказы */}
-      <div className="bg-gray-800 rounded-lg shadow p-6 mb-6">
+      <div className="bg-gray-50 rounded-lg shadow p-6 mb-6">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-white">Последние заказы</h2>
+          <h2 className="text-xl font-semibold text-gray-900">Последние заказы</h2>
           <a
             href="/dashboard/customer/orders"
-            className="text-green-400 hover:text-green-300 text-sm"
+            className="text-brand-light hover:text-brand-dark text-sm"
           >
             Все заказы →
           </a>
@@ -182,8 +182,8 @@ export default async function CustomerDashboard() {
                 const hasRejections = rejectedOrderIds.has(order.id)
                 
                 // Определяем цвет подсветки
-                let borderColor = 'border-gray-700'
-                let bgColor = 'bg-gray-700'
+                let borderColor = 'border-gray-200'
+                let bgColor = 'bg-gray-100'
                 
                 if (hasRejections) {
                   // Заказы с отказами - красным
@@ -213,17 +213,17 @@ export default async function CustomerDashboard() {
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
-                            <p className="font-medium text-white">Заказ №{order.order_number || order.id.slice(0, 8)}</p>
+                            <p className="font-medium text-gray-900">Заказ №{order.order_number || order.id.slice(0, 8)}</p>
                             {hasRejections && (
-                              <span className="px-2 py-1 bg-red-500 text-white text-xs rounded">
+                              <span className="px-2 py-1 bg-red-500 text-gray-900 text-xs rounded">
                                 Есть отказы
                               </span>
                             )}
                           </div>
-                          <p className="text-sm text-gray-300 mt-1">
+                          <p className="text-sm text-gray-700 mt-1">
                             {order.pickup_address} → {order.delivery_address}
                           </p>
-                          <p className="text-sm text-gray-400 mt-1">
+                          <p className="text-sm text-gray-600 mt-1">
                             Статус: {order.status === 'searching_courier' ? 'Ищем курьера' :
                                      order.status === 'courier_accepted' ? 'Курьер принял заказ' :
                                      order.status === 'courier_coming' ? 'Курьер едет к отправителю' :
@@ -232,7 +232,7 @@ export default async function CustomerDashboard() {
                                      order.status === 'cancelled' ? 'Отменен' : order.status}
                           </p>
                           {order.driver_full_name && (
-                            <p className="text-sm text-gray-400 mt-1">
+                            <p className="text-sm text-gray-600 mt-1">
                               Водитель: {order.driver_full_name}
                             </p>
                           )}
@@ -241,7 +241,7 @@ export default async function CustomerDashboard() {
                           </p>
                         </div>
                         <div className="text-right ml-4">
-                          <p className="font-semibold text-white">{order.final_price} BYN</p>
+                          <p className="font-semibold text-gray-900">{order.final_price} BYN</p>
                         </div>
                       </div>
                     </Link>
@@ -270,7 +270,7 @@ export default async function CustomerDashboard() {
                               alert('Произошла ошибка при отмене заказа')
                             }
                           }}
-                          className="w-full bg-red-600 text-white px-3 py-1.5 rounded text-xs hover:bg-red-700 transition"
+                          className="w-full bg-red-600 text-gray-900 px-3 py-1.5 rounded text-xs hover:bg-red-700 transition"
                         >
                           Отменить заказ
                         </button>
@@ -281,7 +281,7 @@ export default async function CustomerDashboard() {
               })}
           </div>
         ) : (
-          <p className="text-gray-400">Пока нет заказов</p>
+          <p className="text-gray-600">Пока нет заказов</p>
         )}
       </div>
 
@@ -289,13 +289,13 @@ export default async function CustomerDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <a
           href="/dashboard/customer/create-order"
-          className="bg-green-600 text-white px-6 py-4 rounded-lg hover:bg-green-700 transition text-center font-semibold"
+          className="bg-brand-light text-gray-900 px-6 py-4 rounded-lg hover:bg-brand-dark transition text-center font-semibold"
         >
           Создать новый заказ
         </a>
         <a
           href="/dashboard/customer/drivers"
-          className="bg-gray-700 text-white px-6 py-4 rounded-lg hover:bg-gray-600 transition text-center font-semibold"
+          className="bg-gray-100 text-gray-900 px-6 py-4 rounded-lg hover:bg-gray-100 transition text-center font-semibold"
         >
           Управление водителями
         </a>

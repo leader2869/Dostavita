@@ -360,8 +360,8 @@ export function DriverLocationMap({
 
   if (loading) {
     return (
-      <div style={{ height }} className="rounded-lg overflow-hidden border border-gray-600 bg-gray-700 flex items-center justify-center">
-        <p className="text-gray-400">Загрузка карты...</p>
+      <div style={{ height }} className="rounded-lg overflow-hidden border border-gray-300 bg-gray-100 flex items-center justify-center">
+        <p className="text-gray-600">Загрузка карты...</p>
       </div>
     )
   }
@@ -371,8 +371,8 @@ export function DriverLocationMap({
 
   if (!displayLocation) {
     return (
-      <div style={{ height }} className="rounded-lg overflow-hidden border border-gray-600 bg-gray-700 flex items-center justify-center">
-        <p className="text-gray-400">Местоположение водителя недоступно</p>
+      <div style={{ height }} className="rounded-lg overflow-hidden border border-gray-300 bg-gray-100 flex items-center justify-center">
+        <p className="text-gray-600">Местоположение водителя недоступно</p>
       </div>
     )
   }
@@ -389,7 +389,7 @@ export function DriverLocationMap({
   })
 
   return (
-    <div style={{ height, width: '100%' }} className="rounded-lg overflow-hidden border border-gray-600">
+    <div style={{ height, width: '100%' }} className="rounded-lg overflow-hidden border border-gray-300">
       <MapContainer
         center={center}
         zoom={zoom}

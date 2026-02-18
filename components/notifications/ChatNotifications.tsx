@@ -112,7 +112,7 @@ export function ChatNotifications({ userId, userRole }: ChatNotificationsProps) 
   return (
     <button
       onClick={handleClick}
-      className="relative p-2 text-gray-400 hover:text-white transition-colors"
+      className="relative p-2 text-gray-600 hover:text-gray-900 transition-colors"
       title={`Непрочитанных сообщений: ${count}`}
     >
       <svg
@@ -129,7 +129,7 @@ export function ChatNotifications({ userId, userRole }: ChatNotificationsProps) 
         />
       </svg>
       {count > 0 && (
-        <span className={`absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center ${
+        <span className={`absolute -top-1 -right-1 bg-red-500 text-gray-900 text-xs font-bold rounded-full flex items-center justify-center ${
           count > 9 ? 'px-1.5 min-w-[1.5rem]' : 'w-5 h-5'
         }`}>
           {count > 10 ? count : count >= 10 ? 10 : count}

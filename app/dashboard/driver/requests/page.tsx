@@ -85,8 +85,8 @@ export default function DriverRequestsPage() {
     return (
       <div className="pb-20">
         <BackButton />
-        <h1 className="text-3xl font-bold mb-6 text-white">Запросы организаций</h1>
-        <div className="text-center py-8 text-gray-400">Загрузка...</div>
+        <h1 className="text-3xl font-bold mb-6 text-gray-900">Запросы организаций</h1>
+        <div className="text-center py-8 text-gray-600">Загрузка...</div>
         <DriverBottomNavigation />
       </div>
     )
@@ -95,7 +95,7 @@ export default function DriverRequestsPage() {
   return (
     <div className="pb-20">
       <BackButton />
-      <h1 className="text-3xl font-bold mb-6 text-white">Запросы организаций</h1>
+      <h1 className="text-3xl font-bold mb-6 text-gray-900">Запросы организаций</h1>
 
       {error && (
         <div className="mb-4 p-3 bg-red-900/50 border border-red-500 rounded text-red-200 text-sm">
@@ -108,19 +108,19 @@ export default function DriverRequestsPage() {
           {requests.map((request: any) => (
             <div
               key={request.id}
-              className="bg-gray-800 rounded-lg shadow p-6 border border-gray-700"
+              className="bg-gray-50 rounded-lg shadow p-6 border border-gray-200"
             >
               <div className="flex justify-between items-start mb-4">
                 <div className="flex-1">
-                  <h3 className="text-xl font-semibold text-white mb-2">
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
                     {request.organization_name || 'Организация'}
                   </h3>
-                  <p className="text-gray-400 text-sm mb-1">
+                  <p className="text-gray-600 text-sm mb-1">
                     Email: {request.organization_email}
                   </p>
                   {request.message && (
-                    <div className="mt-3 p-3 bg-gray-700 rounded">
-                      <p className="text-sm text-gray-300">{request.message}</p>
+                    <div className="mt-3 p-3 bg-gray-100 rounded">
+                      <p className="text-sm text-gray-700">{request.message}</p>
                     </div>
                   )}
                   <p className="text-gray-500 text-xs mt-3">
@@ -129,18 +129,18 @@ export default function DriverRequestsPage() {
                 </div>
               </div>
 
-              <div className="flex gap-2 pt-4 border-t border-gray-700">
+              <div className="flex gap-2 pt-4 border-t border-gray-200">
                 <button
                   onClick={() => handleRespond(request.id, 'accepted')}
                   disabled={responding === request.id}
-                  className="flex-1 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 disabled:opacity-50 transition"
+                  className="flex-1 bg-brand-light text-gray-900 px-4 py-2 rounded-md hover:bg-brand-dark disabled:opacity-50 transition"
                 >
                   {responding === request.id ? 'Обработка...' : 'Принять'}
                 </button>
                 <button
                   onClick={() => handleRespond(request.id, 'rejected')}
                   disabled={responding === request.id}
-                  className="flex-1 bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 disabled:opacity-50 transition"
+                  className="flex-1 bg-red-600 text-gray-900 px-4 py-2 rounded-md hover:bg-red-700 disabled:opacity-50 transition"
                 >
                   {responding === request.id ? 'Обработка...' : 'Отклонить'}
                 </button>
@@ -149,8 +149,8 @@ export default function DriverRequestsPage() {
           ))}
         </div>
       ) : (
-        <div className="bg-gray-800 rounded-lg shadow p-6 text-center">
-          <p className="text-gray-400">У вас пока нет запросов от организаций</p>
+        <div className="bg-gray-50 rounded-lg shadow p-6 text-center">
+          <p className="text-gray-600">У вас пока нет запросов от организаций</p>
         </div>
       )}
 

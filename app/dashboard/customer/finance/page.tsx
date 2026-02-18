@@ -194,8 +194,8 @@ export default function CustomerFinancePage() {
     return (
       <div className="pb-20">
         <BackButton />
-        <h1 className="text-3xl font-bold mb-6 text-white">Финансы</h1>
-        <div className="text-center py-8 text-gray-400">Загрузка...</div>
+        <h1 className="text-3xl font-bold mb-6 text-gray-900">Финансы</h1>
+        <div className="text-center py-8 text-gray-600">Загрузка...</div>
       </div>
     )
   }
@@ -203,17 +203,17 @@ export default function CustomerFinancePage() {
   return (
     <div className="pb-20">
       <BackButton />
-      <h1 className="text-3xl font-bold mb-6 text-white">Финансы</h1>
+      <h1 className="text-3xl font-bold mb-6 text-gray-900">Финансы</h1>
 
       {/* Выбор периода */}
-      <div className="bg-gray-800 rounded-lg shadow p-4 mb-6">
+      <div className="bg-gray-50 rounded-lg shadow p-4 mb-6">
         <div className="flex gap-2 flex-wrap mb-4">
           <button
             onClick={() => setPeriod('today')}
             className={`px-4 py-2 rounded-md transition ${
               period === 'today'
-                ? 'bg-green-600 text-white'
-                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                ? 'bg-brand-light text-gray-900'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-100'
             }`}
           >
             Сегодня
@@ -222,8 +222,8 @@ export default function CustomerFinancePage() {
             onClick={() => setPeriod('week')}
             className={`px-4 py-2 rounded-md transition ${
               period === 'week'
-                ? 'bg-green-600 text-white'
-                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                ? 'bg-brand-light text-gray-900'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-100'
             }`}
           >
             Неделя
@@ -232,8 +232,8 @@ export default function CustomerFinancePage() {
             onClick={() => setPeriod('month')}
             className={`px-4 py-2 rounded-md transition ${
               period === 'month'
-                ? 'bg-green-600 text-white'
-                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                ? 'bg-brand-light text-gray-900'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-100'
             }`}
           >
             Месяц
@@ -242,8 +242,8 @@ export default function CustomerFinancePage() {
             onClick={() => setPeriod('all')}
             className={`px-4 py-2 rounded-md transition ${
               period === 'all'
-                ? 'bg-green-600 text-white'
-                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                ? 'bg-brand-light text-gray-900'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-100'
             }`}
           >
             Все время
@@ -252,8 +252,8 @@ export default function CustomerFinancePage() {
             onClick={() => setPeriod('custom')}
             className={`px-4 py-2 rounded-md transition ${
               period === 'custom'
-                ? 'bg-green-600 text-white'
-                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                ? 'bg-brand-light text-gray-900'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-100'
             }`}
           >
             Произвольная дата
@@ -263,25 +263,25 @@ export default function CustomerFinancePage() {
         {period === 'custom' && (
           <div className="flex gap-4 items-end flex-wrap">
             <div className="flex-1 min-w-[200px]">
-              <label className="block text-sm font-medium text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 Дата начала
               </label>
               <input
                 type="date"
                 value={customStartDate}
                 onChange={(e) => setCustomStartDate(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-900"
               />
             </div>
             <div className="flex-1 min-w-[200px]">
-              <label className="block text-sm font-medium text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 Дата окончания
               </label>
               <input
                 type="date"
                 value={customEndDate}
                 onChange={(e) => setCustomEndDate(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-900"
               />
             </div>
             <button
@@ -291,7 +291,7 @@ export default function CustomerFinancePage() {
                 }
               }}
               disabled={!customStartDate || !customEndDate}
-              className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+              className="px-6 py-2 bg-brand-light text-gray-900 rounded-md hover:bg-brand-dark disabled:opacity-50 disabled:cursor-not-allowed transition"
             >
               Применить
             </button>
@@ -300,12 +300,12 @@ export default function CustomerFinancePage() {
       </div>
 
       {/* Баланс организации */}
-      <div className="bg-gray-800 rounded-lg shadow p-6 mb-6">
-        <h2 className="text-xl font-semibold mb-4 text-white">Баланс организации</h2>
-        <p className="text-3xl font-bold text-green-600">
+      <div className="bg-gray-50 rounded-lg shadow p-6 mb-6">
+        <h2 className="text-xl font-semibold mb-4 text-gray-900">Баланс организации</h2>
+        <p className="text-3xl font-bold text-brand-light">
           {balance?.amount ? parseFloat(balance.amount).toFixed(2) : '0.00'} {balance?.currency || 'BYN'}
         </p>
-        <p className="text-sm text-gray-400 mt-2">
+        <p className="text-sm text-gray-600 mt-2">
           Сумма, полученная от водителей (сдача кассы)
         </p>
       </div>
@@ -313,23 +313,23 @@ export default function CustomerFinancePage() {
       {/* Запросы на сдачу кассы от водителей - размещаем сверху */}
       {/* Показываем блок только если есть pending (активные) запросы */}
       {cashDepositRequests.some((r: any) => r.status === 'pending') && (
-        <div className="bg-gray-800 rounded-lg shadow p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4 text-white">Запросы на сдачу кассы</h2>
+        <div className="bg-gray-50 rounded-lg shadow p-6 mb-6">
+          <h2 className="text-xl font-semibold mb-4 text-gray-900">Запросы на сдачу кассы</h2>
           <div className="space-y-3">
             {/* Показываем только pending (ожидающие принятия) запросы */}
             {cashDepositRequests.filter((r: any) => r.status === 'pending').map((request: any) => (
-              <div key={request.id} className="border border-blue-500/50 rounded-lg p-4 bg-gray-700/50">
+              <div key={request.id} className="border border-blue-500/50 rounded-lg p-4 bg-gray-100/50">
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
-                      <p className="font-semibold text-white text-lg">
+                      <p className="font-semibold text-gray-900 text-lg">
                         {request.profiles?.full_name || 'Водитель без имени'}
                       </p>
                       <span className={`px-2 py-1 text-xs rounded ${
                         request.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' :
-                        request.status === 'approved' ? 'bg-green-500/20 text-green-400' :
+                        request.status === 'approved' ? 'bg-brand-light/20 text-brand-light' :
                         request.status === 'rejected' ? 'bg-red-500/20 text-red-400' :
-                        'bg-gray-500/20 text-gray-400'
+                        'bg-gray-500/20 text-gray-600'
                       }`}>
                         {request.status === 'pending' && 'Ожидает принятия'}
                         {request.status === 'approved' && 'Принято'}
@@ -340,7 +340,7 @@ export default function CustomerFinancePage() {
                     <p className="text-xl font-bold text-blue-400 mb-2">
                       {parseFloat(request.amount || 0).toFixed(2)} BYN
                     </p>
-                    <p className="text-gray-400 text-xs">
+                    <p className="text-gray-600 text-xs">
                       Дата запроса: {new Date(request.created_at).toLocaleString('ru-RU', {
                         day: '2-digit',
                         month: '2-digit',
@@ -350,7 +350,7 @@ export default function CustomerFinancePage() {
                       })}
                     </p>
                     {request.approved_at && (
-                      <p className="text-green-400 text-xs mt-1">
+                      <p className="text-brand-light text-xs mt-1">
                         Принято: {new Date(request.approved_at).toLocaleString('ru-RU', {
                           day: '2-digit',
                           month: '2-digit',
@@ -396,7 +396,7 @@ export default function CustomerFinancePage() {
                             alert(`Ошибка: ${err.message || 'Не удалось принять запрос'}`)
                           }
                         }}
-                        className="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700 transition"
+                        className="bg-brand-light text-gray-900 px-4 py-2 rounded text-sm hover:bg-brand-dark transition"
                       >
                         Принять
                       </button>
@@ -422,7 +422,7 @@ export default function CustomerFinancePage() {
                             alert(`Ошибка: ${err.message || 'Не удалось отклонить запрос'}`)
                           }
                         }}
-                        className="bg-red-600 text-white px-4 py-2 rounded text-sm hover:bg-red-700 transition"
+                        className="bg-red-600 text-gray-900 px-4 py-2 rounded text-sm hover:bg-red-700 transition"
                       >
                         Отклонить
                       </button>
@@ -437,20 +437,20 @@ export default function CustomerFinancePage() {
 
       {/* Общая статистика */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-        <div className="bg-gray-800 rounded-lg shadow p-6">
-          <h3 className="text-sm text-gray-400 mb-2">Водителей</h3>
-          <p className="text-3xl font-bold text-white">{totalDrivers}</p>
+        <div className="bg-gray-50 rounded-lg shadow p-6">
+          <h3 className="text-sm text-gray-600 mb-2">Водителей</h3>
+          <p className="text-3xl font-bold text-gray-900">{totalDrivers}</p>
         </div>
-        <div className="bg-gray-800 rounded-lg shadow p-6">
-          <h3 className="text-sm text-gray-400 mb-2">Завершенных заказов</h3>
-          <p className="text-3xl font-bold text-green-400">{totalCompletedOrders}</p>
+        <div className="bg-gray-50 rounded-lg shadow p-6">
+          <h3 className="text-sm text-gray-600 mb-2">Завершенных заказов</h3>
+          <p className="text-3xl font-bold text-brand-light">{totalCompletedOrders}</p>
         </div>
-        <div className="bg-gray-800 rounded-lg shadow p-6">
-          <h3 className="text-sm text-gray-400 mb-2">Общая сумма</h3>
+        <div className="bg-gray-50 rounded-lg shadow p-6">
+          <h3 className="text-sm text-gray-600 mb-2">Общая сумма</h3>
           <p className="text-3xl font-bold text-blue-400">{totalEarnings.toFixed(2)} BYN</p>
         </div>
         <div 
-          className="bg-gray-800 rounded-lg shadow p-6 cursor-pointer hover:bg-gray-700 transition"
+          className="bg-gray-50 rounded-lg shadow p-6 cursor-pointer hover:bg-gray-100 transition"
           onClick={() => {
             const receivablesSection = document.getElementById('receivables-section')
             if (receivablesSection) {
@@ -458,29 +458,29 @@ export default function CustomerFinancePage() {
             }
           }}
         >
-          <h3 className="text-sm text-gray-400 mb-2">Дебиторка</h3>
+          <h3 className="text-sm text-gray-600 mb-2">Дебиторка</h3>
           <p className="text-3xl font-bold text-red-400">{totalReceivables.toFixed(2)} BYN</p>
         </div>
       </div>
 
       {/* Финансы по водителям */}
-      <div className="bg-gray-800 rounded-lg shadow p-6 mb-6">
-        <h2 className="text-xl font-semibold mb-4 text-white">Финансы по водителям</h2>
+      <div className="bg-gray-50 rounded-lg shadow p-6 mb-6">
+        <h2 className="text-xl font-semibold mb-4 text-gray-900">Финансы по водителям</h2>
         {finances && finances.length > 0 ? (
           <div className="space-y-4">
             {finances.map((finance: any) => (
-              <div key={finance.driver_id} className="border border-gray-700 rounded-lg p-4 bg-gray-700">
+              <div key={finance.driver_id} className="border border-gray-200 rounded-lg p-4 bg-gray-100">
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
-                    <p className="font-semibold text-white text-lg">{finance.driver_full_name || 'Без имени'}</p>
+                    <p className="font-semibold text-gray-900 text-lg">{finance.driver_full_name || 'Без имени'}</p>
                     <div className="mt-2 space-y-1 text-sm">
-                      <p className="text-gray-300">
-                        Завершенных заказов: <span className="text-white font-semibold">{finance.completed_orders_count || 0}</span>
+                      <p className="text-gray-700">
+                        Завершенных заказов: <span className="text-gray-900 font-semibold">{finance.completed_orders_count || 0}</span>
                       </p>
-                      <p className="text-gray-300">
-                        Общая сумма: <span className="text-green-400 font-semibold">{parseFloat(finance.total_earnings || 0).toFixed(2)} BYN</span>
+                      <p className="text-gray-700">
+                        Общая сумма: <span className="text-brand-light font-semibold">{parseFloat(finance.total_earnings || 0).toFixed(2)} BYN</span>
                       </p>
-                      <p className="text-gray-300">
+                      <p className="text-gray-700">
                         Баланс: <span className="text-blue-400 font-semibold">{parseFloat(finance.balance || 0).toFixed(2)} BYN</span>
                       </p>
                       {(() => {
@@ -492,7 +492,7 @@ export default function CustomerFinancePage() {
                         const driverReceivablesTotal = driverReceivables.reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0)
                         if (driverReceivablesTotal > 0) {
                           return (
-                            <p className="text-gray-300">
+                            <p className="text-gray-700">
                               Дебиторка: <span className="text-red-400 font-semibold">{driverReceivablesTotal.toFixed(2)} BYN</span>
                               <span className="text-gray-500 text-xs ml-1">
                                 ({driverReceivables.length} {driverReceivables.length === 1 ? 'заказ' : 'заказов'})
@@ -512,14 +512,14 @@ export default function CustomerFinancePage() {
                           setWithdrawAmount('')
                           setShowWithdrawModal(true)
                         }}
-                        className="bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700 transition"
+                        className="bg-blue-600 text-gray-900 px-4 py-2 rounded text-sm hover:bg-blue-700 transition"
                       >
                         Забрать кассу
                       </button>
                     )}
                     <a
                       href={`/dashboard/customer/drivers/${finance.driver_id}`}
-                      className="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700 transition"
+                      className="bg-brand-light text-gray-900 px-4 py-2 rounded text-sm hover:bg-brand-dark transition"
                     >
                       Подробнее
                     </a>
@@ -529,25 +529,25 @@ export default function CustomerFinancePage() {
             ))}
           </div>
         ) : (
-          <p className="text-gray-400 text-center py-8">Нет данных за выбранный период</p>
+          <p className="text-gray-600 text-center py-8">Нет данных за выбранный период</p>
         )}
       </div>
 
       {/* Модальное окно изъятия кассы */}
       {showWithdrawModal && selectedDriver && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-800 rounded-lg shadow-xl p-6 max-w-md w-full">
-            <h2 className="text-2xl font-bold mb-4 text-white">Забрать кассу у водителя</h2>
-            <p className="text-gray-300 mb-2">
-              Водитель: <span className="text-white font-semibold">{selectedDriver.driver_full_name || 'Без имени'}</span>
+          <div className="bg-gray-50 rounded-lg shadow-xl p-6 max-w-md w-full">
+            <h2 className="text-2xl font-bold mb-4 text-gray-900">Забрать кассу у водителя</h2>
+            <p className="text-gray-700 mb-2">
+              Водитель: <span className="text-gray-900 font-semibold">{selectedDriver.driver_full_name || 'Без имени'}</span>
             </p>
-            <p className="text-gray-300 mb-4">
-              Доступный баланс водителя: <span className="text-green-400 font-semibold">
+            <p className="text-gray-700 mb-4">
+              Доступный баланс водителя: <span className="text-brand-light font-semibold">
                 {parseFloat(selectedDriver.balance || 0).toFixed(2)} BYN
               </span>
             </p>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Сумма для изъятия
               </label>
               <input
@@ -558,7 +558,7 @@ export default function CustomerFinancePage() {
                 value={withdrawAmount}
                 onChange={(e) => setWithdrawAmount(e.target.value)}
                 placeholder="0.00"
-                className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div className="flex gap-3">
@@ -601,7 +601,7 @@ export default function CustomerFinancePage() {
                     alert(`Ошибка: ${err.message || 'Не удалось забрать кассу'}`)
                   }
                 }}
-                className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+                className="flex-1 bg-blue-600 text-gray-900 px-4 py-2 rounded-md hover:bg-blue-700 transition"
               >
                 Забрать кассу
               </button>
@@ -611,7 +611,7 @@ export default function CustomerFinancePage() {
                   setSelectedDriver(null)
                   setWithdrawAmount('')
                 }}
-                className="flex-1 bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition"
+                className="flex-1 bg-gray-600 text-gray-900 px-4 py-2 rounded-md hover:bg-gray-100 transition"
               >
                 Отмена
               </button>
@@ -621,17 +621,17 @@ export default function CustomerFinancePage() {
       )}
 
       {/* Дебиторка */}
-      <div id="receivables-section" className="bg-gray-800 rounded-lg shadow p-6">
-        <h2 className="text-xl font-semibold mb-4 text-white">Дебиторка (неоплаченные заказы)</h2>
+      <div id="receivables-section" className="bg-gray-50 rounded-lg shadow p-6">
+        <h2 className="text-xl font-semibold mb-4 text-gray-900">Дебиторка (неоплаченные заказы)</h2>
         {receivables && receivables.length > 0 ? (
           <div className="space-y-4">
             {receivables.map((receivable: any) => (
-              <div key={receivable.id} className="border border-red-500/50 rounded-lg p-4 bg-gray-700/50">
+              <div key={receivable.id} className="border border-red-500/50 rounded-lg p-4 bg-gray-100/50">
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <p 
-                        className="font-semibold text-white text-lg cursor-pointer hover:text-blue-400 transition"
+                        className="font-semibold text-gray-900 text-lg cursor-pointer hover:text-blue-400 transition"
                         onClick={() => {
                           if (receivable.order_id) {
                             router.push(`/dashboard/customer/orders/${receivable.order_id}`)
@@ -645,11 +645,11 @@ export default function CustomerFinancePage() {
                       </span>
                     </div>
                     <div className="mt-2 space-y-1 text-sm">
-                      <p className="text-gray-300">
+                      <p className="text-gray-700">
                         Сумма: <span className="text-red-400 font-semibold">{parseFloat(receivable.amount || 0).toFixed(2)} BYN</span>
                       </p>
-                      <p className="text-gray-300">
-                        Должник: <span className="text-white font-semibold capitalize">
+                      <p className="text-gray-700">
+                        Должник: <span className="text-gray-900 font-semibold capitalize">
                           {receivable.debtor_type === 'sender' ? 'Отправитель' : 'Получатель'}
                         </span>
                         {receivable.debtor_name && (
@@ -683,24 +683,24 @@ export default function CustomerFinancePage() {
                         )}
                       </p>
                       {receivable.debtor_phone && (
-                        <p className="text-gray-300">
-                          Телефон: <a href={`tel:${receivable.debtor_phone}`} className="text-green-400 hover:text-green-300">{receivable.debtor_phone}</a>
+                        <p className="text-gray-700">
+                          Телефон: <a href={`tel:${receivable.debtor_phone}`} className="text-brand-light hover:text-brand-dark">{receivable.debtor_phone}</a>
                         </p>
                       )}
-                      <p className="text-gray-300">
-                        Водитель: <span className="text-white">{receivable.driver_full_name || 'Неизвестно'}</span>
+                      <p className="text-gray-700">
+                        Водитель: <span className="text-gray-900">{receivable.driver_full_name || 'Неизвестно'}</span>
                       </p>
                       {receivable.pickup_address && (
-                        <p className="text-gray-400 text-xs mt-1">
+                        <p className="text-gray-600 text-xs mt-1">
                           Откуда: {receivable.pickup_address}
                         </p>
                       )}
                       {receivable.delivery_address && (
-                        <p className="text-gray-400 text-xs">
+                        <p className="text-gray-600 text-xs">
                           Куда: {receivable.delivery_address}
                         </p>
                       )}
-                      <p className="text-gray-400 text-xs mt-1">
+                      <p className="text-gray-600 text-xs mt-1">
                         Дата: {new Date(receivable.created_at).toLocaleString('ru-RU', {
                           day: '2-digit',
                           month: '2-digit',
@@ -783,7 +783,7 @@ export default function CustomerFinancePage() {
                           alert(`Ошибка: ${err.message || 'Не удалось обработать оплату'}`)
                         }
                       }}
-                      className="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700 transition"
+                      className="bg-brand-light text-gray-900 px-4 py-2 rounded text-sm hover:bg-brand-dark transition"
                     >
                       Провести оплату
                     </button>
@@ -794,7 +794,7 @@ export default function CustomerFinancePage() {
           </div>
         ) : (
           <div className="text-center py-8">
-            <p className="text-gray-400 mb-2">Нет дебиторки за выбранный период</p>
+            <p className="text-gray-600 mb-2">Нет дебиторки за выбранный период</p>
             <p className="text-gray-500 text-sm">
               Дебиторка появляется, когда водитель отмечает заказ как "не оплачен" после завершения доставки
             </p>
@@ -805,16 +805,16 @@ export default function CustomerFinancePage() {
       {/* Модальное окно информации о должнике */}
       {showDebtorModal && selectedDebtor && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-800 rounded-lg shadow-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-gray-50 rounded-lg shadow-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold text-white">Информация о должнике</h2>
+              <h2 className="text-2xl font-bold text-gray-900">Информация о должнике</h2>
               <button
                 onClick={() => {
                   setShowDebtorModal(false)
                   setSelectedDebtor(null)
                   setDebtorReceivables([])
                 }}
-                className="text-gray-400 hover:text-white"
+                className="text-gray-600 hover:text-gray-900"
               >
                 ✕
               </button>
@@ -822,15 +822,15 @@ export default function CustomerFinancePage() {
             
             <div className="space-y-4">
               <div>
-                <p className="text-sm text-gray-400">Имя</p>
-                <p className="text-white font-semibold text-lg">{selectedDebtor.name || 'Не указано'}</p>
+                <p className="text-sm text-gray-600">Имя</p>
+                <p className="text-gray-900 font-semibold text-lg">{selectedDebtor.name || 'Не указано'}</p>
               </div>
               
               {selectedDebtor.phone && (
                 <div>
-                  <p className="text-sm text-gray-400">Телефон</p>
-                  <p className="text-white">
-                    <a href={`tel:${selectedDebtor.phone}`} className="text-green-400 hover:text-green-300 font-medium">
+                  <p className="text-sm text-gray-600">Телефон</p>
+                  <p className="text-gray-900">
+                    <a href={`tel:${selectedDebtor.phone}`} className="text-brand-light hover:text-brand-dark font-medium">
                       {selectedDebtor.phone}
                     </a>
                   </p>
@@ -838,30 +838,30 @@ export default function CustomerFinancePage() {
               )}
               
               <div>
-                <p className="text-sm text-gray-400">Тип</p>
-                <p className="text-white capitalize">
+                <p className="text-sm text-gray-600">Тип</p>
+                <p className="text-gray-900 capitalize">
                   {selectedDebtor.type === 'sender' ? 'Отправитель' : 'Получатель'}
                 </p>
               </div>
               
-              <div className="border-t border-gray-700 pt-4">
-                <p className="text-sm text-gray-400 mb-2">Общая сумма задолженности</p>
+              <div className="border-t border-gray-200 pt-4">
+                <p className="text-sm text-gray-600 mb-2">Общая сумма задолженности</p>
                 <p className="text-3xl font-bold text-red-400">
                   {debtorReceivables.reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0).toFixed(2)} BYN
                 </p>
-                <p className="text-gray-400 text-sm mt-1">
+                <p className="text-gray-600 text-sm mt-1">
                   ({debtorReceivables.length} {debtorReceivables.length === 1 ? 'неоплаченный заказ' : 'неоплаченных заказов'})
                 </p>
               </div>
               
               {debtorReceivables.length > 0 && (
-                <div className="border-t border-gray-700 pt-4">
-                  <h3 className="text-lg font-semibold text-white mb-3">Неоплаченные заказы</h3>
+                <div className="border-t border-gray-200 pt-4">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3">Неоплаченные заказы</h3>
                   <div className="space-y-2">
                     {debtorReceivables.map((r: any) => (
                       <div 
                         key={r.id} 
-                        className="bg-gray-700/50 rounded p-3 cursor-pointer hover:bg-gray-700 transition"
+                        className="bg-gray-100/50 rounded p-3 cursor-pointer hover:bg-gray-100 transition"
                         onClick={() => {
                           if (r.order_id) {
                             router.push(`/dashboard/customer/orders/${r.order_id}`)
@@ -870,15 +870,15 @@ export default function CustomerFinancePage() {
                       >
                         <div className="flex justify-between items-center">
                           <div>
-                            <p className="text-white font-medium">
+                            <p className="text-gray-900 font-medium">
                               Заказ {r.order_number ? `№${r.order_number}` : 'без номера'}
                             </p>
                             {r.pickup_address && r.delivery_address && (
-                              <p className="text-gray-400 text-xs mt-1">
+                              <p className="text-gray-600 text-xs mt-1">
                                 {r.pickup_address} → {r.delivery_address}
                               </p>
                             )}
-                            <p className="text-gray-400 text-xs mt-1">
+                            <p className="text-gray-600 text-xs mt-1">
                               {new Date(r.created_at).toLocaleDateString('ru-RU')}
                             </p>
                           </div>

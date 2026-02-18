@@ -104,48 +104,48 @@ export default async function DriverDetailsPage({ params }: { params: { id: stri
       case 'courier_delivering':
         return 'text-purple-400 bg-purple-400/20 border-purple-400/50'
       case 'completed':
-        return 'text-green-400 bg-green-400/20 border-green-400/50'
+        return 'text-brand-light bg-brand-light/20 border-green-400/50'
       case 'cancelled':
         return 'text-red-400 bg-red-400/20 border-red-400/50'
       default:
-        return 'text-gray-400 bg-gray-400/20 border-gray-400/50'
+        return 'text-gray-600 bg-gray-400/20 border-gray-400/50'
     }
   }
 
   return (
     <div className="pb-20">
       <BackButton />
-      <h1 className="text-3xl font-bold mb-6 text-white">Информация о водителе</h1>
+      <h1 className="text-3xl font-bold mb-6 text-gray-900">Информация о водителе</h1>
 
       {/* Информация о водителе */}
-      <div className="bg-gray-800 rounded-lg shadow p-6 mb-6">
+      <div className="bg-gray-50 rounded-lg shadow p-6 mb-6">
         <div className="flex items-start gap-6">
           {driver.avatar_url ? (
             <img
               src={driver.avatar_url}
               alt={driver.full_name || 'Водитель'}
-              className="w-24 h-24 rounded-full object-cover border-2 border-gray-600"
+              className="w-24 h-24 rounded-full object-cover border-2 border-gray-300"
             />
           ) : (
-            <div className="w-24 h-24 rounded-full bg-gray-700 border-2 border-gray-600 flex items-center justify-center">
-              <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-24 h-24 rounded-full bg-gray-100 border-2 border-gray-300 flex items-center justify-center">
+              <svg className="w-12 h-12 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
             </div>
           )}
           <div className="flex-1">
-            <h2 className="text-2xl font-bold text-white mb-2">{driver.full_name || 'Без имени'}</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">{driver.full_name || 'Без имени'}</h2>
             <div className="space-y-1 text-sm">
-              <p className="text-gray-300">
-                <span className="text-gray-400">Email:</span> {driver.email}
+              <p className="text-gray-700">
+                <span className="text-gray-600">Email:</span> {driver.email}
               </p>
               {driver.phone && (
-                <p className="text-gray-300">
-                  <span className="text-gray-400">Телефон:</span> {driver.phone}
+                <p className="text-gray-700">
+                  <span className="text-gray-600">Телефон:</span> {driver.phone}
                 </p>
               )}
-              <p className="text-gray-300">
-                <span className="text-gray-400">Транспорт:</span> {
+              <p className="text-gray-700">
+                <span className="text-gray-600">Транспорт:</span> {
                   driver.vehicle_type === 'car' ? 'Автомобиль' :
                   driver.vehicle_type === 'motorcycle' ? 'Мотоцикл' :
                   driver.vehicle_type === 'bicycle' ? 'Велосипед' :
@@ -156,27 +156,27 @@ export default async function DriverDetailsPage({ params }: { params: { id: stri
                 )}
               </p>
               {driver.vehicle_number && (
-                <p className="text-gray-300">
-                  <span className="text-gray-400">Номер транспорта:</span> {driver.vehicle_number}
+                <p className="text-gray-700">
+                  <span className="text-gray-600">Номер транспорта:</span> {driver.vehicle_number}
                 </p>
               )}
               {driver.license_number && (
-                <p className="text-gray-300">
-                  <span className="text-gray-400">Удостоверение:</span> {driver.license_number}
+                <p className="text-gray-700">
+                  <span className="text-gray-600">Удостоверение:</span> {driver.license_number}
                 </p>
               )}
               {driver.current_location && (
-                <p className="text-green-400 mt-2">
-                  <span className="text-gray-400">Статус:</span> 📍 Онлайн
+                <p className="text-brand-light mt-2">
+                  <span className="text-gray-600">Статус:</span> 📍 Онлайн
                 </p>
               )}
               {!driver.current_location && (
                 <p className="text-gray-500 mt-2">
-                  <span className="text-gray-400">Статус:</span> ⚫ Офлайн
+                  <span className="text-gray-600">Статус:</span> ⚫ Офлайн
                 </p>
               )}
               {driver.location_updated_at && (
-                <p className="text-gray-400 text-xs mt-1">
+                <p className="text-gray-600 text-xs mt-1">
                   Последнее обновление: {formatDistanceToNow(new Date(driver.location_updated_at), { addSuffix: true, locale: ru })}
                 </p>
               )}
@@ -185,7 +185,7 @@ export default async function DriverDetailsPage({ params }: { params: { id: stri
           <div className="text-right flex flex-col gap-2">
             <a
               href={`/dashboard/customer/tracking?driver=${driver.id}`}
-              className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition inline-block text-center"
+              className="bg-brand-light text-gray-900 px-4 py-2 rounded-md hover:bg-brand-dark transition inline-block text-center"
             >
               Отследить на карте
             </a>
@@ -200,20 +200,20 @@ export default async function DriverDetailsPage({ params }: { params: { id: stri
 
       {/* Финансы */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        <div className="bg-gray-800 rounded-lg shadow p-6">
-          <h3 className="text-sm text-gray-400 mb-2">Баланс</h3>
-          <p className="text-3xl font-bold text-white">
+        <div className="bg-gray-50 rounded-lg shadow p-6">
+          <h3 className="text-sm text-gray-600 mb-2">Баланс</h3>
+          <p className="text-3xl font-bold text-gray-900">
             {displayBalance.amount ? parseFloat(displayBalance.amount).toFixed(2) : '0.00'} {displayBalance.currency || 'BYN'}
           </p>
         </div>
-        <div className="bg-gray-800 rounded-lg shadow p-6">
-          <h3 className="text-sm text-gray-400 mb-2">Завершенных заказов</h3>
-          <p className="text-3xl font-bold text-green-400">
+        <div className="bg-gray-50 rounded-lg shadow p-6">
+          <h3 className="text-sm text-gray-600 mb-2">Завершенных заказов</h3>
+          <p className="text-3xl font-bold text-brand-light">
             {driverFinance?.completed_orders_count || completedOrders.length}
           </p>
         </div>
-        <div className="bg-gray-800 rounded-lg shadow p-6">
-          <h3 className="text-sm text-gray-400 mb-2">Общая сумма</h3>
+        <div className="bg-gray-50 rounded-lg shadow p-6">
+          <h3 className="text-sm text-gray-600 mb-2">Общая сумма</h3>
           <p className="text-3xl font-bold text-blue-400">
             {driverFinance ? parseFloat(driverFinance.total_earnings || 0).toFixed(2) : '0.00'} BYN
           </p>
@@ -224,24 +224,24 @@ export default async function DriverDetailsPage({ params }: { params: { id: stri
       <div className="space-y-6">
         {/* Активные заказы */}
         {activeOrders.length > 0 && (
-          <div className="bg-gray-800 rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-white mb-4 pb-2 border-b border-gray-700">
+          <div className="bg-gray-50 rounded-lg shadow p-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
               Активные заказы ({activeOrders.length})
             </h2>
             <div className="space-y-4">
               {activeOrders.map((order: any) => (
-                <div key={order.id} className="border border-gray-700 rounded-lg p-4 bg-gray-700 hover:bg-gray-600 transition">
+                <div key={order.id} className="border border-gray-200 rounded-lg p-4 bg-gray-100 hover:bg-gray-100 transition">
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
-                      <p className="font-medium text-white">Заказ №{order.order_number || order.id.slice(0, 8)}</p>
-                      <p className="text-sm text-gray-300 mt-1">
+                      <p className="font-medium text-gray-900">Заказ №{order.order_number || order.id.slice(0, 8)}</p>
+                      <p className="text-sm text-gray-700 mt-1">
                         а) {formatAddressForOrder(order.pickup_address)}
                       </p>
-                      <p className="text-sm text-gray-300 mt-1">
+                      <p className="text-sm text-gray-700 mt-1">
                         б) {formatAddressForOrder(order.delivery_address)}
                       </p>
                       <div className="mt-2">
-                        <span className="text-sm text-gray-400">Статус: </span>
+                        <span className="text-sm text-gray-600">Статус: </span>
                         <span
                           className={`inline-block px-3 py-1 rounded-full text-xs font-semibold border ${
                             getStatusColor(order.status)
@@ -251,8 +251,8 @@ export default async function DriverDetailsPage({ params }: { params: { id: stri
                         </span>
                       </div>
                       {order.item_type && (
-                        <p className="text-sm text-gray-400 mt-1">
-                          Тип груза: <span className="text-gray-300">
+                        <p className="text-sm text-gray-600 mt-1">
+                          Тип груза: <span className="text-gray-700">
                             {order.item_type === 'documents' ? 'Документы' :
                              order.item_type === 'parcel' ? 'Посылка' :
                              order.item_type === 'flowers' ? 'Цветы' :
@@ -261,8 +261,8 @@ export default async function DriverDetailsPage({ params }: { params: { id: stri
                           </span>
                         </p>
                       )}
-                      <p className="text-sm text-gray-400 mt-1">
-                        Создан: <span className="text-gray-300">
+                      <p className="text-sm text-gray-600 mt-1">
+                        Создан: <span className="text-gray-700">
                           {new Date(order.created_at).toLocaleString('ru-RU', {
                             day: '2-digit',
                             month: '2-digit',
@@ -273,17 +273,17 @@ export default async function DriverDetailsPage({ params }: { params: { id: stri
                         </span>
                       </p>
                       {order.description && (
-                        <p className="text-sm text-gray-400 mt-1 italic">
+                        <p className="text-sm text-gray-600 mt-1 italic">
                           {order.description}
                         </p>
                       )}
                       {order.ready_at && (() => {
                         const { formattedTime, timeStatus, statusType } = formatReadyTime(order.ready_at)
                         return (
-                          <p className="text-sm text-gray-400 mt-1">
-                            Заказ будет готов к выдаче: <span className="text-gray-300">{formattedTime}</span>
+                          <p className="text-sm text-gray-600 mt-1">
+                            Заказ будет готов к выдаче: <span className="text-gray-700">{formattedTime}</span>
                             {timeStatus && (
-                              <span className={`ml-2 ${statusType === 'waiting' ? 'text-red-400 animate-blink' : statusType === 'upcoming' ? 'text-yellow-400 animate-blink' : 'text-gray-400'}`}>
+                              <span className={`ml-2 ${statusType === 'waiting' ? 'text-red-400 animate-blink' : statusType === 'upcoming' ? 'text-yellow-400 animate-blink' : 'text-gray-600'}`}>
                                 ({timeStatus})
                               </span>
                             )}
@@ -292,7 +292,7 @@ export default async function DriverDetailsPage({ params }: { params: { id: stri
                       })()}
                     </div>
                     <div className="text-right ml-4">
-                      <p className="font-semibold text-white text-lg">{order.final_price} BYN</p>
+                      <p className="font-semibold text-gray-900 text-lg">{order.final_price} BYN</p>
                     </div>
                   </div>
                 </div>
@@ -303,21 +303,21 @@ export default async function DriverDetailsPage({ params }: { params: { id: stri
 
         {/* История заказов */}
         {completedOrders.length > 0 && (
-          <div className="bg-gray-800 rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-white mb-4 pb-2 border-b border-gray-700">
+          <div className="bg-gray-50 rounded-lg shadow p-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
               История заказов ({completedOrders.length})
             </h2>
             <div className="space-y-4">
               {completedOrders.slice(0, 10).map((order: any) => (
-                <div key={order.id} className="border border-gray-700 rounded-lg p-4 bg-gray-700 hover:bg-gray-600 transition">
+                <div key={order.id} className="border border-gray-200 rounded-lg p-4 bg-gray-100 hover:bg-gray-100 transition">
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
-                      <p className="font-medium text-white">Заказ №{order.order_number || order.id.slice(0, 8)}</p>
-                      <p className="text-sm text-gray-300 mt-1">
+                      <p className="font-medium text-gray-900">Заказ №{order.order_number || order.id.slice(0, 8)}</p>
+                      <p className="text-sm text-gray-700 mt-1">
                         {order.pickup_address} → {order.delivery_address}
                       </p>
                       <div className="mt-2">
-                        <span className="text-sm text-gray-400">Статус: </span>
+                        <span className="text-sm text-gray-600">Статус: </span>
                         <span
                           className={`inline-block px-3 py-1 rounded-full text-xs font-semibold border ${
                             getStatusColor(order.status)
@@ -327,13 +327,13 @@ export default async function DriverDetailsPage({ params }: { params: { id: stri
                         </span>
                       </div>
                       {order.completed_at && (
-                        <p className="text-sm text-gray-400 mt-2">
+                        <p className="text-sm text-gray-600 mt-2">
                           Завершен: {new Date(order.completed_at).toLocaleString('ru-RU')}
                         </p>
                       )}
                     </div>
                     <div className="text-right ml-4">
-                      <p className="font-semibold text-white text-lg">{order.final_price} BYN</p>
+                      <p className="font-semibold text-gray-900 text-lg">{order.final_price} BYN</p>
                     </div>
                   </div>
                 </div>
@@ -343,8 +343,8 @@ export default async function DriverDetailsPage({ params }: { params: { id: stri
         )}
 
         {driverOrders.length === 0 && (
-          <div className="bg-gray-800 rounded-lg shadow p-6">
-            <p className="text-gray-400 text-center">У водителя пока нет заказов</p>
+          <div className="bg-gray-50 rounded-lg shadow p-6">
+            <p className="text-gray-600 text-center">У водителя пока нет заказов</p>
           </div>
         )}
       </div>

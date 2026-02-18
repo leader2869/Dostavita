@@ -173,7 +173,7 @@ export function AddressAutocomplete({
         {loading && (
           <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
             <svg
-              className="animate-spin h-5 w-5 text-gray-400"
+              className="animate-spin h-5 w-5 text-gray-600"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
@@ -197,19 +197,19 @@ export function AddressAutocomplete({
       </div>
 
       {showResults && results.length > 0 && (
-        <div className="absolute z-50 w-full mt-1 bg-gray-800 border border-gray-700 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+        <div className="absolute z-50 w-full mt-1 bg-gray-50 border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
           {results.map((result, index) => (
             <button
               key={`${result.lat}-${result.lon}-${index}`}
               type="button"
               onClick={() => handleSelectAddress(result)}
-              className={`w-full text-left px-4 py-3 hover:bg-gray-700 transition ${
-                index === selectedIndex ? 'bg-gray-700' : ''
-              } ${index !== results.length - 1 ? 'border-b border-gray-700' : ''}`}
+              className={`w-full text-left px-4 py-3 hover:bg-gray-100 transition ${
+                index === selectedIndex ? 'bg-gray-100' : ''
+              } ${index !== results.length - 1 ? 'border-b border-gray-200' : ''}`}
             >
-              <p className="text-white text-sm font-medium">{result.display_name}</p>
+              <p className="text-gray-900 text-sm font-medium">{result.display_name}</p>
               {result.address.city && (
-                <p className="text-gray-400 text-xs mt-1">
+                <p className="text-gray-600 text-xs mt-1">
                   {result.address.city}
                   {result.address.road && `, ${result.address.road}`}
                 </p>

@@ -230,8 +230,8 @@ export default function CustomerDriversPage() {
     return (
       <div className="pb-20">
         <BackButton />
-        <h1 className="text-3xl font-bold mb-6 text-white">Управление водителями</h1>
-        <div className="text-center py-8 text-gray-400">Загрузка...</div>
+        <h1 className="text-3xl font-bold mb-6 text-gray-900">Управление водителями</h1>
+        <div className="text-center py-8 text-gray-600">Загрузка...</div>
       </div>
     )
   }
@@ -240,7 +240,7 @@ export default function CustomerDriversPage() {
     <div className="pb-20">
       <BackButton />
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-white">Управление водителями</h1>
+        <h1 className="text-3xl font-bold text-gray-900">Управление водителями</h1>
         {user && (
           <DriverOrganizationChatButton
             organizationId={user.id}
@@ -253,19 +253,19 @@ export default function CustomerDriversPage() {
         )}
       </div>
 
-      <div className="bg-gray-800 rounded-lg shadow p-6 mb-6">
+      <div className="bg-gray-50 rounded-lg shadow p-6 mb-6">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-white">Мои водители ({drivers.length})</h2>
+          <h2 className="text-xl font-semibold text-gray-900">Мои водители ({drivers.length})</h2>
           <div className="flex gap-2">
             <button
               onClick={() => setShowCreateModal(true)}
-              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+              className="bg-blue-600 text-gray-900 px-4 py-2 rounded-md hover:bg-blue-700 transition"
             >
               Создать водителя
             </button>
             <button
               onClick={() => setShowAddModal(true)}
-              className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition"
+              className="bg-brand-light text-gray-900 px-4 py-2 rounded-md hover:bg-brand-dark transition"
             >
               Найти водителя
             </button>
@@ -281,7 +281,7 @@ export default function CustomerDriversPage() {
         {drivers.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {drivers.map((driver: any) => (
-              <div key={driver.id} className="border border-gray-700 rounded-lg p-4 bg-gray-700 hover:bg-gray-600 transition">
+              <div key={driver.id} className="border border-gray-200 rounded-lg p-4 bg-gray-100 hover:bg-gray-100 transition">
                 <div className="flex items-center gap-3 mb-3">
                   {driver.avatar_url ? (
                     <img
@@ -291,20 +291,20 @@ export default function CustomerDriversPage() {
                     />
                   ) : (
                     <div className="w-12 h-12 rounded-full bg-gray-600 flex items-center justify-center">
-                      <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                       </svg>
                     </div>
                   )}
                   <div className="flex-1">
-                    <p className="font-medium text-white">{driver.full_name || 'Без имени'}</p>
-                    <p className="text-sm text-gray-400">{driver.email}</p>
-                    <p className="text-sm text-gray-400">{driver.phone || 'Телефон не указан'}</p>
+                    <p className="font-medium text-gray-900">{driver.full_name || 'Без имени'}</p>
+                    <p className="text-sm text-gray-600">{driver.email}</p>
+                    <p className="text-sm text-gray-600">{driver.phone || 'Телефон не указан'}</p>
                   </div>
                 </div>
                 <div className="space-y-1 text-sm mb-3">
-                  <p className="text-gray-300">
-                    <span className="text-gray-400">Транспорт:</span> {
+                  <p className="text-gray-700">
+                    <span className="text-gray-600">Транспорт:</span> {
                       driver.vehicle_type === 'car' ? 'Автомобиль' :
                       driver.vehicle_type === 'motorcycle' ? 'Мотоцикл' :
                       driver.vehicle_type === 'bicycle' ? 'Велосипед' :
@@ -315,26 +315,26 @@ export default function CustomerDriversPage() {
                     )}
                   </p>
                   {driver.vehicle_number && (
-                    <p className="text-gray-300">
-                      <span className="text-gray-400">Номер:</span> {driver.vehicle_number}
+                    <p className="text-gray-700">
+                      <span className="text-gray-600">Номер:</span> {driver.vehicle_number}
                     </p>
                   )}
                   {driver.license_number && (
-                    <p className="text-gray-300">
-                      <span className="text-gray-400">Удостоверение:</span> {driver.license_number}
+                    <p className="text-gray-700">
+                      <span className="text-gray-600">Удостоверение:</span> {driver.license_number}
                     </p>
                   )}
                 </div>
                 <div className="flex gap-2">
                   <a
                     href={`/dashboard/customer/drivers/${driver.id}`}
-                    className="flex-1 text-center bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700 transition"
+                    className="flex-1 text-center bg-blue-600 text-gray-900 px-4 py-2 rounded text-sm hover:bg-blue-700 transition"
                   >
                     Подробнее
                   </a>
                   <a
                     href={`/dashboard/customer/tracking?driver=${driver.id}`}
-                    className="flex-1 text-center bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700 transition"
+                    className="flex-1 text-center bg-brand-light text-gray-900 px-4 py-2 rounded text-sm hover:bg-brand-dark transition"
                   >
                     Отследить
                   </a>
@@ -350,7 +350,7 @@ export default function CustomerDriversPage() {
                   )}
                   <button
                     onClick={() => handleDetachDriver(driver.id)}
-                    className="px-3 py-2 bg-red-600 text-white rounded text-sm hover:bg-red-700 transition"
+                    className="px-3 py-2 bg-red-600 text-gray-900 rounded text-sm hover:bg-red-700 transition"
                     title="Отвязать водителя"
                   >
                     ✕
@@ -361,10 +361,10 @@ export default function CustomerDriversPage() {
           </div>
         ) : (
           <div className="text-center py-8">
-            <p className="text-gray-400 mb-4">У вас пока нет водителей</p>
+            <p className="text-gray-600 mb-4">У вас пока нет водителей</p>
             <button
               onClick={() => setShowAddModal(true)}
-              className="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition"
+              className="bg-brand-light text-gray-900 px-6 py-2 rounded-md hover:bg-brand-dark transition"
             >
               Добавить первого водителя
             </button>
@@ -375,10 +375,10 @@ export default function CustomerDriversPage() {
       {/* Модальное окно для добавления водителя */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-gray-50 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-bold text-white">Добавить водителя</h2>
+                <h2 className="text-2xl font-bold text-gray-900">Добавить водителя</h2>
                 <button
                   onClick={() => {
                     setShowAddModal(false)
@@ -386,7 +386,7 @@ export default function CustomerDriversPage() {
                     setSearchResults([])
                     setError(null)
                   }}
-                  className="text-gray-400 hover:text-white transition"
+                  className="text-gray-600 hover:text-gray-900 transition"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -395,7 +395,7 @@ export default function CustomerDriversPage() {
               </div>
 
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Поиск водителя (email, имя, телефон)
                 </label>
                 <div className="flex gap-2">
@@ -405,12 +405,12 @@ export default function CustomerDriversPage() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                     placeholder="Введите email, имя или телефон..."
-                    className="flex-1 px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white placeholder-gray-400"
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-900 placeholder-gray-400"
                   />
                   <button
                     onClick={handleSearch}
                     disabled={searching}
-                    className="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 disabled:opacity-50 transition"
+                    className="bg-brand-light text-gray-900 px-6 py-2 rounded-md hover:bg-brand-dark disabled:opacity-50 transition"
                   >
                     {searching ? 'Поиск...' : 'Найти'}
                   </button>
@@ -425,21 +425,21 @@ export default function CustomerDriversPage() {
 
               {searchResults.length > 0 && (
                 <div className="space-y-2">
-                  <h3 className="text-sm font-medium text-gray-400 mb-2">
+                  <h3 className="text-sm font-medium text-gray-600 mb-2">
                     Найдено водителей: {searchResults.length}
                   </h3>
                   <div className="space-y-2 max-h-96 overflow-y-auto">
                     {searchResults.map((driver: any) => (
                       <div
                         key={driver.id}
-                        className="border border-gray-700 rounded-lg p-4 bg-gray-700 hover:bg-gray-600 transition"
+                        className="border border-gray-200 rounded-lg p-4 bg-gray-100 hover:bg-gray-100 transition"
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex-1">
-                            <p className="font-medium text-white">{driver.full_name || 'Без имени'}</p>
-                            <p className="text-sm text-gray-400">{driver.email}</p>
+                            <p className="font-medium text-gray-900">{driver.full_name || 'Без имени'}</p>
+                            <p className="text-sm text-gray-600">{driver.email}</p>
                             {driver.phone && (
-                              <p className="text-sm text-gray-400">{driver.phone}</p>
+                              <p className="text-sm text-gray-600">{driver.phone}</p>
                             )}
                             {driver.vehicle_type && (
                               <p className="text-xs text-gray-500 mt-1">
@@ -461,7 +461,7 @@ export default function CustomerDriversPage() {
                               handleAttachDriver(driver.id, message || undefined)
                             }}
                             disabled={attaching === driver.id}
-                            className="ml-4 bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700 disabled:opacity-50 transition"
+                            className="ml-4 bg-brand-light text-gray-900 px-4 py-2 rounded text-sm hover:bg-brand-dark disabled:opacity-50 transition"
                           >
                             {attaching === driver.id ? 'Отправка...' : 'Отправить запрос'}
                           </button>
@@ -473,13 +473,13 @@ export default function CustomerDriversPage() {
               )}
 
               {searchQuery && !searching && searchResults.length === 0 && (
-                <div className="text-center py-8 text-gray-400">
+                <div className="text-center py-8 text-gray-600">
                   Водители не найдены. Попробуйте другой поисковый запрос.
                 </div>
               )}
 
               {!searchQuery && searchResults.length === 0 && (
-                <div className="text-center py-8 text-gray-400">
+                <div className="text-center py-8 text-gray-600">
                   Введите данные для поиска водителя (email, имя или телефон)
                 </div>
               )}
@@ -491,10 +491,10 @@ export default function CustomerDriversPage() {
       {/* Модальное окно для создания водителя */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-gray-50 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-bold text-white">Создать аккаунт водителя</h2>
+                <h2 className="text-2xl font-bold text-gray-900">Создать аккаунт водителя</h2>
                 <button
                   onClick={() => {
                     setShowCreateModal(false)
@@ -509,7 +509,7 @@ export default function CustomerDriversPage() {
                     setNewDriverVehicleNumber('')
                     setNewDriverLicenseNumber('')
                   }}
-                  className="text-gray-400 hover:text-white transition"
+                  className="text-gray-600 hover:text-gray-900 transition"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -525,7 +525,7 @@ export default function CustomerDriversPage() {
 
               <form onSubmit={handleCreateDriver} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Email *
                   </label>
                   <input
@@ -533,13 +533,13 @@ export default function CustomerDriversPage() {
                     value={newDriverEmail}
                     onChange={(e) => setNewDriverEmail(e.target.value)}
                     required
-                    className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-900"
                     placeholder="driver@example.com"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Пароль *
                   </label>
                   <input
@@ -548,13 +548,13 @@ export default function CustomerDriversPage() {
                     onChange={(e) => setNewDriverPassword(e.target.value)}
                     required
                     minLength={6}
-                    className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-900"
                     placeholder="Минимум 6 символов"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Полное имя *
                   </label>
                   <input
@@ -562,33 +562,33 @@ export default function CustomerDriversPage() {
                     value={newDriverFullName}
                     onChange={(e) => setNewDriverFullName(e.target.value)}
                     required
-                    className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-900"
                     placeholder="Иванов Иван Иванович"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Телефон
                   </label>
                   <input
                     type="tel"
                     value={newDriverPhone}
                     onChange={(e) => setNewDriverPhone(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-900"
                     placeholder="+375291234567"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Тип транспорта *
                   </label>
                   <select
                     value={newDriverVehicleType}
                     onChange={(e) => setNewDriverVehicleType(e.target.value)}
                     required
-                    className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-900"
                   >
                     <option value="">Выберите тип</option>
                     <option value="car">Автомобиль</option>
@@ -601,27 +601,27 @@ export default function CustomerDriversPage() {
                 {(newDriverVehicleType === 'car' || newDriverVehicleType === 'motorcycle') && (
                   <>
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-1">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
                         Марка транспорта
                       </label>
                       <input
                         type="text"
                         value={newDriverVehicleBrand}
                         onChange={(e) => setNewDriverVehicleBrand(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-900"
                         placeholder="Toyota, BMW, Honda и т.д."
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-1">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
                         Модель транспорта
                       </label>
                       <input
                         type="text"
                         value={newDriverVehicleModel}
                         onChange={(e) => setNewDriverVehicleModel(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-900"
                         placeholder="Camry, X5, CBR600 и т.д."
                       />
                     </div>
@@ -629,20 +629,20 @@ export default function CustomerDriversPage() {
                 )}
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Номер транспорта
                   </label>
                   <input
                     type="text"
                     value={newDriverVehicleNumber}
                     onChange={(e) => setNewDriverVehicleNumber(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-900"
                     placeholder="1234 AB-7"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Номер водительского удостоверения *
                   </label>
                   <input
@@ -650,7 +650,7 @@ export default function CustomerDriversPage() {
                     value={newDriverLicenseNumber}
                     onChange={(e) => setNewDriverLicenseNumber(e.target.value)}
                     required
-                    className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-900"
                     placeholder="AB1234567"
                   />
                 </div>
@@ -659,7 +659,7 @@ export default function CustomerDriversPage() {
                   <button
                     type="submit"
                     disabled={creating}
-                    className="flex-1 bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 disabled:opacity-50 transition"
+                    className="flex-1 bg-brand-light text-gray-900 px-6 py-2 rounded-md hover:bg-brand-dark disabled:opacity-50 transition"
                   >
                     {creating ? 'Создание...' : 'Создать водителя'}
                   </button>
@@ -676,7 +676,7 @@ export default function CustomerDriversPage() {
                       setNewDriverVehicleNumber('')
                       setNewDriverLicenseNumber('')
                     }}
-                    className="px-6 py-2 border border-gray-600 rounded-md hover:bg-gray-700 text-white transition"
+                    className="px-6 py-2 border border-gray-300 rounded-md hover:bg-gray-100 text-gray-900 transition"
                   >
                     Отмена
                   </button>

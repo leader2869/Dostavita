@@ -21,7 +21,7 @@ export async function GET(request: Request) {
       `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=5&addressdetails=1&countrycodes=by&accept-language=ru`,
       {
         headers: {
-          'User-Agent': 'Dostavita Delivery App (contact@dostavita.by)',
+          'User-Agent': 'Просто! Delivery App (contact@prosto.of.by)',
           'Accept-Language': 'ru',
         },
       }

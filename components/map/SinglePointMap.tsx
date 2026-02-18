@@ -55,7 +55,7 @@ export function SinglePointMap({
   const center: [number, number] = [coordinates.lat, coordinates.lon]
   
   return (
-    <div style={{ height, width: '100%' }} className="rounded-lg overflow-hidden border border-gray-600">
+    <div style={{ height, width: '100%' }} className="rounded-lg overflow-hidden border border-gray-300">
       <MapContainer
         center={center}
         zoom={zoom}

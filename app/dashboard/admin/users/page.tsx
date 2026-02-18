@@ -176,8 +176,8 @@ export default function AdminUsersPage() {
     return (
       <div>
         <BackButton />
-        <h1 className="text-3xl font-bold mb-6 text-white">Управление пользователями</h1>
-        <p className="text-gray-400">Загрузка...</p>
+        <h1 className="text-3xl font-bold mb-6 text-gray-900">Управление пользователями</h1>
+        <p className="text-gray-600">Загрузка...</p>
       </div>
     )
   }
@@ -185,44 +185,44 @@ export default function AdminUsersPage() {
   return (
     <div>
       <BackButton />
-      <h1 className="text-3xl font-bold mb-6 text-white">Управление пользователями</h1>
+      <h1 className="text-3xl font-bold mb-6 text-gray-900">Управление пользователями</h1>
 
-      <div className="bg-gray-800 rounded-lg shadow overflow-hidden">
+      <div className="bg-gray-50 rounded-lg shadow overflow-hidden">
         <table className="min-w-full divide-y divide-gray-700">
-          <thead className="bg-gray-900">
+          <thead className="bg-white">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Email</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">ФИО</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Телефон</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Роль</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Дата регистрации</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Действия</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">Email</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">ФИО</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">Телефон</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">Роль</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">Дата регистрации</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">Действия</th>
             </tr>
           </thead>
-          <tbody className="bg-gray-800 divide-y divide-gray-700">
+          <tbody className="bg-gray-50 divide-y divide-gray-700">
             {users && users.length > 0 ? (
               users.map((user: any) => (
                 <tr key={user.id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     {user.email}
                   </td>
-                  <td className="px-6 py-4 text-sm text-white">
+                  <td className="px-6 py-4 text-sm text-gray-900">
                     {user.full_name || '-'}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                     {user.phone || '-'}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {roleLabels[user.role] || user.role}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                     {new Date(user.created_at).toLocaleDateString('ru-RU')}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleEdit(user)}
-                        className="text-green-500 hover:text-green-400"
+                        className="text-brand-light hover:text-brand-light"
                       >
                         Редактировать
                       </button>
@@ -238,7 +238,7 @@ export default function AdminUsersPage() {
               ))
             ) : (
               <tr>
-                <td colSpan={6} className="px-6 py-4 text-center text-gray-400">
+                <td colSpan={6} className="px-6 py-4 text-center text-gray-600">
                   Нет пользователей
                 </td>
               </tr>
@@ -250,57 +250,57 @@ export default function AdminUsersPage() {
       {/* Модальное окно редактирования */}
       {showEditModal && editingUser && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md">
-            <h2 className="text-2xl font-bold mb-4 text-white">Редактировать пользователя</h2>
+          <div className="bg-gray-50 rounded-lg p-6 w-full max-w-md">
+            <h2 className="text-2xl font-bold mb-4 text-gray-900">Редактировать пользователя</h2>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Email
                 </label>
                 <input
                   type="email"
                   value={editEmail}
                   onChange={(e) => setEditEmail(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
+                  className="w-full px-3 py-2 bg-gray-100 text-gray-900 border border-gray-300 rounded-md focus:outline-none focus:ring-brand-light focus:border-brand-light"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   ФИО
                 </label>
                 <input
                   type="text"
                   value={editFullName}
                   onChange={(e) => setEditFullName(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
+                  className="w-full px-3 py-2 bg-gray-100 text-gray-900 border border-gray-300 rounded-md focus:outline-none focus:ring-brand-light focus:border-brand-light"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Телефон
                 </label>
                 <input
                   type="tel"
                   value={editPhone}
                   onChange={(e) => setEditPhone(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
+                  className="w-full px-3 py-2 bg-gray-100 text-gray-900 border border-gray-300 rounded-md focus:outline-none focus:ring-brand-light focus:border-brand-light"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Роль
                 </label>
                 <select
                   value={editRole}
                   onChange={(e) => setEditRole(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
+                  className="w-full px-3 py-2 bg-gray-100 text-gray-900 border border-gray-300 rounded-md focus:outline-none focus:ring-brand-light focus:border-brand-light"
                 >
                   {roleOptions.map((option) => (
-                    <option key={option.value} value={option.value} className="bg-gray-700">
+                    <option key={option.value} value={option.value} className="bg-gray-100">
                       {option.label}
                     </option>
                   ))}
@@ -317,7 +317,7 @@ export default function AdminUsersPage() {
                 <button
                   onClick={handleSaveEdit}
                   disabled={saving}
-                  className="flex-1 bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 disabled:opacity-50"
+                  className="flex-1 bg-brand-light text-gray-900 px-6 py-2 rounded-md hover:bg-brand-dark disabled:opacity-50"
                 >
                   {saving ? 'Сохранение...' : 'Сохранить'}
                 </button>
@@ -327,7 +327,7 @@ export default function AdminUsersPage() {
                     setEditingUser(null)
                     setError(null)
                   }}
-                  className="px-6 py-2 border border-gray-600 text-gray-300 rounded-md hover:bg-gray-700"
+                  className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-100"
                 >
                   Отмена
                 </button>
@@ -340,10 +340,10 @@ export default function AdminUsersPage() {
       {/* Модальное окно удаления */}
       {showDeleteModal && userToDelete && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md">
-            <h2 className="text-2xl font-bold mb-4 text-white">Удалить пользователя</h2>
+          <div className="bg-gray-50 rounded-lg p-6 w-full max-w-md">
+            <h2 className="text-2xl font-bold mb-4 text-gray-900">Удалить пользователя</h2>
 
-            <p className="text-gray-300 mb-6">
+            <p className="text-gray-700 mb-6">
               Вы уверены, что хотите удалить пользователя <strong>{userToDelete.email}</strong>?
               Это действие нельзя отменить.
             </p>
@@ -358,7 +358,7 @@ export default function AdminUsersPage() {
               <button
                 onClick={handleConfirmDelete}
                 disabled={saving}
-                className="flex-1 bg-red-600 text-white px-6 py-2 rounded-md hover:bg-red-700 disabled:opacity-50"
+                className="flex-1 bg-red-600 text-gray-900 px-6 py-2 rounded-md hover:bg-red-700 disabled:opacity-50"
               >
                 {saving ? 'Удаление...' : 'Удалить'}
               </button>
@@ -368,7 +368,7 @@ export default function AdminUsersPage() {
                   setUserToDelete(null)
                   setError(null)
                 }}
-                className="px-6 py-2 border border-gray-600 text-gray-300 rounded-md hover:bg-gray-700"
+                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-100"
               >
                 Отмена
               </button>

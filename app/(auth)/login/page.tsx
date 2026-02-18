@@ -96,56 +96,56 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="bg-gray-800 p-8 rounded-lg shadow-md w-full">
-      <h1 className="text-2xl font-bold text-center mb-6 text-white">Вход в Dostavita</h1>
+    <div className="bg-white p-8 rounded-lg shadow-lg w-full border border-gray-200">
+      <h1 className="text-5xl font-bold text-center mb-6 text-brand-light" style={{ fontFamily: 'var(--font-amatic-sc), cursive' }}>Просто! вход</h1>
       {checkingAuth && (
-        <div className="text-center text-gray-400 text-sm mb-4">Проверка аутентификации...</div>
+        <div className="text-center text-gray-600 text-sm mb-4">Проверка аутентификации...</div>
       )}
     
       <form onSubmit={handleLogin} className="space-y-4">
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-300">
-            Email
-          </label>
-          <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="mt-1 block w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
-          />
-        </div>
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-900">
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="mt-1 block w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-light focus:border-brand-light transition"
+            />
+          </div>
 
-        <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-300">
-            Пароль
-          </label>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className="mt-1 block w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
-          />
-        </div>
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-900">
+              Пароль
+            </label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="mt-1 block w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-light focus:border-brand-light transition"
+            />
+          </div>
 
-        {error && (
-          <div className="text-red-400 text-sm bg-red-900 bg-opacity-30 p-3 rounded border border-red-800">{error}</div>
-        )}
+          {error && (
+            <div className="text-red-600 text-sm bg-red-50 p-3 rounded border border-red-200">{error}</div>
+          )}
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
-        >
-          {loading ? 'Вход...' : 'Войти'}
-        </button>
-      </form>
+          <button
+            type="submit"
+            disabled={loading || checkingAuth}
+            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-gray-900 bg-brand-light hover:bg-brand-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-light disabled:opacity-50 transition"
+          >
+            {loading ? 'Вход...' : 'Войти'}
+          </button>
+        </form>
 
       <div className="mt-4 text-center">
-        <a href="/register" className="text-sm text-green-500 hover:text-green-500">
+        <a href="/register" className="text-sm text-brand-light hover:text-brand-dark transition">
           Нет аккаунта? Зарегистрироваться
         </a>
       </div>

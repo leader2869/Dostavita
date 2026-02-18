@@ -1,9 +1,17 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import Script from 'next/script'
+import { Amatic_SC } from 'next/font/google'
+
+const amaticSC = Amatic_SC({
+  weight: '700',
+  subsets: ['latin', 'cyrillic'],
+  display: 'swap',
+  variable: '--font-amatic-sc',
+})
 
 export const metadata: Metadata = {
-  title: 'Dostavita',
+  title: 'Просто!',
   description: 'Платформа для службы доставки',
   manifest: '/manifest.json',
 }
@@ -14,7 +22,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="ru" suppressHydrationWarning>
+    <html lang="ru" suppressHydrationWarning className={amaticSC.variable}>
       <head>
         <Script id="register-sw" strategy="afterInteractive">
           {`
@@ -32,7 +40,7 @@ export default function RootLayout({
           `}
         </Script>
       </head>
-      <body style={{ backgroundColor: '#111827', margin: 0, padding: 0 }}>{children}</body>
+      <body style={{ backgroundColor: '#ffffff', margin: 0, padding: 0 }}>{children}</body>
     </html>
   )
 }

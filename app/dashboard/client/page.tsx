@@ -209,11 +209,11 @@ export default function ClientDashboard() {
       case 'courier_delivering':
         return 'text-purple-400 bg-purple-400/20 border-purple-400/50'
       case 'completed':
-        return 'text-green-400 bg-green-400/20 border-green-400/50'
+        return 'text-brand-light bg-brand-light/20 border-green-400/50'
       case 'cancelled':
         return 'text-red-400 bg-red-400/20 border-red-400/50'
       default:
-        return 'text-gray-400 bg-gray-400/20 border-gray-400/50'
+        return 'text-gray-600 bg-gray-400/20 border-gray-400/50'
     }
   }
 
@@ -410,14 +410,14 @@ export default function ClientDashboard() {
 
   return (
     <div className="pb-20">
-      <h1 className="text-3xl font-bold mb-6 text-white">Главная</h1>
+      <h1 className="text-3xl font-bold mb-6 text-gray-900">Главная</h1>
 
-      <div className="bg-gray-800 rounded-lg shadow p-6 mb-6">
-        <h2 className="text-xl font-semibold mb-4 text-white">Быстрые действия</h2>
+      <div className="bg-gray-50 rounded-lg shadow p-6 mb-6">
+        <h2 className="text-xl font-semibold mb-4 text-gray-900">Быстрые действия</h2>
         <div className="grid grid-cols-2 gap-4">
           <a
             href="/dashboard/client/create-order"
-            className="bg-green-600 text-white p-4 rounded-lg text-center hover:bg-green-700 transition flex items-center justify-center"
+            className="bg-brand-light text-gray-900 p-4 rounded-lg text-center hover:bg-brand-dark transition flex items-center justify-center"
           >
             <span className="leading-tight">
               Создать<br />заказ
@@ -425,7 +425,7 @@ export default function ClientDashboard() {
           </a>
           <button
             onClick={handleCallDriver}
-            className="bg-blue-600 text-white p-4 rounded-lg text-center hover:bg-blue-700 transition flex items-center justify-center"
+            className="bg-blue-600 text-gray-900 p-4 rounded-lg text-center hover:bg-blue-700 transition flex items-center justify-center"
           >
             <span className="leading-tight">
               Позвонить<br />курьеру
@@ -434,10 +434,10 @@ export default function ClientDashboard() {
         </div>
       </div>
 
-      <div className="bg-gray-800 rounded-lg shadow p-6 mb-6">
-        <h2 className="text-xl font-semibold mb-4 text-white">Мои активные заказы</h2>
+      <div className="bg-gray-50 rounded-lg shadow p-6 mb-6">
+        <h2 className="text-xl font-semibold mb-4 text-gray-900">Мои активные заказы</h2>
         {loading ? (
-          <p className="text-gray-400">Загрузка...</p>
+          <p className="text-gray-600">Загрузка...</p>
         ) : orders.length > 0 ? (
           <div className="space-y-4">
             {orders.map((order: any) => {
@@ -447,20 +447,20 @@ export default function ClientDashboard() {
               return (
                 <div
                   key={order.id}
-                  className="border border-gray-700 rounded-lg p-4 bg-gray-700 hover:bg-gray-600 transition cursor-pointer"
+                  className="border border-gray-200 rounded-lg p-4 bg-gray-100 hover:bg-gray-100 transition cursor-pointer"
                   onClick={() => router.push(`/dashboard/client/orders/${order.id}`)}
                 >
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
-                      <p className="font-medium text-white">Заказ №{order.order_number || order.id.slice(0, 8)}</p>
-                      <p className="text-sm text-gray-300 mt-1">
+                      <p className="font-medium text-gray-900">Заказ №{order.order_number || order.id.slice(0, 8)}</p>
+                      <p className="text-sm text-gray-700 mt-1">
                         а) {formatAddressForOrder(order.pickup_address)}
                       </p>
-                      <p className="text-sm text-gray-300 mt-1">
+                      <p className="text-sm text-gray-700 mt-1">
                         б) {formatAddressForOrder(order.delivery_address)}
                       </p>
                       <div className="mt-1">
-                        <span className="text-sm text-gray-400">Статус: </span>
+                        <span className="text-sm text-gray-600">Статус: </span>
                         <span
                           className={`inline-block px-3 py-1 rounded-full text-xs font-semibold border ${
                             getStatusColor(order.status)
@@ -470,8 +470,8 @@ export default function ClientDashboard() {
                         </span>
                       </div>
                       {order.item_type && (
-                        <p className="text-sm text-gray-400 mt-1">
-                          Тип груза: <span className="text-gray-300">
+                        <p className="text-sm text-gray-600 mt-1">
+                          Тип груза: <span className="text-gray-700">
                             {order.item_type === 'documents' ? 'Документы' :
                              order.item_type === 'parcel' ? 'Посылка' :
                              order.item_type === 'flowers' ? 'Цветы' :
@@ -480,8 +480,8 @@ export default function ClientDashboard() {
                           </span>
                         </p>
                       )}
-                      <p className="text-sm text-gray-400 mt-1">
-                        Создан: <span className="text-gray-300">
+                      <p className="text-sm text-gray-600 mt-1">
+                        Создан: <span className="text-gray-700">
                           {new Date(order.created_at).toLocaleString('ru-RU', {
                             day: '2-digit',
                             month: '2-digit',
@@ -492,17 +492,17 @@ export default function ClientDashboard() {
                         </span>
                       </p>
                       {order.description && (
-                        <p className="text-sm text-gray-400 mt-1 italic">
+                        <p className="text-sm text-gray-600 mt-1 italic">
                           {order.description}
                         </p>
                       )}
                       {order.ready_at && (() => {
                         const { formattedTime, timeStatus, statusType } = formatReadyTime(order.ready_at)
                         return (
-                          <p className="text-sm text-gray-400 mt-1">
-                            Заказ будет готов к выдаче: <span className="text-gray-300">{formattedTime}</span>
+                          <p className="text-sm text-gray-600 mt-1">
+                            Заказ будет готов к выдаче: <span className="text-gray-700">{formattedTime}</span>
                             {timeStatus && (
-                              <span className={`ml-2 ${statusType === 'waiting' ? 'text-red-400 animate-blink' : statusType === 'upcoming' ? 'text-yellow-400 animate-blink' : 'text-gray-400'}`}>
+                              <span className={`ml-2 ${statusType === 'waiting' ? 'text-red-400 animate-blink' : statusType === 'upcoming' ? 'text-yellow-400 animate-blink' : 'text-gray-600'}`}>
                                 ({timeStatus})
                               </span>
                             )}
@@ -511,7 +511,7 @@ export default function ClientDashboard() {
                       })()}
                     </div>
                     <div className="text-right ml-4">
-                      <p className="font-semibold text-lg text-white">{order.final_price} BYN</p>
+                      <p className="font-semibold text-lg text-gray-900">{order.final_price} BYN</p>
                     </div>
                   </div>
                   {canEdit && (
@@ -521,7 +521,7 @@ export default function ClientDashboard() {
                           e.stopPropagation()
                           router.push(`/dashboard/client/orders/${order.id}/edit`)
                         }}
-                        className="flex-1 bg-green-600 text-white px-3 py-1.5 rounded text-xs hover:bg-green-700 transition"
+                        className="flex-1 bg-brand-light text-gray-900 px-3 py-1.5 rounded text-xs hover:bg-brand-dark transition"
                       >
                         Редактировать
                       </button>
@@ -547,7 +547,7 @@ export default function ClientDashboard() {
                             alert('Произошла ошибка при отмене заказа')
                           }
                         }}
-                        className="flex-1 bg-red-600 text-white px-3 py-1.5 rounded text-xs hover:bg-red-700 transition"
+                        className="flex-1 bg-red-600 text-gray-900 px-3 py-1.5 rounded text-xs hover:bg-red-700 transition"
                       >
                         Отменить заказ
                       </button>
@@ -562,13 +562,13 @@ export default function ClientDashboard() {
             })}
           </div>
         ) : (
-          <p className="text-gray-400">У вас пока нет активных заказов</p>
+          <p className="text-gray-600">У вас пока нет активных заказов</p>
         )}
       </div>
 
-      <div className="bg-gray-800 rounded-lg shadow p-6">
+      <div className="bg-gray-50 rounded-lg shadow p-6">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-white">Мои адреса</h2>
+          <h2 className="text-xl font-semibold text-gray-900">Мои адреса</h2>
           <a
             href="/dashboard/client/addresses"
             className="text-sm text-blue-400 hover:text-blue-300"
@@ -581,18 +581,18 @@ export default function ClientDashboard() {
           {savedAddresses.map((addr) => (
             <div
               key={addr.id}
-              className="bg-gray-700 rounded-lg p-3 cursor-pointer hover:bg-gray-600 transition border border-gray-600 hover:border-green-500"
+              className="bg-gray-100 rounded-lg p-3 cursor-pointer hover:bg-gray-100 transition border border-gray-300 hover:border-green-500"
               onClick={() => router.push('/dashboard/client/addresses')}
             >
               <div className="flex items-start justify-between mb-1">
-                <h3 className="text-sm font-semibold text-white flex-1 line-clamp-1">{addr.label}</h3>
+                <h3 className="text-sm font-semibold text-gray-900 flex-1 line-clamp-1">{addr.label}</h3>
                 {addr.is_default && (
-                  <span className="px-1 py-0.5 bg-green-600 text-white text-xs rounded ml-1">
+                  <span className="px-1 py-0.5 bg-brand-light text-gray-900 text-xs rounded ml-1">
                     ✓
                   </span>
                 )}
               </div>
-              <p className="text-xs text-gray-400 line-clamp-3 mb-1">
+              <p className="text-xs text-gray-600 line-clamp-3 mb-1">
                 {formatAddressForCard(addr.address, addr.entrance, addr.floor, addr.apartment)}
               </p>
             </div>
@@ -601,12 +601,12 @@ export default function ClientDashboard() {
           {/* Квадратик для добавления нового адреса - всегда показывается */}
           <div
             onClick={() => setShowAddModal(true)}
-            className="bg-gray-700 rounded-lg p-3 cursor-pointer hover:bg-gray-600 transition border-2 border-dashed border-gray-600 hover:border-green-500 flex flex-col items-center justify-center min-h-[100px]"
+            className="bg-gray-100 rounded-lg p-3 cursor-pointer hover:bg-gray-100 transition border-2 border-dashed border-gray-300 hover:border-green-500 flex flex-col items-center justify-center min-h-[100px]"
           >
-            <svg className="w-6 h-6 text-gray-400 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-6 h-6 text-gray-600 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
-            <p className="text-xs text-gray-400 font-medium">Добавить</p>
+            <p className="text-xs text-gray-600 font-medium">Добавить</p>
           </div>
         </div>
       </div>
@@ -614,10 +614,10 @@ export default function ClientDashboard() {
       {/* Модальное окно для добавления адреса */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-gray-50 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <form onSubmit={handleSaveAddress} className="p-6">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-bold text-white">Добавить адрес</h2>
+                <h2 className="text-2xl font-bold text-gray-900">Добавить адрес</h2>
                 <button
                   type="button"
                   onClick={() => {
@@ -634,7 +634,7 @@ export default function ClientDashboard() {
                     setIsDefault(false)
                     setError(null)
                   }}
-                  className="text-gray-400 hover:text-white transition"
+                  className="text-gray-600 hover:text-gray-900 transition"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -650,7 +650,7 @@ export default function ClientDashboard() {
 
               <div className="space-y-4">
                 <div>
-                  <label htmlFor="label" className="block text-sm font-medium text-gray-300 mb-1">
+                  <label htmlFor="label" className="block text-sm font-medium text-gray-700 mb-1">
                     Название адреса *
                   </label>
                   <input
@@ -660,19 +660,19 @@ export default function ClientDashboard() {
                     onChange={(e) => setLabel(e.target.value)}
                     required
                     placeholder="Например: Дом, Офис, Магазин"
-                    className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white placeholder-gray-400"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-900 placeholder-gray-400"
                   />
                 </div>
 
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <label htmlFor="address" className="block text-sm font-medium text-gray-300">
+                    <label htmlFor="address" className="block text-sm font-medium text-gray-700">
                       Адрес *
                     </label>
                     <button
                       type="button"
                       onClick={() => setShowMapPicker(true)}
-                      className="text-xs text-green-400 hover:text-green-300 underline"
+                      className="text-xs text-brand-light hover:text-brand-dark underline"
                     >
                       Указать на карте
                     </button>
@@ -689,7 +689,7 @@ export default function ClientDashboard() {
                     }}
                     placeholder="Начните вводить адрес"
                     required
-                    className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
+                    className="w-full px-3 py-2 bg-gray-100 text-gray-900 border border-gray-300 rounded-md focus:outline-none focus:ring-brand-light focus:border-brand-light"
                   />
                   
                   {/* Карта для отображения выбранного адреса */}
@@ -706,7 +706,7 @@ export default function ClientDashboard() {
                   {/* Дополнительные поля */}
                   <div className="grid grid-cols-3 gap-2 mt-2">
                     <div>
-                      <label htmlFor="entrance" className="block text-xs text-gray-400 mb-1">
+                      <label htmlFor="entrance" className="block text-xs text-gray-600 mb-1">
                         Подъезд
                       </label>
                       <input
@@ -715,11 +715,11 @@ export default function ClientDashboard() {
                         value={entrance}
                         onChange={(e) => setEntrance(e.target.value)}
                         placeholder="1"
-                        className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 text-sm"
+                        className="w-full px-3 py-2 bg-gray-100 text-gray-900 border border-gray-300 rounded-md focus:outline-none focus:ring-brand-light focus:border-brand-light text-sm"
                       />
                     </div>
                     <div>
-                      <label htmlFor="floor" className="block text-xs text-gray-400 mb-1">
+                      <label htmlFor="floor" className="block text-xs text-gray-600 mb-1">
                         Этаж
                       </label>
                       <input
@@ -728,11 +728,11 @@ export default function ClientDashboard() {
                         value={floor}
                         onChange={(e) => setFloor(e.target.value)}
                         placeholder="3"
-                        className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 text-sm"
+                        className="w-full px-3 py-2 bg-gray-100 text-gray-900 border border-gray-300 rounded-md focus:outline-none focus:ring-brand-light focus:border-brand-light text-sm"
                       />
                     </div>
                     <div>
-                      <label htmlFor="apartment" className="block text-xs text-gray-400 mb-1">
+                      <label htmlFor="apartment" className="block text-xs text-gray-600 mb-1">
                         Квартира
                       </label>
                       <input
@@ -741,14 +741,14 @@ export default function ClientDashboard() {
                         value={apartment}
                         onChange={(e) => setApartment(e.target.value)}
                         placeholder="12"
-                        className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 text-sm"
+                        className="w-full px-3 py-2 bg-gray-100 text-gray-900 border border-gray-300 rounded-md focus:outline-none focus:ring-brand-light focus:border-brand-light text-sm"
                       />
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <label htmlFor="addressType" className="block text-sm font-medium text-gray-300 mb-1">
+                  <label htmlFor="addressType" className="block text-sm font-medium text-gray-700 mb-1">
                     Тип адреса *
                   </label>
                   <select
@@ -756,7 +756,7 @@ export default function ClientDashboard() {
                     value={addressType}
                     onChange={(e) => setAddressType(e.target.value as any)}
                     required
-                    className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-900"
                   >
                     <option value="both">Отправление и доставка</option>
                     <option value="pickup">Только отправление</option>
@@ -765,7 +765,7 @@ export default function ClientDashboard() {
                 </div>
 
                 <div>
-                  <label htmlFor="region" className="block text-sm font-medium text-gray-300 mb-1">
+                  <label htmlFor="region" className="block text-sm font-medium text-gray-700 mb-1">
                     Регион
                   </label>
                   <select
@@ -773,7 +773,7 @@ export default function ClientDashboard() {
                     value={selectedRegion}
                     onChange={(e) => setSelectedRegion(e.target.value)}
                     disabled={!address}
-                    className={`w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 ${!address ? 'opacity-60 cursor-not-allowed' : ''}`}
+                    className={`w-full px-3 py-2 bg-gray-100 text-gray-900 border border-gray-300 rounded-md focus:outline-none focus:ring-brand-light focus:border-brand-light ${!address ? 'opacity-60 cursor-not-allowed' : ''}`}
                   >
                     <option value="">Выберите регион</option>
                     {regions.map((region) => (
@@ -790,9 +790,9 @@ export default function ClientDashboard() {
                     id="isDefault"
                     checked={isDefault}
                     onChange={(e) => setIsDefault(e.target.checked)}
-                    className="w-4 h-4 text-green-600 bg-gray-700 border-gray-600 rounded focus:ring-green-500"
+                    className="w-4 h-4 text-brand-light bg-gray-100 border-gray-300 rounded focus:ring-brand-light"
                   />
-                  <label htmlFor="isDefault" className="ml-2 text-sm text-gray-300">
+                  <label htmlFor="isDefault" className="ml-2 text-sm text-gray-700">
                     Установить как адрес по умолчанию
                   </label>
                 </div>
@@ -815,14 +815,14 @@ export default function ClientDashboard() {
                     setIsDefault(false)
                     setError(null)
                   }}
-                  className="px-6 py-2 border border-gray-600 rounded-md hover:bg-gray-700 text-white transition"
+                  className="px-6 py-2 border border-gray-300 rounded-md hover:bg-gray-100 text-gray-900 transition"
                 >
                   Отмена
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 disabled:opacity-50 transition"
+                  className="bg-brand-light text-gray-900 px-6 py-2 rounded-md hover:bg-brand-dark disabled:opacity-50 transition"
                 >
                   {saving ? 'Сохранение...' : 'Сохранить адрес'}
                 </button>
@@ -835,14 +835,14 @@ export default function ClientDashboard() {
       {/* Модальное окно для выбора адреса на карте */}
       {showMapPicker && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
-          <div className="bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-gray-50 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-bold text-white">Выберите адрес на карте</h2>
+                <h2 className="text-2xl font-bold text-gray-900">Выберите адрес на карте</h2>
                 <button
                   type="button"
                   onClick={() => setShowMapPicker(false)}
-                  className="text-gray-400 hover:text-white transition"
+                  className="text-gray-600 hover:text-gray-900 transition"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -890,7 +890,7 @@ export default function ClientDashboard() {
                 <button
                   type="button"
                   onClick={() => setShowMapPicker(false)}
-                  className="px-6 py-2 border border-gray-600 rounded-md hover:bg-gray-700 text-white transition"
+                  className="px-6 py-2 border border-gray-300 rounded-md hover:bg-gray-100 text-gray-900 transition"
                 >
                   Отмена
                 </button>
@@ -903,14 +903,14 @@ export default function ClientDashboard() {
       {/* Модальное окно для выбора заказа для звонка курьеру */}
       {showCallDriverModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-800 rounded-lg shadow-xl max-w-md w-full max-h-[90vh] flex flex-col">
-            <div className="p-6 border-b border-gray-700 flex-shrink-0">
+          <div className="bg-gray-50 rounded-lg shadow-xl max-w-md w-full max-h-[90vh] flex flex-col">
+            <div className="p-6 border-b border-gray-200 flex-shrink-0">
               <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold text-white">Выберите заказ</h2>
+                <h2 className="text-2xl font-bold text-gray-900">Выберите заказ</h2>
                 <button
                   type="button"
                   onClick={() => setShowCallDriverModal(false)}
-                  className="text-gray-400 hover:text-white transition"
+                  className="text-gray-600 hover:text-gray-900 transition"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -926,20 +926,20 @@ export default function ClientDashboard() {
                   .map((order) => (
                     <div
                       key={order.id}
-                      className="bg-gray-700 rounded-lg p-4 cursor-pointer hover:bg-gray-600 transition border border-gray-600"
+                      className="bg-gray-100 rounded-lg p-4 cursor-pointer hover:bg-gray-100 transition border border-gray-300"
                       onClick={() => order.driver?.phone && handleCallDriverFromModal(order.driver.phone)}
                     >
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
-                          <p className="font-medium text-white">Заказ №{order.order_number || order.id.slice(0, 8)}</p>
-                          <p className="text-sm text-gray-300 mt-1">
+                          <p className="font-medium text-gray-900">Заказ №{order.order_number || order.id.slice(0, 8)}</p>
+                          <p className="text-sm text-gray-700 mt-1">
                             а) {formatAddressForOrder(order.pickup_address)}
                           </p>
-                          <p className="text-sm text-gray-300 mt-1">
+                          <p className="text-sm text-gray-700 mt-1">
                             б) {formatAddressForOrder(order.delivery_address)}
                           </p>
                           {order.driver?.full_name && (
-                            <p className="text-xs text-gray-400 mt-1">Курьер: {order.driver.full_name}</p>
+                            <p className="text-xs text-gray-600 mt-1">Курьер: {order.driver.full_name}</p>
                           )}
                         </div>
                         {order.driver?.phone && (
@@ -947,7 +947,7 @@ export default function ClientDashboard() {
                             <a
                               href={`tel:${order.driver.phone}`}
                               onClick={(e) => e.stopPropagation()}
-                              className="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700 transition flex items-center gap-2"
+                              className="bg-brand-light text-gray-900 px-4 py-2 rounded text-sm hover:bg-brand-dark transition flex items-center gap-2"
                             >
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />

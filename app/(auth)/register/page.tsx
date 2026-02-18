@@ -118,12 +118,12 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="bg-gray-800 p-8 rounded-lg shadow-md">
-      <h1 className="text-2xl font-bold text-center mb-6">Регистрация в Dostavita</h1>
+    <div className="bg-white p-8 rounded-lg shadow-md border border-gray-200">
+      <h1 className="text-5xl font-bold text-center mb-6 text-brand-light" style={{ fontFamily: 'var(--font-amatic-sc), cursive' }}>Регистрация в Просто!</h1>
       
       <form onSubmit={handleRegister} className="space-y-4">
         <div>
-          <label htmlFor="fullName" className="block text-sm font-medium text-gray-300">
+          <label htmlFor="fullName" className="block text-sm font-medium text-gray-900">
             ФИО
           </label>
           <input
@@ -132,12 +132,12 @@ export default function RegisterPage() {
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
             required
-            className="mt-1 block w-full px-3 py-2 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
+            className="mt-1 block w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-light focus:border-brand-light"
           />
         </div>
 
         <div>
-          <label htmlFor="phone" className="block text-sm font-medium text-gray-300">
+          <label htmlFor="phone" className="block text-sm font-medium text-gray-900">
             Телефон
           </label>
           <input
@@ -146,12 +146,12 @@ export default function RegisterPage() {
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             required
-            className="mt-1 block w-full px-3 py-2 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
+            className="mt-1 block w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-light focus:border-brand-light"
           />
         </div>
 
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-300">
+          <label htmlFor="email" className="block text-sm font-medium text-gray-900">
             Email
           </label>
           <input
@@ -160,12 +160,12 @@ export default function RegisterPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="mt-1 block w-full px-3 py-2 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
+            className="mt-1 block w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-light focus:border-brand-light"
           />
         </div>
 
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-300">
+          <label htmlFor="password" className="block text-sm font-medium text-gray-900">
             Пароль
           </label>
           <input
@@ -175,19 +175,19 @@ export default function RegisterPage() {
             onChange={(e) => setPassword(e.target.value)}
             required
             minLength={6}
-            className="mt-1 block w-full px-3 py-2 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
+            className="mt-1 block w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-light focus:border-brand-light"
           />
         </div>
 
         <div>
-          <label htmlFor="role" className="block text-sm font-medium text-gray-300">
+          <label htmlFor="role" className="block text-sm font-medium text-gray-900">
             Роль
           </label>
           <select
             id="role"
             value={role}
             onChange={(e) => setRole(e.target.value as 'client' | 'customer' | 'driver')}
-            className="mt-1 block w-full px-3 py-2 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
+            className="mt-1 block w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-light focus:border-brand-light"
           >
             <option value="client">Клиент (может быть отправителем или получателем)</option>
             <option value="customer">Организация (бары, рестораны, магазины)</option>
@@ -196,20 +196,20 @@ export default function RegisterPage() {
         </div>
 
         {error && (
-          <div className="text-red-600 text-sm">{error}</div>
+          <div className="text-red-600 text-sm bg-red-50 p-3 rounded border border-red-200">{error}</div>
         )}
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
+          className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-gray-900 bg-brand-light hover:bg-brand-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-light disabled:opacity-50"
         >
           {loading ? 'Регистрация...' : 'Зарегистрироваться'}
         </button>
       </form>
 
       <div className="mt-4 text-center">
-        <a href="/login" className="text-sm text-green-500 hover:text-green-500">
+        <a href="/login" className="text-sm text-brand-light hover:text-brand-dark">
           Уже есть аккаунт? Войти
         </a>
       </div>

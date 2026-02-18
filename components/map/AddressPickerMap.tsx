@@ -97,8 +97,8 @@ export function AddressPickerMap({
   }, [selectedCoordinates])
 
   return (
-    <div style={{ height, width: '100%' }} className="rounded-lg overflow-hidden border border-gray-600">
-      <div className="bg-gray-800 p-2 text-sm text-gray-300 text-center border-b border-gray-700">
+    <div style={{ height, width: '100%' }} className="rounded-lg overflow-hidden border border-gray-300">
+      <div className="bg-gray-50 p-2 text-sm text-gray-700 text-center border-b border-gray-200">
         {label}
       </div>
       <MapContainer
@@ -164,7 +164,7 @@ export function AddressPickerMap({
         )}
       </MapContainer>
       {selectedCoordinates && address && (
-        <div className="bg-gray-700 p-2 text-xs text-gray-300 border-t border-gray-600">
+        <div className="bg-gray-100 p-2 text-xs text-gray-700 border-t border-gray-300">
           <strong>Адрес:</strong> {address}
         </div>
       )}

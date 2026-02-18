@@ -41,21 +41,21 @@ export default function DebugAuthPage() {
       <div className="space-y-4">
         <div>
           <h2 className="font-semibold">Session:</h2>
-          <pre className="bg-gray-700 p-4 rounded overflow-auto">
+          <pre className="bg-gray-100 p-4 rounded overflow-auto">
             {JSON.stringify(session, null, 2)}
           </pre>
         </div>
         
         <div>
           <h2 className="font-semibold">User:</h2>
-          <pre className="bg-gray-700 p-4 rounded overflow-auto">
+          <pre className="bg-gray-100 p-4 rounded overflow-auto">
             {JSON.stringify(user, null, 2)}
           </pre>
         </div>
         
         <div>
           <h2 className="font-semibold">Cookies:</h2>
-          <pre className="bg-gray-700 p-4 rounded overflow-auto">
+          <pre className="bg-gray-100 p-4 rounded overflow-auto">
             {typeof document !== 'undefined' ? document.cookie : 'N/A'}
           </pre>
         </div>

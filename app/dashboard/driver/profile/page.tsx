@@ -203,9 +203,9 @@ export default function DriverProfilePage() {
   return (
     <div className="max-w-2xl mx-auto pb-20">
       <BackButton />
-      <h1 className="text-3xl font-bold mb-6 text-white">Профиль водителя</h1>
+      <h1 className="text-3xl font-bold mb-6 text-gray-900">Профиль водителя</h1>
 
-      <form onSubmit={handleSubmit} className="bg-gray-800 rounded-lg shadow p-6 space-y-4">
+      <form onSubmit={handleSubmit} className="bg-gray-50 rounded-lg shadow p-6 space-y-4">
         {/* Аватар */}
         <div className="flex flex-col items-center mb-6">
           <div className="relative">
@@ -213,12 +213,12 @@ export default function DriverProfilePage() {
               <img
                 src={avatarUrl}
                 alt="Аватар"
-                className="w-24 h-24 rounded-full object-cover border-2 border-gray-600"
+                className="w-24 h-24 rounded-full object-cover border-2 border-gray-300"
               />
             ) : (
-              <div className="w-24 h-24 rounded-full bg-gray-700 border-2 border-gray-600 flex items-center justify-center">
+              <div className="w-24 h-24 rounded-full bg-gray-100 border-2 border-gray-300 flex items-center justify-center">
                 <svg
-                  className="w-12 h-12 text-gray-400"
+                  className="w-12 h-12 text-gray-600"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -232,7 +232,7 @@ export default function DriverProfilePage() {
                 </svg>
               </div>
             )}
-            <label className="absolute bottom-0 right-0 bg-green-600 text-white rounded-full p-2 cursor-pointer hover:bg-green-700 transition">
+            <label className="absolute bottom-0 right-0 bg-brand-light text-gray-900 rounded-full p-2 cursor-pointer hover:bg-brand-dark transition">
               <svg
                 className="w-4 h-4"
                 fill="none"
@@ -256,27 +256,27 @@ export default function DriverProfilePage() {
             </label>
           </div>
           {uploadingAvatar && (
-            <p className="text-sm text-gray-400 mt-2">Загрузка аватара...</p>
+            <p className="text-sm text-gray-600 mt-2">Загрузка аватара...</p>
           )}
         </div>
 
         {/* ФИО */}
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             ФИО
           </label>
           <input
             type="text"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-900"
             placeholder="Иванов Иван Иванович"
           />
         </div>
 
         {/* Телефон */}
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             Телефон *
           </label>
           <input
@@ -284,7 +284,7 @@ export default function DriverProfilePage() {
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             required
-            className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-900"
             placeholder="+375 (XX) XXX-XX-XX"
           />
         </div>
@@ -292,13 +292,13 @@ export default function DriverProfilePage() {
         {/* Информация об организации */}
         {organization && (
           <div className="bg-green-900/30 border border-green-500/50 rounded-lg p-4">
-            <h3 className="text-sm font-semibold text-green-400 mb-2">Организация</h3>
-            <p className="text-white font-medium">{organization.organization_name || 'Организация'}</p>
+            <h3 className="text-sm font-semibold text-brand-light mb-2">Организация</h3>
+            <p className="text-gray-900 font-medium">{organization.organization_name || 'Организация'}</p>
             {organization.organization_email && (
-              <p className="text-gray-300 text-sm mt-1">Email: {organization.organization_email}</p>
+              <p className="text-gray-700 text-sm mt-1">Email: {organization.organization_email}</p>
             )}
             {organization.organization_phone && (
-              <p className="text-gray-300 text-sm mt-1">Телефон: {organization.organization_phone}</p>
+              <p className="text-gray-700 text-sm mt-1">Телефон: {organization.organization_phone}</p>
             )}
           </div>
         )}
@@ -313,14 +313,14 @@ export default function DriverProfilePage() {
 
         {/* Тип транспорта */}
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             Тип транспорта *
           </label>
           <select
             value={vehicleType}
             onChange={(e) => setVehicleType(e.target.value)}
             required
-            className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-900"
           >
             <option value="">Выберите тип</option>
             <option value="car">Легковой автомобиль</option>
@@ -333,27 +333,27 @@ export default function DriverProfilePage() {
         {(vehicleType === 'car' || vehicleType === 'motorcycle') && (
           <>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 Марка транспорта
               </label>
               <input
                 type="text"
                 value={vehicleBrand}
                 onChange={(e) => setVehicleBrand(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-900"
                 placeholder="Toyota, BMW, Honda и т.д."
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 Модель транспорта
               </label>
               <input
                 type="text"
                 value={vehicleModel}
                 onChange={(e) => setVehicleModel(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-900"
                 placeholder="Camry, X5, CBR600 и т.д."
               />
             </div>
@@ -361,20 +361,20 @@ export default function DriverProfilePage() {
         )}
 
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             Номер транспорта
           </label>
           <input
             type="text"
             value={vehicleNumber}
             onChange={(e) => setVehicleNumber(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-900"
             placeholder="1234 AB-7"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             Номер водительского удостоверения *
           </label>
           <input
@@ -382,7 +382,7 @@ export default function DriverProfilePage() {
             value={licenseNumber}
             onChange={(e) => setLicenseNumber(e.target.value)}
             required
-            className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-900"
             placeholder="AB1234567"
           />
         </div>
@@ -395,14 +395,14 @@ export default function DriverProfilePage() {
           <button
             type="submit"
             disabled={saving}
-            className="flex-1 bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 disabled:opacity-50"
+            className="flex-1 bg-brand-light text-gray-900 px-6 py-2 rounded-md hover:bg-brand-dark disabled:opacity-50"
           >
             {saving ? 'Сохранение...' : 'Сохранить'}
           </button>
           <button
             type="button"
             onClick={() => router.back()}
-            className="px-6 py-2 border border-gray-600 rounded-md hover:bg-gray-900"
+            className="px-6 py-2 border border-gray-300 rounded-md hover:bg-white"
           >
             Отмена
           </button>
@@ -411,11 +411,11 @@ export default function DriverProfilePage() {
 
       {/* Запросы на присоединение к организации */}
       {requests && requests.length > 0 && (
-        <div className="bg-gray-800 rounded-lg shadow p-6 mt-6">
-          <h2 className="text-xl font-semibold mb-4 text-white">
+        <div className="bg-gray-50 rounded-lg shadow p-6 mt-6">
+          <h2 className="text-xl font-semibold mb-4 text-gray-900">
             Запросы на присоединение к организации
             {pendingRequestsCount > 0 && (
-              <span className="ml-2 bg-red-500 text-white text-xs font-bold rounded-full px-2 py-1">
+              <span className="ml-2 bg-red-500 text-gray-900 text-xs font-bold rounded-full px-2 py-1">
                 {pendingRequestsCount}
               </span>
             )}
@@ -429,17 +429,17 @@ export default function DriverProfilePage() {
                     ? 'border-yellow-500/50 bg-yellow-900/20'
                     : request.status === 'accepted'
                     ? 'border-green-500/50 bg-green-900/20'
-                    : 'border-gray-700 bg-gray-700'
+                    : 'border-gray-200 bg-gray-100'
                 }`}
               >
                 <div className="flex justify-between items-start mb-2">
                   <div className="flex-1">
-                    <p className="font-medium text-white">
+                    <p className="font-medium text-gray-900">
                       {request.organization_name || 'Организация'}
                     </p>
-                    <p className="text-sm text-gray-400">{request.organization_email}</p>
+                    <p className="text-sm text-gray-600">{request.organization_email}</p>
                     {request.message && (
-                      <p className="text-sm text-gray-300 mt-2">{request.message}</p>
+                      <p className="text-sm text-gray-700 mt-2">{request.message}</p>
                     )}
                     <p className="text-xs text-gray-500 mt-2">
                       Получен: {new Date(request.created_at).toLocaleString('ru-RU')}
@@ -448,7 +448,7 @@ export default function DriverProfilePage() {
                       <p className="text-xs text-yellow-400 mt-1">Ожидает вашего ответа</p>
                     )}
                     {request.status === 'accepted' && (
-                      <p className="text-xs text-green-400 mt-1">Принят</p>
+                      <p className="text-xs text-brand-light mt-1">Принят</p>
                     )}
                     {request.status === 'rejected' && (
                       <p className="text-xs text-red-400 mt-1">Отклонен</p>
@@ -459,14 +459,14 @@ export default function DriverProfilePage() {
                       <button
                         onClick={() => handleRespondToRequest(request.id, 'accepted')}
                         disabled={responding === request.id}
-                        className="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700 disabled:opacity-50 transition"
+                        className="bg-brand-light text-gray-900 px-4 py-2 rounded text-sm hover:bg-brand-dark disabled:opacity-50 transition"
                       >
                         {responding === request.id ? 'Обработка...' : 'Принять'}
                       </button>
                       <button
                         onClick={() => handleRespondToRequest(request.id, 'rejected')}
                         disabled={responding === request.id}
-                        className="bg-red-600 text-white px-4 py-2 rounded text-sm hover:bg-red-700 disabled:opacity-50 transition"
+                        className="bg-red-600 text-gray-900 px-4 py-2 rounded text-sm hover:bg-red-700 disabled:opacity-50 transition"
                       >
                         {responding === request.id ? 'Обработка...' : 'Отклонить'}
                       </button>
@@ -480,8 +480,8 @@ export default function DriverProfilePage() {
       )}
 
       {requests && requests.length === 0 && !organization && (
-        <div className="bg-gray-800 rounded-lg shadow p-6 mt-6">
-          <p className="text-gray-400 text-center">
+        <div className="bg-gray-50 rounded-lg shadow p-6 mt-6">
+          <p className="text-gray-600 text-center">
             У вас пока нет запросов от организаций
           </p>
         </div>

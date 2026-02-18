@@ -330,13 +330,13 @@ export function OrderChat({ orderId, currentUserId, onClose }: OrderChatProps) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div className="bg-gray-800 rounded-lg shadow-xl max-w-md w-full max-h-[80vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+      <div className="bg-gray-50 rounded-lg shadow-xl max-w-md w-full max-h-[80vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
         {/* Заголовок */}
-        <div className="p-4 border-b border-gray-700 flex justify-between items-center flex-shrink-0">
-          <h3 className="text-xl font-semibold text-white">Чат по заказу</h3>
+        <div className="p-4 border-b border-gray-200 flex justify-between items-center flex-shrink-0">
+          <h3 className="text-xl font-semibold text-gray-900">Чат по заказу</h3>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-white transition"
+            className="text-gray-600 hover:text-gray-900 transition"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -347,9 +347,9 @@ export function OrderChat({ orderId, currentUserId, onClose }: OrderChatProps) {
         {/* Сообщения */}
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
           {loading ? (
-            <div className="text-center text-gray-400">Загрузка сообщений...</div>
+            <div className="text-center text-gray-600">Загрузка сообщений...</div>
           ) : messages.length === 0 ? (
-            <div className="text-center text-gray-400">Пока нет сообщений</div>
+            <div className="text-center text-gray-600">Пока нет сообщений</div>
           ) : (
             messages.map((msg) => {
               const isOwn = msg.sender_id === currentUserId
@@ -358,14 +358,14 @@ export function OrderChat({ orderId, currentUserId, onClose }: OrderChatProps) {
                   key={msg.id}
                   className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
                 >
-                  <div className={`max-w-[80%] ${isOwn ? 'bg-blue-600' : 'bg-gray-700'} rounded-lg p-3`}>
+                  <div className={`max-w-[80%] ${isOwn ? 'bg-blue-600' : 'bg-gray-100'} rounded-lg p-3`}>
                     {!isOwn && (
-                      <p className="text-xs text-gray-300 mb-1">
+                      <p className="text-xs text-gray-700 mb-1">
                         {senderNames[msg.sender_id] || 'Неизвестный'}
                       </p>
                     )}
-                    <p className="text-white text-sm whitespace-pre-wrap break-words">{msg.message}</p>
-                    <p className="text-xs text-gray-300 mt-1">
+                    <p className="text-gray-900 text-sm whitespace-pre-wrap break-words">{msg.message}</p>
+                    <p className="text-xs text-gray-700 mt-1">
                       {new Date(msg.created_at).toLocaleTimeString('ru-RU', {
                         hour: '2-digit',
                         minute: '2-digit'
@@ -380,21 +380,21 @@ export function OrderChat({ orderId, currentUserId, onClose }: OrderChatProps) {
         </div>
 
         {/* Поле ввода */}
-        <div className="p-4 border-t border-gray-700 flex-shrink-0">
+        <div className="p-4 border-t border-gray-200 flex-shrink-0">
           <div className="flex gap-2">
             <textarea
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Введите сообщение..."
-              className="flex-1 bg-gray-700 text-white rounded-lg px-4 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="flex-1 bg-gray-100 text-gray-900 rounded-lg px-4 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
               rows={2}
               disabled={sending}
             />
             <button
               onClick={handleSend}
               disabled={!newMessage.trim() || sending}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-blue-600 hover:bg-blue-700 text-gray-900 px-6 py-2 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {sending ? '...' : 'Отправить'}
             </button>

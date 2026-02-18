@@ -196,7 +196,7 @@ export default function AcceptOrderPage() {
   }
 
   if (loading) {
-    return <div className="text-center py-8 text-white">Загрузка...</div>
+    return <div className="text-center py-8 text-gray-900">Загрузка...</div>
   }
 
   if (!order) {
@@ -206,23 +206,23 @@ export default function AcceptOrderPage() {
   return (
     <div className="max-w-2xl mx-auto">
       <BackButton />
-      <h1 className="text-3xl font-bold mb-6 text-white">Принять заказ</h1>
+      <h1 className="text-3xl font-bold mb-6 text-gray-900">Принять заказ</h1>
 
-      <div className="bg-gray-800 rounded-lg shadow p-6 space-y-4">
+      <div className="bg-gray-50 rounded-lg shadow p-6 space-y-4">
         <div>
-          <h2 className="font-semibold mb-2 text-white">Детали заказа</h2>
-          <p className="text-white"><strong className="text-white">Откуда:</strong> {formatAddressForOrder(order.pickup_address)}</p>
-          <p className="text-white"><strong className="text-white">Куда:</strong> {formatAddressForOrder(order.delivery_address)}</p>
-          <p className="text-white"><strong className="text-white">Тип груза:</strong> {
+          <h2 className="font-semibold mb-2 text-gray-900">Детали заказа</h2>
+          <p className="text-gray-900"><strong className="text-gray-900">Откуда:</strong> {formatAddressForOrder(order.pickup_address)}</p>
+          <p className="text-gray-900"><strong className="text-gray-900">Куда:</strong> {formatAddressForOrder(order.delivery_address)}</p>
+          <p className="text-gray-900"><strong className="text-gray-900">Тип груза:</strong> {
             order.item_type === 'documents' ? 'Документы' :
             order.item_type === 'parcel' ? 'Посылка' :
             order.item_type === 'flowers' ? 'Цветы' :
             order.item_type === 'food' ? 'Еда' : 'Не указан'
           }</p>
           {order.description && (
-            <p className="text-white"><strong className="text-white">Описание:</strong> {order.description}</p>
+            <p className="text-gray-900"><strong className="text-gray-900">Описание:</strong> {order.description}</p>
           )}
-          <p className="text-xl font-bold mt-4 text-white">Стоимость: {order.final_price} BYN</p>
+          <p className="text-xl font-bold mt-4 text-gray-900">Стоимость: {order.final_price} BYN</p>
         </div>
 
         {!driver && (
@@ -232,7 +232,7 @@ export default function AcceptOrderPage() {
             </p>
             <a
               href="/dashboard/driver/profile"
-              className="text-green-500 hover:text-green-600 underline"
+              className="text-brand-light hover:text-brand-light underline"
             >
               Создать профиль водителя
             </a>
@@ -247,7 +247,7 @@ export default function AcceptOrderPage() {
           <button
             onClick={handleAccept}
             disabled={accepting || !driver}
-            className="flex-1 bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 disabled:opacity-50"
+            className="flex-1 bg-brand-light text-gray-900 px-6 py-2 rounded-md hover:bg-brand-dark disabled:opacity-50"
           >
             {accepting ? 'Принятие...' : 'Принять заказ'}
           </button>
@@ -270,7 +270,7 @@ export default function AcceptOrderPage() {
               }
             }}
             disabled={accepting || !driver}
-            className="flex-1 bg-red-600 text-white px-6 py-2 rounded-md hover:bg-red-700 disabled:opacity-50"
+            className="flex-1 bg-red-600 text-gray-900 px-6 py-2 rounded-md hover:bg-red-700 disabled:opacity-50"
           >
             Отказаться
           </button>

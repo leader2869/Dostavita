@@ -77,11 +77,11 @@ export default function DriverMyOrdersPage() {
       case 'courier_delivering':
         return 'text-purple-400 bg-purple-400/20 border-purple-400/50'
       case 'completed':
-        return 'text-green-400 bg-green-400/20 border-green-400/50'
+        return 'text-brand-light bg-brand-light/20 border-green-400/50'
       case 'cancelled':
         return 'text-red-400 bg-red-400/20 border-red-400/50'
       default:
-        return 'text-gray-400 bg-gray-400/20 border-gray-400/50'
+        return 'text-gray-600 bg-gray-400/20 border-gray-400/50'
     }
   }
 
@@ -105,7 +105,7 @@ export default function DriverMyOrdersPage() {
     return (
       <div
         key={order.id}
-        className="bg-gray-800 rounded-lg shadow p-6 border border-gray-700 hover:border-green-500 transition"
+        className="bg-gray-50 rounded-lg shadow p-6 border border-gray-200 hover:border-green-500 transition"
       >
         <div
           className="cursor-pointer"
@@ -114,7 +114,7 @@ export default function DriverMyOrdersPage() {
           <div className="flex justify-between items-start mb-4">
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-2">
-                <h3 className="text-lg font-semibold text-white">
+                <h3 className="text-lg font-semibold text-gray-900">
                   Заказ №{order.order_number || order.id.slice(0, 8)}
                 </h3>
                 <span
@@ -125,15 +125,15 @@ export default function DriverMyOrdersPage() {
                   {getStatusLabel(order.status)}
                 </span>
               </div>
-              <p className="text-sm text-gray-300 mb-1">
+              <p className="text-sm text-gray-700 mb-1">
                 <span className="font-medium">Откуда:</span> {formatAddressForOrder(order.pickup_address)}
               </p>
-              <p className="text-sm text-gray-300 mb-1">
+              <p className="text-sm text-gray-700 mb-1">
                 <span className="font-medium">Куда:</span> {formatAddressForOrder(order.delivery_address)}
               </p>
               {order.item_type && (
-                <p className="text-sm text-gray-400 mt-2">
-                  Тип груза: <span className="text-gray-300">
+                <p className="text-sm text-gray-600 mt-2">
+                  Тип груза: <span className="text-gray-700">
                     {order.item_type === 'documents' ? 'Документы' :
                      order.item_type === 'parcel' ? 'Посылка' :
                      order.item_type === 'flowers' ? 'Цветы' :
@@ -143,17 +143,17 @@ export default function DriverMyOrdersPage() {
                 </p>
               )}
               {order.description && (
-                <p className="text-sm text-gray-400 mt-1 italic">
+                <p className="text-sm text-gray-600 mt-1 italic">
                   {order.description}
                 </p>
               )}
               {order.ready_at && (() => {
                 const { formattedTime, timeStatus, statusType } = formatReadyTime(order.ready_at)
                 return (
-                  <p className="text-sm text-gray-400 mt-1">
-                    Заказ будет готов к выдаче: <span className="text-gray-300">{formattedTime}</span>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Заказ будет готов к выдаче: <span className="text-gray-700">{formattedTime}</span>
                     {timeStatus && (
-                      <span className={`ml-2 ${statusType === 'waiting' ? 'text-red-400 animate-blink' : statusType === 'upcoming' ? 'text-yellow-400 animate-blink' : 'text-gray-400'}`}>
+                      <span className={`ml-2 ${statusType === 'waiting' ? 'text-red-400 animate-blink' : statusType === 'upcoming' ? 'text-yellow-400 animate-blink' : 'text-gray-600'}`}>
                         ({timeStatus})
                       </span>
                     )}
@@ -162,7 +162,7 @@ export default function DriverMyOrdersPage() {
               })()}
             </div>
             <div className="text-right ml-4">
-              <p className="text-xl font-bold text-white mb-2">
+              <p className="text-xl font-bold text-gray-900 mb-2">
                 {order.final_price} BYN
               </p>
             </div>
@@ -179,9 +179,9 @@ export default function DriverMyOrdersPage() {
     return (
       <div className="pb-20">
         <BackButton />
-        <h1 className="text-3xl font-bold mb-6 text-white">Мои заказы</h1>
-        <div className="bg-gray-800 rounded-lg shadow p-6">
-          <p className="text-gray-400 text-center">Проверка аутентификации...</p>
+        <h1 className="text-3xl font-bold mb-6 text-gray-900">Мои заказы</h1>
+        <div className="bg-gray-50 rounded-lg shadow p-6">
+          <p className="text-gray-600 text-center">Проверка аутентификации...</p>
         </div>
       </div>
     )
@@ -194,18 +194,18 @@ export default function DriverMyOrdersPage() {
   return (
     <div className="pb-20">
       <BackButton />
-      <h1 className="text-3xl font-bold mb-6 text-white">Мои заказы</h1>
+      <h1 className="text-3xl font-bold mb-6 text-gray-900">Мои заказы</h1>
 
       {loading ? (
-        <div className="bg-gray-800 rounded-lg shadow p-6">
-          <p className="text-gray-400 text-center">Загрузка...</p>
+        <div className="bg-gray-50 rounded-lg shadow p-6">
+          <p className="text-gray-600 text-center">Загрузка...</p>
         </div>
       ) : (
         <div className="space-y-6">
           {/* Активные заказы */}
           {activeOrders.length > 0 && (
-            <div className="bg-gray-800 rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold text-white mb-4 pb-2 border-b border-gray-700">
+            <div className="bg-gray-50 rounded-lg shadow p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
                 Активные заказы ({activeOrders.length})
               </h2>
               <div className="space-y-4">
@@ -216,8 +216,8 @@ export default function DriverMyOrdersPage() {
 
           {/* История заказов */}
           {completedOrders.length > 0 && (
-            <div className="bg-gray-800 rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold text-white mb-4 pb-2 border-b border-gray-700">
+            <div className="bg-gray-50 rounded-lg shadow p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
                 История заказов ({completedOrders.length})
               </h2>
               <div className="space-y-4">
@@ -228,8 +228,8 @@ export default function DriverMyOrdersPage() {
 
           {/* Если нет заказов вообще */}
           {orders.length === 0 && (
-            <div className="bg-gray-800 rounded-lg shadow p-6">
-              <p className="text-gray-400 text-center">У вас пока нет заказов</p>
+            <div className="bg-gray-50 rounded-lg shadow p-6">
+              <p className="text-gray-600 text-center">У вас пока нет заказов</p>
             </div>
           )}
         </div>

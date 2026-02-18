@@ -468,7 +468,7 @@ export default function IconSelectorPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 p-8">
+    <div className="min-h-screen bg-white p-8">
       <div className="max-w-7xl mx-auto">
         <h1 className="text-3xl font-bold mb-6">Выбор иконки машинки</h1>
         
@@ -485,17 +485,17 @@ export default function IconSelectorPage() {
             <button
               key={icon.id}
               onClick={() => handleSelect(icon.id)}
-              className={`p-4 bg-gray-800 rounded-lg shadow hover:shadow-lg transition-all border-2 ${
+              className={`p-4 bg-gray-50 rounded-lg shadow hover:shadow-lg transition-all border-2 ${
                 selectedIcon === icon.id
                   ? 'border-green-500 bg-green-50'
-                  : 'border-gray-700 hover:border-gray-600'
+                  : 'border-gray-200 hover:border-gray-300'
               }`}
             >
               <div className="flex flex-col items-center justify-center space-y-2">
-                <div className={`${selectedIcon === icon.id ? 'text-green-500' : 'text-gray-300'}`}>
+                <div className={`${selectedIcon === icon.id ? 'text-brand-light' : 'text-gray-700'}`}>
                   {icon.svg}
                 </div>
-                <span className="text-xs text-center text-gray-300">
+                <span className="text-xs text-center text-gray-700">
                   #{icon.id}
                 </span>
               </div>
@@ -504,11 +504,11 @@ export default function IconSelectorPage() {
         </div>
 
         {selectedIcon && (
-          <div className="mt-8 p-6 bg-gray-800 rounded-lg shadow">
+          <div className="mt-8 p-6 bg-gray-50 rounded-lg shadow">
             <h2 className="text-xl font-semibold mb-4">
               Выбранная иконка: {carIcons.find(i => i.id === selectedIcon)?.name}
             </h2>
-            <div className="bg-gray-700 p-4 rounded">
+            <div className="bg-gray-100 p-4 rounded">
               <pre className="text-xs overflow-x-auto">
                 {JSON.stringify(carIcons.find(i => i.id === selectedIcon)?.svg, null, 2)}
               </pre>

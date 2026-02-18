@@ -85,7 +85,7 @@ export function DriverChatSection({ driverUserId, organizationId }: DriverChatSe
 
   return (
     <>
-      <div className="bg-gray-800 rounded-lg shadow p-6">
+      <div className="bg-gray-50 rounded-lg shadow p-6">
         {!organizationId && (
           <div className="mb-4 p-3 bg-yellow-900/30 border border-yellow-500/50 rounded text-yellow-200 text-sm">
             Вы не привязаны к организации. Чаты будут доступны после привязки к организации.
@@ -94,9 +94,9 @@ export function DriverChatSection({ driverUserId, organizationId }: DriverChatSe
         {organizationId && (
           <>
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold text-white">Чаты с организацией</h2>
+              <h2 className="text-xl font-semibold text-gray-900">Чаты с организацией</h2>
               {unreadCount > 0 && (
-                <span className="bg-red-500 text-white text-xs font-bold rounded-full px-2 py-1">
+                <span className="bg-red-500 text-gray-900 text-xs font-bold rounded-full px-2 py-1">
                   {unreadCount > 9 ? '9+' : unreadCount} непрочитанных
                 </span>
               )}
@@ -106,19 +106,19 @@ export function DriverChatSection({ driverUserId, organizationId }: DriverChatSe
               {/* Общий чат компании */}
               <button
                 onClick={() => setActiveChat('general')}
-                className="bg-gray-700 hover:bg-gray-600 rounded-lg p-4 transition text-left"
+                className="bg-gray-100 hover:bg-gray-100 rounded-lg p-4 transition text-left"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-6 h-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-white">Общий чат компании</h3>
-                    <p className="text-sm text-gray-400">Чат для всех водителей организации</p>
+                    <h3 className="text-lg font-semibold text-gray-900">Общий чат компании</h3>
+                    <p className="text-sm text-gray-600">Чат для всех водителей организации</p>
                   </div>
-                  <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </div>
@@ -127,19 +127,19 @@ export function DriverChatSection({ driverUserId, organizationId }: DriverChatSe
               {/* Личный чат с организацией */}
               <button
                 onClick={() => setActiveChat('personal')}
-                className="bg-gray-700 hover:bg-gray-600 rounded-lg p-4 transition text-left"
+                className="bg-gray-100 hover:bg-gray-100 rounded-lg p-4 transition text-left"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-6 h-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                     </svg>
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-white">Личный чат</h3>
-                    <p className="text-sm text-gray-400">Приватный чат с организацией</p>
+                    <h3 className="text-lg font-semibold text-gray-900">Личный чат</h3>
+                    <p className="text-sm text-gray-600">Приватный чат с организацией</p>
                   </div>
-                  <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </div>

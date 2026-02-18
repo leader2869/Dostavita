@@ -56,13 +56,13 @@ export function DriverBottomNavigation() {
   }, []) // Убрали supabase из зависимостей
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-gray-800 border-t border-gray-700 z-50">
+    <div className="fixed bottom-0 left-0 right-0 bg-gray-50 border-t border-gray-200 z-50">
       <div className="flex justify-around items-center h-16">
         <Link
           href="/dashboard/driver"
           className={`flex flex-col items-center justify-center flex-1 h-full relative ${
-            isActive('/dashboard/driver') ? 'text-green-400' : 'text-gray-400'
-          } hover:text-green-400 transition`}
+            isActive('/dashboard/driver') ? 'text-brand-light' : 'text-gray-600'
+          } hover:text-brand-light transition`}
         >
           <div className="relative">
             <svg
@@ -90,8 +90,8 @@ export function DriverBottomNavigation() {
         <Link
           href="/dashboard/driver/my-orders"
           className={`flex flex-col items-center justify-center flex-1 h-full ${
-            isActive('/dashboard/driver/my-orders') ? 'text-green-400' : 'text-gray-400'
-          } hover:text-green-400 transition`}
+            isActive('/dashboard/driver/my-orders') ? 'text-brand-light' : 'text-gray-600'
+          } hover:text-brand-light transition`}
         >
           <svg
             className="w-6 h-6 mb-1"
@@ -112,8 +112,8 @@ export function DriverBottomNavigation() {
         <Link
           href="/dashboard/driver/finance"
           className={`flex flex-col items-center justify-center flex-1 h-full ${
-            isActive('/dashboard/driver/finance') ? 'text-green-400' : 'text-gray-400'
-          } hover:text-green-400 transition`}
+            isActive('/dashboard/driver/finance') ? 'text-brand-light' : 'text-gray-600'
+          } hover:text-brand-light transition`}
         >
           <svg
             className="w-6 h-6 mb-1"
@@ -134,8 +134,8 @@ export function DriverBottomNavigation() {
         <Link
           href="/dashboard/driver/profile"
           className={`flex flex-col items-center justify-center flex-1 h-full relative ${
-            isActive('/dashboard/driver/profile') ? 'text-green-400' : 'text-gray-400'
-          } hover:text-green-400 transition`}
+            isActive('/dashboard/driver/profile') ? 'text-brand-light' : 'text-gray-600'
+          } hover:text-brand-light transition`}
         >
           <div className="relative">
             <svg
@@ -152,7 +152,7 @@ export function DriverBottomNavigation() {
               />
             </svg>
             {pendingRequestsCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+              <span className="absolute -top-1 -right-1 bg-red-500 text-gray-900 text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                 {pendingRequestsCount > 9 ? '9+' : pendingRequestsCount}
               </span>
             )}

@@ -179,14 +179,14 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
               checked={showCancelled}
               onChange={(e) => setShowCancelled(e.target.checked)}
               disabled={!cancelledOrders || cancelledOrders.length === 0}
-              className="w-4 h-4 text-green-600 bg-gray-700 border-gray-600 rounded focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-4 h-4 text-brand-light bg-gray-100 border-gray-300 rounded focus:ring-brand-light disabled:opacity-50 disabled:cursor-not-allowed"
             />
-            <span className={`text-sm ${cancelledOrders && cancelledOrders.length > 0 ? 'text-gray-300' : 'text-gray-500'}`}>
+            <span className={`text-sm ${cancelledOrders && cancelledOrders.length > 0 ? 'text-gray-700' : 'text-gray-500'}`}>
               Показать скрытые ({cancelledOrders?.length || 0})
             </span>
           </label>
         </div>
-        <p className="text-gray-400">Нет доступных заказов</p>
+        <p className="text-gray-600">Нет доступных заказов</p>
       </div>
     )
   }
@@ -195,30 +195,30 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
   const renderOrderCard = (order: Order, isHidden: boolean = false) => (
     <div
       key={order.id}
-      className={`border rounded-lg p-4 cursor-pointer hover:bg-gray-700 transition ${isHidden ? 'border-yellow-600 bg-yellow-900/20' : 'border-gray-700'}`}
+      className={`border rounded-lg p-4 cursor-pointer hover:bg-gray-100 transition ${isHidden ? 'border-yellow-600 bg-yellow-900/20' : 'border-gray-200'}`}
       onClick={() => router.push(`/dashboard/driver/accept-order/${order.id}`)}
     >
           <div className="flex justify-between items-start mb-3">
             <div className="flex-1">
               <div className="flex items-center gap-2">
-                <p className="font-medium text-white">Заказ №{order.order_number || order.id.slice(0, 8)}</p>
+                <p className="font-medium text-gray-900">Заказ №{order.order_number || order.id.slice(0, 8)}</p>
                 {isHidden && (
-                  <span className="text-xs bg-yellow-600 text-white px-2 py-1 rounded">
+                  <span className="text-xs bg-yellow-600 text-gray-900 px-2 py-1 rounded">
                     Скрыт
                   </span>
                 )}
               </div>
-              <p className="text-sm text-gray-300 mt-1">
+              <p className="text-sm text-gray-700 mt-1">
                 а) {formatAddressForOrder(order.pickup_address)}
               </p>
-              <p className="text-sm text-gray-300 mt-1">
+              <p className="text-sm text-gray-700 mt-1">
                 б) {formatAddressForOrder(order.delivery_address)}
               </p>
-              <p className="text-sm text-gray-400 mt-1">
-                Тип груза: <span className="text-gray-300">{getItemTypeLabel(order.item_type)}</span>
+              <p className="text-sm text-gray-600 mt-1">
+                Тип груза: <span className="text-gray-700">{getItemTypeLabel(order.item_type)}</span>
               </p>
-              <p className="text-sm text-gray-400 mt-1">
-                Создан: <span className="text-gray-300">
+              <p className="text-sm text-gray-600 mt-1">
+                Создан: <span className="text-gray-700">
                   {new Date(order.created_at).toLocaleString('ru-RU', {
                     day: '2-digit',
                     month: '2-digit',
@@ -236,17 +236,17 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
                 </span>
               </p>
               {order.description && (
-                <p className="text-sm text-gray-400 mt-2 italic">
+                <p className="text-sm text-gray-600 mt-2 italic">
                   {order.description}
                 </p>
               )}
               {order.ready_at && (() => {
                 const { formattedTime, timeStatus, statusType } = formatReadyTime(order.ready_at)
                 return (
-                  <p className="text-sm text-gray-400 mt-1">
-                    Заказ будет готов к выдаче: <span className="text-gray-300">{formattedTime}</span>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Заказ будет готов к выдаче: <span className="text-gray-700">{formattedTime}</span>
                     {timeStatus && (
-                      <span className={`ml-2 ${statusType === 'waiting' ? 'text-red-400 animate-blink' : statusType === 'upcoming' ? 'text-yellow-400 animate-blink' : 'text-gray-400'}`}>
+                      <span className={`ml-2 ${statusType === 'waiting' ? 'text-red-400 animate-blink' : statusType === 'upcoming' ? 'text-yellow-400 animate-blink' : 'text-gray-600'}`}>
                         ({timeStatus})
                       </span>
                     )}
@@ -254,14 +254,14 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
                 )
               })()}
             </div>
-            <p className="font-semibold text-white ml-4">{order.final_price} BYN</p>
+            <p className="font-semibold text-gray-900 ml-4">{order.final_price} BYN</p>
           </div>
           <div className="flex gap-2 mt-3">
             {isHidden ? (
               <a
                 href={`/dashboard/driver/accept-order/${order.id}`}
                 onClick={(e) => e.stopPropagation()}
-                className="flex-1 text-center bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700 transition"
+                className="flex-1 text-center bg-brand-light text-gray-900 px-4 py-2 rounded text-sm hover:bg-brand-dark transition"
               >
                 Принять заказ
               </a>
@@ -270,7 +270,7 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
                 <a
                   href={`/dashboard/driver/accept-order/${order.id}`}
                   onClick={(e) => e.stopPropagation()}
-                  className="flex-1 text-center bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700 transition"
+                  className="flex-1 text-center bg-brand-light text-gray-900 px-4 py-2 rounded text-sm hover:bg-brand-dark transition"
                 >
                   Принять заказ
                 </a>
@@ -279,7 +279,7 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
                     e.stopPropagation()
                     handleReject(order.id)
                   }}
-                  className="flex-1 bg-red-600 text-white px-4 py-2 rounded text-sm hover:bg-red-700 transition"
+                  className="flex-1 bg-red-600 text-gray-900 px-4 py-2 rounded text-sm hover:bg-red-700 transition"
                 >
                   Скрыть заказ
                 </button>
@@ -299,9 +299,9 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
               type="checkbox"
               checked={showCancelled}
               onChange={(e) => setShowCancelled(e.target.checked)}
-              className="w-4 h-4 text-green-600 bg-gray-700 border-gray-600 rounded focus:ring-green-500"
+              className="w-4 h-4 text-brand-light bg-gray-100 border-gray-300 rounded focus:ring-brand-light"
             />
-            <span className="text-sm text-gray-300">
+            <span className="text-sm text-gray-700">
               Показать скрытые ({cancelledOrders.length})
             </span>
           </label>
@@ -311,7 +311,7 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
       {/* Скрытые заказы - показываем СВЕРХУ (первыми) */}
       {showCancelled && uniqueHiddenOrders.length > 0 && (
         <div>
-          <h3 className="text-lg font-semibold text-white mb-4">Скрытые заказы</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Скрытые заказы</h3>
           <div className="space-y-4">
             {uniqueHiddenOrders.map((order) => renderOrderCard(order, true))}
           </div>
@@ -325,7 +325,7 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
             {orders.map((order) => renderOrderCard(order, false))}
           </div>
         ) : (
-          <p className="text-gray-400">Нет доступных заказов</p>
+          <p className="text-gray-600">Нет доступных заказов</p>
         )}
       </div>
     </div>
