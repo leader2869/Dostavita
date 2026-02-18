@@ -414,7 +414,7 @@ export default function ClientDashboard() {
         <div className="grid grid-cols-2 gap-4">
           <a
             href="/dashboard/client/create-order"
-            className="bg-brand-light text-gray-900 p-4 rounded-lg text-center hover:bg-brand-dark transition flex items-center justify-center"
+            className="bg-green-500 text-white p-4 rounded-lg text-center hover:bg-green-600 transition flex items-center justify-center"
           >
             <span className="leading-tight">
               Создать<br />заказ
@@ -422,7 +422,7 @@ export default function ClientDashboard() {
           </a>
           <button
             onClick={handleCallDriver}
-            className="bg-green-500 text-white p-4 rounded-lg text-center hover:bg-green-600 transition flex items-center justify-center"
+            className="bg-purple-300 text-gray-900 p-4 rounded-lg text-center hover:bg-purple-400 transition flex items-center justify-center"
           >
             <span className="leading-tight">
               Позвонить<br />курьеру
