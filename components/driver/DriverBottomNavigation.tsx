@@ -2,15 +2,18 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useAvailableOrdersCount } from '@/hooks/useAvailableOrdersCount'
 
 export function DriverBottomNavigation() {
   const pathname = usePathname()
+  const router = useRouter()
   const supabase = createClient()
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0)
   const [driverUserId, setDriverUserId] = useState<string | null>(null)
+  const [activeOrders, setActiveOrders] = useState<any[]>([])
+  const [showOrdersModal, setShowOrdersModal] = useState(false)
   const { count: availableOrdersCount } = useAvailableOrdersCount(driverUserId)
 
   const isActive = (path: string) => {
@@ -29,6 +32,18 @@ export function DriverBottomNavigation() {
         if (!user || !isMounted) return
 
         setDriverUserId(user.id)
+
+        // Загружаем активные заказы водителя
+        const { data: ordersData, error: ordersError } = await supabase
+          .from('orders')
+          .select('id, order_number, pickup_address, delivery_address, status, created_at')
+          .eq('executor_user_id', user.id)
+          .in('status', ['courier_accepted', 'courier_coming', 'courier_delivering'])
+          .order('created_at', { ascending: false })
+
+        if (isMounted && !ordersError && ordersData) {
+          setActiveOrders(ordersData || [])
+        }
 
         const { data: requestsData, error: requestsError } = await supabase
           .rpc('get_driver_requests', { driver_user_id: user.id })
@@ -55,15 +70,38 @@ export function DriverBottomNavigation() {
     }
   }, []) // Убрали supabase из зависимостей
 
+  const handleActiveOrderClick = () => {
+    if (activeOrders.length === 0) {
+      // Если нет активных заказов, переходим на страницу заказов
+      router.push('/dashboard/driver/my-orders')
+      return
+    }
+
+    if (activeOrders.length === 1) {
+      // Если заказ один, открываем его
+      router.push(`/dashboard/driver/orders/${activeOrders[0].id}`)
+    } else {
+      // Если заказов несколько, показываем список
+      setShowOrdersModal(true)
+    }
+  }
+
+  const formatAddressForCard = (address: string) => {
+    if (!address) return 'Адрес не указан'
+    const parts = address.split(',').slice(0, 2)
+    return parts.join(', ')
+  }
+
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-gray-50 border-t border-gray-200 z-50">
-      <div className="flex justify-around items-center h-16">
-        <Link
-          href="/dashboard/driver"
-          className={`flex flex-col items-center justify-center flex-1 h-full relative ${
-            isActive('/dashboard/driver') ? 'text-brand-light' : 'text-gray-600'
-          } hover:text-brand-light transition`}
-        >
+    <>
+      <div className="fixed bottom-0 left-0 right-0 bg-gray-50 border-t border-gray-200 z-50">
+        <div className="flex justify-around items-center h-16 relative">
+          <Link
+            href="/dashboard/driver"
+            className={`flex flex-col items-center justify-center flex-1 h-full relative ${
+              isActive('/dashboard/driver') ? 'text-brand-light' : 'text-gray-600'
+            } hover:text-brand-light transition`}
+          >
           <div className="relative">
             <svg
               className="w-6 h-6 mb-1"
@@ -159,8 +197,96 @@ export function DriverBottomNavigation() {
           </div>
           <span className="text-xs">Профиль</span>
         </Link>
+
+          {/* Центральная кнопка "П!" в круге */}
+          <button
+            onClick={handleActiveOrderClick}
+            className="absolute left-1/2 transform -translate-x-1/2 -top-6 w-14 h-14 rounded-full bg-brand-light text-gray-900 flex items-center justify-center shadow-lg hover:bg-brand-dark transition-all z-10"
+            style={{ fontFamily: 'var(--font-amatic-sc), cursive' }}
+          >
+            <span className="text-2xl font-bold">П!</span>
+            {activeOrders.length > 0 && (
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                {activeOrders.length > 9 ? '9+' : activeOrders.length}
+              </span>
+            )}
+          </button>
+        </div>
       </div>
-    </div>
+
+      {/* Модальное окно со списком активных заказов */}
+      {showOrdersModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] p-4" onClick={() => setShowOrdersModal(false)}>
+          <div className="bg-gray-50 rounded-lg shadow-xl max-w-md w-full max-h-[80vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+            <div className="p-4 border-b border-gray-200 flex justify-between items-center flex-shrink-0">
+              <h3 className="text-xl font-semibold text-gray-900">Активные заказы</h3>
+              <button
+                onClick={() => setShowOrdersModal(false)}
+                className="text-gray-600 hover:text-gray-900 transition"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="overflow-y-auto flex-1 p-4">
+              {activeOrders.length === 0 ? (
+                <div className="text-center text-gray-600 py-8">Нет активных заказов</div>
+              ) : (
+                <div className="space-y-3">
+                  {activeOrders.map((order) => {
+                    const getStatusLabel = (status: string) => {
+                      switch (status) {
+                        case 'courier_accepted':
+                          return 'Курьер принял заказ'
+                        case 'courier_coming':
+                          return 'Курьер едет к отправителю'
+                        case 'courier_delivering':
+                          return 'Курьер едет к получателю'
+                        default:
+                          return status
+                      }
+                    }
+
+                    return (
+                      <div
+                        key={order.id}
+                        className="bg-gray-100 rounded-lg p-4 cursor-pointer hover:bg-gray-200 transition border border-gray-300"
+                        onClick={() => {
+                          setShowOrdersModal(false)
+                          router.push(`/dashboard/driver/orders/${order.id}`)
+                        }}
+                      >
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <p className="font-medium text-gray-900">
+                              Заказ №{order.order_number || order.id.slice(0, 8)}
+                            </p>
+                            <p className="text-sm text-gray-700 mt-1">
+                              Откуда: {formatAddressForCard(order.pickup_address)}
+                            </p>
+                            <p className="text-sm text-gray-700 mt-1">
+                              Куда: {formatAddressForCard(order.delivery_address)}
+                            </p>
+                            <span className="inline-block mt-2 px-2 py-1 bg-blue-500/20 text-blue-600 text-xs rounded">
+                              {getStatusLabel(order.status)}
+                            </span>
+                          </div>
+                          <svg className="w-5 h-5 text-gray-600 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   )
 }
 

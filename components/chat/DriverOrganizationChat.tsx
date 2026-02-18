@@ -339,9 +339,10 @@ export function DriverOrganizationChat({
           }
         }
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Ошибка загрузки фото:', err)
-      alert('Не удалось загрузить фото')
+      const errorMessage = err?.message || err?.error?.message || 'Не удалось загрузить фото'
+      alert(`Ошибка загрузки фото: ${errorMessage}`)
     } finally {
       setUploadingPhoto(false)
       if (fileInputRef.current) {
