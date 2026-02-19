@@ -35,8 +35,8 @@ export function OrderStatusProgress({ status, variant = 'connected' }: OrderStat
   // Вариант 1: Соединенная линия с кружочками - единый сосуд
   if (variant === 'connected') {
     return (
-      <div className="w-full py-3 fixed top-16 left-0 right-0 bg-white z-30 border-b border-gray-200 px-4">
-        <div className="max-w-2xl mx-auto">
+      <div className="fixed top-16 left-0 right-0 bg-white/80 backdrop-blur-sm z-30">
+        <div className="max-w-2xl mx-auto px-4 py-3">
           <div className="relative">
             {/* Фоновая линия - широкая, проходит через все кружки */}
             <div className="absolute top-6 left-0 right-0 h-2.5 bg-gray-200 rounded-full"></div>
