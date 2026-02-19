@@ -92,7 +92,7 @@ export function PageTitle() {
   if (!pageTitle) return null
 
   return (
-    <span className="text-4xl font-bold text-brand-light ml-2" style={{ fontFamily: 'var(--font-amatic-sc), cursive' }}>
+    <span className="text-4xl font-bold text-brand-light ml-2 font-amatic-sc">
       {pageTitle}
     </span>
   )

@@ -1,5 +1,7 @@
 'use client'
 
+import { useState, useEffect } from 'react'
+import { createClient } from '@/lib/supabase/client'
 import { SignOutButton } from '@/components/auth/SignOutButton'
 import { ChatNotifications } from '@/components/notifications/ChatNotifications'
 import type { User } from '@/lib/types'
@@ -9,7 +11,67 @@ interface DashboardNavProps {
   userId: string
 }
 
-export function DashboardNav({ profile, userId }: DashboardNavProps) {
+export function DashboardNav({ profile: initialProfile, userId }: DashboardNavProps) {
+  const supabase = createClient()
+  const [profile, setProfile] = useState<User>(initialProfile)
+  const [avatarKey, setAvatarKey] = useState(Date.now())
+
+  // Загружаем актуальный профиль и слушаем изменения
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .single()
+
+        if (!error && data) {
+          // Обновляем ключ только если avatar_url действительно изменился
+          setProfile(prevProfile => {
+            if (prevProfile.avatar_url !== data.avatar_url) {
+              setAvatarKey(Date.now())
+            }
+            return data as User
+          })
+        }
+      } catch (err) {
+        console.error('Ошибка загрузки профиля:', err)
+      }
+    }
+
+    // Загружаем профиль сразу
+    loadProfile()
+
+    // Подписываемся на изменения профиля через Realtime
+    const channel = supabase
+      .channel(`profile_changes_${userId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'profiles',
+          filter: `id=eq.${userId}`,
+        },
+        (payload) => {
+          const updatedProfile = payload.new as User
+          // Обновляем профиль и ключ только если avatar_url изменился
+          setProfile(prevProfile => {
+            if (prevProfile.avatar_url !== updatedProfile.avatar_url) {
+              setAvatarKey(Date.now())
+            }
+            return updatedProfile
+          })
+        }
+      )
+      .subscribe()
+
+    return () => {
+      channel.unsubscribe()
+    }
+  }, [userId, supabase])
+
   return (
     <div className="flex items-center space-x-4">
       {/* Уведомления о сообщениях */}
@@ -18,9 +80,14 @@ export function DashboardNav({ profile, userId }: DashboardNavProps) {
       <div className="flex items-center space-x-3">
         {profile.avatar_url ? (
           <img
-            src={profile.avatar_url || ''}
+            key={avatarKey}
+            src={`${profile.avatar_url}?t=${avatarKey}`}
             alt="Аватар"
             className="w-8 h-8 rounded-full object-cover border border-gray-300"
+            onError={(e) => {
+              // Если изображение не загрузилось, скрываем его и показываем иконку
+              e.currentTarget.style.display = 'none'
+            }}
           />
         ) : (
           <div className="w-8 h-8 rounded-full bg-gray-200 border border-gray-300 flex items-center justify-center">

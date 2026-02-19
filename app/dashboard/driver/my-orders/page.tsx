@@ -199,7 +199,7 @@ export default function DriverMyOrdersPage() {
                 </span>
                 {isUnpaid && (
                   <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold border bg-red-200/50 text-red-700 border-red-300/50">
-                    Заказ не оплачен
+                    Не оплачен
                   </span>
                 )}
               </div>

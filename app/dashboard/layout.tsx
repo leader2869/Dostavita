@@ -20,21 +20,59 @@ export default async function DashboardLayout({
   console.log('========================================')
   
   let user, authError
-  try {
-    const result = await supabase.auth.getUser()
-    user = result.data.user
-    authError = result.error
-  } catch (err: any) {
-    console.error('❌ Dashboard Layout - Исключение при getUser():', err)
-    // Если это ошибка сети, пробуем получить сессию из cookies
-    if (err.message?.includes('fetch failed') || err.message?.includes('timeout')) {
-      console.log('⚠️ Dashboard Layout - Ошибка сети при подключении к Supabase')
-      console.log('Проверьте переменные окружения NEXT_PUBLIC_SUPABASE_URL и NEXT_PUBLIC_SUPABASE_ANON_KEY')
-      console.log('Текущий URL:', process.env.NEXT_PUBLIC_SUPABASE_URL)
+  const maxRetries = 3
+  let lastError: any = null
+  
+  // Пробуем подключиться с повторными попытками
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const result = await supabase.auth.getUser()
+      user = result.data.user
+      authError = result.error
+      
+      // Если получили пользователя или ошибка не связана с сетью, выходим из цикла
+      if (user || (authError && !authError.message?.includes('fetch failed') && !authError.message?.includes('timeout'))) {
+        break
+      }
+      
+      // Если это ошибка сети и не последняя попытка, ждем и пробуем снова
+      if (authError && (authError.message?.includes('fetch failed') || authError.message?.includes('timeout'))) {
+        lastError = authError
+        if (attempt < maxRetries) {
+          console.log(`⚠️ Dashboard Layout - Попытка ${attempt}/${maxRetries} не удалась, повтор через 1 секунду...`)
+          await new Promise(resolve => setTimeout(resolve, 1000))
+          continue
+        }
+      }
+    } catch (err: any) {
+      console.error(`❌ Dashboard Layout - Исключение при getUser() (попытка ${attempt}/${maxRetries}):`, err)
+      lastError = err
+      
+      // Если это ошибка сети и не последняя попытка, ждем и пробуем снова
+      if ((err.message?.includes('fetch failed') || err.message?.includes('timeout')) && attempt < maxRetries) {
+        console.log(`⚠️ Dashboard Layout - Ошибка сети, повтор через 1 секунду...`)
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        continue
+      }
+      
+      // Если это не ошибка сети или последняя попытка, выходим
+      if (!err.message?.includes('fetch failed') && !err.message?.includes('timeout')) {
+        throw err
+      }
+      
       authError = err
-    } else {
-      throw err
     }
+  }
+  
+  // Если все попытки не удались, используем последнюю ошибку
+  if (!user && lastError && !authError) {
+    authError = lastError
+  }
+  
+  if (authError && (authError.message?.includes('fetch failed') || authError.message?.includes('timeout'))) {
+    console.log('⚠️ Dashboard Layout - Ошибка сети при подключении к Supabase после всех попыток')
+    console.log('Проверьте переменные окружения NEXT_PUBLIC_SUPABASE_URL и NEXT_PUBLIC_SUPABASE_ANON_KEY')
+    console.log('Текущий URL:', process.env.NEXT_PUBLIC_SUPABASE_URL)
   }
 
   console.log('Dashboard Layout - Результат getUser():', { 
@@ -162,7 +200,7 @@ export default async function DashboardLayout({
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between h-16">
               <div className="flex items-center">
-                <h1 className="text-4xl font-bold text-brand-light" style={{ fontFamily: 'var(--font-amatic-sc), cursive' }}>Просто!</h1>
+                <h1 className="text-4xl font-bold text-brand-light font-amatic-sc">Просто!</h1>
                 <PageTitle />
               </div>
               <DashboardNav profile={profile as User} userId={user.id} />

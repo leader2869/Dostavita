@@ -224,7 +224,7 @@ export function AcceptOrderModal({ orderId, onClose, onSuccess }: AcceptOrderMod
       <div className="bg-gray-50 rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
         {/* Заголовок */}
         <div className="p-4 border-b border-gray-200 flex justify-between items-center">
-          <h3 className="text-xl font-semibold text-gray-900" style={{ fontFamily: 'var(--font-amatic-sc), cursive' }}>Просто!Новый заказ</h3>
+          <h3 className="text-xl font-bold text-gray-900 font-amatic-sc">Просто!Новый заказ</h3>
           <button
             onClick={onClose}
             className="text-gray-600 hover:text-gray-900 transition"

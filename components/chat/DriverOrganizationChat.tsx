@@ -55,6 +55,49 @@ export function DriverOrganizationChat({
     scrollToBottom()
   }, [messages])
 
+  // Функция загрузки сообщений
+  const loadMessages = async () => {
+    try {
+      let query = supabase
+        .from('driver_organization_messages')
+        .select('*')
+        .eq('organization_id', organizationId)
+
+      if (driverId) {
+        query = query.eq('driver_id', driverId)
+      } else {
+        query = query.is('driver_id', null)
+      }
+
+      query = query.order('created_at', { ascending: true })
+
+      const { data, error } = await query
+
+      if (error) throw error
+
+      setMessages(data || [])
+      
+      // Загружаем имена отправителей
+      const uniqueSenderIds = [...new Set((data || []).map(m => m.sender_id))]
+      if (uniqueSenderIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, full_name, email')
+          .in('id', uniqueSenderIds)
+
+        if (profiles) {
+          const names: Record<string, string> = {}
+          profiles.forEach(p => {
+            names[p.id] = p.full_name || p.email || 'Неизвестный'
+          })
+          setSenderNames(prev => ({ ...prev, ...names }))
+        }
+      }
+    } catch (err) {
+      console.error('Ошибка загрузки сообщений:', err)
+    }
+  }
+
   // Загружаем сообщения при монтировании
   useEffect(() => {
     let isMounted = true
@@ -136,33 +179,42 @@ export function DriverOrganizationChat({
                 return [...prev, newMessage]
               })
               
-              // Загружаем имя отправителя, если его еще нет
-              setSenderNames(prev => {
-                if (prev[newMessage.sender_id]) {
-                  return prev // Имя уже есть
+              // Если модальное окно открыто и сообщение от другого пользователя, отмечаем его как прочитанное
+              if (newMessage.sender_id !== currentUserId && newMessage.read_at === null) {
+                const { error } = await supabase
+                  .from('driver_organization_messages')
+                  .update({ read_at: new Date().toISOString() })
+                  .eq('id', newMessage.id)
+
+                if (!error && isMounted) {
+                  // Обновляем локальное состояние
+                  setMessages(prev => prev.map(m => 
+                    m.id === newMessage.id 
+                      ? { ...m, read_at: new Date().toISOString() }
+                      : m
+                  ))
+                  // Вызываем callback для обновления счетчика
+                  if (onMessagesRead) {
+                    onMessagesRead()
+                  }
                 }
-                
-                // Загружаем имя асинхронно
-                supabase
+              }
+              
+              // Загружаем имя отправителя, если его еще нет
+              if (!senderNames[newMessage.sender_id]) {
+                const { data: profile } = await supabase
                   .from('profiles')
                   .select('id, full_name, email')
                   .eq('id', newMessage.sender_id)
                   .single()
-                  .then(({ data: profile, error }) => {
-                    if (error) {
-                      console.error('Ошибка загрузки профиля:', error)
-                      return
-                    }
-                    if (profile && isMounted) {
-                      setSenderNames(current => ({
-                        ...current,
-                        [newMessage.sender_id]: profile.full_name || profile.email || 'Неизвестный'
-                      }))
-                    }
-                  })
-                
-                return prev
-              })
+
+                if (profile && isMounted) {
+                  setSenderNames(prev => ({
+                    ...prev,
+                    [newMessage.sender_id]: profile.full_name || profile.email || 'Неизвестный'
+                  }))
+                }
+              }
             }
           } else if (payload.eventType === 'UPDATE') {
             const updatedMessage = payload.new as Message
@@ -184,6 +236,11 @@ export function DriverOrganizationChat({
 
   // Отмечаем все непрочитанные сообщения как прочитанные при открытии модального окна
   useEffect(() => {
+    // Сбрасываем флаг при изменении чата (driverId или organizationId)
+    setHasMarkedAsRead(false)
+  }, [driverId, organizationId])
+
+  useEffect(() => {
     if (hasMarkedAsRead || loading || messages.length === 0) return
 
     const markMessagesAsRead = async () => {
@@ -195,6 +252,10 @@ export function DriverOrganizationChat({
 
         if (unreadMessages.length === 0) {
           setHasMarkedAsRead(true)
+          // Вызываем callback даже если нет непрочитанных сообщений
+          if (onMessagesRead) {
+            onMessagesRead()
+          }
           return
         }
 
@@ -216,8 +277,11 @@ export function DriverOrganizationChat({
           ))
           setHasMarkedAsRead(true)
           // Вызываем callback для обновления счетчика непрочитанных сообщений
+          // Вызываем несколько раз с задержками для надежности
           if (onMessagesRead) {
             onMessagesRead()
+            setTimeout(() => onMessagesRead(), 300)
+            setTimeout(() => onMessagesRead(), 1000)
           }
         }
       } catch (err) {
@@ -232,7 +296,31 @@ export function DriverOrganizationChat({
 
     return () => clearTimeout(timer)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [messages, currentUserId, loading, hasMarkedAsRead])
+  }, [messages, currentUserId, loading, hasMarkedAsRead, onMessagesRead])
+
+  // Автоматическое обновление сообщений каждые 3 секунды, пока модальное окно открыто
+  useEffect(() => {
+    // Загружаем сообщения сразу при открытии
+    loadMessages()
+
+    // Устанавливаем интервал для обновления каждые 3 секунды
+    const interval = setInterval(() => {
+      loadMessages()
+    }, 3000)
+
+    // Очищаем интервал при размонтировании компонента
+    return () => {
+      clearInterval(interval)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [organizationId, driverId])
+
+  // Сбрасываем флаг при закрытии модального окна или изменении чата
+  useEffect(() => {
+    return () => {
+      setHasMarkedAsRead(false)
+    }
+  }, [driverId, organizationId])
 
   const handleSend = async () => {
     if ((!newMessage.trim() && !uploadingPhoto) || sending) return

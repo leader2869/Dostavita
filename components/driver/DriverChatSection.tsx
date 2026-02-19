@@ -12,12 +12,14 @@ interface DriverChatSectionProps {
 export function DriverChatSection({ driverUserId, organizationId }: DriverChatSectionProps) {
   const supabase = createClient()
   const [activeChat, setActiveChat] = useState<'general' | 'personal' | null>(null)
-  const [unreadCount, setUnreadCount] = useState(0)
+  const [generalUnreadCount, setGeneralUnreadCount] = useState(0)
+  const [personalUnreadCount, setPersonalUnreadCount] = useState(0)
 
   // Функция для загрузки счетчика непрочитанных сообщений
   const loadUnreadCount = useCallback(async () => {
     if (!organizationId) {
-      setUnreadCount(0)
+      setGeneralUnreadCount(0)
+      setPersonalUnreadCount(0)
       return
     }
 
@@ -33,6 +35,8 @@ export function DriverChatSection({ driverUserId, organizationId }: DriverChatSe
 
       if (generalError) {
         console.error('Ошибка подсчета непрочитанных в общем чате:', generalError)
+      } else {
+        setGeneralUnreadCount(generalUnread || 0)
       }
 
       // Подсчитываем непрочитанные сообщения в личном чате
@@ -46,11 +50,9 @@ export function DriverChatSection({ driverUserId, organizationId }: DriverChatSe
 
       if (personalError) {
         console.error('Ошибка подсчета непрочитанных в личном чате:', personalError)
+      } else {
+        setPersonalUnreadCount(personalUnread || 0)
       }
-
-      const total = (generalUnread || 0) + (personalUnread || 0)
-      console.log('Непрочитанные сообщения - общий:', generalUnread, 'личный:', personalUnread, 'всего:', total)
-      setUnreadCount(total)
     } catch (err) {
       console.error('Ошибка подсчета непрочитанных сообщений:', err)
     }
@@ -58,7 +60,8 @@ export function DriverChatSection({ driverUserId, organizationId }: DriverChatSe
 
   useEffect(() => {
     if (!organizationId) {
-      setUnreadCount(0)
+      setGeneralUnreadCount(0)
+      setPersonalUnreadCount(0)
       return
     }
 
@@ -112,26 +115,26 @@ export function DriverChatSection({ driverUserId, organizationId }: DriverChatSe
         )}
         {organizationId && (
           <>
-            <div className="flex justify-between items-center mb-4">
+            <div className="mb-4">
               <h2 className="text-xl font-semibold text-gray-900">Чаты с организацией</h2>
-              {unreadCount > 0 && (
-                <span className="bg-red-500 text-gray-900 text-xs font-bold rounded-full px-2 py-1">
-                  {unreadCount > 9 ? '9+' : unreadCount} непрочитанных
-                </span>
-              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Общий чат компании */}
               <button
                 onClick={() => setActiveChat('general')}
-                className="bg-gray-100 hover:bg-gray-100 rounded-lg p-4 transition text-left"
+                className="bg-gray-100 hover:bg-gray-100 rounded-lg p-4 transition text-left relative"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-brand-light flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 rounded-full bg-brand-light flex items-center justify-center flex-shrink-0 relative">
                     <svg className="w-6 h-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
+                    {generalUnreadCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                        {generalUnreadCount > 9 ? '9+' : generalUnreadCount}
+                      </span>
+                    )}
                   </div>
                   <div className="flex-1">
                     <h3 className="text-lg font-semibold text-gray-900">Общий чат компании</h3>
@@ -146,13 +149,18 @@ export function DriverChatSection({ driverUserId, organizationId }: DriverChatSe
               {/* Личный чат с организацией */}
               <button
                 onClick={() => setActiveChat('personal')}
-                className="bg-gray-100 hover:bg-gray-100 rounded-lg p-4 transition text-left"
+                className="bg-gray-100 hover:bg-gray-100 rounded-lg p-4 transition text-left relative"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0 relative">
                     <svg className="w-6 h-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                     </svg>
+                    {personalUnreadCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                        {personalUnreadCount > 9 ? '9+' : personalUnreadCount}
+                      </span>
+                    )}
                   </div>
                   <div className="flex-1">
                     <h3 className="text-lg font-semibold text-gray-900">Личный чат</h3>
@@ -198,9 +206,9 @@ export function DriverChatSection({ driverUserId, organizationId }: DriverChatSe
                     .neq('sender_id', driverUserId)
                     .is('read_at', null)
 
-                  const total = (generalUnread || 0) + (personalUnread || 0)
-                  setUnreadCount(total)
-                  console.log('Счетчик обновлен после закрытия чата:', total)
+                  setGeneralUnreadCount(generalUnread || 0)
+                  setPersonalUnreadCount(personalUnread || 0)
+                  console.log('Счетчики обновлены после закрытия чата:', { general: generalUnread, personal: personalUnread })
                 } catch (err) {
                   console.error('Ошибка обновления счетчика:', err)
                 }
@@ -210,8 +218,9 @@ export function DriverChatSection({ driverUserId, organizationId }: DriverChatSe
           }}
           onMessagesRead={() => {
             // Обновляем счетчик сразу после того, как сообщения отмечены как прочитанные
-            // Используем функцию loadUnreadCount из useCallback
             console.log('onMessagesRead вызван, обновляем счетчик...')
+            // Вызываем несколько раз с задержками для надежности
+            loadUnreadCount()
             setTimeout(() => {
               loadUnreadCount()
             }, 300)
