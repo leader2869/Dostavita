@@ -588,6 +588,9 @@ export default function DriverFinancePage() {
           <h2 className="text-xl font-semibold mb-4 text-gray-900">Статистика</h2>
           <div className="space-y-2">
             <p className="text-gray-700">
+              Выполнено заказов: <span className="text-gray-900 font-semibold">{completedOrders?.length || 0}</span>
+            </p>
+            <p className="text-gray-700">
               Общая сумма заказов: <span className="text-gray-900 font-semibold">{totalOrdersAmount.toFixed(2)} BYN</span>
             </p>
             <p className="text-gray-700">

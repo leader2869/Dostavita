@@ -95,7 +95,7 @@ export function DriverBottomNavigation() {
   return (
     <>
       <div className="fixed bottom-0 left-0 right-0 bg-gray-50 border-t border-gray-200 z-50">
-        <div className="flex justify-around items-center h-16 relative">
+        <div className="flex justify-around items-center h-16">
           <Link
             href="/dashboard/driver"
             className={`flex flex-col items-center justify-center flex-1 h-full relative ${
@@ -147,6 +147,20 @@ export function DriverBottomNavigation() {
           <span className="text-xs">Заказы</span>
         </Link>
 
+          {/* Центральная кнопка "П!" в круге - крупнее остальных */}
+          <button
+            onClick={handleActiveOrderClick}
+            className="relative w-20 h-20 rounded-full bg-brand-light text-gray-900 flex items-center justify-center shadow-lg hover:bg-brand-dark transition-all z-10 -mt-4"
+            style={{ fontFamily: 'var(--font-amatic-sc), cursive' }}
+          >
+            <span className="text-4xl font-bold">П!</span>
+            {activeOrders.length > 0 && (
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
+                {activeOrders.length > 9 ? '9+' : activeOrders.length}
+              </span>
+            )}
+          </button>
+
         <Link
           href="/dashboard/driver/finance"
           className={`flex flex-col items-center justify-center flex-1 h-full ${
@@ -197,20 +211,6 @@ export function DriverBottomNavigation() {
           </div>
           <span className="text-xs">Профиль</span>
         </Link>
-
-          {/* Центральная кнопка "П!" в круге */}
-          <button
-            onClick={handleActiveOrderClick}
-            className="absolute left-1/2 transform -translate-x-1/2 -top-6 w-14 h-14 rounded-full bg-brand-light text-gray-900 flex items-center justify-center shadow-lg hover:bg-brand-dark transition-all z-10"
-            style={{ fontFamily: 'var(--font-amatic-sc), cursive' }}
-          >
-            <span className="text-2xl font-bold">П!</span>
-            {activeOrders.length > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                {activeOrders.length > 9 ? '9+' : activeOrders.length}
-              </span>
-            )}
-          </button>
         </div>
       </div>
 

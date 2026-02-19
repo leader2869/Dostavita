@@ -117,11 +117,11 @@ export default function DriverMyOrdersPage() {
         key={order.id}
         className={`rounded-lg shadow p-6 border border-gray-200 hover:border-green-500 transition ${
           isCancelled
-            ? 'bg-red-50/20'
+            ? 'bg-red-100/40'
             : isCompletedAndPaid 
-            ? 'bg-green-50/20' 
+            ? 'bg-green-100/40' 
             : isUnpaid 
-            ? 'bg-yellow-50/20' 
+            ? 'bg-yellow-100/40' 
             : 'bg-gray-50'
         }`}
       >

@@ -303,7 +303,7 @@ export function OrderActions({ order, onStopPropagation }: OrderActionsProps) {
 
   return (
     <>
-      <div className="flex gap-2 mt-3 justify-start" onClick={(e) => e.stopPropagation()}>
+      <div className="flex gap-2 justify-start" onClick={(e) => e.stopPropagation()}>
         {/* Кнопка телефона */}
         <button
           onClick={handlePhoneClick}

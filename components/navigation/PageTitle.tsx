@@ -27,15 +27,15 @@ export function PageTitle() {
     if (pathname.startsWith('/dashboard/client/orders/') && pathname.includes('/edit')) {
       return 'Редактировать заказ'
     }
-    if (pathname.startsWith('/dashboard/client/orders/')) {
-      return 'Детали заказа'
-    }
-    
-    // Для водителя
-    // Проверяем более специфичные пути первыми
-    if (pathname.startsWith('/dashboard/driver/orders/')) {
-      return 'Детали заказа'
-    }
+                if (pathname.startsWith('/dashboard/client/orders/')) {
+                  return 'Детали'
+                }
+                
+                // Для водителя
+                // Проверяем более специфичные пути первыми
+                if (pathname.startsWith('/dashboard/driver/orders/')) {
+                  return 'Детали'
+                }
     if (pathname.startsWith('/dashboard/driver/profile')) {
       return 'Профиль'
     }
@@ -49,11 +49,11 @@ export function PageTitle() {
       return 'Главная'
     }
     
-    // Для организации
-    // Проверяем более специфичные пути первыми
-    if (pathname.startsWith('/dashboard/customer/orders/')) {
-      return 'Детали заказа'
-    }
+                // Для организации
+                // Проверяем более специфичные пути первыми
+                if (pathname.startsWith('/dashboard/customer/orders/')) {
+                  return 'Детали'
+                }
     if (pathname.startsWith('/dashboard/customer/drivers/')) {
       return 'Профиль водителя'
     }
