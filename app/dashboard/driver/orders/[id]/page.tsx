@@ -375,9 +375,7 @@ export default function OrderDetailsPage() {
     // Перезагружаем заказ, чтобы получить обновленный is_paid
     await loadOrder()
     console.log('Order reloaded after payment')
-    
-    // После успешной обработки оплаты переходим на главную страницу
-    router.push('/dashboard/driver')
+    // Остаемся на странице деталей заказа
   }
 
   if (loading) {
