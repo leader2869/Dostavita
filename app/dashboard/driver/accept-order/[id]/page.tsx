@@ -161,27 +161,10 @@ export default function AcceptOrderPage() {
       console.log('=== Order AFTER accept ===')
       console.log('Updated order:', updatedOrder)
       console.log('Check error:', checkError)
-      if (updatedOrder) {
-        console.log('executor_user_id:', updatedOrder.executor_user_id)
-        console.log('status:', updatedOrder.status)
-        console.log('Matches user ID?', updatedOrder.executor_user_id === user.id)
-        console.log('Expected status: courier_accepted')
-        console.log('Actual status:', updatedOrder.status)
-        if (updatedOrder.status !== 'courier_accepted') {
-          console.error('⚠️ ПРОБЛЕМА: Статус не изменился на courier_accepted!')
-          console.error('Возможно, миграция 073 не применена или функция работает неправильно')
-        }
-        if (updatedOrder.executor_user_id !== user.id) {
-          console.error('⚠️ ПРОБЛЕМА: executor_user_id не установлен!')
-        }
-      } else {
-        console.error('❌ Заказ не найден после принятия!')
-      }
-
-      // Переходим на страницу "Мои заказы" после принятия заказа
-      // Используем router.push вместо window.location.href, чтобы сохранить логи в консоли
-      console.log('✅ Заказ принят успешно, переходим на страницу "Мои заказы"')
-      router.push('/dashboard/driver/my-orders')
+      
+      // После успешного принятия заказа перенаправляем на страницу деталей заказа
+      console.log('✅ Заказ принят успешно, переходим на страницу деталей заказа')
+      router.push(`/dashboard/driver/orders/${orderId}`)
     } catch (err: any) {
       console.error('❌ ОШИБКА при принятии заказа:', err)
       console.error('Error message:', err.message)

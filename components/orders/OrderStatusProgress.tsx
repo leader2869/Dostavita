@@ -44,7 +44,13 @@ export function OrderStatusProgress({ status, variant = 'connected' }: OrderStat
             {/* Прогресс линия - широкая, заполняется зеленым */}
             <div
               className="absolute top-6 left-0 h-2.5 bg-green-500 rounded-full transition-all duration-500"
-              style={{ width: `${((currentStage - 1) / (stages.length - 1)) * 100}%` }}
+              style={{ 
+                width: currentStage === 0 
+                  ? '0%' 
+                  : currentStage === stages.length
+                  ? '100%'
+                  : `${((currentStage - 1) / (stages.length - 1)) * 100 + (100 / (stages.length - 1)) * 0.5}%` 
+              }}
             ></div>
 
             {/* Кружочки с этапами - часть единого сосуда */}
