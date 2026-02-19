@@ -19,7 +19,7 @@ interface OrderActionsProps {
   onStopPropagation?: (e: React.MouseEvent) => void
 }
 
-export function OrderActions({ order, onStopPropagation }: OrderActionsProps) {
+export function OrderActions({ order, onStopPropagation, vertical = false }: OrderActionsProps) {
   const [showPhoneMenu, setShowPhoneMenu] = useState(false)
   const [showNavMenu, setShowNavMenu] = useState(false)
   const [showChat, setShowChat] = useState(false)
@@ -303,7 +303,7 @@ export function OrderActions({ order, onStopPropagation }: OrderActionsProps) {
 
   return (
     <>
-      <div className="flex gap-2 justify-start" onClick={(e) => e.stopPropagation()}>
+      <div className={`flex gap-2 justify-start items-center ${vertical ? 'flex-col' : ''}`} onClick={(e) => e.stopPropagation()}>
         {/* Кнопка телефона */}
         <button
           onClick={handlePhoneClick}

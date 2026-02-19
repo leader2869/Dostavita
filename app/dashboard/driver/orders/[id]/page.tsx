@@ -371,44 +371,13 @@ export default function OrderDetailsPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto pb-24">
-      {/* Закрепленная панель с кнопкой "Назад" и действиями */}
+    <div className="max-w-2xl mx-auto pb-24 relative">
+      {/* Кнопки действий - справа поверх контента */}
       {order && (
-        <div className="fixed top-16 left-0 right-0 bg-white border-b border-gray-200 z-40 shadow-sm">
-          <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-            <div className="flex items-center gap-3">
-              {/* Кнопка "Назад" */}
-              <button
-                onClick={() => router.push('/dashboard/driver')}
-                className="flex items-center text-gray-600 hover:text-gray-900 transition-colors flex-shrink-0"
-              >
-                <svg
-                  className="w-5 h-5 mr-2"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 19l-7-7 7-7"
-                  />
-                </svg>
-                <span className="text-sm">Назад</span>
-              </button>
-              
-              {/* Кнопки действий */}
-              <div className="flex-1 flex gap-2 justify-start items-center">
-                <OrderActions order={order} />
-              </div>
-            </div>
-          </div>
+        <div className="fixed top-20 right-4 z-50">
+          <OrderActions order={order} vertical={true} />
         </div>
       )}
-
-      {/* Отступ для закрепленной панели */}
-      <div className="pt-20">
 
       <div className="bg-gray-50 rounded-lg shadow p-6 space-y-4">
         <div>
@@ -647,7 +616,6 @@ export default function OrderDetailsPage() {
 
       {/* Нижняя навигация */}
       <DriverBottomNavigation />
-      </div>
     </div>
   )
 }
