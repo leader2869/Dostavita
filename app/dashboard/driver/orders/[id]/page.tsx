@@ -386,19 +386,19 @@ export default function OrderDetailsPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto pb-24 relative">
-      {/* Карта прогресса - закреплена вверху */}
+    <div className="max-w-2xl mx-auto relative">
+      {/* Карта прогресса - закреплена вверху, всегда видна */}
       <OrderStatusProgress status={order.status} variant="connected" />
       
-      {/* Кнопки действий - справа снизу */}
+      {/* Кнопки действий - справа снизу, всегда закреплены */}
       {order && (
-        <div className="fixed bottom-32 right-4 z-50">
+        <div className="fixed bottom-24 right-4 z-[100]">
           <OrderActions order={order} vertical={true} />
         </div>
       )}
 
-      {/* Отступ для закрепленной карты прогресса */}
-      <div className="pt-24">
+      {/* Отступ для закрепленной карты прогресса и ползунка */}
+      <div className="pt-28 pb-24">
         <div className="bg-gray-50 rounded-lg shadow p-6 space-y-4">
 
         <div>
@@ -556,9 +556,9 @@ export default function OrderDetailsPage() {
           <div className="text-red-600 text-sm">{error}</div>
         )}
 
-        {/* Ползунок для смены статуса - закреплен внизу, выше навигации */}
+        {/* Ползунок для смены статуса - закреплен внизу, всегда виден */}
         {hasNextStatus && (
-          <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 z-40">
+          <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 z-[90]">
             <div 
               ref={sliderRef}
               className="swipe-slider relative bg-gray-200 rounded-full h-16 cursor-grab active:cursor-grabbing select-none w-64"

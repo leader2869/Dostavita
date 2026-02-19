@@ -33,3 +33,4 @@ GRANT EXECUTE ON FUNCTION public.get_all_regions() TO anon;
 
 
 
+

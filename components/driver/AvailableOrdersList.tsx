@@ -7,6 +7,7 @@ import { formatDistanceToNow } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { formatAddressForOrder } from '@/lib/utils/formatAddress'
 import { formatReadyTime } from '@/lib/utils/formatReadyTime'
+import { AcceptOrderModal } from './AcceptOrderModal'
 
 interface Order {
   id: string
@@ -51,6 +52,7 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
   const [orders, setOrders] = useState(initialOrders)
   const [rejectedOrderIds, setRejectedOrderIds] = useState<Set<string>>(new Set())
   const [showCancelled, setShowCancelled] = useState(false)
+  const [acceptOrderId, setAcceptOrderId] = useState<string | null>(null)
   // Используем ref для отслеживания отклоненных заказов, которые не должны возвращаться
   const rejectedOrderIdsRef = useRef<Set<string>>(new Set())
 
@@ -196,7 +198,6 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
     <div
       key={order.id}
       className={`border rounded-lg p-4 cursor-pointer hover:bg-gray-100 transition ${isHidden ? 'border-yellow-600 bg-yellow-900/20' : 'border-gray-200'}`}
-      onClick={() => router.push(`/dashboard/driver/accept-order/${order.id}`)}
     >
           <div className="flex justify-between items-start mb-3">
             <div className="flex-1">
@@ -256,30 +257,25 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
             </div>
             <p className="font-semibold text-gray-900 ml-4">{order.final_price} BYN</p>
           </div>
-          <div className="flex gap-2 mt-3">
+          <div className="flex gap-2 mt-3" onClick={(e) => e.stopPropagation()}>
             {isHidden ? (
-              <a
-                href={`/dashboard/driver/accept-order/${order.id}`}
-                onClick={(e) => e.stopPropagation()}
+              <button
+                onClick={() => setAcceptOrderId(order.id)}
                 className="flex-1 text-center bg-green-300 text-gray-900 px-4 py-2 rounded text-sm hover:bg-green-400 transition"
               >
                 Принять заказ
-              </a>
+              </button>
             ) : (
               <>
-                <a
-                  href={`/dashboard/driver/accept-order/${order.id}`}
-                  onClick={(e) => e.stopPropagation()}
+                <button
+                  onClick={() => setAcceptOrderId(order.id)}
                   className="flex-1 text-center bg-green-300 text-gray-900 px-4 py-2 rounded text-sm hover:bg-green-400 transition"
                 >
                   Принять заказ
-                </a>
+                </button>
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    handleReject(order.id)
-                  }}
-                  className="flex-1 bg-red-300 text-gray-900 px-4 py-2 rounded text-sm hover:bg-red-400 transition"
+                  onClick={() => handleReject(order.id)}
+                  className="flex-1 bg-gray-300 text-gray-900 px-4 py-2 rounded text-sm hover:bg-gray-400 transition"
                 >
                   Скрыть заказ
                 </button>
@@ -328,6 +324,19 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
           <p className="text-gray-600">Нет доступных заказов</p>
         )}
       </div>
+
+      {/* Модальное окно подтверждения принятия заказа */}
+      {acceptOrderId && (
+        <AcceptOrderModal
+          orderId={acceptOrderId}
+          onClose={() => setAcceptOrderId(null)}
+          onSuccess={() => {
+            setAcceptOrderId(null)
+            // Обновляем список заказов после принятия
+            window.location.reload()
+          }}
+        />
+      )}
     </div>
   )
 }

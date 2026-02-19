@@ -4,7 +4,6 @@ import type { User } from '@/lib/types'
 import { DashboardNav } from '@/components/navigation/DashboardNav'
 import { PageTitle } from '@/components/navigation/PageTitle'
 import { DriverLayoutWrapper } from '@/components/driver/DriverLayoutWrapper'
-import { PullToRefreshWrapper } from '@/components/ui/PullToRefreshWrapper'
 import { BottomNavigationWrapper } from '@/components/navigation/BottomNavigationWrapper'
 
 export const dynamic = 'force-dynamic'
@@ -171,9 +170,7 @@ export default async function DashboardLayout({
           </div>
         </nav>
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24 pb-10">
-          <PullToRefreshWrapper>
-            {children}
-          </PullToRefreshWrapper>
+          {children}
         </main>
       </div>
       {/* Нижняя навигация - закреплена для всех страниц, вне основного контейнера */}

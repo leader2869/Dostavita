@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { formatAddressForOrder } from '@/lib/utils/formatAddress'
+import { AcceptOrderModal } from './AcceptOrderModal'
 
 export function NewOrderNotification() {
   const supabase = createClient()
@@ -13,6 +14,7 @@ export function NewOrderNotification() {
   const [hasActiveOrder, setHasActiveOrder] = useState(false)
   const [processing, setProcessing] = useState(false)
   const [isDriver, setIsDriver] = useState(false)
+  const [showAcceptModal, setShowAcceptModal] = useState(false)
   const shownOrderIdsRef = useRef<Set<string>>(new Set())
   const checkIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -160,20 +162,10 @@ export function NewOrderNotification() {
     }
   }, [isDriver, checkNewAvailableOrders])
 
-  const handleAccept = async () => {
+  const handleAccept = () => {
     if (!newOrder || processing) return
-
-    setProcessing(true)
-    try {
-      // Переходим на страницу принятия заказа
-      router.push(`/dashboard/driver/accept-order/${newOrder.id}`)
-      setShowModal(false)
-    } catch (err) {
-      console.error('Ошибка при принятии заказа:', err)
-      alert('Ошибка при принятии заказа')
-    } finally {
-      setProcessing(false)
-    }
+    setShowModal(false)
+    setShowAcceptModal(true)
   }
 
   const handleReject = async () => {
@@ -217,85 +209,104 @@ export function NewOrderNotification() {
   if (!showModal || !newOrder) return null
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100] p-4" onClick={handleClose}>
-      <div className="bg-gray-50 rounded-lg shadow-xl max-w-md w-full" onClick={(e) => e.stopPropagation()}>
-        {/* Заголовок */}
-        <div className="p-4 border-b border-gray-200 flex justify-between items-center">
-          <h3 className="text-xl font-semibold text-gray-900">Новый доступный заказ</h3>
-          <button
-            onClick={handleClose}
-            className="text-gray-600 hover:text-gray-900 transition"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-
-        {/* Информация о заказе */}
-        <div className="p-6 space-y-4">
-          <div>
-            <p className="text-sm text-gray-600">Номер заказа</p>
-            <p className="text-lg font-semibold text-gray-900">
-              Заказ №{newOrder.order_number || newOrder.id.slice(0, 8)}
-            </p>
+    <>
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100] p-4" onClick={handleClose}>
+        <div className="bg-gray-50 rounded-lg shadow-xl max-w-md w-full" onClick={(e) => e.stopPropagation()}>
+          {/* Заголовок */}
+          <div className="p-4 border-b border-gray-200 flex justify-between items-center">
+            <h3 className="text-xl font-semibold text-gray-900">Новый доступный заказ</h3>
+            <button
+              onClick={handleClose}
+              className="text-gray-600 hover:text-gray-900 transition"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
 
-          <div>
-            <p className="text-sm text-gray-600">Откуда</p>
-            <p className="text-gray-900">{formatAddressForOrder(newOrder.pickup_address)}</p>
-          </div>
-
-          <div>
-            <p className="text-sm text-gray-600">Куда</p>
-            <p className="text-gray-900">{formatAddressForOrder(newOrder.delivery_address)}</p>
-          </div>
-
-          {newOrder.item_type && (
+          {/* Информация о заказе */}
+          <div className="p-6 space-y-4">
             <div>
-              <p className="text-sm text-gray-600">Тип груза</p>
-              <p className="text-gray-900">
-                {newOrder.item_type === 'documents' ? 'Документы' :
-                 newOrder.item_type === 'parcel' ? 'Посылка' :
-                 newOrder.item_type === 'flowers' ? 'Цветы' :
-                 newOrder.item_type === 'food' ? 'Еда' :
-                 newOrder.item_type === 'other' ? 'Другое' : 'Не указан'}
+              <p className="text-sm text-gray-600">Номер заказа</p>
+              <p className="text-lg font-semibold text-gray-900">
+                Заказ №{newOrder.order_number || newOrder.id.slice(0, 8)}
               </p>
             </div>
-          )}
 
-          {newOrder.description && (
             <div>
-              <p className="text-sm text-gray-600">Описание</p>
-              <p className="text-gray-900 italic">{newOrder.description}</p>
+              <p className="text-sm text-gray-600">Откуда</p>
+              <p className="text-gray-900">{formatAddressForOrder(newOrder.pickup_address)}</p>
             </div>
-          )}
 
-          <div>
-            <p className="text-sm text-gray-600">Стоимость</p>
-            <p className="text-2xl font-bold text-brand-light">{newOrder.final_price} BYN</p>
+            <div>
+              <p className="text-sm text-gray-600">Куда</p>
+              <p className="text-gray-900">{formatAddressForOrder(newOrder.delivery_address)}</p>
+            </div>
+
+            {newOrder.item_type && (
+              <div>
+                <p className="text-sm text-gray-600">Тип груза</p>
+                <p className="text-gray-900">
+                  {newOrder.item_type === 'documents' ? 'Документы' :
+                   newOrder.item_type === 'parcel' ? 'Посылка' :
+                   newOrder.item_type === 'flowers' ? 'Цветы' :
+                   newOrder.item_type === 'food' ? 'Еда' :
+                   newOrder.item_type === 'other' ? 'Другое' : 'Не указан'}
+                </p>
+              </div>
+            )}
+
+            {newOrder.description && (
+              <div>
+                <p className="text-sm text-gray-600">Описание</p>
+                <p className="text-gray-900 italic">{newOrder.description}</p>
+              </div>
+            )}
+
+            <div>
+              <p className="text-sm text-gray-600">Стоимость</p>
+              <p className="text-2xl font-bold text-brand-light">{newOrder.final_price} BYN</p>
+            </div>
+          </div>
+
+          {/* Кнопки */}
+          <div className="p-4 border-t border-gray-200 flex gap-3">
+            <button
+              onClick={handleAccept}
+              disabled={processing}
+              className="flex-1 bg-green-300 hover:bg-green-400 text-gray-900 px-4 py-3 rounded transition disabled:opacity-50"
+            >
+              Принять заказ
+            </button>
+            <button
+              onClick={handleReject}
+              disabled={processing}
+              className="flex-1 bg-red-300 hover:bg-red-400 text-gray-900 px-4 py-3 rounded transition disabled:opacity-50"
+            >
+              Отказаться
+            </button>
           </div>
         </div>
-
-        {/* Кнопки */}
-        <div className="p-4 border-t border-gray-200 flex gap-3">
-          <button
-            onClick={handleAccept}
-            disabled={processing}
-            className="flex-1 bg-green-300 hover:bg-green-400 text-gray-900 px-4 py-3 rounded transition disabled:opacity-50"
-          >
-            {processing ? 'Обработка...' : 'Принять заказ'}
-          </button>
-          <button
-            onClick={handleReject}
-            disabled={processing}
-            className="flex-1 bg-red-300 hover:bg-red-400 text-gray-900 px-4 py-3 rounded transition disabled:opacity-50"
-          >
-            {processing ? 'Обработка...' : 'Отказаться'}
-          </button>
-        </div>
       </div>
-    </div>
+
+      {/* Модальное окно подтверждения принятия заказа */}
+      {showAcceptModal && newOrder && (
+        <AcceptOrderModal
+          orderId={newOrder.id}
+          onClose={() => {
+            setShowAcceptModal(false)
+            setShowModal(false)
+            setNewOrder(null)
+          }}
+          onSuccess={() => {
+            setShowAcceptModal(false)
+            setShowModal(false)
+            setNewOrder(null)
+          }}
+        />
+      )}
+    </>
   )
 }
 
