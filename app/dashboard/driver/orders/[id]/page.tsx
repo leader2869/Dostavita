@@ -26,6 +26,7 @@ export default function OrderDetailsPage() {
   const [swipeProgress, setSwipeProgress] = useState(0)
   const [isSwiping, setIsSwiping] = useState(false)
   const [swipeStartX, setSwipeStartX] = useState(0)
+  const [handlePosition, setHandlePosition] = useState(0) // Позиция ползунка в пикселях
   const sliderRef = useRef<HTMLDivElement>(null)
   const nextActionRef = useRef<(() => Promise<void>) | null>(null)
 
@@ -279,9 +280,15 @@ export default function OrderDetailsPage() {
     const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX
     if (sliderRef.current) {
       const rect = sliderRef.current.getBoundingClientRect()
-      setSwipeStartX(clientX - rect.left)
+      const startX = clientX - rect.left
+      setSwipeStartX(startX)
+      const handleWidth = 64 // w-16 = 64px
+      const maxPosition = rect.width - handleWidth
+      const position = Math.min(Math.max(startX - handleWidth / 2, 0), maxPosition)
+      setHandlePosition(position)
+      const progress = (position / maxPosition) * 100
+      setSwipeProgress(progress)
     }
-    setSwipeProgress(0)
   }, [hasNextStatus, processing])
 
   const handleSwipeMove = useCallback((e: React.TouchEvent) => {
@@ -290,11 +297,15 @@ export default function OrderDetailsPage() {
     const clientX = e.touches[0].clientX
     const rect = sliderRef.current.getBoundingClientRect()
     const currentX = clientX - rect.left
-    const sliderWidth = sliderRef.current.offsetWidth
-    const diff = currentX - swipeStartX
-    const progress = Math.min(Math.max((diff / sliderWidth) * 100, 0), 100)
+    const handleWidth = 64 // w-16 = 64px
+    const maxPosition = rect.width - handleWidth
+    // Позиция ползунка: центр ползунка следует за пальцем
+    const position = Math.min(Math.max(currentX - handleWidth / 2, 0), maxPosition)
+    setHandlePosition(position)
+    // Прогресс для заполнения фона
+    const progress = (position / maxPosition) * 100
     setSwipeProgress(progress)
-  }, [isSwiping, hasNextStatus, processing, swipeStartX])
+  }, [isSwiping, hasNextStatus, processing])
 
   const handleSwipeEnd = useCallback(async () => {
     if (!isSwiping || !hasNextStatus || processing) return
@@ -308,6 +319,7 @@ export default function OrderDetailsPage() {
     }
     
     setSwipeProgress(0)
+    setHandlePosition(0)
   }, [isSwiping, hasNextStatus, processing, swipeProgress])
 
   // Глобальные обработчики для мыши
@@ -320,23 +332,28 @@ export default function OrderDetailsPage() {
       if (processing || !sliderRef.current) return
       const rect = sliderRef.current.getBoundingClientRect()
       const currentX = e.clientX - rect.left
-      const sliderWidth = sliderRef.current.offsetWidth
-      const diff = currentX - swipeStartX
-      const progress = Math.min(Math.max((diff / sliderWidth) * 100, 0), 100)
+      const handleWidth = 64 // w-16 = 64px
+      const maxPosition = rect.width - handleWidth
+      // Позиция ползунка: центр ползунка следует за курсором
+      const position = Math.min(Math.max(currentX - handleWidth / 2, 0), maxPosition)
+      setHandlePosition(position)
+      // Прогресс для заполнения фона
+      const progress = (position / maxPosition) * 100
       currentProgress = progress
       setSwipeProgress(progress)
     }
 
-    const handleMouseUp = async () => {
-      if (processing) return
-      setIsSwiping(false)
-      
-      if (currentProgress >= 80 && nextActionRef.current) {
-        await nextActionRef.current()
+      const handleMouseUp = async () => {
+        if (processing) return
+        setIsSwiping(false)
+        
+        if (currentProgress >= 80 && nextActionRef.current) {
+          await nextActionRef.current()
+        }
+        
+        setSwipeProgress(0)
+        setHandlePosition(0)
       }
-      
-      setSwipeProgress(0)
-    }
 
     document.addEventListener('mousemove', handleMouseMove)
     document.addEventListener('mouseup', handleMouseUp)
@@ -373,18 +390,19 @@ export default function OrderDetailsPage() {
 
   return (
     <div className="max-w-2xl mx-auto pb-24 relative">
+      {/* Карта прогресса - закреплена вверху */}
+      <OrderStatusProgress status={order.status} variant="connected" />
+      
       {/* Кнопки действий - справа поверх контента */}
       {order && (
-        <div className="fixed top-20 right-4 z-50">
+        <div className="fixed top-32 right-4 z-50">
           <OrderActions order={order} vertical={true} />
         </div>
       )}
 
-      <div className="bg-gray-50 rounded-lg shadow p-6 space-y-4">
-        <div>
-          <h2 className="font-semibold mb-4 text-gray-900">Статус заказа</h2>
-          <OrderStatusProgress status={order.status} variant="connected" />
-        </div>
+      {/* Отступ для закрепленной карты прогресса */}
+      <div className="pt-24">
+        <div className="bg-gray-50 rounded-lg shadow p-6 space-y-4">
 
         <div>
           <h2 className="font-semibold mb-2 text-gray-900">Адреса</h2>
@@ -543,30 +561,27 @@ export default function OrderDetailsPage() {
 
         {/* Ползунок для смены статуса - закреплен внизу, выше навигации */}
         {hasNextStatus && (
-          <div className="fixed bottom-20 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg z-40">
-            <div className="max-w-2xl mx-auto">
-              <p className="text-xs text-gray-600 mb-2 text-center">Смахните ползунок вправо для смены статуса</p>
-              
-              <div 
-                ref={sliderRef}
-                className="swipe-slider relative bg-gray-200 rounded-full h-16 cursor-grab active:cursor-grabbing select-none w-1/2 mx-auto"
-                onTouchStart={handleSwipeStart}
-                onTouchMove={handleSwipeMove}
-                onTouchEnd={handleSwipeEnd}
-                onMouseDown={handleSwipeStart}
-              >
+          <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 z-40">
+            <div 
+              ref={sliderRef}
+              className="swipe-slider relative bg-gray-200 rounded-full h-16 cursor-grab active:cursor-grabbing select-none w-64"
+              onTouchStart={handleSwipeStart}
+              onTouchMove={handleSwipeMove}
+              onTouchEnd={handleSwipeEnd}
+              onMouseDown={handleSwipeStart}
+            >
               {/* Фон прогресса */}
               <div 
-                className="absolute left-0 top-0 h-full bg-brand-light rounded-full transition-all duration-200"
-                style={{ width: `${swipeProgress}%` }}
+                className="absolute left-0 top-0 h-full bg-brand-light rounded-full"
+                style={{ width: `${handlePosition + 64}px`, transition: 'none' }}
               ></div>
               
               {/* Ползунок */}
               <div 
-                className="absolute left-0 top-0 h-full w-16 bg-white border-4 border-brand-light rounded-full flex items-center justify-center shadow-lg z-10"
+                className="absolute top-0 h-full w-16 bg-white border-4 border-brand-light rounded-full flex items-center justify-center shadow-lg z-10"
                 style={{ 
-                  transform: `translateX(${Math.min(swipeProgress * (100 - 16) / 100, 100 - 16)}%)`,
-                  transition: isSwiping ? 'none' : 'transform 0.2s ease-out'
+                  left: `${handlePosition}px`,
+                  transition: isSwiping ? 'none' : 'none'
                 }}
               >
                 <svg className="w-6 h-6 text-brand-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -574,18 +589,17 @@ export default function OrderDetailsPage() {
                 </svg>
               </div>
                 
-                {/* Текст */}
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none px-2">
-                  <span className={`text-xs font-semibold transition-colors truncate ${swipeProgress >= 80 ? 'text-white' : 'text-gray-700'}`}>
-                    {swipeProgress >= 80 ? 'Отпустите' : getNextStatusLabel()}
-                  </span>
-                </div>
+              {/* Текст */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none px-2">
+                <span className={`text-xs font-semibold transition-colors truncate ${swipeProgress >= 80 ? 'text-white' : 'text-gray-700'}`}>
+                  {swipeProgress >= 80 ? 'Отпустите' : getNextStatusLabel()}
+                </span>
               </div>
-              
-              {processing && (
-                <p className="text-center text-xs text-gray-600 mt-2">Обработка...</p>
-              )}
             </div>
+            
+            {processing && (
+              <p className="text-center text-xs text-gray-600 mt-2">Обработка...</p>
+            )}
           </div>
         )}
 
@@ -596,6 +610,7 @@ export default function OrderDetailsPage() {
             </div>
           </div>
         )}
+        </div>
       </div>
 
       {/* Модальное окно оплаты */}

@@ -35,53 +35,55 @@ export function OrderStatusProgress({ status, variant = 'connected' }: OrderStat
   // Вариант 1: Соединенная линия с кружочками - единый сосуд
   if (variant === 'connected') {
     return (
-      <div className="w-full py-5">
-        <div className="relative">
-          {/* Фоновая линия - широкая, проходит через все кружки */}
-          <div className="absolute top-8 left-0 right-0 h-3 bg-gray-200 rounded-full"></div>
-          
-          {/* Прогресс линия - широкая, заполняется зеленым */}
-          <div
-            className="absolute top-8 left-0 h-3 bg-green-500 rounded-full transition-all duration-500"
-            style={{ width: `${((currentStage - 1) / (stages.length - 1)) * 100}%` }}
-          ></div>
+      <div className="w-full py-3 fixed top-16 left-0 right-0 bg-white z-30 border-b border-gray-200 px-4">
+        <div className="max-w-2xl mx-auto">
+          <div className="relative">
+            {/* Фоновая линия - широкая, проходит через все кружки */}
+            <div className="absolute top-6 left-0 right-0 h-2.5 bg-gray-200 rounded-full"></div>
+            
+            {/* Прогресс линия - широкая, заполняется зеленым */}
+            <div
+              className="absolute top-6 left-0 h-2.5 bg-green-500 rounded-full transition-all duration-500"
+              style={{ width: `${((currentStage - 1) / (stages.length - 1)) * 100}%` }}
+            ></div>
 
-          {/* Кружочки с этапами - часть единого сосуда */}
-          <div className="relative flex justify-between">
-            {stages.map((stage, index) => {
-              const isActive = index + 1 <= currentStage
-              const isCurrent = index + 1 === currentStage
+            {/* Кружочки с этапами - часть единого сосуда */}
+            <div className="relative flex justify-between">
+              {stages.map((stage, index) => {
+                const isActive = index + 1 <= currentStage
+                const isCurrent = index + 1 === currentStage
 
-              return (
-                <div key={stage.id} className="flex flex-col items-center">
-                  {/* Круг этапа - единый, сливается с линией */}
-                  <div
-                    className={`relative w-12 h-12 rounded-full flex items-center justify-center transition-all z-10 ${
-                      isActive
-                        ? 'bg-green-500 text-white'
-                        : 'bg-gray-200 text-gray-400'
-                    } ${isCurrent ? 'ring-2 ring-green-300' : ''}`}
-                  >
-                    {isActive ? (
-                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                      </svg>
-                    ) : (
-                      <span className="text-sm font-bold">{stage.id}</span>
-                    )}
+                return (
+                  <div key={stage.id} className="flex flex-col items-center">
+                    {/* Круг этапа - единый, сливается с линией */}
+                    <div
+                      className={`relative w-9 h-9 rounded-full flex items-center justify-center transition-all z-10 ${
+                        isActive
+                          ? 'bg-green-500 text-white'
+                          : 'bg-gray-200 text-gray-400'
+                      } ${isCurrent ? 'ring-2 ring-green-300' : ''}`}
+                    >
+                      {isActive ? (
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                        </svg>
+                      ) : (
+                        <span className="text-xs font-bold">{stage.id}</span>
+                      )}
+                    </div>
+                    
+                    {/* Подпись этапа */}
+                    <p
+                      className={`text-xs mt-1.5 text-center max-w-[75px] leading-tight ${
+                        isActive ? 'text-gray-900 font-semibold' : 'text-gray-500'
+                      }`}
+                    >
+                      {stage.label}
+                    </p>
                   </div>
-                  
-                  {/* Подпись этапа */}
-                  <p
-                    className={`text-xs mt-2 text-center max-w-[85px] leading-tight ${
-                      isActive ? 'text-gray-900 font-semibold' : 'text-gray-500'
-                    }`}
-                  >
-                    {stage.label}
-                  </p>
-                </div>
-              )
-            })}
+                )
+              })}
+            </div>
           </div>
         </div>
       </div>
