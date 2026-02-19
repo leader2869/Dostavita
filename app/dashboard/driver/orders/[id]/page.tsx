@@ -8,6 +8,7 @@ import { BackButton } from '@/components/ui/BackButton'
 import { OrderActions } from '@/components/driver/OrderActions'
 import { PaymentModal } from '@/components/driver/PaymentModal'
 import { DriverBottomNavigation } from '@/components/driver/DriverBottomNavigation'
+import { OrderStatusProgress } from '@/components/orders/OrderStatusProgress'
 import { formatAddressForOrder } from '@/lib/utils/formatAddress'
 import { formatReadyTime } from '@/lib/utils/formatReadyTime'
 
@@ -381,15 +382,8 @@ export default function OrderDetailsPage() {
 
       <div className="bg-gray-50 rounded-lg shadow p-6 space-y-4">
         <div>
-          <h2 className="font-semibold mb-2 text-gray-900">Статус</h2>
-          <p className="text-lg text-gray-900">
-            {order.status === 'searching_courier' && 'Ищем курьера'}
-            {order.status === 'courier_accepted' && 'Курьер принял заказ'}
-            {order.status === 'courier_coming' && 'Курьер едет к отправителю'}
-            {order.status === 'courier_delivering' && 'Курьер едет к получателю'}
-            {order.status === 'completed' && 'Заказ завершен'}
-            {order.status === 'cancelled' && 'Отменен'}
-          </p>
+          <h2 className="font-semibold mb-4 text-gray-900">Статус заказа</h2>
+          <OrderStatusProgress status={order.status} variant="connected" />
         </div>
 
         <div>
