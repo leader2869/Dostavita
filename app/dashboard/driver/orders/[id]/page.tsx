@@ -391,9 +391,9 @@ export default function OrderDetailsPage() {
       {/* Карта прогресса - закреплена вверху */}
       <OrderStatusProgress status={order.status} variant="connected" />
       
-      {/* Кнопки действий - справа поверх контента */}
+      {/* Кнопки действий - справа снизу */}
       {order && (
-        <div className="fixed top-32 right-4 z-50">
+        <div className="fixed bottom-32 right-4 z-50">
           <OrderActions order={order} vertical={true} />
         </div>
       )}

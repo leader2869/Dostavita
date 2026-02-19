@@ -150,7 +150,7 @@ export function DriverBottomNavigation() {
           {/* Центральная кнопка "П!" в круге - крупнее остальных */}
           <button
             onClick={handleActiveOrderClick}
-            className="relative w-20 h-20 rounded-full bg-brand-light text-gray-900 flex items-center justify-center shadow-lg hover:bg-brand-dark transition-all z-10 -mt-4"
+            className="relative w-20 h-20 rounded-full bg-brand-light text-gray-900 flex items-center justify-center shadow-lg hover:bg-brand-dark transition-all z-10 -mt-6"
             style={{ fontFamily: 'var(--font-amatic-sc), cursive' }}
           >
             <span className="text-4xl font-bold">П!</span>
