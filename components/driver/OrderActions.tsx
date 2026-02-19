@@ -17,6 +17,7 @@ interface OrderActionsProps {
     delivery_coordinates: any
   }
   onStopPropagation?: (e: React.MouseEvent) => void
+  vertical?: boolean
 }
 
 export function OrderActions({ order, onStopPropagation, vertical = false }: OrderActionsProps) {
