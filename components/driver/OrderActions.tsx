@@ -330,7 +330,7 @@ export function OrderActions({ order, onStopPropagation, vertical = false }: Ord
         {canShowChat && (
           <button
             onClick={handleChatClick}
-            className="w-12 h-12 rounded-full relative flex items-center justify-center bg-yellow-500/20 hover:bg-yellow-500/40 text-yellow-600 hover:text-yellow-700 transition-all"
+            className="w-12 h-12 rounded-full relative flex items-center justify-center bg-brand-light/20 hover:bg-brand-light/40 text-brand-light hover:text-brand-dark transition-all"
             title="Чат"
           >
             <svg
@@ -359,7 +359,7 @@ export function OrderActions({ order, onStopPropagation, vertical = false }: Ord
         {/* Кнопка навигации */}
         <button
           onClick={handleNavClick}
-          className="w-12 h-12 rounded-full flex items-center justify-center bg-purple-500/20 hover:bg-purple-500/40 text-purple-600 hover:text-purple-700 transition-all"
+          className="w-12 h-12 rounded-full flex items-center justify-center bg-yellow-300/20 hover:bg-yellow-300/40 text-yellow-600 hover:text-yellow-700 transition-all"
           title="Навигация"
         >
           <svg
@@ -396,13 +396,23 @@ export function OrderActions({ order, onStopPropagation, vertical = false }: Ord
       {/* Меню выбора телефона */}
       {showPhoneMenu && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setShowPhoneMenu(false)}>
-          <div className="bg-gray-50 rounded-lg p-6 max-w-sm w-full mx-4" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-xl font-semibold text-gray-900 mb-4">Кому позвонить?</h3>
-            <div className="space-y-3">
+          <div className="bg-gray-50 rounded-lg shadow-xl max-w-sm w-full mx-4" onClick={(e) => e.stopPropagation()}>
+            <div className="p-4 border-b border-gray-200 flex justify-between items-center">
+              <h3 className="text-xl font-semibold text-gray-900">Кому позвонить?</h3>
+              <button
+                onClick={() => setShowPhoneMenu(false)}
+                className="text-gray-600 hover:text-gray-900 transition"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="p-6 space-y-3">
               {order.sender_phone && (
                 <button
                   onClick={() => handleCall(order.sender_phone!)}
-                  className="w-full bg-brand-light hover:bg-brand-dark text-gray-900 px-4 py-3 rounded transition"
+                  className="w-full bg-green-500/20 hover:bg-green-500/40 text-green-600 hover:text-green-700 px-4 py-3 rounded transition"
                 >
                   Отправитель: {order.sender_phone}
                 </button>
@@ -410,17 +420,11 @@ export function OrderActions({ order, onStopPropagation, vertical = false }: Ord
               {order.recipient_phone && (
                 <button
                   onClick={() => handleCall(order.recipient_phone!)}
-                  className="w-full bg-brand-light hover:bg-brand-dark text-gray-900 px-4 py-3 rounded transition"
+                  className="w-full bg-green-500/20 hover:bg-green-500/40 text-green-600 hover:text-green-700 px-4 py-3 rounded transition"
                 >
                   Получатель: {order.recipient_phone}
                 </button>
               )}
-              <button
-                onClick={() => setShowPhoneMenu(false)}
-                className="w-full bg-gray-600 hover:bg-gray-100 text-gray-900 px-4 py-3 rounded transition"
-              >
-                Отмена
-              </button>
             </div>
           </div>
         </div>
@@ -429,33 +433,37 @@ export function OrderActions({ order, onStopPropagation, vertical = false }: Ord
       {/* Меню выбора навигации */}
       {showNavMenu && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setShowNavMenu(false)}>
-          <div className="bg-gray-50 rounded-lg p-6 max-w-sm w-full mx-4" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-xl font-semibold text-gray-900 mb-4">Куда построить маршрут?</h3>
-            <div className="space-y-3">
+          <div className="bg-gray-50 rounded-lg shadow-xl max-w-sm w-full mx-4" onClick={(e) => e.stopPropagation()}>
+            <div className="p-4 border-b border-gray-200 flex justify-between items-center">
+              <h3 className="text-xl font-semibold text-gray-900">Куда построить маршрут?</h3>
+              <button
+                onClick={() => setShowNavMenu(false)}
+                className="text-gray-600 hover:text-gray-900 transition"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="p-6 space-y-3">
               <button
                 onClick={() => handleNavTypeSelect('pickup')}
-                className="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 px-4 py-3 rounded transition"
+                className="w-full bg-yellow-100 hover:bg-yellow-200 text-gray-900 px-4 py-3 rounded transition"
               >
                 К отправителю
               </button>
               <button
                 onClick={() => handleNavTypeSelect('delivery')}
-                className="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 px-4 py-3 rounded transition"
+                className="w-full bg-yellow-100 hover:bg-yellow-200 text-gray-900 px-4 py-3 rounded transition"
               >
                 К получателю
               </button>
               <button
                 onClick={() => handleNavTypeSelect('full')}
-                className="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 px-4 py-3 rounded transition font-semibold"
+                className="w-full bg-yellow-100 hover:bg-yellow-200 text-gray-900 px-4 py-3 rounded transition font-semibold"
                 disabled={loadingLocation || !driverLocation}
               >
                 {loadingLocation ? 'Загрузка местоположения...' : 'Весь маршрут'}
-              </button>
-              <button
-                onClick={() => setShowNavMenu(false)}
-                className="w-full bg-gray-600 hover:bg-gray-100 text-gray-900 px-4 py-3 rounded transition"
-              >
-                Отмена
               </button>
             </div>
           </div>
@@ -468,35 +476,39 @@ export function OrderActions({ order, onStopPropagation, vertical = false }: Ord
           setShowNavAppMenu(false)
           setSelectedNavType(null)
         }}>
-          <div className="bg-gray-50 rounded-lg p-6 max-w-sm w-full mx-4" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-xl font-semibold text-gray-900 mb-4">Выберите приложение навигации</h3>
-            <div className="space-y-3">
-              <button
-                onClick={() => openNavigation(0)}
-                className="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 px-4 py-3 rounded transition text-left"
-              >
-                Яндекс Навигатор
-              </button>
-              <button
-                onClick={() => openNavigation(1)}
-                className="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 px-4 py-3 rounded transition text-left"
-              >
-                Яндекс Карты
-              </button>
-              <button
-                onClick={() => openNavigation(2)}
-                className="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 px-4 py-3 rounded transition text-left"
-              >
-                2ГИС
-              </button>
+          <div className="bg-gray-50 rounded-lg shadow-xl max-w-sm w-full mx-4" onClick={(e) => e.stopPropagation()}>
+            <div className="p-4 border-b border-gray-200 flex justify-between items-center">
+              <h3 className="text-xl font-semibold text-gray-900">Выберите приложение навигации</h3>
               <button
                 onClick={() => {
                   setShowNavAppMenu(false)
                   setSelectedNavType(null)
                 }}
-                className="w-full bg-gray-600 hover:bg-gray-100 text-gray-900 px-4 py-3 rounded transition"
+                className="text-gray-600 hover:text-gray-900 transition"
               >
-                Отмена
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="p-6 space-y-3">
+              <button
+                onClick={() => openNavigation(0)}
+                className="w-full bg-yellow-100 hover:bg-yellow-200 text-gray-900 px-4 py-3 rounded transition text-left"
+              >
+                Яндекс Навигатор
+              </button>
+              <button
+                onClick={() => openNavigation(1)}
+                className="w-full bg-yellow-100 hover:bg-yellow-200 text-gray-900 px-4 py-3 rounded transition text-left"
+              >
+                Яндекс Карты
+              </button>
+              <button
+                onClick={() => openNavigation(2)}
+                className="w-full bg-yellow-100 hover:bg-yellow-200 text-gray-900 px-4 py-3 rounded transition text-left"
+              >
+                2ГИС
               </button>
             </div>
           </div>

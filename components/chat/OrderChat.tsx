@@ -352,25 +352,22 @@ export function OrderChat({ orderId, currentUserId, onClose }: OrderChatProps) {
             <div className="text-center text-gray-600">Пока нет сообщений</div>
           ) : (
             messages.map((msg) => {
-              const isOwn = msg.sender_id === currentUserId
               return (
                 <div
                   key={msg.id}
-                  className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
+                  className="flex justify-start"
                 >
-                  <div className={`max-w-[80%] ${isOwn ? 'bg-blue-600' : 'bg-gray-100'} rounded-lg p-3`}>
-                    {!isOwn && (
-                      <p className="text-xs text-gray-700 mb-1">
-                        {senderNames[msg.sender_id] || 'Неизвестный'}
-                      </p>
-                    )}
+                  <div className="max-w-[75%] bg-gray-200 rounded-lg p-3">
+                    <div className="text-xs mb-1 text-gray-900">
+                      {senderNames[msg.sender_id] || 'Неизвестный'}
+                    </div>
                     <p className="text-gray-900 text-sm whitespace-pre-wrap break-words">{msg.message}</p>
-                    <p className="text-xs text-gray-700 mt-1">
+                    <div className="text-xs mt-1 text-gray-600">
                       {new Date(msg.created_at).toLocaleTimeString('ru-RU', {
                         hour: '2-digit',
                         minute: '2-digit'
                       })}
-                    </p>
+                    </div>
                   </div>
                 </div>
               )
@@ -394,9 +391,17 @@ export function OrderChat({ orderId, currentUserId, onClose }: OrderChatProps) {
             <button
               onClick={handleSend}
               disabled={!newMessage.trim() || sending}
-              className="bg-blue-600 hover:bg-blue-700 text-gray-900 px-6 py-2 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-brand-light hover:bg-brand-dark text-gray-900 px-4 py-2 rounded transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {sending ? '...' : 'Отправить'}
+              {sending ? (
+                <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+                </svg>
+              )}
             </button>
           </div>
         </div>
