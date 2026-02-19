@@ -3,6 +3,7 @@ import { createServerSupabaseClient } from '@/lib/supabase/server'
 import type { User } from '@/lib/types'
 import { DashboardNav } from '@/components/navigation/DashboardNav'
 import { PageTitle } from '@/components/navigation/PageTitle'
+import { DriverLayoutWrapper } from '@/components/driver/DriverLayoutWrapper'
 
 export const dynamic = 'force-dynamic'
 
@@ -151,22 +152,26 @@ export default async function DashboardLayout({
   console.log('✅ Dashboard Layout - Профиль загружен успешно:', (profile as User).role)
   console.log('========================================')
 
+  const isDriver = (profile as User).role === 'driver'
+
   return (
-    <div className="min-h-screen bg-white">
-      <nav className="fixed top-0 left-0 right-0 bg-white shadow-sm border-b border-gray-200 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <h1 className="text-4xl font-bold text-brand-light" style={{ fontFamily: 'var(--font-amatic-sc), cursive' }}>Просто!</h1>
-              <PageTitle />
+    <DriverLayoutWrapper>
+      <div className="min-h-screen bg-white">
+        <nav className="fixed top-0 left-0 right-0 bg-white shadow-sm border-b border-gray-200 z-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between h-16">
+              <div className="flex items-center">
+                <h1 className="text-4xl font-bold text-brand-light" style={{ fontFamily: 'var(--font-amatic-sc), cursive' }}>Просто!</h1>
+                <PageTitle />
+              </div>
+              <DashboardNav profile={profile as User} userId={user.id} />
             </div>
-            <DashboardNav profile={profile as User} userId={user.id} />
           </div>
-        </div>
-      </nav>
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
-        {children}
-      </main>
-    </div>
+        </nav>
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
+          {children}
+        </main>
+      </div>
+    </DriverLayoutWrapper>
   )
 }
