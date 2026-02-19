@@ -3,7 +3,6 @@ import { redirect } from 'next/navigation'
 import { BackButton } from '@/components/ui/BackButton'
 import { formatAddressForOrder } from '@/lib/utils/formatAddress'
 import { formatReadyTime } from '@/lib/utils/formatReadyTime'
-import { CustomerBottomNavigation } from '@/components/customer/CustomerBottomNavigation'
 import { ExportOrdersButton } from '@/components/customer/ExportOrdersButton'
 
 export default async function CustomerOrdersPage() {
@@ -241,7 +240,6 @@ export default async function CustomerOrdersPage() {
         )}
       </div>
 
-      <CustomerBottomNavigation />
     </div>
   )
 }

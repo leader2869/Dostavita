@@ -5,7 +5,6 @@ import { formatDistanceToNow } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { formatAddressForOrder } from '@/lib/utils/formatAddress'
 import { formatReadyTime } from '@/lib/utils/formatReadyTime'
-import { CustomerBottomNavigation } from '@/components/customer/CustomerBottomNavigation'
 import { DriverChatButton } from '@/components/customer/DriverChatButton'
 
 export default async function DriverDetailsPage({ params }: { params: { id: string } }) {
@@ -349,7 +348,6 @@ export default async function DriverDetailsPage({ params }: { params: { id: stri
         )}
       </div>
 
-      <CustomerBottomNavigation />
     </div>
   )
 }

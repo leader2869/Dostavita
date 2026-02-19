@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { BackButton } from '@/components/ui/BackButton'
 import { DriverLocationMap } from '@/components/map/DriverLocationMap'
-import { CustomerBottomNavigation } from '@/components/customer/CustomerBottomNavigation'
 
 export default function CustomerTrackingPage() {
   const router = useRouter()
@@ -392,7 +391,6 @@ export default function CustomerTrackingPage() {
         </div>
       </div>
 
-      <CustomerBottomNavigation />
     </div>
   )
 }

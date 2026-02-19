@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { BackButton } from '@/components/ui/BackButton'
-import { DriverBottomNavigation } from '@/components/driver/DriverBottomNavigation'
 import { formatDistanceToNow } from 'date-fns'
 import { ru } from 'date-fns/locale'
 
@@ -87,7 +86,6 @@ export default function DriverRequestsPage() {
         <BackButton />
         <h1 className="text-3xl font-bold mb-6 text-gray-900">Запросы организаций</h1>
         <div className="text-center py-8 text-gray-600">Загрузка...</div>
-        <DriverBottomNavigation />
       </div>
     )
   }
@@ -153,8 +151,6 @@ export default function DriverRequestsPage() {
           <p className="text-gray-600">У вас пока нет запросов от организаций</p>
         </div>
       )}
-
-      <DriverBottomNavigation />
     </div>
   )
 }

@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import type { Region } from '@/lib/types'
-import { ClientBottomNavigation } from '@/components/client/ClientBottomNavigation'
 import { AddressAutocomplete } from '@/components/ui/AddressAutocomplete'
 import { OrderMap } from '@/components/map/OrderMap'
 import { AddressPickerMap } from '@/components/map/AddressPickerMap'
@@ -552,7 +551,6 @@ export default function EditOrderPage() {
     return (
       <div className="pb-20">
         <div className="text-center py-8 text-gray-600">Загрузка...</div>
-        <ClientBottomNavigation />
       </div>
     )
   }
@@ -574,7 +572,6 @@ export default function EditOrderPage() {
             Вернуться к заказам
           </button>
         </div>
-        <ClientBottomNavigation />
       </div>
     )
   }
@@ -1180,7 +1177,6 @@ export default function EditOrderPage() {
         </div>
       )}
 
-      <ClientBottomNavigation />
     </div>
   )
 }

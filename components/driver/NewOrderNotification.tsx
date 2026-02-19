@@ -13,7 +13,7 @@ export function NewOrderNotification() {
   const [hasActiveOrder, setHasActiveOrder] = useState(false)
   const [processing, setProcessing] = useState(false)
   const [isDriver, setIsDriver] = useState(false)
-  const lastCheckedOrderIdRef = useRef<string | null>(null)
+  const shownOrderIdsRef = useRef<Set<string>>(new Set())
   const checkIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
   // Проверяем наличие активных заказов
@@ -85,10 +85,11 @@ export function NewOrderNotification() {
       const latestOrder = filteredOrders[0]
 
       // Проверяем, это новый заказ (не тот, который мы уже показывали)
-      if (latestOrder.id !== lastCheckedOrderIdRef.current) {
+      // И модальное окно не должно быть уже открыто
+      if (!shownOrderIdsRef.current.has(latestOrder.id) && !showModal) {
         setNewOrder(latestOrder)
         setShowModal(true)
-        lastCheckedOrderIdRef.current = latestOrder.id
+        shownOrderIdsRef.current.add(latestOrder.id)
       }
     } catch (err) {
       console.error('Ошибка проверки новых заказов:', err)
@@ -193,8 +194,7 @@ export function NewOrderNotification() {
       if (response.ok) {
         setShowModal(false)
         setNewOrder(null)
-        // Обновляем последний проверенный заказ, чтобы не показывать его снова
-        lastCheckedOrderIdRef.current = newOrder.id
+        // Заказ уже в shownOrderIdsRef, поэтому не будет показан снова
       } else {
         const data = await response.json()
         alert(data.error || 'Ошибка при отклонении заказа')
@@ -209,10 +209,9 @@ export function NewOrderNotification() {
 
   const handleClose = () => {
     setShowModal(false)
-    // Обновляем последний проверенный заказ, чтобы не показывать его снова
-    if (newOrder) {
-      lastCheckedOrderIdRef.current = newOrder.id
-    }
+    // Заказ уже в shownOrderIdsRef, поэтому не будет показан снова
+    // Просто очищаем состояние
+    setNewOrder(null)
   }
 
   if (!showModal || !newOrder) return null
@@ -283,7 +282,7 @@ export function NewOrderNotification() {
           <button
             onClick={handleAccept}
             disabled={processing}
-            className="flex-1 bg-brand-light hover:bg-brand-dark text-gray-900 px-4 py-3 rounded transition disabled:opacity-50"
+            className="flex-1 bg-green-300 hover:bg-green-400 text-gray-900 px-4 py-3 rounded transition disabled:opacity-50"
           >
             {processing ? 'Обработка...' : 'Принять заказ'}
           </button>

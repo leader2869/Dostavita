@@ -1,7 +1,6 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import { BackButton } from '@/components/ui/BackButton'
-import { CustomerBottomNavigation } from '@/components/customer/CustomerBottomNavigation'
 import { formatDistanceToNowStrict } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { DriverLocationMapWrapper } from '@/components/map/DriverLocationMapWrapper'
@@ -330,7 +329,6 @@ export default async function CustomerOrderDetailsPage({ params }: { params: { i
         )}
       </div>
 
-      <CustomerBottomNavigation />
     </div>
   )
 }

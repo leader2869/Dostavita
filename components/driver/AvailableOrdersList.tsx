@@ -261,7 +261,7 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
               <a
                 href={`/dashboard/driver/accept-order/${order.id}`}
                 onClick={(e) => e.stopPropagation()}
-                className="flex-1 text-center bg-brand-light text-gray-900 px-4 py-2 rounded text-sm hover:bg-brand-dark transition"
+                className="flex-1 text-center bg-green-300 text-gray-900 px-4 py-2 rounded text-sm hover:bg-green-400 transition"
               >
                 Принять заказ
               </a>
@@ -270,7 +270,7 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
                 <a
                   href={`/dashboard/driver/accept-order/${order.id}`}
                   onClick={(e) => e.stopPropagation()}
-                  className="flex-1 text-center bg-brand-light text-gray-900 px-4 py-2 rounded text-sm hover:bg-brand-dark transition"
+                  className="flex-1 text-center bg-green-300 text-gray-900 px-4 py-2 rounded text-sm hover:bg-green-400 transition"
                 >
                   Принять заказ
                 </a>
@@ -279,7 +279,7 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
                     e.stopPropagation()
                     handleReject(order.id)
                   }}
-                  className="flex-1 bg-red-600 text-gray-900 px-4 py-2 rounded text-sm hover:bg-red-700 transition"
+                  className="flex-1 bg-red-300 text-gray-900 px-4 py-2 rounded text-sm hover:bg-red-400 transition"
                 >
                   Скрыть заказ
                 </button>

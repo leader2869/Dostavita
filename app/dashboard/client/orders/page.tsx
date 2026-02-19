@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { ClientBottomNavigation } from '@/components/client/ClientBottomNavigation'
 import { ClientOrderActions } from '@/components/client/ClientOrderActions'
 import { formatAddressForOrder } from '@/lib/utils/formatAddress'
 import { formatReadyTime } from '@/lib/utils/formatReadyTime'
@@ -288,7 +287,6 @@ export default function ClientOrdersPage() {
         </div>
       )}
 
-      <ClientBottomNavigation />
     </div>
   )
 }

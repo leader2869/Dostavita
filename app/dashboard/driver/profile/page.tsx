@@ -4,8 +4,6 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import type { User } from '@/lib/types'
-import { BackButton } from '@/components/ui/BackButton'
-import { DriverBottomNavigation } from '@/components/driver/DriverBottomNavigation'
 
 export default function DriverProfilePage() {
   const router = useRouter()
@@ -212,7 +210,6 @@ export default function DriverProfilePage() {
 
   return (
     <div className="max-w-2xl mx-auto pb-20">
-      <BackButton />
 
       <form onSubmit={handleSubmit} className="bg-gray-50 rounded-lg shadow p-6 space-y-4">
         {/* Аватар */}
@@ -477,8 +474,6 @@ export default function DriverProfilePage() {
           </p>
         </div>
       )}
-      
-      <DriverBottomNavigation />
     </div>
   )
 }

@@ -7,7 +7,6 @@ import type { Order } from '@/lib/types'
 import { BackButton } from '@/components/ui/BackButton'
 import { OrderActions } from '@/components/driver/OrderActions'
 import { PaymentModal } from '@/components/driver/PaymentModal'
-import { DriverBottomNavigation } from '@/components/driver/DriverBottomNavigation'
 import { OrderStatusProgress } from '@/components/orders/OrderStatusProgress'
 import { formatAddressForOrder } from '@/lib/utils/formatAddress'
 import { formatReadyTime } from '@/lib/utils/formatReadyTime'
@@ -620,9 +619,6 @@ export default function OrderDetailsPage() {
           onSuccess={handlePaymentSuccess}
         />
       )}
-
-      {/* Нижняя навигация */}
-      <DriverBottomNavigation />
     </div>
   )
 }

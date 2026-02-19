@@ -3,8 +3,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { BackButton } from '@/components/ui/BackButton'
-import { DriverBottomNavigation } from '@/components/driver/DriverBottomNavigation'
 import { exportFinanceReportToExcel, exportOrdersToExcel, exportTransactionsToExcel } from '@/lib/utils/exportToExcel'
 
 type Period = 'today' | 'yesterday' | 'week' | 'month' | 'all' | 'custom'
@@ -346,7 +344,6 @@ export default function DriverFinancePage() {
   if (loading) {
     return (
       <div className="pb-20">
-        <BackButton />
         <div className="flex justify-between items-center mb-6">
         <button
           onClick={() => {
@@ -381,7 +378,6 @@ export default function DriverFinancePage() {
 
   return (
     <div className="pb-20">
-      <BackButton />
       <div className="flex justify-between items-center mb-6">
         <button
           onClick={() => {
@@ -863,8 +859,6 @@ export default function DriverFinancePage() {
           )
         })()}
       </div>
-      
-      <DriverBottomNavigation />
     </div>
   )
 }

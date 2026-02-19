@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { BackButton } from '@/components/ui/BackButton'
-import { ClientBottomNavigation } from '@/components/client/ClientBottomNavigation'
 import { AddressAutocomplete } from '@/components/ui/AddressAutocomplete'
 import type { Region } from '@/lib/types'
 import { formatAddressForCard } from '@/lib/utils/formatAddress'
@@ -347,7 +346,6 @@ export default function SavedAddressesPage() {
         <BackButton />
         <h1 className="text-3xl font-bold mb-6 text-gray-900">Мои адреса</h1>
         <p className="text-gray-600">Загрузка...</p>
-        <ClientBottomNavigation />
       </div>
     )
   }
@@ -642,7 +640,6 @@ export default function SavedAddressesPage() {
         </div>
       )}
 
-      <ClientBottomNavigation />
     </div>
   )
 }

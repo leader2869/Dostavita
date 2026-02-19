@@ -4,6 +4,8 @@ import type { User } from '@/lib/types'
 import { DashboardNav } from '@/components/navigation/DashboardNav'
 import { PageTitle } from '@/components/navigation/PageTitle'
 import { DriverLayoutWrapper } from '@/components/driver/DriverLayoutWrapper'
+import { PullToRefreshWrapper } from '@/components/ui/PullToRefreshWrapper'
+import { BottomNavigationWrapper } from '@/components/navigation/BottomNavigationWrapper'
 
 export const dynamic = 'force-dynamic'
 
@@ -156,7 +158,7 @@ export default async function DashboardLayout({
 
   return (
     <DriverLayoutWrapper>
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-white relative">
         <nav className="fixed top-0 left-0 right-0 bg-white shadow-sm border-b border-gray-200 z-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between h-16">
@@ -168,10 +170,14 @@ export default async function DashboardLayout({
             </div>
           </div>
         </nav>
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
-          {children}
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24 pb-10">
+          <PullToRefreshWrapper>
+            {children}
+          </PullToRefreshWrapper>
         </main>
       </div>
+      {/* Нижняя навигация - закреплена для всех страниц, вне основного контейнера */}
+      <BottomNavigationWrapper role={(profile as User).role} />
     </DriverLayoutWrapper>
   )
 }

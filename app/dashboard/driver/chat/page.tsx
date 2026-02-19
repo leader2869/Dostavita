@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { DriverBottomNavigation } from '@/components/driver/DriverBottomNavigation'
 import { DriverOrganizationChat } from '@/components/chat/DriverOrganizationChat'
 
 export default function DriverChatPage() {
@@ -76,7 +75,6 @@ export default function DriverChatPage() {
     return (
       <div className="pb-20">
         <div className="text-center py-8 text-gray-600">Загрузка...</div>
-        <DriverBottomNavigation />
       </div>
     )
   }
@@ -90,7 +88,6 @@ export default function DriverChatPage() {
             Вы не привязаны к организации. Чаты будут доступны после привязки к организации.
           </p>
         </div>
-        <DriverBottomNavigation />
       </div>
     )
   }
@@ -192,8 +189,6 @@ export default function DriverChatPage() {
           onClose={() => setActiveChat(null)}
         />
       )}
-
-      <DriverBottomNavigation />
     </div>
   )
 }

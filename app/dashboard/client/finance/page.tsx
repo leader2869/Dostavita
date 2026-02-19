@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { BackButton } from '@/components/ui/BackButton'
-import { ClientBottomNavigation } from '@/components/client/ClientBottomNavigation'
 import { formatAddressForOrder } from '@/lib/utils/formatAddress'
 import { exportFinanceReportToExcel, exportOrdersToExcel, exportReceivablesToExcel } from '@/lib/utils/exportToExcel'
 
@@ -423,7 +422,6 @@ export default function ClientFinancePage() {
         )}
       </div>
 
-      <ClientBottomNavigation />
     </div>
   )
 }

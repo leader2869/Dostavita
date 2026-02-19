@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import type { Region } from '@/lib/types'
-import { ClientBottomNavigation } from '@/components/client/ClientBottomNavigation'
 import { AddressAutocomplete } from '@/components/ui/AddressAutocomplete'
 import { OrderMap } from '@/components/map/OrderMap'
 import { AddressPickerMap } from '@/components/map/AddressPickerMap'
@@ -1127,7 +1126,6 @@ export default function CreateOrderPage() {
         </div>
       )}
 
-      <ClientBottomNavigation />
     </div>
   )
 }

@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { ClientBottomNavigation } from '@/components/client/ClientBottomNavigation'
 import { OrderMap } from '@/components/map/OrderMap'
 import { DriverLocationMap } from '@/components/map/DriverLocationMap'
 import { OrderActions } from '@/components/driver/OrderActions'
@@ -134,7 +133,6 @@ export default function OrderDetailsPage() {
     return (
       <div className="pb-20">
         <div className="text-center py-8 text-gray-600">Загрузка...</div>
-        <ClientBottomNavigation />
       </div>
     )
   }
@@ -151,7 +149,6 @@ export default function OrderDetailsPage() {
             Вернуться к заказам
           </button>
         </div>
-        <ClientBottomNavigation />
       </div>
     )
   }
@@ -417,7 +414,6 @@ export default function OrderDetailsPage() {
         </div>
       </div>
 
-      <ClientBottomNavigation />
     </div>
   )
 }

@@ -5,7 +5,6 @@ import type { User } from '@/lib/types'
 import { AvailableOrdersList } from '@/components/driver/AvailableOrdersList'
 import { DriverLocationTracker } from '@/components/driver/DriverLocationTracker'
 import { DriverPushNotifications } from '@/components/driver/DriverPushNotifications'
-import { DriverBottomNavigation } from '@/components/driver/DriverBottomNavigation'
 import { OrderActions } from '@/components/driver/OrderActions'
 import { formatAddressForOrder } from '@/lib/utils/formatAddress'
 import { ORDER_STATUS_LABELS } from '@/lib/constants'
@@ -293,9 +292,6 @@ export default async function DriverDashboard() {
           organizationId={organizationId || null}
         />
       </div>
-
-      {/* Нижняя навигация */}
-      <DriverBottomNavigation />
     </div>
     </>
   )

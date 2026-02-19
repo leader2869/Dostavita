@@ -1,15 +1,15 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { BackButton } from '@/components/ui/BackButton'
 import { useAuthCheck } from '@/hooks/useAuthCheck'
 import { formatAddressForOrder } from '@/lib/utils/formatAddress'
-import { DriverBottomNavigation } from '@/components/driver/DriverBottomNavigation'
 import { OrderActions } from '@/components/driver/OrderActions'
 import { formatReadyTime } from '@/lib/utils/formatReadyTime'
+
+type Period = 'today' | 'yesterday' | 'week' | 'month' | 'all'
 
 export default function DriverMyOrdersPage() {
   const router = useRouter()
@@ -17,19 +17,65 @@ export default function DriverMyOrdersPage() {
   const { user, loading: authLoading } = useAuthCheck()
   const [orders, setOrders] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [period, setPeriod] = useState<Period>('today')
+  const [displayedCount, setDisplayedCount] = useState(10)
 
-  useEffect(() => {
-    if (authLoading || !user) return
+  const getDateFilter = useCallback((period: Period) => {
+    const now = new Date()
+    switch (period) {
+      case 'today':
+        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0)
+        const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999)
+        return { start: todayStart.toISOString(), end: todayEnd.toISOString() }
+      case 'yesterday':
+        const yesterday = new Date(now)
+        yesterday.setDate(now.getDate() - 1)
+        const yesterdayStart = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate(), 0, 0, 0, 0)
+        const yesterdayEnd = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate(), 23, 59, 59, 999)
+        return { start: yesterdayStart.toISOString(), end: yesterdayEnd.toISOString() }
+      case 'week':
+        const weekStart = new Date(now)
+        weekStart.setDate(now.getDate() - 7)
+        weekStart.setHours(0, 0, 0, 0)
+        const weekEnd = new Date(now)
+        weekEnd.setHours(23, 59, 59, 999)
+        return { start: weekStart.toISOString(), end: weekEnd.toISOString() }
+      case 'month':
+        const monthStart = new Date(now)
+        monthStart.setMonth(now.getMonth() - 1)
+        monthStart.setHours(0, 0, 0, 0)
+        const monthEnd = new Date(now)
+        monthEnd.setHours(23, 59, 59, 999)
+        return { start: monthStart.toISOString(), end: monthEnd.toISOString() }
+      case 'all':
+      default:
+        return { start: null, end: null }
+    }
+  }, [])
+
+  const loadOrders = useCallback(async () => {
+    if (!user) return
 
     let isMounted = true
+    setLoading(true)
 
-    const loadOrders = async () => {
-      // Получаем все заказы водителя (где executor_user_id равен ID текущего пользователя)
-      const { data: ordersData, error } = await supabase
+    try {
+      const dateFilter = getDateFilter(period)
+      
+      let query = supabase
         .from('orders')
         .select('*')
         .eq('executor_user_id', user.id)
         .order('created_at', { ascending: false })
+
+      // Применяем фильтр по дате, если выбран период
+      if (dateFilter.start && dateFilter.end) {
+        query = query
+          .gte('created_at', dateFilter.start)
+          .lte('created_at', dateFilter.end)
+      }
+
+      const { data: ordersData, error } = await query
 
       if (!isMounted) return
 
@@ -38,22 +84,30 @@ export default function DriverMyOrdersPage() {
         setOrders([])
       } else {
         const loadedOrders = ordersData || []
-        console.log('Загружено заказов:', loadedOrders.length)
-        console.log('Активные заказы:', loadedOrders.filter(o => o.status !== 'completed' && o.status !== 'cancelled').length)
-        console.log('Завершенные заказы:', loadedOrders.filter(o => o.status === 'completed' || o.status === 'cancelled').length)
         setOrders(loadedOrders)
+        // Сбрасываем счетчик отображаемых заказов при смене периода
+        setDisplayedCount(10)
       }
-      
-      setLoading(false)
+    } catch (err) {
+      console.error('Ошибка загрузки заказов:', err)
+      if (isMounted) {
+        setOrders([])
+      }
+    } finally {
+      if (isMounted) {
+        setLoading(false)
+      }
     }
 
-    loadOrders()
-    
     return () => {
       isMounted = false
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, authLoading]) // Убрали supabase из зависимостей
+  }, [user, period, supabase, getDateFilter])
+
+  useEffect(() => {
+    if (authLoading || !user) return
+    loadOrders()
+  }, [authLoading, user, period, loadOrders])
 
   const getStatusLabel = (status: string) => {
     switch (status) {
@@ -101,6 +155,14 @@ export default function DriverMyOrdersPage() {
   const completedOrders = orders.filter(order => 
     order.status === 'completed' || order.status === 'cancelled'
   )
+
+  // Ограничиваем количество отображаемых заказов
+  const displayedOrders = completedOrders.slice(0, displayedCount)
+  const hasMore = completedOrders.length > displayedCount
+
+  const handleLoadMore = () => {
+    setDisplayedCount(prev => prev + 10)
+  }
 
   const renderOrderCard = (order: any) => {
     // Показываем кнопки только для активных заказов
@@ -196,7 +258,6 @@ export default function DriverMyOrdersPage() {
   if (authLoading) {
     return (
       <div className="pb-20">
-        <BackButton />
         <div className="bg-gray-50 rounded-lg shadow p-6">
           <p className="text-gray-600 text-center">Проверка аутентификации...</p>
         </div>
@@ -210,7 +271,61 @@ export default function DriverMyOrdersPage() {
 
   return (
     <div className="pb-20">
-      <BackButton />
+      {/* Выбор периода */}
+      <div className="mb-6">
+        <div className="flex gap-2 flex-wrap">
+          <button
+            onClick={() => setPeriod('today')}
+            className={`px-4 py-2 rounded-md transition ${
+              period === 'today'
+                ? 'bg-brand-light text-gray-900'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            Сегодня
+          </button>
+          <button
+            onClick={() => setPeriod('yesterday')}
+            className={`px-4 py-2 rounded-md transition ${
+              period === 'yesterday'
+                ? 'bg-brand-light text-gray-900'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            Вчера
+          </button>
+          <button
+            onClick={() => setPeriod('week')}
+            className={`px-4 py-2 rounded-md transition ${
+              period === 'week'
+                ? 'bg-brand-light text-gray-900'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            Неделя
+          </button>
+          <button
+            onClick={() => setPeriod('month')}
+            className={`px-4 py-2 rounded-md transition ${
+              period === 'month'
+                ? 'bg-brand-light text-gray-900'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            Месяц
+          </button>
+          <button
+            onClick={() => setPeriod('all')}
+            className={`px-4 py-2 rounded-md transition ${
+              period === 'all'
+                ? 'bg-brand-light text-gray-900'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            Все
+          </button>
+        </div>
+      </div>
 
       {loading ? (
         <div className="bg-gray-50 rounded-lg shadow p-6">
@@ -218,28 +333,35 @@ export default function DriverMyOrdersPage() {
         </div>
       ) : (
         <div className="space-y-6">
-          {/* История заказов */}
+          {/* Заказы */}
           {completedOrders.length > 0 && (
             <div className="bg-gray-50 rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
-                История заказов ({completedOrders.length})
-              </h2>
               <div className="space-y-4">
-                {completedOrders.map(renderOrderCard)}
+                {displayedOrders.map(renderOrderCard)}
               </div>
+              
+              {/* Кнопка "Загрузить еще" */}
+              {hasMore && (
+                <div className="mt-4 text-center">
+                  <button
+                    onClick={handleLoadMore}
+                    className="bg-brand-light hover:bg-brand-dark text-gray-900 px-6 py-2 rounded-md transition"
+                  >
+                    Загрузить еще
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
           {/* Если нет заказов вообще */}
           {orders.length === 0 && (
             <div className="bg-gray-50 rounded-lg shadow p-6">
-              <p className="text-gray-600 text-center">У вас пока нет заказов</p>
+              <p className="text-gray-600 text-center">У вас пока нет заказов за выбранный период</p>
             </div>
           )}
         </div>
       )}
-      
-      <DriverBottomNavigation />
     </div>
   )
 }

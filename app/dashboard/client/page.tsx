@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { ClientBottomNavigation } from '@/components/client/ClientBottomNavigation'
 import { OrdersMap } from '@/components/map/OrdersMap'
 import { AddressAutocomplete } from '@/components/ui/AddressAutocomplete'
 import { AddressPickerMap } from '@/components/map/AddressPickerMap'
@@ -961,8 +960,6 @@ export default function ClientDashboard() {
           </div>
         </div>
       )}
-
-      <ClientBottomNavigation />
     </div>
   )
 }

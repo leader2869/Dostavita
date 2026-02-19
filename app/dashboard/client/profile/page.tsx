@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { ClientBottomNavigation } from '@/components/client/ClientBottomNavigation'
 
 export default function ClientProfilePage() {
   const router = useRouter()
@@ -263,7 +262,6 @@ export default function ClientProfilePage() {
         </div>
       </form>
 
-      <ClientBottomNavigation />
     </div>
   )
 }

@@ -2,7 +2,6 @@ import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import type { User } from '@/lib/types'
 import Link from 'next/link'
-import { CustomerBottomNavigation } from '@/components/customer/CustomerBottomNavigation'
 import { GeneralChatButton } from '@/components/customer/GeneralChatButton'
 
 export default async function CustomerDashboard() {
@@ -299,8 +298,6 @@ export default async function CustomerDashboard() {
           Управление водителями
         </a>
       </div>
-
-      <CustomerBottomNavigation />
     </div>
   )
 }

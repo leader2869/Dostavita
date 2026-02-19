@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { BackButton } from '@/components/ui/BackButton'
-import { CustomerBottomNavigation } from '@/components/customer/CustomerBottomNavigation'
 import { DriverOrganizationChatButton } from '@/components/chat/DriverOrganizationChatButton'
 
 export default function CustomerDriversPage() {
@@ -686,7 +685,6 @@ export default function CustomerDriversPage() {
         </div>
       )}
 
-      <CustomerBottomNavigation />
     </div>
   )
 }
