@@ -3,9 +3,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { exportFinanceReportToExcel, exportOrdersToExcel, exportTransactionsToExcel } from '@/lib/utils/exportToExcel'
 
-type Period = 'today' | 'yesterday' | 'week' | 'month' | 'all' | 'custom'
+type Period = 'today' | 'yesterday' | 'week' | 'custom'
 
 export default function DriverFinancePage() {
   const router = useRouter()
@@ -17,6 +16,7 @@ export default function DriverFinancePage() {
   const [transactions, setTransactions] = useState<any[]>([])
   const [completedOrders, setCompletedOrders] = useState<any[]>([])
   const [unpaidOrdersFromReceivables, setUnpaidOrdersFromReceivables] = useState<any[]>([])
+  const [allUnpaidCompletedOrders, setAllUnpaidCompletedOrders] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [period, setPeriod] = useState<Period>('today')
   const [customStartDate, setCustomStartDate] = useState<string>('')
@@ -25,6 +25,9 @@ export default function DriverFinancePage() {
   const [showDepositModal, setShowDepositModal] = useState(false)
   const [cashDepositRequests, setCashDepositRequests] = useState<any[]>([])
   const [transactionFilter, setTransactionFilter] = useState<'all' | 'credit' | 'debit'>('all')
+  const [displayedTransactionsCount, setDisplayedTransactionsCount] = useState(10)
+  const [unpaidOrderSearch, setUnpaidOrderSearch] = useState<string>('')
+  const [displayedUnpaidOrdersCount, setDisplayedUnpaidOrdersCount] = useState(5)
 
   const getDateFilter = useCallback((period: Period) => {
     const now = new Date()
@@ -46,13 +49,6 @@ export default function DriverFinancePage() {
         const weekEnd = new Date(now)
         weekEnd.setHours(23, 59, 59, 999)
         return { start: weekStart.toISOString(), end: weekEnd.toISOString() }
-      case 'month':
-        const monthStart = new Date(now)
-        monthStart.setMonth(now.getMonth() - 1)
-        monthStart.setHours(0, 0, 0, 0)
-        const monthEnd = new Date(now)
-        monthEnd.setHours(23, 59, 59, 999)
-        return { start: monthStart.toISOString(), end: monthEnd.toISOString() }
       case 'custom':
         if (customStartDate && customEndDate) {
           const start = new Date(customStartDate)
@@ -62,7 +58,6 @@ export default function DriverFinancePage() {
           return { start: start.toISOString(), end: end.toISOString() }
         }
         return { start: null, end: null }
-      case 'all':
       default:
         return { start: null, end: null }
     }
@@ -135,7 +130,6 @@ export default function DriverFinancePage() {
         .select('*')
         .eq('user_id', currentUser.id)
         .order('created_at', { ascending: false })
-        .limit(50)
 
       if (dateFilter.start) {
         transactionsQuery = transactionsQuery.gte('created_at', dateFilter.start)
@@ -152,6 +146,7 @@ export default function DriverFinancePage() {
       
       if (isMounted) {
         setTransactions(transactionsData || [])
+        setDisplayedTransactionsCount(10) // Сбрасываем счетчик при загрузке новых данных
         console.log('Загружено транзакций:', transactionsData?.length || 0)
       }
 
@@ -178,21 +173,34 @@ export default function DriverFinancePage() {
       console.log('Orders count:', ordersData?.length || 0)
       console.log('Orders error:', ordersError)
       
-      // Получаем неоплаченные заказы из receivables по driver_user_id
+      // Получаем неоплаченные заказы из receivables по driver_user_id (БЕЗ фильтра по дате)
       let receivablesQuery = supabase
         .from('receivables')
         .select('id, order_id, amount, currency, status, created_at')
         .eq('driver_user_id', currentUser.id)
         .eq('status', 'unpaid')
       
-      if (dateFilter.start) {
-        receivablesQuery = receivablesQuery.gte('created_at', dateFilter.start)
-      }
-      if (dateFilter.end) {
-        receivablesQuery = receivablesQuery.lte('created_at', dateFilter.end)
-      }
+      // УБИРАЕМ фильтр по дате для receivables, чтобы показывать все неоплаченные заказы
+      // if (dateFilter.start) {
+      //   receivablesQuery = receivablesQuery.gte('created_at', dateFilter.start)
+      // }
+      // if (dateFilter.end) {
+      //   receivablesQuery = receivablesQuery.lte('created_at', dateFilter.end)
+      // }
       
       const { data: receivablesData, error: receivablesError } = await receivablesQuery
+      
+      // Также загружаем все завершенные неоплаченные заказы (БЕЗ фильтра по дате)
+      const { data: allUnpaidCompletedOrders, error: unpaidOrdersError } = await supabase
+        .from('orders')
+        .select('id, order_number, final_price, completed_at, is_paid, pickup_address, delivery_address, created_at')
+        .eq('executor_user_id', currentUser.id)
+        .eq('status', 'completed')
+        .or('is_paid.is.null,is_paid.eq.false')
+      
+      console.log('=== All unpaid completed orders loaded ===')
+      console.log('Unpaid completed orders count:', allUnpaidCompletedOrders?.length || 0)
+      console.log('Unpaid orders error:', unpaidOrdersError)
       
       console.log('=== Receivables loaded ===')
       console.log('Receivables count:', receivablesData?.length || 0)
@@ -269,6 +277,26 @@ export default function DriverFinancePage() {
           console.log('🔵 Первая receivable.orders.id:', receivablesWithOrders[0].orders?.id)
         }
         setUnpaidOrdersFromReceivables(receivablesWithOrders || [])
+        // Сохраняем все неоплаченные завершенные заказы в отдельное состояние
+        setAllUnpaidCompletedOrders(allUnpaidCompletedOrders || [])
+        
+        // Загружаем запросы на сдачу кассы
+        if (profileData?.organization_id) {
+          const { data: requestsData, error: requestsError } = await supabase
+            .from('cash_deposit_requests')
+            .select('*')
+            .eq('driver_user_id', currentUser.id)
+            .order('created_at', { ascending: false })
+          
+          if (requestsError) {
+            console.error('Ошибка загрузки запросов на сдачу кассы:', requestsError)
+          }
+          
+          if (isMounted) {
+            setCashDepositRequests(requestsData || [])
+          }
+        }
+        
         setLoading(false)
       }
     } catch (err: any) {
@@ -298,34 +326,35 @@ export default function DriverFinancePage() {
   const paidOrders = validOrders.filter(order => order.is_paid === true) || []
   const paidAmount = paidOrders.reduce((sum, order) => sum + (parseFloat(order.final_price) || 0), 0) || 0
   
-  // Неоплаченные заказы берем из receivables
+  // Неоплаченные заказы: берем из receivables И из завершенных заказов с is_paid = false/null
   // Преобразуем данные из receivables в формат для отображения
-  const unpaidOrders = (unpaidOrdersFromReceivables || []).map((receivable: any) => {
+  const unpaidOrdersFromReceivablesList = (unpaidOrdersFromReceivables || []).map((receivable: any) => {
     const order = receivable.orders
-    console.log('=== Формирование unpaidOrders ===')
+    console.log('=== Формирование unpaidOrders из receivables ===')
     console.log('receivable:', receivable)
     console.log('receivable.orders:', order)
     console.log('order.id:', order?.id)
-    console.log('order.id type:', typeof order?.id)
     
     if (!order || !order.id) {
       console.error('❌ ОШИБКА: order или order.id отсутствует!')
       console.error('receivable:', JSON.stringify(receivable, null, 2))
+      return null
     }
     
     return {
-      id: order?.id,
-      order_number: order?.order_number,
-      final_price: receivable.amount || order?.final_price,
-      completed_at: order?.completed_at,
-      is_paid: order?.is_paid,
-      pickup_address: order?.pickup_address,
-      delivery_address: order?.delivery_address,
-      created_at: order?.created_at,
+      id: order.id,
+      order_number: order.order_number,
+      final_price: receivable.amount || order.final_price,
+      completed_at: order.completed_at,
+      is_paid: order.is_paid,
+      pickup_address: order.pickup_address,
+      delivery_address: order.delivery_address,
+      created_at: order.created_at,
       receivable_id: receivable.id,
-      _debug_receivable: receivable  // Для отладки
+      _debug_receivable: receivable
     }
   }).filter((order: any) => {
+    if (!order) return false
     // Фильтруем заказы с валидными UUID
     if (!order.id) {
       console.warn('⚠️ Заказ без ID отфильтрован:', order)
@@ -339,38 +368,54 @@ export default function DriverFinancePage() {
     return isValid
   })
   
+  // Также проверяем завершенные заказы с is_paid = false/null (используем отдельно загруженные данные)
+  const unpaidOrdersFromCompleted = (allUnpaidCompletedOrders || []).map((order: any) => ({
+    id: order.id,
+    order_number: order.order_number,
+    final_price: order.final_price,
+    completed_at: order.completed_at,
+    is_paid: order.is_paid,
+    pickup_address: order.pickup_address,
+    delivery_address: order.delivery_address,
+    created_at: order.created_at,
+    receivable_id: null
+  }))
+  
+  // Объединяем оба списка, убирая дубликаты по order.id
+  const allUnpaidOrders = [...unpaidOrdersFromReceivablesList, ...unpaidOrdersFromCompleted]
+  const uniqueUnpaidOrdersMap = new Map()
+  allUnpaidOrders.forEach((order: any) => {
+    if (order && order.id) {
+      // Если заказ уже есть, приоритет у того, что из receivables (имеет receivable_id)
+      if (!uniqueUnpaidOrdersMap.has(order.id) || order.receivable_id) {
+        uniqueUnpaidOrdersMap.set(order.id, order)
+      }
+    }
+  })
+  const unpaidOrders = Array.from(uniqueUnpaidOrdersMap.values())
+  
   const unpaidAmount = unpaidOrders.reduce((sum, order) => sum + (parseFloat(order.final_price) || 0), 0) || 0
+  
+  // Фильтруем неоплаченные заказы по поисковому запросу
+  const filteredUnpaidOrders = unpaidOrders.filter((order: any) => {
+    if (!unpaidOrderSearch.trim()) return true
+    const searchTerm = unpaidOrderSearch.toLowerCase().trim()
+    const orderNumber = String(order.order_number || order.id?.slice(0, 8) || '').toLowerCase()
+    return orderNumber.includes(searchTerm)
+  })
+  
+  // Ограничиваем количество отображаемых неоплаченных заказов
+  const displayedUnpaidOrders = filteredUnpaidOrders.slice(0, displayedUnpaidOrdersCount)
+  const hasMoreUnpaidOrders = filteredUnpaidOrders.length > displayedUnpaidOrdersCount
+  
+  // Сбрасываем счетчик при смене поискового запроса
+  useEffect(() => {
+    setDisplayedUnpaidOrdersCount(5)
+  }, [unpaidOrderSearch])
 
   if (loading) {
     return (
       <div className="pb-20">
-        <div className="flex justify-between items-center mb-6">
-        <button
-          onClick={() => {
-            const filename = `Финансовый_отчет_водителя_${period}_${new Date().toISOString().split('T')[0]}`
-            exportFinanceReportToExcel({
-              orders: completedOrders,
-              transactions: transactions,
-              summary: {
-                'Баланс': balance?.amount ? parseFloat(balance.amount).toFixed(2) + ' BYN' : '0.00 BYN',
-                'Общая сумма заказов': totalOrdersAmount.toFixed(2) + ' BYN',
-                'Оплачено': paidAmount.toFixed(2) + ' BYN',
-                'Неоплачено': (totalOrdersAmount - paidAmount).toFixed(2) + ' BYN',
-                'Количество завершенных заказов': completedOrders.length,
-                'Количество неоплаченных заказов': unpaidOrders.length,
-                'Период': period === 'all' ? 'Все время' : period === 'today' ? 'Сегодня' : period === 'week' ? 'Неделя' : period === 'month' ? 'Месяц' : 'Выбранный период',
-              }
-            }, filename)
-          }}
-          className="bg-brand-light hover:bg-brand-dark text-white px-4 py-2 rounded-md text-sm font-medium transition flex items-center gap-2"
-          title="Экспорт всех данных в Excel"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          Экспорт в Excel
-        </button>
-      </div>
         <div className="text-center py-8 text-gray-600">Загрузка...</div>
       </div>
     )
@@ -378,33 +423,6 @@ export default function DriverFinancePage() {
 
   return (
     <div className="pb-20">
-      <div className="flex justify-between items-center mb-6">
-        <button
-          onClick={() => {
-            const filename = `Финансовый_отчет_водителя_${period}_${new Date().toISOString().split('T')[0]}`
-            exportFinanceReportToExcel({
-              orders: completedOrders,
-              transactions: transactions,
-              summary: {
-                'Баланс': balance?.amount ? parseFloat(balance.amount).toFixed(2) + ' BYN' : '0.00 BYN',
-                'Общая сумма заказов': totalOrdersAmount.toFixed(2) + ' BYN',
-                'Оплачено': paidAmount.toFixed(2) + ' BYN',
-                'Неоплачено': (totalOrdersAmount - paidAmount).toFixed(2) + ' BYN',
-                'Количество завершенных заказов': completedOrders.length,
-                'Количество неоплаченных заказов': unpaidOrders.length,
-                'Период': period === 'all' ? 'Все время' : period === 'today' ? 'Сегодня' : period === 'week' ? 'Неделя' : period === 'month' ? 'Месяц' : 'Выбранный период',
-              }
-            }, filename)
-          }}
-          className="bg-brand-light hover:bg-brand-dark text-white px-4 py-2 rounded-md text-sm font-medium transition flex items-center gap-2"
-          title="Экспорт всех данных в Excel"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          Экспорт в Excel
-        </button>
-      </div>
 
       {/* Выбор периода */}
       <div className="bg-gray-50 rounded-lg shadow p-4 mb-6">
@@ -440,26 +458,6 @@ export default function DriverFinancePage() {
             Неделя
           </button>
           <button
-            onClick={() => setPeriod('month')}
-            className={`px-4 py-2 rounded-md transition ${
-              period === 'month'
-                ? 'bg-brand-light text-gray-900'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-100'
-            }`}
-          >
-            Месяц
-          </button>
-          <button
-            onClick={() => setPeriod('all')}
-            className={`px-4 py-2 rounded-md transition ${
-              period === 'all'
-                ? 'bg-brand-light text-gray-900'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-100'
-            }`}
-          >
-            Все время
-          </button>
-          <button
             onClick={() => setPeriod('custom')}
             className={`px-4 py-2 rounded-md transition ${
               period === 'custom'
@@ -467,7 +465,7 @@ export default function DriverFinancePage() {
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-100'
             }`}
           >
-            Произвольная дата
+            ...
           </button>
         </div>
 
@@ -518,6 +516,63 @@ export default function DriverFinancePage() {
           <p className="text-3xl font-bold text-green-600">
             {balance?.amount ? parseFloat(balance.amount).toFixed(2) : '0.00'} {balance?.currency || 'BYN'}
           </p>
+          
+          {/* Информация о запросах, ожидающих подтверждения */}
+          {(() => {
+            const pendingRequests = cashDepositRequests.filter((r: any) => r.status === 'pending')
+            const pendingAmount = pendingRequests.reduce((sum: number, r: any) => sum + parseFloat(r.amount || 0), 0)
+            
+            if (pendingAmount > 0) {
+              return (
+                <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                  <p className="text-sm text-gray-700">
+                    <span className="font-semibold">Отправлено на запрос:</span>{' '}
+                    <span className="text-yellow-600 font-bold">{pendingAmount.toFixed(2)} BYN</span>
+                  </p>
+                  <p className="text-xs text-gray-600 mt-1">⏳ Ожидает подтверждения</p>
+                  <div className="mt-2 space-y-2">
+                    {pendingRequests.map((request: any) => (
+                      <div key={request.id} className="flex justify-between items-center bg-white/50 rounded p-2">
+                        <div className="flex-1">
+                          <p className="text-xs text-gray-700">
+                            {request.amount} BYN • {new Date(request.created_at).toLocaleString('ru-RU', {
+                              day: '2-digit',
+                              month: '2-digit',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </p>
+                        </div>
+                        <button
+                          onClick={async () => {
+                            if (!confirm('Отменить запрос на сдачу кассы?')) return
+                            try {
+                              const { error } = await supabase.rpc('cancel_cash_deposit_request', {
+                                request_id: request.id
+                              })
+                              if (error) {
+                                alert(`Ошибка: ${error.message}`)
+                              } else {
+                                loadData()
+                              }
+                            } catch (err: any) {
+                              alert(`Ошибка: ${err.message}`)
+                            }
+                          }}
+                          className="text-red-400 hover:text-red-300 text-xs font-medium ml-2"
+                        >
+                          Отменить
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )
+            }
+            return null
+          })()}
+          
           {profile?.organization_id && (
             <>
               <button
@@ -526,55 +581,6 @@ export default function DriverFinancePage() {
               >
                 Отправить запрос на сдачу кассы
               </button>
-              
-              {/* Запросы на сдачу кассы */}
-              {cashDepositRequests.length > 0 && (
-                <div className="mt-4">
-                  <h3 className="text-sm font-medium text-gray-700 mb-2">Запросы на сдачу кассы</h3>
-                  <div className="space-y-2">
-                    {cashDepositRequests.map((request: any) => (
-                      <div key={request.id} className="bg-gray-100 rounded p-3 text-sm">
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <p className="text-gray-900 font-medium">{request.amount} BYN</p>
-                            <p className="text-gray-600 text-xs">
-                              {request.status === 'pending' && '⏳ Ожидает принятия'}
-                              {request.status === 'approved' && '✅ Принято'}
-                              {request.status === 'rejected' && '❌ Отклонено'}
-                              {request.status === 'cancelled' && '🚫 Отменено'}
-                            </p>
-                            <p className="text-gray-500 text-xs">
-                              {new Date(request.created_at).toLocaleString('ru-RU')}
-                            </p>
-                          </div>
-                          {request.status === 'pending' && (
-                            <button
-                              onClick={async () => {
-                                if (!confirm('Отменить запрос на сдачу кассы?')) return
-                                try {
-                                  const { error } = await supabase.rpc('cancel_cash_deposit_request', {
-                                    request_id: request.id
-                                  })
-                                  if (error) {
-                                    alert(`Ошибка: ${error.message}`)
-                                  } else {
-                                    loadData()
-                                  }
-                                } catch (err: any) {
-                                  alert(`Ошибка: ${err.message}`)
-                                }
-                              }}
-                              className="text-red-400 hover:text-red-300 text-xs"
-                            >
-                              Отменить
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
             </>
           )}
         </div>
@@ -605,24 +611,19 @@ export default function DriverFinancePage() {
       {/* Неоплаченные заказы */}
       {unpaidOrders.length > 0 && (
         <div className="bg-gray-50 rounded-lg shadow p-6 mb-6">
-          <div className="flex justify-between items-center mb-4">
+          <div className="mb-4 flex items-center justify-between gap-4 flex-wrap">
             <h2 className="text-xl font-semibold text-gray-900">Неоплаченные заказы</h2>
-            <button
-              onClick={() => {
-                const filename = `Неоплаченные_заказы_${new Date().toISOString().split('T')[0]}`
-                exportOrdersToExcel(unpaidOrders, filename)
-              }}
-              className="bg-brand-light hover:bg-brand-dark text-white px-3 py-1.5 rounded text-xs font-medium transition flex items-center gap-1"
-              title="Экспорт неоплаченных заказов в Excel"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              Экспорт
-            </button>
+            <input
+              type="text"
+              placeholder="Поиск по номеру заказа..."
+              value={unpaidOrderSearch}
+              onChange={(e) => setUnpaidOrderSearch(e.target.value)}
+              className="flex-1 min-w-[200px] max-w-[300px] px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-light"
+            />
           </div>
           <div className="space-y-3">
-            {unpaidOrders.map((order: any) => (
+            {displayedUnpaidOrders.length > 0 ? (
+              displayedUnpaidOrders.map((order: any) => (
               <div key={order.id} className="border border-red-700 rounded-lg p-4 bg-red-900/10">
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
@@ -678,46 +679,74 @@ export default function DriverFinancePage() {
                           alert(`Ошибка: ${err.message || 'Не удалось обработать оплату'}`)
                         }
                       }}
-                      className="mt-2 bg-green-500 text-white px-3 py-1.5 rounded text-sm hover:bg-green-600 transition"
+                      className="mt-2 bg-green-300 text-gray-900 px-3 py-1.5 rounded text-sm hover:bg-green-400 transition"
                     >
                       Принять оплату
                     </button>
                   </div>
                 </div>
               </div>
-            ))}
+              ))
+            ) : (
+              <div className="text-center py-4 text-gray-600">
+                {unpaidOrderSearch.trim() ? 'Заказы с таким номером не найдены' : 'Нет неоплаченных заказов'}
+              </div>
+            )}
+            {hasMoreUnpaidOrders && (
+              <div className="mt-4 text-center">
+                <button
+                  onClick={() => setDisplayedUnpaidOrdersCount(prev => prev + 5)}
+                  className="bg-brand-light hover:bg-brand-dark text-gray-900 px-6 py-2 rounded-md transition"
+                >
+                  Загрузить еще
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
 
       {/* Модальное окно сдачи кассы */}
-      {showDepositModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-50 rounded-lg shadow-xl p-6 max-w-md w-full">
-            <h2 className="text-2xl font-bold mb-4 text-gray-900">Запрос на сдачу кассы</h2>
-            <p className="text-gray-700 mb-2">
-              Доступный баланс: <span className="text-brand-light font-semibold">
-                {balance?.amount ? parseFloat(balance.amount).toFixed(2) : '0.00'} BYN
-              </span>
-            </p>
-            <p className="text-gray-600 text-sm mb-4">
-              После отправки запроса деньги останутся на вашем балансе до принятия запроса организацией.
-            </p>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Сумма для сдачи
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                min="0.01"
-                max={balance?.amount || 0}
-                value={depositAmount}
-                onChange={(e) => setDepositAmount(e.target.value)}
-                placeholder="0.00"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-light"
-              />
-            </div>
+      {showDepositModal && (() => {
+        const pendingRequests = cashDepositRequests.filter((r: any) => r.status === 'pending')
+        const pendingAmount = pendingRequests.reduce((sum: number, r: any) => sum + parseFloat(r.amount || 0), 0)
+        const availableBalance = parseFloat(balance?.amount || 0) - pendingAmount
+        
+        return (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-gray-50 rounded-lg shadow-xl p-6 max-w-md w-full">
+              <h2 className="text-2xl font-bold mb-4 text-gray-900">Запрос на сдачу кассы</h2>
+              <p className="text-gray-700 mb-2">
+                <span className="text-green-600 font-semibold">Доступный баланс:</span> <span className="text-green-600 font-semibold">
+                  {balance?.amount ? parseFloat(balance.amount).toFixed(2) : '0.00'} BYN
+                </span>
+              </p>
+              {pendingAmount > 0 && (
+                <p className="text-gray-600 text-sm mb-1">
+                  Уже отправлено на запрос: <span className="font-semibold">{pendingAmount.toFixed(2)} BYN</span>
+                </p>
+              )}
+              <p className="text-gray-600 text-sm mb-2">
+                Доступно для нового запроса: <span className="font-semibold text-green-600">{availableBalance.toFixed(2)} BYN</span>
+              </p>
+              <p className="text-gray-600 text-sm mb-4">
+                После отправки запроса деньги останутся на вашем балансе до принятия запроса организацией.
+              </p>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Сумма для сдачи
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0.01"
+                  max={availableBalance}
+                  value={depositAmount}
+                  onChange={(e) => setDepositAmount(e.target.value)}
+                  placeholder="0.00"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-light"
+                />
+              </div>
             <div className="flex gap-3">
               <button
                 onClick={async () => {
@@ -726,8 +755,13 @@ export default function DriverFinancePage() {
                     alert('Введите корректную сумму')
                     return
                   }
-                  if (amount > parseFloat(balance?.amount || 0)) {
-                    alert('Недостаточно средств на балансе')
+                  // Проверяем доступный баланс с учетом уже отправленных запросов
+                  const pendingRequests = cashDepositRequests.filter((r: any) => r.status === 'pending')
+                  const pendingAmount = pendingRequests.reduce((sum: number, r: any) => sum + parseFloat(r.amount || 0), 0)
+                  const availableBalance = parseFloat(balance?.amount || 0) - pendingAmount
+                  
+                  if (amount > availableBalance) {
+                    alert(`Недостаточно средств. Доступно для нового запроса: ${availableBalance.toFixed(2)} BYN`)
                     return
                   }
                   
@@ -751,7 +785,7 @@ export default function DriverFinancePage() {
                     alert(`Ошибка: ${err.message || 'Не удалось создать запрос'}`)
                   }
                 }}
-                className="flex-1 bg-brand-light text-gray-900 px-4 py-2 rounded-md hover:bg-brand-dark transition"
+                className="flex-1 bg-green-300 text-gray-900 px-4 py-2 rounded-md hover:bg-green-400 transition"
               >
                 Отправить запрос
               </button>
@@ -760,38 +794,29 @@ export default function DriverFinancePage() {
                   setShowDepositModal(false)
                   setDepositAmount('')
                 }}
-                className="flex-1 bg-gray-600 text-gray-900 px-4 py-2 rounded-md hover:bg-gray-100 transition"
+                className="flex-1 bg-red-300 text-gray-900 px-4 py-2 rounded-md hover:bg-red-400 transition"
               >
                 Отмена
               </button>
             </div>
           </div>
         </div>
-      )}
+        )
+      })()}
 
       {/* Транзакции */}
       <div className="bg-gray-50 rounded-lg shadow p-6 mt-6">
-        <div className="flex justify-between items-center mb-4">
+        <div className="mb-4">
           <h2 className="text-xl font-semibold text-gray-900">История транзакций</h2>
-          <button
-            onClick={() => {
-              const filename = `Транзакции_${period}_${new Date().toISOString().split('T')[0]}`
-              exportTransactionsToExcel(transactions, filename)
-            }}
-            className="bg-brand-light hover:bg-brand-dark text-white px-3 py-1.5 rounded text-xs font-medium transition flex items-center gap-1"
-            title="Экспорт транзакций в Excel"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            Экспорт
-          </button>
         </div>
         
         {/* Фильтр транзакций */}
         <div className="flex gap-2 mb-4">
           <button
-            onClick={() => setTransactionFilter('all')}
+            onClick={() => {
+              setTransactionFilter('all')
+              setDisplayedTransactionsCount(10) // Сбрасываем счетчик при смене фильтра
+            }}
             className={`px-4 py-2 rounded-md transition text-sm ${
               transactionFilter === 'all'
                 ? 'bg-brand-light text-gray-900'
@@ -801,7 +826,10 @@ export default function DriverFinancePage() {
             Все операции
           </button>
           <button
-            onClick={() => setTransactionFilter('credit')}
+            onClick={() => {
+              setTransactionFilter('credit')
+              setDisplayedTransactionsCount(10) // Сбрасываем счетчик при смене фильтра
+            }}
             className={`px-4 py-2 rounded-md transition text-sm ${
               transactionFilter === 'credit'
                 ? 'bg-green-500 text-white'
@@ -811,7 +839,10 @@ export default function DriverFinancePage() {
             Только приход
           </button>
           <button
-            onClick={() => setTransactionFilter('debit')}
+            onClick={() => {
+              setTransactionFilter('debit')
+              setDisplayedTransactionsCount(10) // Сбрасываем счетчик при смене фильтра
+            }}
             className={`px-4 py-2 rounded-md transition text-sm ${
               transactionFilter === 'debit'
                 ? 'bg-red-500 text-white'
@@ -830,26 +861,41 @@ export default function DriverFinancePage() {
             return true
           })
           
+          const displayedTransactions = filteredTransactions.slice(0, displayedTransactionsCount)
+          const hasMore = filteredTransactions.length > displayedTransactionsCount
+          
           return filteredTransactions && filteredTransactions.length > 0 ? (
-            <div className="space-y-2">
-              {filteredTransactions.map((transaction: any) => (
-              <div key={transaction.id} className="border-b border-gray-200 pb-2">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="font-medium text-gray-900">{transaction.description}</p>
-                    <p className="text-sm text-gray-600">
-                      {new Date(transaction.created_at).toLocaleString('ru-RU')}
+            <>
+              <div className="space-y-2">
+                {displayedTransactions.map((transaction: any) => (
+                <div key={transaction.id} className="border-b border-gray-200 pb-2">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="font-medium text-gray-900">{transaction.description}</p>
+                      <p className="text-sm text-gray-600">
+                        {new Date(transaction.created_at).toLocaleString('ru-RU')}
+                      </p>
+                    </div>
+                    <p className={`font-semibold ${
+                      transaction.type === 'credit' ? 'text-green-600' : 'text-red-400'
+                    }`}>
+                      {transaction.type === 'credit' ? '+' : '-'}{transaction.amount} BYN
                     </p>
                   </div>
-                  <p className={`font-semibold ${
-                    transaction.type === 'credit' ? 'text-green-600' : 'text-red-400'
-                  }`}>
-                    {transaction.type === 'credit' ? '+' : '-'}{transaction.amount} BYN
-                  </p>
                 </div>
+                ))}
               </div>
-              ))}
-            </div>
+              {hasMore && (
+                <div className="mt-4 text-center">
+                  <button
+                    onClick={() => setDisplayedTransactionsCount(prev => prev + 10)}
+                    className="bg-brand-light hover:bg-brand-dark text-gray-900 px-6 py-2 rounded-md transition"
+                  >
+                    Загрузить еще
+                  </button>
+                </div>
+              )}
+            </>
           ) : (
             <p className="text-gray-600">
               {transactions && transactions.length > 0 

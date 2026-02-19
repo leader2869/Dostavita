@@ -270,7 +270,7 @@ export function PaymentModal({ order, isOpen, onClose, onSuccess }: PaymentModal
           <button
             onClick={() => handlePayment(true)}
             disabled={processing}
-            className="flex-1 bg-brand-light hover:bg-brand-dark text-gray-900 font-semibold py-3 px-4 rounded-md transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 bg-green-300 hover:bg-green-400 text-gray-900 font-semibold py-3 px-4 rounded-md transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {processing ? 'Обработка...' : 'Принял оплату'}
           </button>
@@ -278,7 +278,7 @@ export function PaymentModal({ order, isOpen, onClose, onSuccess }: PaymentModal
           <button
             onClick={() => handlePayment(false)}
             disabled={processing}
-            className="flex-1 bg-red-600 hover:bg-red-700 text-gray-900 font-semibold py-3 px-4 rounded-md transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 bg-red-300 hover:bg-red-400 text-gray-900 font-semibold py-3 px-4 rounded-md transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {processing ? 'Обработка...' : 'Заказ не оплачен'}
           </button>

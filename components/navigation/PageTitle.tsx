@@ -43,7 +43,7 @@ export function PageTitle() {
       return 'Финансы'
     }
     if (pathname.startsWith('/dashboard/driver/my-orders')) {
-      return 'Мои заказы'
+      return 'История'
     }
     if (pathname === '/dashboard/driver' || pathname === '/dashboard/driver/') {
       return 'Главная'

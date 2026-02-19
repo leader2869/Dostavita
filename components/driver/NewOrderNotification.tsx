@@ -1,22 +1,40 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { formatAddressForOrder } from '@/lib/utils/formatAddress'
 import { AcceptOrderModal } from './AcceptOrderModal'
 
 export function NewOrderNotification() {
   const supabase = createClient()
-  const router = useRouter()
-  const [showModal, setShowModal] = useState(false)
   const [newOrder, setNewOrder] = useState<any>(null)
   const [hasActiveOrder, setHasActiveOrder] = useState(false)
-  const [processing, setProcessing] = useState(false)
   const [isDriver, setIsDriver] = useState(false)
   const [showAcceptModal, setShowAcceptModal] = useState(false)
   const shownOrderIdsRef = useRef<Set<string>>(new Set())
   const checkIntervalRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Загружаем показанные заказы из sessionStorage при монтировании
+  useEffect(() => {
+    try {
+      const stored = sessionStorage.getItem('driver_shown_order_ids')
+      if (stored) {
+        const ids = JSON.parse(stored)
+        shownOrderIdsRef.current = new Set(ids)
+      }
+    } catch (err) {
+      console.error('Ошибка загрузки показанных заказов из sessionStorage:', err)
+    }
+  }, [])
+
+  // Сохраняем показанные заказы в sessionStorage
+  const saveShownOrderIds = useCallback(() => {
+    try {
+      const ids = Array.from(shownOrderIdsRef.current)
+      sessionStorage.setItem('driver_shown_order_ids', JSON.stringify(ids))
+    } catch (err) {
+      console.error('Ошибка сохранения показанных заказов в sessionStorage:', err)
+    }
+  }, [])
 
   // Проверяем наличие активных заказов
   const checkActiveOrders = useCallback(async (userId: string) => {
@@ -88,15 +106,16 @@ export function NewOrderNotification() {
 
       // Проверяем, это новый заказ (не тот, который мы уже показывали)
       // И модальное окно не должно быть уже открыто
-      if (!shownOrderIdsRef.current.has(latestOrder.id) && !showModal) {
+      if (!shownOrderIdsRef.current.has(latestOrder.id) && !showAcceptModal) {
         setNewOrder(latestOrder)
-        setShowModal(true)
+        setShowAcceptModal(true)
         shownOrderIdsRef.current.add(latestOrder.id)
+        saveShownOrderIds()
       }
     } catch (err) {
       console.error('Ошибка проверки новых заказов:', err)
     }
-  }, [supabase, checkActiveOrders])
+  }, [supabase, checkActiveOrders, saveShownOrderIds, showAcceptModal])
 
   // Проверяем роль пользователя
   useEffect(() => {
@@ -123,6 +142,40 @@ export function NewOrderNotification() {
 
     checkRole()
   }, [])
+
+  // Подписка на изменения статуса заказа в реальном времени
+  useEffect(() => {
+    if (!newOrder || !showAcceptModal) return
+
+    const channel = supabase
+      .channel(`order-${newOrder.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'orders',
+          filter: `id=eq.${newOrder.id}`,
+        },
+        (payload) => {
+          const updatedOrder = payload.new as any
+          // Если заказ принят другим водителем (статус изменился с searching_courier)
+          if (updatedOrder.status !== 'searching_courier') {
+            console.log('Заказ принят другим водителем, закрываем модальное окно')
+            // Помечаем заказ как показанный
+            shownOrderIdsRef.current.add(newOrder.id)
+            saveShownOrderIds()
+            setShowAcceptModal(false)
+            setNewOrder(null)
+          }
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [newOrder, showAcceptModal, supabase, saveShownOrderIds])
 
   // Основной цикл проверки
   useEffect(() => {
@@ -162,146 +215,67 @@ export function NewOrderNotification() {
     }
   }, [isDriver, checkNewAvailableOrders])
 
-  const handleAccept = () => {
-    if (!newOrder || processing) return
-    setShowModal(false)
-    setShowAcceptModal(true)
-  }
+  // Проверяем статус заказа перед показом модального окна
+  useEffect(() => {
+    if (!newOrder || !showAcceptModal) return
 
-  const handleReject = async () => {
-    if (!newOrder || processing) return
+    const checkOrderStatus = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('orders')
+          .select('status, executor_user_id')
+          .eq('id', newOrder.id)
+          .single()
 
-    setProcessing(true)
-    try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+        if (error) {
+          console.error('Ошибка проверки статуса заказа:', error)
+          return
+        }
 
-      // Отклоняем заказ
-      const response = await fetch('/api/driver/reject-order', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId: newOrder.id }),
-      })
-
-      if (response.ok) {
-        setShowModal(false)
-        setNewOrder(null)
-        // Заказ уже в shownOrderIdsRef, поэтому не будет показан снова
-      } else {
-        const data = await response.json()
-        alert(data.error || 'Ошибка при отклонении заказа')
+        // Если заказ уже принят (статус не searching_courier), закрываем модальное окно
+        if (data && data.status !== 'searching_courier') {
+          console.log('Заказ уже принят, закрываем модальное окно')
+          shownOrderIdsRef.current.add(newOrder.id)
+          saveShownOrderIds()
+          setShowAcceptModal(false)
+          setNewOrder(null)
+        }
+      } catch (err) {
+        console.error('Ошибка проверки статуса заказа:', err)
       }
-    } catch (err) {
-      console.error('Ошибка при отклонении заказа:', err)
-      alert('Ошибка при отклонении заказа')
-    } finally {
-      setProcessing(false)
     }
-  }
 
-  const handleClose = () => {
-    setShowModal(false)
-    // Заказ уже в shownOrderIdsRef, поэтому не будет показан снова
-    // Просто очищаем состояние
-    setNewOrder(null)
-  }
+    // Проверяем статус сразу при открытии модального окна
+    checkOrderStatus()
 
-  if (!showModal || !newOrder) return null
+    // И проверяем каждые 2 секунды, пока модальное окно открыто
+    const statusCheckInterval = setInterval(checkOrderStatus, 2000)
+
+    return () => {
+      clearInterval(statusCheckInterval)
+    }
+  }, [newOrder, showAcceptModal, supabase, saveShownOrderIds])
+
+  if (!showAcceptModal || !newOrder) return null
 
   return (
     <>
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100] p-4" onClick={handleClose}>
-        <div className="bg-gray-50 rounded-lg shadow-xl max-w-md w-full" onClick={(e) => e.stopPropagation()}>
-          {/* Заголовок */}
-          <div className="p-4 border-b border-gray-200 flex justify-between items-center">
-            <h3 className="text-xl font-semibold text-gray-900">Новый доступный заказ</h3>
-            <button
-              onClick={handleClose}
-              className="text-gray-600 hover:text-gray-900 transition"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-
-          {/* Информация о заказе */}
-          <div className="p-6 space-y-4">
-            <div>
-              <p className="text-sm text-gray-600">Номер заказа</p>
-              <p className="text-lg font-semibold text-gray-900">
-                Заказ №{newOrder.order_number || newOrder.id.slice(0, 8)}
-              </p>
-            </div>
-
-            <div>
-              <p className="text-sm text-gray-600">Откуда</p>
-              <p className="text-gray-900">{formatAddressForOrder(newOrder.pickup_address)}</p>
-            </div>
-
-            <div>
-              <p className="text-sm text-gray-600">Куда</p>
-              <p className="text-gray-900">{formatAddressForOrder(newOrder.delivery_address)}</p>
-            </div>
-
-            {newOrder.item_type && (
-              <div>
-                <p className="text-sm text-gray-600">Тип груза</p>
-                <p className="text-gray-900">
-                  {newOrder.item_type === 'documents' ? 'Документы' :
-                   newOrder.item_type === 'parcel' ? 'Посылка' :
-                   newOrder.item_type === 'flowers' ? 'Цветы' :
-                   newOrder.item_type === 'food' ? 'Еда' :
-                   newOrder.item_type === 'other' ? 'Другое' : 'Не указан'}
-                </p>
-              </div>
-            )}
-
-            {newOrder.description && (
-              <div>
-                <p className="text-sm text-gray-600">Описание</p>
-                <p className="text-gray-900 italic">{newOrder.description}</p>
-              </div>
-            )}
-
-            <div>
-              <p className="text-sm text-gray-600">Стоимость</p>
-              <p className="text-2xl font-bold text-brand-light">{newOrder.final_price} BYN</p>
-            </div>
-          </div>
-
-          {/* Кнопки */}
-          <div className="p-4 border-t border-gray-200 flex gap-3">
-            <button
-              onClick={handleAccept}
-              disabled={processing}
-              className="flex-1 bg-green-300 hover:bg-green-400 text-gray-900 px-4 py-3 rounded transition disabled:opacity-50"
-            >
-              Принять заказ
-            </button>
-            <button
-              onClick={handleReject}
-              disabled={processing}
-              className="flex-1 bg-red-300 hover:bg-red-400 text-gray-900 px-4 py-3 rounded transition disabled:opacity-50"
-            >
-              Отказаться
-            </button>
-          </div>
-        </div>
-      </div>
-
       {/* Модальное окно подтверждения принятия заказа */}
       {showAcceptModal && newOrder && (
         <AcceptOrderModal
           orderId={newOrder.id}
           onClose={() => {
+            // Помечаем заказ как показанный при закрытии
+            shownOrderIdsRef.current.add(newOrder.id)
+            saveShownOrderIds()
             setShowAcceptModal(false)
-            setShowModal(false)
             setNewOrder(null)
           }}
           onSuccess={() => {
+            // Помечаем заказ как показанный при успешном принятии
+            shownOrderIdsRef.current.add(newOrder.id)
+            saveShownOrderIds()
             setShowAcceptModal(false)
-            setShowModal(false)
             setNewOrder(null)
           }}
         />

@@ -15,6 +15,11 @@ export default function DriverRequestsPage() {
   const [loading, setLoading] = useState(true)
   const [responding, setResponding] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [isMounted, setIsMounted] = useState(false)
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   const loadRequests = useCallback(async () => {
     try {
@@ -122,7 +127,9 @@ export default function DriverRequestsPage() {
                     </div>
                   )}
                   <p className="text-gray-500 text-xs mt-3">
-                    Получен: {formatDistanceToNow(new Date(request.created_at), { addSuffix: true, locale: ru })}
+                    Получен: <span suppressHydrationWarning>
+                      {isMounted ? formatDistanceToNow(new Date(request.created_at), { addSuffix: true, locale: ru }) : ''}
+                    </span>
                   </p>
                 </div>
               </div>
@@ -131,14 +138,14 @@ export default function DriverRequestsPage() {
                 <button
                   onClick={() => handleRespond(request.id, 'accepted')}
                   disabled={responding === request.id}
-                  className="flex-1 bg-brand-light text-gray-900 px-4 py-2 rounded-md hover:bg-brand-dark disabled:opacity-50 transition"
+                  className="flex-1 bg-green-300 text-gray-900 px-4 py-2 rounded-md hover:bg-green-400 disabled:opacity-50 transition"
                 >
                   {responding === request.id ? 'Обработка...' : 'Принять'}
                 </button>
                 <button
                   onClick={() => handleRespond(request.id, 'rejected')}
                   disabled={responding === request.id}
-                  className="flex-1 bg-red-600 text-gray-900 px-4 py-2 rounded-md hover:bg-red-700 disabled:opacity-50 transition"
+                  className="flex-1 bg-red-300 text-gray-900 px-4 py-2 rounded-md hover:bg-red-400 disabled:opacity-50 transition"
                 >
                   {responding === request.id ? 'Обработка...' : 'Отклонить'}
                 </button>

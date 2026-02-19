@@ -390,9 +390,9 @@ export default function OrderDetailsPage() {
       {/* Карта прогресса - закреплена вверху, всегда видна */}
       <OrderStatusProgress status={order.status} variant="connected" />
       
-      {/* Кнопки действий - справа снизу, всегда закреплены */}
-      {order && (
-        <div className="fixed bottom-24 right-4 z-[100]">
+      {/* Кнопки действий - справа снизу, всегда закреплены (только для активных заказов) */}
+      {order && order.status !== 'completed' && order.status !== 'cancelled' && (
+        <div className="fixed bottom-24 right-2 z-[100]">
           <OrderActions order={order} vertical={true} />
         </div>
       )}
@@ -426,21 +426,26 @@ export default function OrderDetailsPage() {
                 {order.delivery_apartment && `Квартира ${order.delivery_apartment}`}
               </p>
             )}
-            {order.sender_phone && (
-              <p className="text-sm text-gray-700 mt-1 ml-4">
-                <strong>Телефон отправителя:</strong>{' '}
-                <a href={`tel:${order.sender_phone}`} className="text-brand-light hover:text-brand-light font-medium">
-                  {order.sender_phone}
-                </a>
-              </p>
-            )}
-            {order.recipient_phone && (
-              <p className="text-sm text-gray-700 mt-1 ml-4">
-                <strong>Телефон получателя:</strong>{' '}
-                <a href={`tel:${order.recipient_phone}`} className="text-brand-light hover:text-brand-light font-medium">
-                  {order.recipient_phone}
-                </a>
-              </p>
+            {/* Телефоны показываем только для активных заказов */}
+            {order.status !== 'completed' && order.status !== 'cancelled' && (
+              <>
+                {order.sender_phone && (
+                  <p className="text-sm text-gray-700 mt-1 ml-4">
+                    <strong>Телефон отправителя:</strong>{' '}
+                    <a href={`tel:${order.sender_phone}`} className="text-brand-light hover:text-brand-light font-medium">
+                      {order.sender_phone}
+                    </a>
+                  </p>
+                )}
+                {order.recipient_phone && (
+                  <p className="text-sm text-gray-700 mt-1 ml-4">
+                    <strong>Телефон получателя:</strong>{' '}
+                    <a href={`tel:${order.recipient_phone}`} className="text-brand-light hover:text-brand-light font-medium">
+                      {order.recipient_phone}
+                    </a>
+                  </p>
+                )}
+              </>
             )}
           </div>
         </div>

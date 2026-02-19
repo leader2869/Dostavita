@@ -9,7 +9,7 @@ import { formatAddressForOrder } from '@/lib/utils/formatAddress'
 import { OrderActions } from '@/components/driver/OrderActions'
 import { formatReadyTime } from '@/lib/utils/formatReadyTime'
 
-type Period = 'today' | 'yesterday' | 'week' | 'month' | 'all'
+type Period = 'today' | 'yesterday' | 'week' | 'all'
 
 export default function DriverMyOrdersPage() {
   const router = useRouter()
@@ -40,13 +40,6 @@ export default function DriverMyOrdersPage() {
         const weekEnd = new Date(now)
         weekEnd.setHours(23, 59, 59, 999)
         return { start: weekStart.toISOString(), end: weekEnd.toISOString() }
-      case 'month':
-        const monthStart = new Date(now)
-        monthStart.setMonth(now.getMonth() - 1)
-        monthStart.setHours(0, 0, 0, 0)
-        const monthEnd = new Date(now)
-        monthEnd.setHours(23, 59, 59, 999)
-        return { start: monthStart.toISOString(), end: monthEnd.toISOString() }
       case 'all':
       default:
         return { start: null, end: null }
@@ -169,7 +162,7 @@ export default function DriverMyOrdersPage() {
     const isActive = order.status === 'courier_accepted' || order.status === 'courier_coming' || order.status === 'courier_delivering'
     // Легкая зеленая заливка для завершенных оплаченных заказов
     const isCompletedAndPaid = order.status === 'completed' && order.is_paid === true
-    // Легкая желтая заливка для неоплаченных заказов
+    // Легкая красная заливка для неоплаченных заказов
     const isUnpaid = order.status === 'completed' && (order.is_paid === false || order.is_paid === null)
     // Легкая красная заливка для отмененных заказов
     const isCancelled = order.status === 'cancelled'
@@ -183,7 +176,7 @@ export default function DriverMyOrdersPage() {
             : isCompletedAndPaid 
             ? 'bg-green-100/40' 
             : isUnpaid 
-            ? 'bg-yellow-100/40' 
+            ? 'bg-red-100/40' 
             : 'bg-gray-50'
         }`}
       >
@@ -204,6 +197,11 @@ export default function DriverMyOrdersPage() {
                 >
                   {getStatusLabel(order.status)}
                 </span>
+                {isUnpaid && (
+                  <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold border bg-red-200/50 text-red-700 border-red-300/50">
+                    Заказ не оплачен
+                  </span>
+                )}
               </div>
               <p className="text-sm text-gray-700 mb-1">
                 <span className="font-medium">Откуда:</span> {formatAddressForOrder(order.pickup_address)}
@@ -303,16 +301,6 @@ export default function DriverMyOrdersPage() {
             }`}
           >
             Неделя
-          </button>
-          <button
-            onClick={() => setPeriod('month')}
-            className={`px-4 py-2 rounded-md transition ${
-              period === 'month'
-                ? 'bg-brand-light text-gray-900'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            Месяц
           </button>
           <button
             onClick={() => setPeriod('all')}

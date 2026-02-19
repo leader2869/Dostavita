@@ -400,14 +400,14 @@ export default function CreateOrderPage() {
           <button
             type="submit"
             disabled={loading}
-            className="flex-1 bg-brand-light text-gray-900 px-6 py-2 rounded-md hover:bg-brand-dark disabled:opacity-50"
+            className="flex-1 bg-green-300 text-gray-900 px-6 py-2 rounded-md hover:bg-green-400 disabled:opacity-50"
           >
             {loading ? 'Создание...' : 'Создать заказ'}
           </button>
           <button
             type="button"
             onClick={() => router.back()}
-            className="px-6 py-2 border border-gray-300 rounded-md hover:bg-white"
+            className="px-6 py-2 bg-red-300 text-gray-900 rounded-md hover:bg-red-400"
           >
             Отмена
           </button>

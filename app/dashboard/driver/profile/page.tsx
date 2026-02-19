@@ -275,7 +275,7 @@ export default function DriverProfilePage() {
             type="text"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-900"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900"
             placeholder="Иванов Иван Иванович"
           />
         </div>
@@ -289,7 +289,7 @@ export default function DriverProfilePage() {
             type="tel"
             value={phone}
             disabled
-            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-600"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-600"
             placeholder="+375 (XX) XXX-XX-XX"
           />
           <p className="text-xs text-gray-600 mt-1">Телефон нельзя изменить. Для изменения обратитесь к администратору.</p>
@@ -326,7 +326,7 @@ export default function DriverProfilePage() {
             value={vehicleType}
             onChange={(e) => setVehicleType(e.target.value)}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-900"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900"
           >
             <option value="">Выберите тип</option>
             <option value="car">Легковой автомобиль</option>
@@ -356,7 +356,7 @@ export default function DriverProfilePage() {
                   setVehicleModel('')
                 }
               }}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-900"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900"
               placeholder="Toyota Camry, BMW X5, Honda CBR600"
             />
           </div>
@@ -370,7 +370,7 @@ export default function DriverProfilePage() {
             type="text"
             value={vehicleNumber}
             onChange={(e) => setVehicleNumber(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-900"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900"
             placeholder="1234 AB-7"
           />
         </div>
@@ -383,14 +383,14 @@ export default function DriverProfilePage() {
           <button
             type="submit"
             disabled={saving}
-            className="flex-1 bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 disabled:opacity-50"
+            className="flex-1 bg-green-300 text-gray-900 px-6 py-2 rounded-md hover:bg-green-400 disabled:opacity-50"
           >
             {saving ? 'Сохранение...' : saved ? 'Изменения сохранены' : 'Сохранить'}
           </button>
           <button
             type="button"
             onClick={() => router.back()}
-            className="px-6 py-2 border border-gray-300 rounded-md hover:bg-white"
+            className="px-6 py-2 bg-red-300 text-gray-900 rounded-md hover:bg-red-400"
           >
             Отмена
           </button>
@@ -447,14 +447,14 @@ export default function DriverProfilePage() {
                       <button
                         onClick={() => handleRespondToRequest(request.id, 'accepted')}
                         disabled={responding === request.id}
-                        className="bg-brand-light text-gray-900 px-4 py-2 rounded text-sm hover:bg-brand-dark disabled:opacity-50 transition"
+                        className="bg-green-300 text-gray-900 px-4 py-2 rounded text-sm hover:bg-green-400 disabled:opacity-50 transition"
                       >
                         {responding === request.id ? 'Обработка...' : 'Принять'}
                       </button>
                       <button
                         onClick={() => handleRespondToRequest(request.id, 'rejected')}
                         disabled={responding === request.id}
-                        className="bg-red-600 text-gray-900 px-4 py-2 rounded text-sm hover:bg-red-700 disabled:opacity-50 transition"
+                        className="bg-red-300 text-gray-900 px-4 py-2 rounded text-sm hover:bg-red-400 disabled:opacity-50 transition"
                       >
                         {responding === request.id ? 'Обработка...' : 'Отклонить'}
                       </button>

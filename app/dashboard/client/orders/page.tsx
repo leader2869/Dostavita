@@ -216,7 +216,7 @@ export default function ClientOrdersPage() {
                   alert('Произошла ошибка при отмене заказа')
                 }
               }}
-              className="flex-1 bg-red-600 text-gray-900 px-3 py-1.5 rounded text-xs hover:bg-red-700 transition"
+              className="flex-1 bg-red-300 text-gray-900 px-3 py-1.5 rounded text-xs hover:bg-red-400 transition"
             >
               Отменить заказ
             </button>

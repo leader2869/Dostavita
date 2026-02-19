@@ -447,7 +447,7 @@ export default function CustomerFinancePage() {
                             alert(`Ошибка: ${err.message || 'Не удалось принять запрос'}`)
                           }
                         }}
-                        className="bg-brand-light text-gray-900 px-4 py-2 rounded text-sm hover:bg-brand-dark transition"
+                        className="bg-green-300 text-gray-900 px-4 py-2 rounded text-sm hover:bg-green-400 transition"
                       >
                         Принять
                       </button>
@@ -473,7 +473,7 @@ export default function CustomerFinancePage() {
                             alert(`Ошибка: ${err.message || 'Не удалось отклонить запрос'}`)
                           }
                         }}
-                        className="bg-red-600 text-gray-900 px-4 py-2 rounded text-sm hover:bg-red-700 transition"
+                        className="bg-red-300 text-gray-900 px-4 py-2 rounded text-sm hover:bg-red-400 transition"
                       >
                         Отклонить
                       </button>

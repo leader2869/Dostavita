@@ -348,7 +348,7 @@ export default function CustomerDriversPage() {
                   )}
                   <button
                     onClick={() => handleDetachDriver(driver.id)}
-                    className="px-3 py-2 bg-red-600 text-gray-900 rounded text-sm hover:bg-red-700 transition"
+                    className="px-3 py-2 bg-red-300 text-gray-900 rounded text-sm hover:bg-red-400 transition"
                     title="Отвязать водителя"
                   >
                     ✕
@@ -674,7 +674,7 @@ export default function CustomerDriversPage() {
                       setNewDriverVehicleNumber('')
                       setNewDriverLicenseNumber('')
                     }}
-                    className="px-6 py-2 border border-gray-300 rounded-md hover:bg-gray-100 text-gray-900 transition"
+                    className="px-6 py-2 bg-red-300 text-gray-900 rounded-md hover:bg-red-400 transition"
                   >
                     Отмена
                   </button>

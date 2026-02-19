@@ -53,8 +53,14 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
   const [rejectedOrderIds, setRejectedOrderIds] = useState<Set<string>>(new Set())
   const [showCancelled, setShowCancelled] = useState(false)
   const [acceptOrderId, setAcceptOrderId] = useState<string | null>(null)
+  const [isMounted, setIsMounted] = useState(false)
   // Используем ref для отслеживания отклоненных заказов, которые не должны возвращаться
   const rejectedOrderIdsRef = useRef<Set<string>>(new Set())
+
+  // Устанавливаем флаг монтирования для избежания ошибок гидратации
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   // Отладка: логируем cancelledOrders (скрытые заказы)
   useEffect(() => {
@@ -197,7 +203,7 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
   const renderOrderCard = (order: Order, isHidden: boolean = false) => (
     <div
       key={order.id}
-      className={`border rounded-lg p-4 cursor-pointer hover:bg-gray-100 transition ${isHidden ? 'border-yellow-600 bg-yellow-900/20' : 'border-gray-200'}`}
+      className={`border rounded-lg p-4 cursor-pointer hover:bg-gray-100 transition ${isHidden ? 'border-gray-300 bg-gray-200' : 'border-gray-200'}`}
     >
           <div className="flex justify-between items-start mb-3">
             <div className="flex-1">
@@ -229,11 +235,11 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
                   })}
                 </span>
                 {' • '}
-                <span className="text-purple-400 font-medium animate-blink">
-                  {formatDistanceToNow(new Date(order.created_at), {
+                <span className="text-purple-400 font-medium animate-blink" suppressHydrationWarning>
+                  {isMounted ? formatDistanceToNow(new Date(order.created_at), {
                     addSuffix: true,
                     locale: ru
-                  })}
+                  }) : ''}
                 </span>
               </p>
               {order.description && (

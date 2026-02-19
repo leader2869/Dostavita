@@ -413,7 +413,7 @@ export default function ClientDashboard() {
         <div className="grid grid-cols-2 gap-4">
           <a
             href="/dashboard/client/create-order"
-            className="bg-green-500 text-white p-4 rounded-lg text-center hover:bg-green-600 transition flex items-center justify-center"
+            className="bg-green-300 text-gray-900 p-4 rounded-lg text-center hover:bg-green-400 transition flex items-center justify-center"
           >
             <span className="leading-tight">
               Создать<br />заказ
@@ -543,7 +543,7 @@ export default function ClientDashboard() {
                             alert('Произошла ошибка при отмене заказа')
                           }
                         }}
-                        className="flex-1 bg-red-600 text-gray-900 px-3 py-1.5 rounded text-xs hover:bg-red-700 transition"
+                        className="flex-1 bg-red-300 text-gray-900 px-3 py-1.5 rounded text-xs hover:bg-red-400 transition"
                       >
                         Отменить заказ
                       </button>
@@ -811,14 +811,14 @@ export default function ClientDashboard() {
                     setIsDefault(false)
                     setError(null)
                   }}
-                  className="px-6 py-2 border border-gray-300 rounded-md hover:bg-gray-100 text-gray-900 transition"
+                  className="px-6 py-2 bg-red-300 text-gray-900 rounded-md hover:bg-red-400 transition"
                 >
                   Отмена
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="bg-brand-light text-gray-900 px-6 py-2 rounded-md hover:bg-brand-dark disabled:opacity-50 transition"
+                  className="bg-green-300 text-gray-900 px-6 py-2 rounded-md hover:bg-green-400 disabled:opacity-50 transition"
                 >
                   {saving ? 'Сохранение...' : 'Сохранить адрес'}
                 </button>
@@ -886,7 +886,7 @@ export default function ClientDashboard() {
                 <button
                   type="button"
                   onClick={() => setShowMapPicker(false)}
-                  className="px-6 py-2 border border-gray-300 rounded-md hover:bg-gray-100 text-gray-900 transition"
+                  className="px-6 py-2 bg-red-300 text-gray-900 rounded-md hover:bg-red-400 transition"
                 >
                   Отмена
                 </button>

@@ -72,8 +72,8 @@ export function DriverBottomNavigation() {
 
   const handleActiveOrderClick = () => {
     if (activeOrders.length === 0) {
-      // Если нет активных заказов, переходим на страницу заказов
-      router.push('/dashboard/driver/my-orders')
+      // Если нет активных заказов, переходим на главную
+      router.push('/dashboard/driver')
       return
     }
 

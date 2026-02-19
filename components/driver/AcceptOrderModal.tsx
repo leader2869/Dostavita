@@ -73,10 +73,43 @@ export function AcceptOrderModal({ orderId, onClose, onSuccess }: AcceptOrderMod
 
     try {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('Не авторизован')
+      if (!user) {
+        throw new Error('Не авторизован')
+      }
+
+      console.log('=== Accepting order ===')
+      console.log('Order ID:', orderId)
+      console.log('User ID:', user.id)
+      console.log('Order status:', order?.status)
+      console.log('Driver profile:', driver ? 'Found' : 'Not found')
+
+      // Проверяем статус заказа перед принятием
+      const { data: orderCheck, error: orderCheckError } = await supabase
+        .from('orders')
+        .select('id, status, executor_user_id')
+        .eq('id', orderId)
+        .single()
+
+      if (orderCheckError) {
+        console.error('Error checking order:', orderCheckError)
+        throw new Error('Не удалось проверить статус заказа')
+      }
+
+      console.log('Order before accept:', orderCheck)
+
+      // Если заказ уже принят другим водителем
+      if (orderCheck?.executor_user_id && orderCheck.executor_user_id !== user.id) {
+        throw new Error('Заказ уже принят другим водителем')
+      }
+
+      // Проверяем, что заказ имеет правильный статус для принятия
+      if (orderCheck?.status !== 'searching_courier' && orderCheck?.status !== 'cancelled') {
+        throw new Error(`Заказ не может быть принят. Текущий статус: ${orderCheck?.status}`)
+      }
 
       // Если заказ отменен, сначала активируем его (меняем статус на searching_courier)
-      if (isReactivating && order?.status === 'cancelled') {
+      if (order?.status === 'cancelled') {
+        console.log('Reactivating cancelled order...')
         const { error: reactivateError } = await supabase
           .from('orders')
           .update({ 
@@ -86,33 +119,45 @@ export function AcceptOrderModal({ orderId, onClose, onSuccess }: AcceptOrderMod
           .eq('id', orderId)
         
         if (reactivateError) {
+          console.error('Error reactivating order:', reactivateError)
           throw reactivateError
         }
       }
 
+      // Вызываем RPC для принятия заказа
+      console.log('Calling accept_order RPC...')
       const { data, error: rpcError } = await supabase.rpc('accept_order', {
         order_uuid: orderId,
         driver_user_uuid: user.id,
       })
 
+      console.log('RPC result:', { data, error: rpcError })
+
       if (rpcError) {
-        throw rpcError
+        console.error('RPC Error details:', JSON.stringify(rpcError, null, 2))
+        throw new Error(rpcError.message || 'Ошибка при принятии заказа')
       }
 
       if (data === false || data === null) {
-        throw new Error('Не удалось принять заказ. Убедитесь, что заказ доступен и у вас заполнен профиль водителя.')
+        console.error('RPC returned false/null')
+        throw new Error('Не удалось принять заказ. Убедитесь, что заказ доступен и у вас заполнен профиль водителя (тип транспорта и номер водительского удостоверения).')
       }
+
+      console.log('Order accepted successfully!')
       
-      // После успешного принятия заказа закрываем модальное окно и перенаправляем
-      onClose()
+      // После успешного принятия заказа перенаправляем на детали заказа
       if (onSuccess) {
         onSuccess()
       }
-      router.push(`/dashboard/driver/orders/${orderId}`)
+      // Используем полный редирект для гарантированного перехода
+      // Модальное окно закроется автоматически при переходе на другую страницу
+      window.location.href = `/dashboard/driver/orders/${orderId}`
     } catch (err: any) {
       console.error('Ошибка при принятии заказа:', err)
-      setError(err.message || 'Не удалось принять заказ')
+      const errorMessage = err.message || 'Не удалось принять заказ'
+      setError(errorMessage)
       setAccepting(false)
+      // Не делаем редирект при ошибке
     }
   }
 
@@ -179,7 +224,7 @@ export function AcceptOrderModal({ orderId, onClose, onSuccess }: AcceptOrderMod
       <div className="bg-gray-50 rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
         {/* Заголовок */}
         <div className="p-4 border-b border-gray-200 flex justify-between items-center">
-          <h3 className="text-xl font-semibold text-gray-900">Принять заказ</h3>
+          <h3 className="text-xl font-semibold text-gray-900" style={{ fontFamily: 'var(--font-amatic-sc), cursive' }}>Просто!Новый заказ</h3>
           <button
             onClick={onClose}
             className="text-gray-600 hover:text-gray-900 transition"
@@ -193,7 +238,7 @@ export function AcceptOrderModal({ orderId, onClose, onSuccess }: AcceptOrderMod
         {/* Информация о заказе */}
         <div className="p-6 space-y-4">
           <div>
-            <h4 className="font-semibold mb-2 text-gray-900">Детали заказа</h4>
+            <p className="text-gray-900 mb-2"><strong className="text-gray-900">Номер заказа:</strong> {order.order_number || order.id.slice(0, 8)}</p>
             <p className="text-gray-900"><strong className="text-gray-900">Откуда:</strong> {formatAddressForOrder(order.pickup_address)}</p>
             <p className="text-gray-900"><strong className="text-gray-900">Куда:</strong> {formatAddressForOrder(order.delivery_address)}</p>
             <p className="text-gray-900"><strong className="text-gray-900">Тип груза:</strong> {
@@ -227,8 +272,16 @@ export function AcceptOrderModal({ orderId, onClose, onSuccess }: AcceptOrderMod
           )}
 
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded p-4">
-              <p className="text-red-600 text-sm">{error}</p>
+            <div className="bg-red-50 border-2 border-red-300 rounded p-4">
+              <div className="flex items-start">
+                <svg className="w-5 h-5 text-red-600 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div>
+                  <p className="text-red-800 font-semibold text-sm mb-1">Ошибка</p>
+                  <p className="text-red-600 text-sm">{error}</p>
+                </div>
+              </div>
             </div>
           )}
         </div>
