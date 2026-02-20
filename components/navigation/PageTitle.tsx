@@ -54,6 +54,9 @@ export function PageTitle() {
                 if (pathname.startsWith('/dashboard/customer/orders/')) {
                   return 'Детали'
                 }
+    if (pathname.startsWith('/dashboard/customer/available-orders')) {
+      return 'Доступные заказы'
+    }
     if (pathname.startsWith('/dashboard/customer/drivers/')) {
       return 'Профиль водителя'
     }

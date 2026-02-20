@@ -98,55 +98,65 @@ export default function CustomerOrdersPage() {
 
       setAvailableOrders(available || [])
 
-      // Получаем активные заказы организации - ТОЛЬКО созданные организацией
+      // Получаем все активные заказы всех водителей организации
       let active: any[] = []
       
-      // Заказы, созданные организацией (customer_id = organization.id) и находящиеся в активных статусах
-      const { data: orgActiveOrders } = await supabase
-        .from('orders')
-        .select(`
-          *,
-          executor:profiles!orders_executor_user_id_fkey(id, full_name, phone)
-        `)
-        .eq('customer_id', currentUser.id) // ТОЛЬКО заказы, созданные организацией
-        .in('status', ['courier_accepted', 'courier_coming', 'courier_delivering'])
-        .order('created_at', { ascending: false })
-      
-      // Дополнительная фильтрация на клиенте для гарантии
-      active = (orgActiveOrders || [])
-        .filter((order: any) => order.customer_id === currentUser.id) // Дополнительная проверка
-        .map((order: any) => ({
+      if (ids.length > 0) {
+        // Заказы всех водителей организации в активных статусах
+        const { data: driverActiveOrders } = await supabase
+          .from('orders')
+          .select(`
+            *,
+            executor:profiles!orders_executor_user_id_fkey(id, full_name, phone),
+            client:profiles!orders_client_id_fkey(id, full_name, phone),
+            customer:profiles!orders_customer_id_fkey(id, full_name, phone)
+          `)
+          .in('executor_user_id', ids)
+          .in('status', ['courier_accepted', 'courier_coming', 'courier_delivering'])
+          .order('created_at', { ascending: false })
+        
+        active = (driverActiveOrders || []).map((order: any) => ({
           ...order,
           driver_full_name: order.executor?.full_name,
           driver_phone: order.executor?.phone
         }))
+      }
       
       setActiveOrders(active)
 
       // Получаем завершенные заказы с фильтром по периоду
       const dateFilter = getDateFilter(period)
       
-      // Завершенные заказы организации - ТОЛЬКО созданные организацией
-      let orgCompletedQuery = supabase
-        .from('orders')
-        .select(`
-          *,
-          executor:profiles!orders_executor_user_id_fkey(id, full_name, phone)
-        `)
-        .eq('customer_id', currentUser.id) // ТОЛЬКО заказы, созданные организацией
-        .in('status', ['completed', 'cancelled'])
+      // Получаем все завершенные заказы всех водителей организации
+      let completed: any[] = []
+      
+      if (ids.length > 0) {
+        let driverCompletedQuery = supabase
+          .from('orders')
+          .select(`
+            *,
+            executor:profiles!orders_executor_user_id_fkey(id, full_name, phone),
+            client:profiles!orders_client_id_fkey(id, full_name, phone),
+            customer:profiles!orders_customer_id_fkey(id, full_name, phone)
+          `)
+          .in('executor_user_id', ids)
+          .in('status', ['completed', 'cancelled'])
 
-      if (dateFilter.start) {
-        orgCompletedQuery = orgCompletedQuery.gte('completed_at', dateFilter.start)
+        if (dateFilter.start) {
+          driverCompletedQuery = driverCompletedQuery.gte('completed_at', dateFilter.start)
+        }
+        if (dateFilter.end) {
+          driverCompletedQuery = driverCompletedQuery.lte('completed_at', dateFilter.end)
+        }
+
+        const { data: driverCompleted } = await driverCompletedQuery
+        
+        completed = (driverCompleted || []).map((order: any) => ({
+          ...order,
+          driver_full_name: order.executor?.full_name,
+          driver_phone: order.executor?.phone
+        }))
       }
-      if (dateFilter.end) {
-        orgCompletedQuery = orgCompletedQuery.lte('completed_at', dateFilter.end)
-      }
-
-      const { data: orgCompleted } = await orgCompletedQuery
-
-      // Дополнительная фильтрация на клиенте для гарантии - только заказы организации
-      const completed = (orgCompleted || []).filter((order: any) => order.customer_id === currentUser.id)
       
       // Сортируем по дате завершения
       completed.sort((a: any, b: any) => {
