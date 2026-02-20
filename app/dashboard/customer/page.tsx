@@ -186,15 +186,15 @@ export default async function CustomerDashboard() {
                 if (hasRejections) {
                   // Заказы с отказами - красным
                   borderColor = 'border-red-500'
-                  bgColor = 'bg-red-900/30'
+                  bgColor = 'bg-red-100/40'
                 } else if (isCompleted) {
                   // Выполненные заказы - зеленым
                   borderColor = 'border-green-500'
-                  bgColor = 'bg-green-900/30'
+                  bgColor = 'bg-green-100/40'
                 } else if (isActive) {
                   // Активные заказы - желтым
                   borderColor = 'border-yellow-500'
-                  bgColor = 'bg-yellow-900/30'
+                  bgColor = 'bg-yellow-100/40'
                 }
                 
                 const canCancel = order.status === 'searching_courier' && !order.executor_user_id

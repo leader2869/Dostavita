@@ -11,11 +11,13 @@ export default function ClientProfilePage() {
   const [profile, setProfile] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const [fullName, setFullName] = useState('')
   const [phone, setPhone] = useState('')
   const [email, setEmail] = useState('')
+  const [organizationName, setOrganizationName] = useState('')
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
 
@@ -43,6 +45,7 @@ export default function ClientProfilePage() {
           setFullName(data.full_name || '')
           setPhone(data.phone || '')
           setEmail(data.email || user.email || '')
+          setOrganizationName(data.organization_name || '')
           setAvatarUrl(data.avatar_url || null)
         } else {
           // Профиль не найден, создаем его через API route (обходит RLS)
@@ -62,6 +65,7 @@ export default function ClientProfilePage() {
             setFullName(newProfile.full_name || '')
             setPhone(newProfile.phone || '')
             setEmail(newProfile.email || user.email || '')
+            setOrganizationName(newProfile.organization_name || '')
             setAvatarUrl(newProfile.avatar_url || null)
           }
         }
@@ -88,6 +92,7 @@ export default function ClientProfilePage() {
         .from('profiles')
         .update({
           full_name: fullName,
+          organization_name: organizationName || null,
           // Телефон не обновляем - его можно изменить только через админа
         })
         .eq('id', user.id)
@@ -95,8 +100,13 @@ export default function ClientProfilePage() {
       if (updateError) throw updateError
 
       // Обновляем профиль в состоянии
-      setProfile({ ...profile, full_name: fullName, phone: phone })
-      alert('Профиль обновлен')
+      setProfile({ ...profile, full_name: fullName, organization_name: organizationName, phone: phone })
+      
+      // Показываем сообщение об успешном сохранении
+      setSaved(true)
+      setTimeout(() => {
+        setSaved(false)
+      }, 3000)
     } catch (err: any) {
       setError(err.message)
     } finally {
@@ -198,17 +208,18 @@ export default function ClientProfilePage() {
           )}
         </div>
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-            Email
+          <label htmlFor="organizationName" className="block text-sm font-medium text-gray-700 mb-1">
+            Наименование организации
           </label>
           <input
-            id="email"
-            type="email"
-            value={email}
-            disabled
-            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-600"
+            id="organizationName"
+            type="text"
+            value={organizationName}
+            onChange={(e) => setOrganizationName(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900"
+            placeholder="ООО «Название организации»"
           />
-          <p className="text-xs text-gray-600 mt-1">Email нельзя изменить</p>
+          <p className="text-xs text-gray-600 mt-1">Необязательное поле</p>
         </div>
 
         <div>
@@ -220,8 +231,8 @@ export default function ClientProfilePage() {
             type="text"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
-            className="w-full px-3 py-2 bg-gray-100 text-gray-900 border border-gray-300 rounded-md focus:outline-none focus:ring-brand-light focus:border-brand-light"
-            placeholder="Введите ваше ФИО"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900"
+            placeholder="Иванов Иван Иванович"
           />
         </div>
 
@@ -234,14 +245,28 @@ export default function ClientProfilePage() {
             type="tel"
             value={phone}
             disabled
-            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-600"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-600"
             placeholder="+375 (XX) XXX-XX-XX"
           />
           <p className="text-xs text-gray-600 mt-1">Телефон нельзя изменить. Для изменения обратитесь к администратору.</p>
         </div>
 
+        <div>
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+            Email
+          </label>
+          <input
+            id="email"
+            type="email"
+            value={email}
+            disabled
+            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-600"
+          />
+          <p className="text-xs text-gray-600 mt-1">Email нельзя изменить</p>
+        </div>
+
         {error && (
-          <div className="text-red-400 text-sm bg-red-900 bg-opacity-30 p-3 rounded border border-red-800">{error}</div>
+          <div className="text-red-600 text-sm">{error}</div>
         )}
 
         <div className="flex gap-4">
@@ -250,14 +275,14 @@ export default function ClientProfilePage() {
             disabled={saving}
             className="flex-1 bg-green-300 text-gray-900 px-6 py-2 rounded-md hover:bg-green-400 disabled:opacity-50"
           >
-            {saving ? 'Сохранение...' : 'Сохранить'}
+            {saving ? 'Сохранение...' : saved ? 'Изменения сохранены' : 'Сохранить'}
           </button>
           <button
             type="button"
-            onClick={handleSignOut}
-            className="px-6 py-2 border border-red-300 text-red-600 rounded-md hover:bg-red-50"
+            onClick={() => router.back()}
+            className="px-6 py-2 bg-red-300 text-gray-900 rounded-md hover:bg-red-400"
           >
-            Выйти
+            Отмена
           </button>
         </div>
       </form>

@@ -257,7 +257,7 @@ export default function CustomerDriversPage() {
           <div className="flex gap-2">
             <button
               onClick={() => setShowCreateModal(true)}
-              className="bg-blue-600 text-gray-900 px-4 py-2 rounded-md hover:bg-blue-700 transition"
+              className="bg-green-300 text-gray-900 px-4 py-2 rounded-md hover:bg-green-400 transition"
             >
               Создать водителя
             </button>
@@ -326,7 +326,7 @@ export default function CustomerDriversPage() {
                 <div className="flex gap-2">
                   <a
                     href={`/dashboard/customer/drivers/${driver.id}`}
-                    className="flex-1 text-center bg-blue-600 text-gray-900 px-4 py-2 rounded text-sm hover:bg-blue-700 transition"
+                    className="flex-1 text-center bg-green-300 text-gray-900 px-4 py-2 rounded text-sm hover:bg-green-400 transition"
                   >
                     Подробнее
                   </a>

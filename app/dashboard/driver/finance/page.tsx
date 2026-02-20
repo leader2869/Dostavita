@@ -624,7 +624,7 @@ export default function DriverFinancePage() {
           <div className="space-y-3">
             {displayedUnpaidOrders.length > 0 ? (
               displayedUnpaidOrders.map((order: any) => (
-              <div key={order.id} className="border border-red-700 rounded-lg p-4 bg-red-900/10">
+              <div key={order.id} className="border border-gray-200 rounded-lg p-4 bg-red-100/40">
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <p className="font-medium text-gray-900">

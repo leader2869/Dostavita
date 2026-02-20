@@ -563,7 +563,7 @@ export default function CustomerFinancePage() {
                           setWithdrawAmount('')
                           setShowWithdrawModal(true)
                         }}
-                        className="bg-blue-600 text-gray-900 px-4 py-2 rounded text-sm hover:bg-blue-700 transition"
+                        className="bg-green-300 text-gray-900 px-4 py-2 rounded text-sm hover:bg-green-400 transition"
                       >
                         Забрать кассу
                       </button>
@@ -652,7 +652,7 @@ export default function CustomerFinancePage() {
                     alert(`Ошибка: ${err.message || 'Не удалось забрать кассу'}`)
                   }
                 }}
-                className="flex-1 bg-blue-600 text-gray-900 px-4 py-2 rounded-md hover:bg-blue-700 transition"
+                className="flex-1 bg-green-300 text-gray-900 px-4 py-2 rounded-md hover:bg-green-400 transition"
               >
                 Забрать кассу
               </button>
@@ -714,13 +714,15 @@ export default function CustomerFinancePage() {
                       <p className="text-gray-700">
                         Сумма: <span className="text-red-400 font-semibold">{parseFloat(receivable.amount || 0).toFixed(2)} BYN</span>
                       </p>
-                      <p className="text-gray-700">
-                        Должник: <span className="text-gray-900 font-semibold capitalize">
-                          {receivable.debtor_type === 'sender' ? 'Отправитель' : 'Получатель'}
-                        </span>
-                        {receivable.debtor_name && (
-                          <span 
-                            className="text-blue-400 ml-1 cursor-pointer hover:text-blue-300 underline"
+                      {receivable.debtor_organization_name && (
+                        <p className="text-gray-700">
+                          Наименование организации: <span className="text-gray-900 font-semibold">{receivable.debtor_organization_name}</span>
+                        </p>
+                      )}
+                      {receivable.debtor_name && (
+                        <p className="text-gray-700">
+                          ФИО: <span 
+                            className="text-gray-900 font-semibold text-blue-400 cursor-pointer hover:text-blue-300 underline"
                             onClick={async () => {
                               // Загружаем все неоплаченные заказы этого должника
                               const { data: debtorReceivablesData } = await supabase
@@ -737,6 +739,7 @@ export default function CustomerFinancePage() {
                               setDebtorReceivables(filtered)
                               setSelectedDebtor({
                                 name: receivable.debtor_name,
+                                organization_name: receivable.debtor_organization_name,
                                 phone: receivable.debtor_phone,
                                 type: receivable.debtor_type,
                                 user_id: receivable.debtor_user_id
@@ -744,10 +747,10 @@ export default function CustomerFinancePage() {
                               setShowDebtorModal(true)
                             }}
                           >
-                            ({receivable.debtor_name})
+                            {receivable.debtor_name}
                           </span>
-                        )}
-                      </p>
+                        </p>
+                      )}
                       {receivable.debtor_phone && (
                         <p className="text-gray-700">
                           Телефон: <a href={`tel:${receivable.debtor_phone}`} className="text-brand-light hover:text-brand-dark">{receivable.debtor_phone}</a>
@@ -887,8 +890,15 @@ export default function CustomerFinancePage() {
             </div>
             
             <div className="space-y-4">
+              {selectedDebtor.organization_name && (
+                <div>
+                  <p className="text-sm text-gray-600">Наименование организации</p>
+                  <p className="text-gray-900 font-semibold text-lg">{selectedDebtor.organization_name}</p>
+                </div>
+              )}
+              
               <div>
-                <p className="text-sm text-gray-600">Имя</p>
+                <p className="text-sm text-gray-600">ФИО</p>
                 <p className="text-gray-900 font-semibold text-lg">{selectedDebtor.name || 'Не указано'}</p>
               </div>
               

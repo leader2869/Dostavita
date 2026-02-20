@@ -40,3 +40,4 @@ GRANT EXECUTE ON FUNCTION public.get_user_profile(UUID) TO anon;
 
 
 
+

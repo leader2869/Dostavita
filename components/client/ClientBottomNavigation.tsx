@@ -24,15 +24,6 @@ export function ClientBottomNavigation() {
       ),
     },
     {
-      label: 'Отправить',
-      path: '/dashboard/client/create-order',
-      icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-        </svg>
-      ),
-    },
-    {
       label: 'Заказы',
       path: '/dashboard/client/orders',
       icon: (
@@ -65,7 +56,37 @@ export function ClientBottomNavigation() {
     <div className="fixed bottom-0 left-0 right-0 bg-gray-50 border-t border-gray-200 shadow-lg z-[100]">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-around items-center h-16">
-          {navItems.map((item) => {
+          {/* Первые две кнопки */}
+          {navItems.slice(0, 2).map((item) => {
+            const active = isActive(item.path)
+            return (
+              <button
+                key={item.path}
+                onClick={() => router.push(item.path)}
+                className={`flex flex-col items-center justify-center flex-1 h-full transition-colors ${
+                  active
+                    ? 'text-brand-light'
+                    : 'text-gray-600 hover:text-gray-700'
+                }`}
+              >
+                <div className={active ? 'text-brand-light' : 'text-gray-600'}>
+                  {item.icon}
+                </div>
+                <span className="text-xs mt-1 font-medium">{item.label}</span>
+              </button>
+            )
+          })}
+
+          {/* Центральная кнопка "П!" в круге - крупнее остальных */}
+          <button
+            onClick={() => router.push('/dashboard/client/create-order')}
+            className="relative w-20 h-20 rounded-full bg-brand-light text-gray-900 flex items-center justify-center shadow-lg hover:bg-brand-dark transition-all z-10 -mt-6 font-amatic-sc"
+          >
+            <span className="text-4xl font-bold">П!</span>
+          </button>
+
+          {/* Последние две кнопки */}
+          {navItems.slice(2).map((item) => {
             const active = isActive(item.path)
             return (
               <button
@@ -89,4 +110,3 @@ export function ClientBottomNavigation() {
     </div>
   )
 }
-

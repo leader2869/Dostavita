@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { OrderMap } from '@/components/map/OrderMap'
 import { DriverLocationMap } from '@/components/map/DriverLocationMap'
 import { OrderActions } from '@/components/driver/OrderActions'
+import { OrderStatusProgress } from '@/components/orders/OrderStatusProgress'
 import { formatAddressForOrder } from '@/lib/utils/formatAddress'
 import { formatReadyTime } from '@/lib/utils/formatReadyTime'
 
@@ -92,6 +93,84 @@ export default function OrderDetailsPage() {
   useEffect(() => {
     loadOrder()
   }, [loadOrder])
+
+  // Подписка на изменения статуса заказа через Realtime
+  useEffect(() => {
+    if (!orderId || !order) return
+
+    let isMounted = true
+
+    console.log('🔔 Подписываемся на изменения заказа:', orderId)
+
+    // Подписываемся на все изменения заказов (без фильтра для обхода возможных проблем с RLS)
+    const channel = supabase
+      .channel(`order_status_${orderId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'orders',
+        },
+        (payload) => {
+          const updatedOrder = payload.new as any
+          // Проверяем, что это наш заказ
+          if (updatedOrder.id === orderId && isMounted) {
+            console.log('📦 Получено обновление заказа:', updatedOrder)
+            console.log('✅ Обновляем статус заказа:', updatedOrder.status)
+            setOrder((prevOrder: any) => {
+              if (prevOrder && prevOrder.id === updatedOrder.id) {
+                return { ...prevOrder, ...updatedOrder }
+              }
+              return prevOrder
+            })
+          }
+        }
+      )
+      .subscribe((status) => {
+        console.log('📡 Статус подписки Realtime:', status)
+        if (status === 'SUBSCRIBED') {
+          console.log('✅ Успешно подписались на изменения заказа')
+        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+          console.error('❌ Ошибка подписки Realtime:', status)
+        }
+      })
+
+    // Периодический опрос как fallback (каждые 3 секунды)
+    const pollInterval = setInterval(async () => {
+      if (!isMounted) return
+      
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return
+
+        const { data: orderData, error } = await supabase
+          .from('orders')
+          .select('*')
+          .eq('id', orderId)
+          .single()
+
+        if (!error && orderData && orderData.status !== order?.status) {
+          console.log('🔄 Polling: статус изменился', orderData.status)
+          setOrder((prevOrder: any) => {
+            if (prevOrder && prevOrder.id === orderData.id) {
+              return { ...prevOrder, ...orderData }
+            }
+            return prevOrder
+          })
+        }
+      } catch (err) {
+        console.error('Ошибка polling:', err)
+      }
+    }, 3000)
+
+    return () => {
+      isMounted = false
+      clearInterval(pollInterval)
+      console.log('🔕 Отписываемся от изменений заказа')
+      supabase.removeChannel(channel)
+    }
+  }, [orderId, supabase, order])
 
   const getStatusLabel = (status: string) => {
     switch (status) {
@@ -205,8 +284,14 @@ export default function OrderDetailsPage() {
 
   return (
     <div className="pb-20">
+      {/* Карта прогресса - закреплена вверху, всегда видна */}
+      {order.status && (
+        <OrderStatusProgress status={order.status} variant="connected" />
+      )}
 
-      <div className="bg-gray-50 rounded-lg shadow p-6 space-y-4">
+      {/* Отступ для закрепленной карты прогресса */}
+      <div className="pt-28">
+        <div className="bg-gray-50 rounded-lg shadow p-6 space-y-4">
         {/* Информация о водителе (если заказ принят) - в самом верху */}
         {order.executor_user_id && (
           <div className="border-b border-gray-200 pb-4 mb-4">
@@ -345,22 +430,6 @@ export default function OrderDetailsPage() {
               </div>
             )}
 
-            {order.ready_at && (() => {
-              const { formattedTime, timeStatus, statusType } = formatReadyTime(order.ready_at)
-              return (
-                <div>
-                  <p className="text-sm text-gray-600">Заказ будет готов к выдаче</p>
-                  <p className="text-gray-900">
-                    {formattedTime}
-                    {timeStatus && (
-                      <span className={`ml-2 ${statusType === 'waiting' ? 'text-red-400 animate-blink' : statusType === 'upcoming' ? 'text-yellow-400 animate-blink' : 'text-gray-600'}`}>
-                        ({timeStatus})
-                      </span>
-                    )}
-                  </p>
-                </div>
-              )
-            })()}
 
             <div>
               <p className="text-sm text-gray-600">Стоимость</p>
@@ -411,6 +480,7 @@ export default function OrderDetailsPage() {
           >
             Вернуться к заказам
           </button>
+        </div>
         </div>
       </div>
 

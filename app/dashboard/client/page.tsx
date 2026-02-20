@@ -84,7 +84,7 @@ export default function ClientDashboard() {
     // Получаем активные заказы (не completed и не cancelled)
     const { data: ordersData, error } = await supabase
       .from('orders')
-      .select('id, pickup_address, delivery_address, status, executor_user_id, final_price, created_at, ready_at, item_type, description')
+      .select('id, order_number, pickup_address, delivery_address, status, executor_user_id, final_price, created_at, ready_at, item_type, description')
       .or(`customer_id.eq.${user.id},client_id.eq.${user.id}`)
       .not('status', 'in', '(completed,cancelled)')
       .order('created_at', { ascending: false })
@@ -943,7 +943,7 @@ export default function ClientDashboard() {
                             <a
                               href={`tel:${order.driver.phone}`}
                               onClick={(e) => e.stopPropagation()}
-                              className="bg-green-500 text-white px-4 py-2 rounded text-sm hover:bg-green-600 transition flex items-center gap-2"
+                              className="bg-green-300 text-gray-900 px-4 py-2 rounded text-sm hover:bg-green-400 transition flex items-center gap-2"
                             >
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />

@@ -396,7 +396,7 @@ export default function SavedAddressesPage() {
                   e.stopPropagation()
                   handleEdit(addr)
                 }}
-                className="flex-1 bg-blue-600 text-gray-900 px-2 py-1 rounded text-xs hover:bg-blue-700 transition"
+                className="flex-1 bg-green-300 text-gray-900 px-2 py-1 rounded text-xs hover:bg-green-400 transition"
               >
                 Редактировать
               </button>

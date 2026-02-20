@@ -551,7 +551,7 @@ export default function CreateOrderPage() {
                   setMapPickerType('pickup')
                   setShowMapPicker(true)
                 }}
-                className="text-sm text-brand-light hover:text-brand-dark"
+                className="text-sm text-yellow-600 hover:text-yellow-700"
               >
                 Указать на карте
               </button>
@@ -666,7 +666,7 @@ export default function CreateOrderPage() {
                   setMapPickerType('delivery')
                   setShowMapPicker(true)
                 }}
-                className="text-sm text-brand-light hover:text-brand-dark"
+                className="text-sm text-yellow-600 hover:text-yellow-700"
               >
                 Указать на карте
               </button>
@@ -1085,10 +1085,11 @@ export default function CreateOrderPage() {
                                   По умолчанию
                                 </span>
                               )}
-                              <span className="px-2 py-1 bg-gray-600 text-gray-700 text-xs rounded">
-                                {addr.address_type === 'pickup' ? 'Отправление' :
-                                 addr.address_type === 'delivery' ? 'Доставка' : 'Оба'}
-                              </span>
+                              {addr.address_type !== 'both' && (
+                                <span className="px-2 py-1 bg-gray-600 text-gray-700 text-xs rounded">
+                                  {addr.address_type === 'pickup' ? 'Отправление' : 'Доставка'}
+                                </span>
+                              )}
                             </div>
                             <p className="text-sm text-gray-700">
                               {formatAddressForCard(addr.address, addr.entrance, addr.floor, addr.apartment)}

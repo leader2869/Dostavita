@@ -4,6 +4,7 @@ import { BackButton } from '@/components/ui/BackButton'
 import { formatDistanceToNowStrict } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { DriverLocationMapWrapper } from '@/components/map/DriverLocationMapWrapper'
+import { OrderStatusRealtime } from '@/components/customer/OrderStatusRealtime'
 import { formatAddressForOrder } from '@/lib/utils/formatAddress'
 import { formatReadyTime } from '@/lib/utils/formatReadyTime'
 
@@ -116,16 +117,14 @@ export default async function CustomerOrderDetailsPage({ params }: { params: { i
         {/* Статус заказа */}
         <div>
           <h2 className="text-xl font-semibold mb-4 text-gray-900">Статус заказа</h2>
-          <div className="flex items-center gap-3">
-            <span className={`px-3 py-1 rounded-full text-sm font-semibold border ${getStatusColor(order.status)}`}>
-              {getStatusLabel(order.status)}
-            </span>
-            {hasRejections && (
-              <span className="px-3 py-1 bg-red-500 text-gray-900 text-sm rounded">
-                Есть отказы ({rejections.length})
-              </span>
-            )}
-          </div>
+          <OrderStatusRealtime
+            orderId={orderId}
+            initialStatus={order.status}
+            getStatusLabel={getStatusLabel}
+            getStatusColor={getStatusColor}
+            hasRejections={hasRejections}
+            rejectionsCount={rejections?.length || 0}
+          />
         </div>
 
         {/* Информация о заказе */}
