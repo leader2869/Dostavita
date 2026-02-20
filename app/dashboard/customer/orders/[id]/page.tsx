@@ -107,7 +107,7 @@ export default async function CustomerOrderDetailsPage({ params }: { params: { i
 
   const isActive = order.status !== 'completed' && order.status !== 'cancelled'
   const isCompleted = order.status === 'completed'
-  const hasRejections = rejections && rejections.length > 0
+  const hasRejections = !!(rejections && rejections.length > 0)
 
   return (
     <div className="pb-20">
