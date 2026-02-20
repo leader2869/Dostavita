@@ -3,8 +3,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { BackButton } from '@/components/ui/BackButton'
 import { DriverOrganizationChatButton } from '@/components/chat/DriverOrganizationChatButton'
+import { DriverLocationMap } from '@/components/map/DriverLocationMap'
 
 export default function CustomerDriversPage() {
   const router = useRouter()
@@ -21,6 +21,13 @@ export default function CustomerDriversPage() {
   const [attaching, setAttaching] = useState<string | null>(null)
   const [creating, setCreating] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  
+  // Состояния для отслеживания
+  const [selectedDriverForTracking, setSelectedDriverForTracking] = useState<string | null>(null)
+  const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0])
+  const [selectedTime, setSelectedTime] = useState<string>('')
+  const [trackPoints, setTrackPoints] = useState<Array<{ lat: number; lon: number; time: string; timestamp: number }>>([])
+  const [currentPosition, setCurrentPosition] = useState<{ lat: number; lon: number } | null>(null)
   
   // Форма создания водителя
   const [newDriverEmail, setNewDriverEmail] = useState('')
@@ -75,6 +82,72 @@ export default function CustomerDriversPage() {
   useEffect(() => {
     loadDrivers()
   }, [loadDrivers])
+
+  // Загружаем трек водителя за выбранный день
+  useEffect(() => {
+    if (!selectedDriverForTracking || !selectedDate) {
+      setTrackPoints([])
+      setCurrentPosition(null)
+      return
+    }
+
+    const loadTrack = async () => {
+      try {
+        const { data: trackData, error: trackError } = await supabase
+          .rpc('get_driver_track', {
+            p_driver_id: selectedDriverForTracking,
+            p_date: selectedDate,
+          })
+
+        if (!trackError && trackData && trackData.length > 0) {
+          const points = trackData
+            .map((point: any) => ({
+              lat: parseFloat(point.latitude),
+              lon: parseFloat(point.longitude),
+              time: new Date(point.created_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }),
+              timestamp: new Date(point.created_at).getTime(),
+            }))
+            .filter((p: any) => !isNaN(p.lat) && !isNaN(p.lon))
+          
+          setTrackPoints(points)
+          
+          // Если выбрано время, находим ближайшую точку
+          if (selectedTime) {
+            const [hours, minutes] = selectedTime.split(':').map(Number)
+            const selectedTimestamp = new Date(`${selectedDate}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00`).getTime()
+            
+            // Находим ближайшую точку по времени
+            let closestPoint = points[0]
+            let minDiff = Math.abs(points[0].timestamp - selectedTimestamp)
+            
+            for (const point of points) {
+              const diff = Math.abs(point.timestamp - selectedTimestamp)
+              if (diff < minDiff) {
+                minDiff = diff
+                closestPoint = point
+              }
+            }
+            
+            setCurrentPosition({ lat: closestPoint.lat, lon: closestPoint.lon })
+          } else if (points.length > 0) {
+            // Если время не выбрано, показываем последнюю точку
+            const lastPoint = points[points.length - 1]
+            setCurrentPosition({ lat: lastPoint.lat, lon: lastPoint.lon })
+          }
+        } else {
+          setTrackPoints([])
+          setCurrentPosition(null)
+        }
+      } catch (err) {
+        console.error('Ошибка загрузки трека:', err)
+        setTrackPoints([])
+        setCurrentPosition(null)
+      }
+    }
+
+    loadTrack()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDriverForTracking, selectedDate, selectedTime])
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) {
@@ -228,7 +301,6 @@ export default function CustomerDriversPage() {
   if (loading) {
     return (
       <div className="pb-20">
-        <BackButton />
         <div className="text-center py-8 text-gray-600">Загрузка...</div>
       </div>
     )
@@ -236,24 +308,9 @@ export default function CustomerDriversPage() {
 
   return (
     <div className="pb-20">
-      <BackButton />
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Управление водителями</h1>
-        {user && (
-          <DriverOrganizationChatButton
-            organizationId={user.id}
-            driverId={null}
-            currentUserId={user.id}
-            currentUserRole="customer"
-            className=""
-            showLabel={true}
-          />
-        )}
-      </div>
-
-      <div className="bg-gray-50 rounded-lg shadow p-6 mb-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-gray-900">Мои водители ({drivers.length})</h2>
+      <div className="mb-6">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold text-gray-900">Водители ({drivers.length})</h1>
           <div className="flex gap-2">
             <button
               onClick={() => setShowCreateModal(true)}
@@ -267,9 +324,21 @@ export default function CustomerDriversPage() {
             >
               Найти водителя
             </button>
+            {user && (
+              <DriverOrganizationChatButton
+                organizationId={user.id}
+                driverId={null}
+                currentUserId={user.id}
+                currentUserRole="customer"
+                className=""
+                showLabel={true}
+              />
+            )}
           </div>
         </div>
+      </div>
 
+      <div className="bg-gray-50 rounded-lg shadow p-6 mb-6">
         {error && (
           <div className="mb-4 p-3 bg-red-900/50 border border-red-500 rounded text-red-200 text-sm">
             {error}
@@ -279,63 +348,66 @@ export default function CustomerDriversPage() {
         {drivers.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {drivers.map((driver: any) => (
-              <div key={driver.id} className="border border-gray-200 rounded-lg p-4 bg-gray-100 hover:bg-gray-100 transition">
-                <div className="flex items-center gap-3 mb-3">
-                  {driver.avatar_url ? (
-                    <img
-                      src={driver.avatar_url}
-                      alt={driver.full_name || 'Водитель'}
-                      className="w-12 h-12 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-12 h-12 rounded-full bg-gray-600 flex items-center justify-center">
-                      <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      </svg>
-                    </div>
-                  )}
-                  <div className="flex-1">
-                    <p className="font-medium text-gray-900">{driver.full_name || 'Без имени'}</p>
-                    <p className="text-sm text-gray-600">{driver.email}</p>
-                    <p className="text-sm text-gray-600">{driver.phone || 'Телефон не указан'}</p>
-                  </div>
-                </div>
-                <div className="space-y-1 text-sm mb-3">
-                  <p className="text-gray-700">
-                    <span className="text-gray-600">Транспорт:</span> {
-                      driver.vehicle_type === 'car' ? 'Автомобиль' :
-                      driver.vehicle_type === 'motorcycle' ? 'Мотоцикл' :
-                      driver.vehicle_type === 'bicycle' ? 'Велосипед' :
-                      driver.vehicle_type === 'walking' ? 'Пешком' : driver.vehicle_type || 'Не указан'
-                    }
-                    {driver.vehicle_brand && driver.vehicle_model && (
-                      <span className="ml-1">({driver.vehicle_brand} {driver.vehicle_model})</span>
+              <div key={driver.id} className="border border-gray-200 rounded-lg p-4 bg-gray-100 hover:bg-gray-200 transition relative">
+                <a
+                  href={`/dashboard/customer/drivers/${driver.id}`}
+                  className="block cursor-pointer"
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    {driver.avatar_url ? (
+                      <img
+                        src={driver.avatar_url}
+                        alt={driver.full_name || 'Водитель'}
+                        className="w-12 h-12 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 rounded-full bg-gray-600 flex items-center justify-center">
+                        <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                      </div>
                     )}
-                  </p>
-                  {driver.vehicle_number && (
+                    <div className="flex-1">
+                      <p className="font-medium text-gray-900">{driver.full_name || 'Без имени'}</p>
+                      <p className="text-sm text-gray-600">{driver.email}</p>
+                      <p className="text-sm text-gray-600">{driver.phone || 'Телефон не указан'}</p>
+                    </div>
+                  </div>
+                  <div className="space-y-1 text-sm mb-3">
                     <p className="text-gray-700">
-                      <span className="text-gray-600">Номер:</span> {driver.vehicle_number}
+                      <span className="text-gray-600">Транспорт:</span> {
+                        driver.vehicle_type === 'car' ? 'Автомобиль' :
+                        driver.vehicle_type === 'motorcycle' ? 'Мотоцикл' :
+                        driver.vehicle_type === 'bicycle' ? 'Велосипед' :
+                        driver.vehicle_type === 'walking' ? 'Пешком' : driver.vehicle_type || 'Не указан'
+                      }
+                      {driver.vehicle_brand && driver.vehicle_model && (
+                        <span className="ml-1">({driver.vehicle_brand} {driver.vehicle_model})</span>
+                      )}
                     </p>
-                  )}
-                  {driver.license_number && (
-                    <p className="text-gray-700">
-                      <span className="text-gray-600">Удостоверение:</span> {driver.license_number}
-                    </p>
-                  )}
-                </div>
-                <div className="flex gap-2">
-                  <a
-                    href={`/dashboard/customer/drivers/${driver.id}`}
-                    className="flex-1 text-center bg-green-300 text-gray-900 px-4 py-2 rounded text-sm hover:bg-green-400 transition"
-                  >
-                    Подробнее
-                  </a>
-                  <a
-                    href={`/dashboard/customer/tracking?driver=${driver.id}`}
-                    className="flex-1 text-center bg-brand-light text-gray-900 px-4 py-2 rounded text-sm hover:bg-brand-dark transition"
+                    {driver.vehicle_number && (
+                      <p className="text-gray-700">
+                        <span className="text-gray-600">Номер:</span> {driver.vehicle_number}
+                      </p>
+                    )}
+                    {driver.license_number && (
+                      <p className="text-gray-700">
+                        <span className="text-gray-600">Удостоверение:</span> {driver.license_number}
+                      </p>
+                    )}
+                  </div>
+                </a>
+                <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+                  <button
+                    onClick={() => setSelectedDriverForTracking(driver.id)}
+                    className={`flex-1 text-center px-4 py-2 rounded text-sm transition ${
+                      selectedDriverForTracking === driver.id
+                        ? 'bg-yellow-200 text-gray-900 hover:bg-yellow-300'
+                        : 'bg-brand-light text-gray-900 hover:bg-brand-dark'
+                    }`}
                   >
                     Отследить
-                  </a>
+                  </button>
                   {user && (
                     <DriverOrganizationChatButton
                       organizationId={user.id}
@@ -366,6 +438,160 @@ export default function CustomerDriversPage() {
             >
               Добавить первого водителя
             </button>
+          </div>
+        )}
+      </div>
+
+      {/* Блок отслеживания */}
+      <div className="bg-gray-50 rounded-lg shadow p-6 mb-6">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold text-gray-900">Отслеживание</h2>
+          {selectedDriverForTracking && (
+            <button
+              onClick={() => {
+                setSelectedDriverForTracking(null)
+                setTrackPoints([])
+                setCurrentPosition(null)
+                setSelectedTime('')
+              }}
+              className="text-gray-600 hover:text-gray-900"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+
+        {selectedDriverForTracking ? (
+          (() => {
+            const driver = drivers.find((d: any) => d.id === selectedDriverForTracking)
+            if (!driver) {
+              return (
+                <div className="text-center py-8 text-gray-600">
+                  Водитель не найден
+                </div>
+              )
+            }
+
+            return (
+              <>
+
+                <div className="space-y-4">
+                  {/* Выбор даты и времени для просмотра трека */}
+                  <div className="bg-gray-100 rounded-lg p-4">
+                    <h3 className="text-sm font-medium text-gray-600 mb-3">Просмотр трека</h3>
+                    
+                    {/* Выбор даты */}
+                    <div className="mb-4">
+                      <label className="block text-xs text-gray-600 mb-2">Выберите день:</label>
+                      <input
+                        type="date"
+                        value={selectedDate}
+                        onChange={(e) => {
+                          setSelectedDate(e.target.value)
+                          setSelectedTime('')
+                        }}
+                        max={new Date().toISOString().split('T')[0]}
+                        className="w-full bg-white text-gray-900 px-3 py-2 rounded-lg border border-gray-300 focus:border-green-400 focus:outline-none"
+                      />
+                    </div>
+
+                    {/* Шкала времени */}
+                    {trackPoints.length > 0 && (
+                      <div className="mb-4">
+                        <label className="block text-xs text-gray-600 mb-2">
+                          Время: {selectedTime || trackPoints[0]?.time || 'Не выбрано'}
+                        </label>
+                        <input
+                          type="range"
+                          min="0"
+                          max={trackPoints.length - 1}
+                          value={selectedTime ? trackPoints.findIndex((p) => p.time === selectedTime) : trackPoints.length - 1}
+                          onChange={(e) => {
+                            const index = parseInt(e.target.value)
+                            if (trackPoints[index]) {
+                              setSelectedTime(trackPoints[index].time)
+                            }
+                          }}
+                          className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer accent-green-400"
+                        />
+                        <div className="flex justify-between text-xs text-gray-500 mt-1">
+                          <span>{trackPoints[0]?.time || ''}</span>
+                          <span>{trackPoints[trackPoints.length - 1]?.time || ''}</span>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Кнопка сброса времени */}
+                    {selectedTime && (
+                      <button
+                        onClick={() => setSelectedTime('')}
+                        className="text-xs text-brand-light hover:text-brand-dark"
+                      >
+                        Показать весь трек
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Местоположение */}
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-600 mb-2">
+                      {selectedTime ? `Местоположение в ${selectedTime}` : 'Текущее местоположение'}
+                    </h3>
+                    {(currentPosition || driver.current_location) ? (
+                      <div className="bg-gray-100 rounded-lg p-4">
+                        {currentPosition && (
+                          <p className="text-gray-900 font-mono text-sm mb-2">
+                            Широта: {currentPosition.lat.toFixed(6)}, Долгота: {currentPosition.lon.toFixed(6)}
+                          </p>
+                        )}
+                        {driver.location_updated_at && !selectedTime && (
+                          <p className="text-gray-600 text-xs mt-2">
+                            Обновлено: {new Date(driver.location_updated_at).toLocaleString('ru-RU')}
+                          </p>
+                        )}
+                        {/* Карта с местоположением водителя */}
+                        <div className="mt-4">
+                          <DriverLocationMap
+                            driverId={driver.id}
+                            orderId={driver.active_order_id}
+                            height="400px"
+                            zoom={15}
+                            showTrack={true}
+                            trackDate={new Date(selectedDate)}
+                            selectedTime={selectedTime}
+                            currentPosition={currentPosition}
+                            trackPoints={selectedTime ? trackPoints.filter(p => {
+                              const pointTime = p.time
+                              const [pointHours, pointMinutes] = pointTime.split(':').map(Number)
+                              const [selectedHours, selectedMinutes] = selectedTime.split(':').map(Number)
+                              const pointTotal = pointHours * 60 + pointMinutes
+                              const selectedTotal = selectedHours * 60 + selectedMinutes
+                              return pointTotal <= selectedTotal
+                            }) : trackPoints}
+                          />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="bg-gray-100 rounded-lg p-4">
+                        <p className="text-gray-600">Местоположение не определено</p>
+                        <p className="text-gray-500 text-xs mt-2">
+                          {selectedDate === new Date().toISOString().split('T')[0] 
+                            ? 'Водитель не передает данные о местоположении'
+                            : 'Нет данных за выбранный день'}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </>
+            )
+          })()
+        ) : (
+          <div className="text-center py-8">
+            <p className="text-gray-600 mb-4">Выберите водителя для отслеживания</p>
+            <p className="text-sm text-gray-500">
+              Нажмите кнопку "Отследить" на карточке водителя выше
+            </p>
           </div>
         )}
       </div>

@@ -67,10 +67,10 @@ export function PageTitle() {
       return 'Заказы'
     }
     if (pathname.startsWith('/dashboard/customer/drivers')) {
-      return 'Управление водителями'
+      return 'Водители'
     }
-    if (pathname.startsWith('/dashboard/customer/tracking')) {
-      return 'Отслеживание водителей'
+    if (pathname.startsWith('/dashboard/customer/profile')) {
+      return 'Профиль'
     }
     if (pathname === '/dashboard/customer' || pathname === '/dashboard/customer/') {
       return 'Главная'

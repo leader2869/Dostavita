@@ -29,7 +29,11 @@ export function DriverOrganizationChatButton({
     <>
       <button
         onClick={() => setShowChat(true)}
-        className={`flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-gray-900 px-4 py-2 rounded transition ${className}`}
+        className={`flex items-center gap-2 ${
+          driverId 
+            ? 'bg-blue-600 hover:bg-blue-700' 
+            : 'bg-yellow-200 hover:bg-yellow-300'
+        } text-gray-900 px-4 py-2 rounded transition ${className}`}
         title={chatType}
       >
         <svg

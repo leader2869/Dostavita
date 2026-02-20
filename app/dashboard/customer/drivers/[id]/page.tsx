@@ -1,11 +1,12 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
-import { BackButton } from '@/components/ui/BackButton'
+import Link from 'next/link'
 import { formatDistanceToNow } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { formatAddressForOrder } from '@/lib/utils/formatAddress'
 import { formatReadyTime } from '@/lib/utils/formatReadyTime'
 import { DriverChatButton } from '@/components/customer/DriverChatButton'
+import { DriverOrdersHistory } from '@/components/customer/DriverOrdersHistory'
 
 export default async function DriverDetailsPage({ params }: { params: { id: string } }) {
   const supabase = createServerSupabaseClient()
@@ -39,11 +40,19 @@ export default async function DriverDetailsPage({ params }: { params: { id: stri
     notFound()
   }
 
-  // Получаем заказы водителя
-  const { data: orders } = await supabase
-    .rpc('get_organization_orders', { organization_user_id: user.id })
+  // Получаем заказы водителя напрямую из таблицы orders
+  // Используем прямую загрузку с учетом RLS политик (миграция 116)
+  const { data: driverOrdersData, error: ordersError } = await supabase
+    .from('orders')
+    .select('*')
+    .eq('executor_user_id', driverId)
+    .order('created_at', { ascending: false })
 
-  const driverOrders = orders?.filter((o: any) => o.executor_user_id === driverId) || []
+  const driverOrders = driverOrdersData || []
+  
+  if (ordersError) {
+    console.error('Ошибка загрузки заказов водителя:', ordersError)
+  }
 
   // Разделяем на активные и завершенные
   const activeOrders = driverOrders.filter((o: any) => 
@@ -113,7 +122,15 @@ export default async function DriverDetailsPage({ params }: { params: { id: stri
 
   return (
     <div className="pb-20">
-      <BackButton />
+      <Link
+        href="/dashboard/customer/drivers"
+        className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-4"
+      >
+        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+        </svg>
+        Назад
+      </Link>
       <h1 className="text-3xl font-bold mb-6 text-gray-900">Информация о водителе</h1>
 
       {/* Информация о водителе */}
@@ -182,12 +199,6 @@ export default async function DriverDetailsPage({ params }: { params: { id: stri
             </div>
           </div>
           <div className="text-right flex flex-col gap-2">
-            <a
-              href={`/dashboard/customer/tracking?driver=${driver.id}`}
-              className="bg-brand-light text-gray-900 px-4 py-2 rounded-md hover:bg-brand-dark transition inline-block text-center"
-            >
-              Отследить на карте
-            </a>
             <DriverChatButton
               organizationId={user.id}
               driverId={driverId}
@@ -201,7 +212,7 @@ export default async function DriverDetailsPage({ params }: { params: { id: stri
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <div className="bg-gray-50 rounded-lg shadow p-6">
           <h3 className="text-sm text-gray-600 mb-2">Баланс</h3>
-          <p className="text-3xl font-bold text-gray-900">
+          <p className="text-3xl font-bold text-green-600">
             {displayBalance.amount ? parseFloat(displayBalance.amount).toFixed(2) : '0.00'} {displayBalance.currency || 'BYN'}
           </p>
         </div>
@@ -301,45 +312,9 @@ export default async function DriverDetailsPage({ params }: { params: { id: stri
         )}
 
         {/* История заказов */}
-        {completedOrders.length > 0 && (
-          <div className="bg-gray-50 rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
-              История заказов ({completedOrders.length})
-            </h2>
-            <div className="space-y-4">
-              {completedOrders.slice(0, 10).map((order: any) => (
-                <div key={order.id} className="border border-gray-200 rounded-lg p-4 bg-gray-100 hover:bg-gray-100 transition">
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <p className="font-medium text-gray-900">Заказ №{order.order_number || order.id.slice(0, 8)}</p>
-                      <p className="text-sm text-gray-700 mt-1">
-                        {order.pickup_address} → {order.delivery_address}
-                      </p>
-                      <div className="mt-2">
-                        <span className="text-sm text-gray-600">Статус: </span>
-                        <span
-                          className={`inline-block px-3 py-1 rounded-full text-xs font-semibold border ${
-                            getStatusColor(order.status)
-                          }`}
-                        >
-                          {getStatusLabel(order.status)}
-                        </span>
-                      </div>
-                      {order.completed_at && (
-                        <p className="text-sm text-gray-600 mt-2">
-                          Завершен: {new Date(order.completed_at).toLocaleString('ru-RU')}
-                        </p>
-                      )}
-                    </div>
-                    <div className="text-right ml-4">
-                      <p className="font-semibold text-gray-900 text-lg">{order.final_price} BYN</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        <DriverOrdersHistory
+          completedOrders={completedOrders}
+        />
 
         {driverOrders.length === 0 && (
           <div className="bg-gray-50 rounded-lg shadow p-6">

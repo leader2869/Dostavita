@@ -1,8 +1,6 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import type { User } from '@/lib/types'
-import Link from 'next/link'
-import { GeneralChatButton } from '@/components/customer/GeneralChatButton'
 
 export default async function CustomerDashboard() {
   const supabase = createServerSupabaseClient()
@@ -42,38 +40,52 @@ export default async function CustomerDashboard() {
   const { data: drivers, error: driversError } = await supabase
     .rpc('get_organization_drivers', { organization_user_id: user.id })
 
-  // Получаем статистику по заказам водителей
-  const { data: organizationOrders } = await supabase
-    .rpc('get_organization_orders', { organization_user_id: user.id })
-
-  // Получаем информацию об отказах для заказов
-  const orderIds = organizationOrders?.map((o: any) => o.id) || []
-  const { data: rejections } = orderIds.length > 0 ? await supabase
-    .from('order_rejections')
-    .select('order_id')
-    .in('order_id', orderIds) : { data: null }
+  // Получаем статистику по заказам напрямую из таблицы orders
+  // Используем прямую загрузку с учетом RLS политик
+  // Сначала получаем ID всех водителей организации
+  const driverIds = drivers?.map((d: any) => d.id) || []
   
-  const rejectedOrderIds = new Set(rejections?.map((r: any) => r.order_id) || [])
+  // Получаем заказы водителей организации и заказы, созданные самой организацией
+  let allOrders: any[] = []
+  
+  // Заказы, созданные организацией
+  const { data: orgCreatedOrders } = await supabase
+    .from('orders')
+    .select('id, status')
+    .eq('customer_id', user.id)
+  
+  // Заказы водителей организации
+  let driverOrders: any[] = []
+  if (driverIds.length > 0) {
+    const { data: driverOrdersData } = await supabase
+      .from('orders')
+      .select('id, status')
+      .in('executor_user_id', driverIds)
+    
+    driverOrders = driverOrdersData || []
+  }
+  
+  // Объединяем и убираем дубликаты
+  const allOrderIds = new Set([
+    ...(orgCreatedOrders?.map((o: any) => o.id) || []),
+    ...(driverOrders.map((o: any) => o.id))
+  ])
+  
+  allOrders = [
+    ...(orgCreatedOrders || []),
+    ...driverOrders.filter((o: any) => !orgCreatedOrders?.some((oc: any) => oc.id === o.id))
+  ]
 
   // Подсчитываем статистику
-  const activeOrdersCount = organizationOrders?.filter((o: any) => 
+  const activeOrdersCount = allOrders.filter((o: any) => 
     o.status !== 'completed' && o.status !== 'cancelled'
-  ).length || 0
-  const completedOrdersCount = organizationOrders?.filter((o: any) => 
+  ).length
+  const completedOrdersCount = allOrders.filter((o: any) => 
     o.status === 'completed'
-  ).length || 0
-  const totalEarnings = organizationOrders?.filter((o: any) => o.status === 'completed')
-    .reduce((sum: number, o: any) => sum + (parseFloat(o.final_price) || 0), 0) || 0
+  ).length
 
   return (
     <div className="pb-20">
-      <div className="flex justify-between items-center mb-6">
-        <GeneralChatButton
-          organizationId={user.id}
-          currentUserId={user.id}
-        />
-      </div>
-
       {/* Статистика */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <div className="bg-gray-50 rounded-lg shadow p-6">
@@ -82,7 +94,7 @@ export default async function CustomerDashboard() {
         </div>
         <div className="bg-gray-50 rounded-lg shadow p-6">
           <h3 className="text-sm text-gray-600 mb-2">Активных заказов</h3>
-          <p className="text-3xl font-bold text-brand-light">{activeOrdersCount}</p>
+          <p className="text-3xl font-bold text-green-600">{activeOrdersCount}</p>
         </div>
         <div className="bg-gray-50 rounded-lg shadow p-6">
           <h3 className="text-sm text-gray-600 mb-2">Завершенных заказов</h3>
@@ -98,13 +110,17 @@ export default async function CustomerDashboard() {
             href="/dashboard/customer/drivers"
             className="text-brand-light hover:text-brand-dark text-sm"
           >
-            Все водители →
+            Управление водителями →
           </a>
         </div>
         {drivers && drivers.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {drivers.slice(0, 6).map((driver: any) => (
-              <div key={driver.id} className="border border-gray-200 rounded-lg p-4 bg-gray-100 hover:bg-gray-100 transition">
+              <a
+                key={driver.id}
+                href={`/dashboard/customer/drivers/${driver.id}`}
+                className="block border border-gray-200 rounded-lg p-4 bg-gray-100 hover:bg-gray-200 transition cursor-pointer"
+              >
                 <div className="flex items-center gap-3 mb-3">
                   {driver.avatar_url ? (
                     <img
@@ -142,13 +158,7 @@ export default async function CustomerDashboard() {
                     </p>
                   )}
                 </div>
-                <a
-                  href={`/dashboard/customer/drivers/${driver.id}`}
-                  className="mt-3 block text-center bg-brand-light text-gray-900 px-4 py-2 rounded text-sm hover:bg-brand-dark transition"
-                >
-                  Подробнее
-                </a>
-              </div>
+              </a>
             ))}
           </div>
         ) : (
@@ -156,148 +166,6 @@ export default async function CustomerDashboard() {
         )}
       </div>
 
-      {/* Последние заказы */}
-      <div className="bg-gray-50 rounded-lg shadow p-6 mb-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-gray-900">Последние заказы</h2>
-          <a
-            href="/dashboard/customer/orders"
-            className="text-brand-light hover:text-brand-dark text-sm"
-          >
-            Все заказы →
-          </a>
-        </div>
-        {organizationOrders && organizationOrders.length > 0 ? (
-          <div className="space-y-4">
-            {organizationOrders
-              .sort((a: any, b: any) => 
-                new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-              )
-              .slice(0, 10)
-              .map((order: any) => {
-                const isActive = order.status !== 'completed' && order.status !== 'cancelled'
-                const isCompleted = order.status === 'completed'
-                const hasRejections = rejectedOrderIds.has(order.id)
-                
-                // Определяем цвет подсветки
-                let borderColor = 'border-gray-200'
-                let bgColor = 'bg-gray-100'
-                
-                if (hasRejections) {
-                  // Заказы с отказами - красным
-                  borderColor = 'border-red-500'
-                  bgColor = 'bg-red-100/40'
-                } else if (isCompleted) {
-                  // Выполненные заказы - зеленым
-                  borderColor = 'border-green-500'
-                  bgColor = 'bg-green-100/40'
-                } else if (isActive) {
-                  // Активные заказы - желтым
-                  borderColor = 'border-yellow-500'
-                  bgColor = 'bg-yellow-100/40'
-                }
-                
-                const canCancel = order.status === 'searching_courier' && !order.executor_user_id
-                
-                return (
-                  <div
-                    key={order.id}
-                    className={`border ${borderColor} rounded-lg p-4 ${bgColor} hover:opacity-80 transition`}
-                  >
-                    <Link
-                      href={`/dashboard/customer/orders/${order.id}`}
-                      className="block cursor-pointer"
-                    >
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <p className="font-medium text-gray-900">Заказ №{order.order_number || order.id.slice(0, 8)}</p>
-                            {hasRejections && (
-                              <span className="px-2 py-1 bg-red-500 text-gray-900 text-xs rounded">
-                                Есть отказы
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-sm text-gray-700 mt-1">
-                            {order.pickup_address} → {order.delivery_address}
-                          </p>
-                          <p className="text-sm text-gray-600 mt-1">
-                            Статус: {order.status === 'searching_courier' ? 'Ищем курьера' :
-                                     order.status === 'courier_accepted' ? 'Курьер принял заказ' :
-                                     order.status === 'courier_coming' ? 'Курьер едет к отправителю' :
-                                     order.status === 'courier_delivering' ? 'Курьер едет к получателю' :
-                                     order.status === 'completed' ? 'Заказ завершен' : 
-                                     order.status === 'cancelled' ? 'Отменен' : order.status}
-                          </p>
-                          {order.driver_full_name && (
-                            <p className="text-sm text-gray-600 mt-1">
-                              Водитель: {order.driver_full_name}
-                            </p>
-                          )}
-                          <p className="text-xs text-gray-500 mt-1">
-                            Создан: {new Date(order.created_at).toLocaleString('ru-RU')}
-                          </p>
-                        </div>
-                        <div className="text-right ml-4">
-                          <p className="font-semibold text-gray-900">{order.final_price} BYN</p>
-                        </div>
-                      </div>
-                    </Link>
-                    {canCancel && (
-                      <div className="mt-3">
-                        <button
-                          onClick={async (e) => {
-                            e.preventDefault()
-                            e.stopPropagation()
-                            if (!confirm('Вы уверены, что хотите отменить этот заказ?')) {
-                              return
-                            }
-                            try {
-                              const response = await fetch(`/api/orders/${order.id}/cancel`, {
-                                method: 'POST',
-                              })
-                              const data = await response.json()
-                              if (response.ok) {
-                                alert('Заказ успешно отменен')
-                                window.location.reload()
-                              } else {
-                                alert(data.error || 'Не удалось отменить заказ')
-                              }
-                            } catch (error) {
-                              console.error('Ошибка отмены заказа:', error)
-                              alert('Произошла ошибка при отмене заказа')
-                            }
-                          }}
-                          className="w-full bg-red-300 text-gray-900 px-3 py-1.5 rounded text-xs hover:bg-red-400 transition"
-                        >
-                          Отменить заказ
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )
-              })}
-          </div>
-        ) : (
-          <p className="text-gray-600">Пока нет заказов</p>
-        )}
-      </div>
-
-      {/* Быстрые действия */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <a
-          href="/dashboard/customer/create-order"
-          className="bg-brand-light text-gray-900 px-6 py-4 rounded-lg hover:bg-brand-dark transition text-center font-semibold"
-        >
-          Создать новый заказ
-        </a>
-        <a
-          href="/dashboard/customer/drivers"
-          className="bg-gray-100 text-gray-900 px-6 py-4 rounded-lg hover:bg-gray-100 transition text-center font-semibold"
-        >
-          Управление водителями
-        </a>
-      </div>
     </div>
   )
 }
