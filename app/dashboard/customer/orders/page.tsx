@@ -22,33 +22,41 @@ export default function CustomerOrdersPage() {
   const [drivers, setDrivers] = useState<any[]>([])
   const [assigningDriver, setAssigningDriver] = useState<string | null>(null)
   const [selectedDriverForOrder, setSelectedDriverForOrder] = useState<{ [orderId: string]: string }>({})
-  const [period, setPeriod] = useState<Period>('today')
+  const [period, setPeriod] = useState<Period>('week')
   const [displayedCompletedOrdersCount, setDisplayedCompletedOrdersCount] = useState(10)
   const [completedFilter, setCompletedFilter] = useState<'all' | 'unpaid' | 'cancelled'>('all')
   const [showActiveOrders, setShowActiveOrders] = useState(false)
-  const [showCompletedOrders, setShowCompletedOrders] = useState(false)
+  const [showCompletedOrders, setShowCompletedOrders] = useState(true)
 
   const getDateFilter = useCallback((period: Period) => {
     const now = new Date()
     switch (period) {
       case 'today':
+        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0)
+        const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999)
         return {
-          start: new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString(),
-          end: now.toISOString()
+          start: todayStart.toISOString(),
+          end: todayEnd.toISOString()
         }
       case 'week':
         const weekAgo = new Date(now)
         weekAgo.setDate(weekAgo.getDate() - 7)
+        weekAgo.setHours(0, 0, 0, 0)
+        const weekEnd = new Date(now)
+        weekEnd.setHours(23, 59, 59, 999)
         return {
           start: weekAgo.toISOString(),
-          end: now.toISOString()
+          end: weekEnd.toISOString()
         }
       case 'month':
         const monthAgo = new Date(now)
         monthAgo.setMonth(monthAgo.getMonth() - 1)
+        monthAgo.setHours(0, 0, 0, 0)
+        const monthEnd = new Date(now)
+        monthEnd.setHours(23, 59, 59, 999)
         return {
           start: monthAgo.toISOString(),
-          end: now.toISOString()
+          end: monthEnd.toISOString()
         }
       case 'all':
       default:
@@ -131,6 +139,7 @@ export default function CustomerOrdersPage() {
       let completed: any[] = []
       
       if (ids.length > 0) {
+        // Сначала загружаем все завершенные и отмененные заказы без фильтра по дате
         let driverCompletedQuery = supabase
           .from('orders')
           .select(`
@@ -142,16 +151,70 @@ export default function CustomerOrdersPage() {
           .in('executor_user_id', ids)
           .in('status', ['completed', 'cancelled'])
 
-        if (dateFilter.start) {
-          driverCompletedQuery = driverCompletedQuery.gte('completed_at', dateFilter.start)
-        }
-        if (dateFilter.end) {
-          driverCompletedQuery = driverCompletedQuery.lte('completed_at', dateFilter.end)
-        }
-
-        const { data: driverCompleted } = await driverCompletedQuery
+        const { data: driverCompleted, error: completedError } = await driverCompletedQuery
         
-        completed = (driverCompleted || []).map((order: any) => ({
+        if (completedError) {
+          console.error('Ошибка загрузки завершенных заказов:', completedError)
+        }
+        
+        console.log('Загружено завершенных заказов:', driverCompleted?.length || 0)
+        console.log('ID водителей:', ids)
+        console.log('Фильтр по дате:', dateFilter)
+        
+        // Фильтруем на клиенте по дате
+        let filteredCompleted = (driverCompleted || []).filter((order: any) => {
+          // Если фильтр не задан, показываем все
+          if (!dateFilter.start && !dateFilter.end) {
+            return true
+          }
+          
+          let orderDate: Date | null = null
+          
+          if (order.status === 'completed' && order.completed_at) {
+            orderDate = new Date(order.completed_at)
+          } else if (order.status === 'cancelled') {
+            // Для отмененных используем cancelled_at или created_at
+            orderDate = order.cancelled_at ? new Date(order.cancelled_at) : new Date(order.created_at)
+          } else {
+            // Для других статусов используем created_at
+            orderDate = new Date(order.created_at)
+          }
+          
+          if (!orderDate) {
+            console.log('Заказ без даты:', order.id, order.status)
+            return true
+          }
+          
+          const filterStart = dateFilter.start ? new Date(dateFilter.start) : null
+          const filterEnd = dateFilter.end ? new Date(dateFilter.end) : null
+          
+          // Проверяем фильтр по дате
+          if (filterStart) {
+            if (orderDate < filterStart) {
+              console.log('Заказ отфильтрован (раньше начала):', order.id, orderDate, filterStart)
+              return false
+            }
+          }
+          
+          if (filterEnd) {
+            if (orderDate > filterEnd) {
+              console.log('Заказ отфильтрован (позже конца):', order.id, orderDate, filterEnd)
+              return false
+            }
+          }
+          
+          return true
+        })
+        
+        console.log('Отфильтровано завершенных заказов:', filteredCompleted.length)
+        if (filteredCompleted.length === 0 && (driverCompleted || []).length > 0) {
+          console.log('Пример заказа:', driverCompleted?.[0])
+          console.log('Дата заказа:', driverCompleted?.[0]?.completed_at || driverCompleted?.[0]?.created_at)
+          console.log('Фильтр start:', dateFilter.start)
+          console.log('Фильтр end:', dateFilter.end)
+        }
+        
+        completed = filteredCompleted.map((order: any) => ({
           ...order,
           driver_full_name: order.executor?.full_name,
           driver_phone: order.executor?.phone
@@ -550,7 +613,10 @@ export default function CustomerOrdersPage() {
             {/* Фильтр по периоду */}
             <div className="mb-4 flex gap-2">
               <button
-                onClick={() => setPeriod('today')}
+                onClick={() => {
+                  setPeriod('today')
+                  setDisplayedCompletedOrdersCount(10)
+                }}
                 className={`px-3 py-1 rounded text-sm transition ${
                   period === 'today'
                     ? 'bg-brand-light text-gray-900'
@@ -560,7 +626,10 @@ export default function CustomerOrdersPage() {
                 Сегодня
               </button>
               <button
-                onClick={() => setPeriod('week')}
+                onClick={() => {
+                  setPeriod('week')
+                  setDisplayedCompletedOrdersCount(10)
+                }}
                 className={`px-3 py-1 rounded text-sm transition ${
                   period === 'week'
                     ? 'bg-brand-light text-gray-900'
@@ -570,7 +639,10 @@ export default function CustomerOrdersPage() {
                 Неделя
               </button>
               <button
-                onClick={() => setPeriod('month')}
+                onClick={() => {
+                  setPeriod('month')
+                  setDisplayedCompletedOrdersCount(10)
+                }}
                 className={`px-3 py-1 rounded text-sm transition ${
                   period === 'month'
                     ? 'bg-brand-light text-gray-900'
@@ -580,7 +652,10 @@ export default function CustomerOrdersPage() {
                 Месяц
               </button>
               <button
-                onClick={() => setPeriod('all')}
+                onClick={() => {
+                  setPeriod('all')
+                  setDisplayedCompletedOrdersCount(10)
+                }}
                 className={`px-3 py-1 rounded text-sm transition ${
                   period === 'all'
                     ? 'bg-brand-light text-gray-900'
