@@ -1,0 +1,26 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Amatic+SC:wght@700&display=swap');
+      .logo-text {
+        font-family: 'Amatic SC', Arial, sans-serif;
+        font-weight: 700;
+        font-size: 280px;
+        fill: #1f2937;
+        text-anchor: middle;
+        dominant-baseline: middle;
+        letter-spacing: -5px;
+      }
+    </style>
+  </defs>
+  <!-- Круглый фон как у кнопки П! -->
+  <circle cx="256" cy="256" r="256" fill="#87ceeb"/>
+  
+  <!-- Текст "П!" в центре с шрифтом Amatic SC Bold -->
+  <text 
+    x="256" 
+    y="320" 
+    class="logo-text"
+  >П!</text>
+</svg>
+
