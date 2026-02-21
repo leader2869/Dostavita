@@ -186,10 +186,21 @@
                 // Очищаем canvas
                 ctx.clearRect(0, 0, size, size);
                 
-                // Круглый фон
+                // Квадратный фон с закругленными краями (как в приложении)
+                const cornerRadius = size * 0.2; // 20% от размера для закругления
                 ctx.fillStyle = '#87ceeb';
                 ctx.beginPath();
-                ctx.arc(size / 2, size / 2, size / 2, 0, 2 * Math.PI);
+                // Рисуем квадрат с закругленными углами
+                ctx.moveTo(cornerRadius, 0);
+                ctx.lineTo(size - cornerRadius, 0);
+                ctx.quadraticCurveTo(size, 0, size, cornerRadius);
+                ctx.lineTo(size, size - cornerRadius);
+                ctx.quadraticCurveTo(size, size, size - cornerRadius, size);
+                ctx.lineTo(cornerRadius, size);
+                ctx.quadraticCurveTo(0, size, 0, size - cornerRadius);
+                ctx.lineTo(0, cornerRadius);
+                ctx.quadraticCurveTo(0, 0, cornerRadius, 0);
+                ctx.closePath();
                 ctx.fill();
                 
                 // Текст "П!" с шрифтом Amatic SC Bold

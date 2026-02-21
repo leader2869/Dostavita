@@ -35,8 +35,8 @@ const svgTemplate = `
       }
     </style>
   </defs>
-  <!-- Круглый фон как у кнопки П! -->
-  <circle cx="{center}" cy="{center}" r="{radius}" fill="#87ceeb"/>
+  <!-- Квадратный фон с закругленными краями (как в приложении) -->
+  <rect x="0" y="0" width="{size}" height="{size}" rx="{cornerRadius}" ry="{cornerRadius}" fill="#87ceeb"/>
   
   <!-- Текст "П!" в центре с шрифтом Amatic SC Bold -->
   <text 
@@ -49,13 +49,13 @@ const svgTemplate = `
 
 function generateIcon(size) {
   const center = size / 2;
-  const radius = size / 2;
+  const cornerRadius = Math.round(size * 0.2); // 20% от размера для закругления
   const fontSize = Math.round(size * 0.55);
   
   const svg = svgTemplate
     .replace(/{size}/g, size)
     .replace(/{center}/g, center)
-    .replace(/{radius}/g, radius)
+    .replace(/{cornerRadius}/g, cornerRadius)
     .replace(/{fontSize}/g, fontSize);
   
   return sharp(Buffer.from(svg))
