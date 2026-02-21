@@ -93,45 +93,87 @@
     </div>
 
     <script>
-        // Ждем загрузки страницы и шрифтов
+        // Используем шрифт, который уже загружается через Google Fonts CSS
         let fontReady = false;
         
-        // Функция для проверки доступности шрифта
-        function checkFontAvailable(size) {
-            return document.fonts.check(`700 ${size}px "Amatic SC"`);
+        // Функция для получения правильного URL шрифта из CSS
+        async function getFontUrlFromCSS() {
+            try {
+                // Загружаем CSS от Google Fonts
+                const cssResponse = await fetch('https://fonts.googleapis.com/css2?family=Amatic+SC:wght@700&display=swap');
+                const cssText = await cssResponse.text();
+                
+                // Ищем URL шрифта в CSS (формат: url(https://...))
+                const urlMatch = cssText.match(/url\(([^)]+\.woff2[^)]*)\)/);
+                if (urlMatch && urlMatch[1]) {
+                    const fontUrl = urlMatch[1].replace(/['"]/g, '');
+                    console.log('✅ Найден URL шрифта в CSS:', fontUrl);
+                    return fontUrl;
+                }
+            } catch (error) {
+                console.warn('⚠️ Не удалось получить URL из CSS:', error);
+            }
+            return null;
         }
         
-        // Ждем загрузки всех ресурсов
-        window.addEventListener('load', () => {
-            // Ждем загрузки шрифтов через FontFace API
-            const font = new FontFace('Amatic SC', 'url(https://fonts.gstatic.com/s/amaticsc/v26/TUZyzwprpvBS1izr_vO0De6ecZQf1Q.woff2)', {
-                weight: '700',
-                style: 'normal'
-            });
-            
-            font.load()
-                .then((loadedFont) => {
-                    document.fonts.add(loadedFont);
+        // Ждем загрузки шрифта через Google Fonts
+        async function initializeFont() {
+            try {
+                // Ждем загрузки всех шрифтов (включая загружаемые через CSS)
+                await document.fonts.ready;
+                console.log('✅ Шрифты из CSS загружены');
+                
+                // Проверяем доступность шрифта
+                const testSize = 16;
+                const fontAvailable = document.fonts.check(`700 ${testSize}px "Amatic SC"`);
+                
+                if (fontAvailable) {
                     fontReady = true;
-                    console.log('✅ Шрифт Amatic SC Bold загружен через FontFace API');
-                    return document.fonts.ready;
-                })
-                .then(() => {
-                    console.log('✅ Все шрифты готовы');
-                    // Дополнительная задержка для гарантии
-                    setTimeout(() => {
-                        drawIcons();
-                    }, 500);
-                })
-                .catch((error) => {
-                    console.warn('⚠️ FontFace API не сработал, используем CSS загрузку:', error);
-                    // Пробуем использовать шрифт, загруженный через CSS
-                    document.fonts.ready.then(() => {
-                        setTimeout(() => {
-                            drawIcons();
-                        }, 1000);
-                    });
-                });
+                    console.log('✅ Шрифт Amatic SC Bold доступен через CSS');
+                } else {
+                    console.warn('⚠️ Шрифт не доступен через CSS, пробуем загрузить напрямую');
+                    
+                    // Получаем правильный URL из CSS
+                    const fontUrl = await getFontUrlFromCSS();
+                    
+                    if (fontUrl) {
+                        try {
+                            const font = new FontFace('Amatic SC', `url(${fontUrl})`, {
+                                weight: '700',
+                                style: 'normal'
+                            });
+                            
+                            await font.load();
+                            document.fonts.add(font);
+                            fontReady = true;
+                            console.log(`✅ Шрифт загружен с URL из CSS: ${fontUrl}`);
+                        } catch (e) {
+                            console.warn(`⚠️ Не удалось загрузить шрифт:`, e);
+                        }
+                    }
+                    
+                    if (!fontReady) {
+                        console.warn('⚠️ Не удалось загрузить шрифт, используем fallback');
+                    }
+                }
+                
+                // Дополнительная задержка для гарантии
+                setTimeout(() => {
+                    drawIcons();
+                }, 500);
+                
+            } catch (error) {
+                console.error('❌ Ошибка инициализации шрифта:', error);
+                setTimeout(() => {
+                    drawIcons();
+                }, 1000);
+            }
+        }
+        
+        // Запускаем инициализацию при загрузке страницы
+        window.addEventListener('load', () => {
+            // Даем время на загрузку CSS шрифта
+            setTimeout(initializeFont, 1000);
         });
 
         function drawIcons() {
@@ -154,13 +196,13 @@
                 ctx.fillStyle = '#1f2937';
                 const fontSize = Math.round(size * 0.55);
                 
-                // Проверяем доступность шрифта для конкретного размера
-                const fontAvailable = checkFontAvailable(fontSize);
+                // Проверяем доступность шрифта
+                const fontAvailable = fontReady && document.fonts.check(`700 ${fontSize}px "Amatic SC"`);
                 
                 // Применяем шрифт Amatic SC Bold
-                if (fontAvailable || fontReady) {
+                if (fontAvailable) {
                     ctx.font = `700 ${fontSize}px "Amatic SC"`;
-                    console.log(`✅ Используется Amatic SC Bold для размера ${size}px (fontSize: ${fontSize}px)`);
+                    console.log(`✅ Используется Amatic SC Bold для размера ${size}px`);
                 } else {
                     // Fallback на системный шрифт
                     ctx.font = `bold ${fontSize}px Arial, sans-serif`;
