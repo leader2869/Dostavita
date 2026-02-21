@@ -154,7 +154,7 @@ export function DriverBottomNavigation() {
           >
             <span className="text-4xl font-bold">П!</span>
             {activeOrders.length > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
+              <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-lg font-black rounded-full w-9 h-9 flex items-center justify-center shadow-lg border-2 border-white">
                 {activeOrders.length > 9 ? '9+' : activeOrders.length}
               </span>
             )}
