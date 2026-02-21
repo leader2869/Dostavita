@@ -310,9 +310,13 @@ export default function OrderDetailsPage() {
                   <p className="text-sm text-gray-600">Телефон</p>
                   {driver.phone ? (
                     <p className="text-gray-900">
-                      <a href={`tel:${driver.phone}`} className="text-brand-light hover:text-brand-light font-medium text-lg">
-                        {driver.phone}
-                      </a>
+                      {order.status !== 'completed' && order.status !== 'cancelled' ? (
+                        <a href={`tel:${driver.phone}`} className="text-brand-light hover:text-brand-light font-medium text-lg">
+                          {driver.phone}
+                        </a>
+                      ) : (
+                        <span className="text-gray-900 font-medium text-lg">{driver.phone}</span>
+                      )}
                     </p>
                   ) : (
                     <p className="text-yellow-400">Телефон не указан водителем</p>
@@ -354,10 +358,12 @@ export default function OrderDetailsPage() {
                   </div>
                 )}
 
-                {/* Кнопки действий (телефон, навигация, чат) */}
-                <div className="mt-4">
-                  <OrderActions order={order} />
-                </div>
+                {/* Кнопки действий (телефон, навигация, чат) - только для активных заказов */}
+                {order.status !== 'completed' && order.status !== 'cancelled' && (
+                  <div className="mt-4">
+                    <OrderActions order={order} />
+                  </div>
+                )}
               </div>
             ) : (
               <p className="text-gray-600">Загрузка информации о водителе...</p>

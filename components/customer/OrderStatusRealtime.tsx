@@ -6,17 +6,51 @@ import { createClient } from '@/lib/supabase/client'
 interface OrderStatusRealtimeProps {
   orderId: string
   initialStatus: string
-  getStatusLabel: (status: string) => string
-  getStatusColor: (status: string) => string
   hasRejections?: boolean
   rejectionsCount?: number
+}
+
+const getStatusLabel = (status: string) => {
+  switch (status) {
+    case 'searching_courier':
+      return 'Ищем курьера'
+    case 'courier_accepted':
+      return 'Курьер принял заказ'
+    case 'courier_coming':
+      return 'Курьер едет к отправителю'
+    case 'courier_delivering':
+      return 'Курьер едет к получателю'
+    case 'completed':
+      return 'Заказ завершен'
+    case 'cancelled':
+      return 'Отменен'
+    default:
+      return status
+  }
+}
+
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'searching_courier':
+      return 'text-yellow-400 bg-yellow-400/20 border-yellow-400/50'
+    case 'courier_accepted':
+      return 'text-orange-400 bg-orange-400/20 border-orange-400/50'
+    case 'courier_coming':
+      return 'text-blue-400 bg-blue-400/20 border-blue-400/50'
+    case 'courier_delivering':
+      return 'text-purple-400 bg-purple-400/20 border-purple-400/50'
+    case 'completed':
+      return 'text-brand-light bg-brand-light/20 border-green-400/50'
+    case 'cancelled':
+      return 'text-red-400 bg-red-400/20 border-red-400/50'
+    default:
+      return 'text-gray-600 bg-gray-400/20 border-gray-400/50'
+  }
 }
 
 export function OrderStatusRealtime({ 
   orderId, 
   initialStatus, 
-  getStatusLabel, 
-  getStatusColor,
   hasRejections = false,
   rejectionsCount = 0
 }: OrderStatusRealtimeProps) {

@@ -40,10 +40,28 @@ export default async function CustomerDashboard() {
   const { data: drivers, error: driversError } = await supabase
     .rpc('get_organization_drivers', { organization_user_id: user.id })
 
+  // Получаем балансы водителей
+  const driverIds = drivers?.map((d: any) => d.id) || []
+  let driverBalances: { [key: string]: { amount: number; currency: string } } = {}
+  
+  if (driverIds.length > 0) {
+    const { data: balances } = await supabase
+      .from('balances')
+      .select('user_id, amount, currency')
+      .in('user_id', driverIds)
+    
+    if (balances) {
+      balances.forEach((b: any) => {
+        driverBalances[b.user_id] = {
+          amount: b.amount || 0,
+          currency: b.currency || 'BYN'
+        }
+      })
+    }
+  }
+
   // Получаем статистику по заказам напрямую из таблицы orders
   // Используем прямую загрузку с учетом RLS политик
-  // Сначала получаем ID всех водителей организации
-  const driverIds = drivers?.map((d: any) => d.id) || []
   
   // Получаем заказы водителей организации и заказы, созданные самой организацией
   let allOrders: any[] = []
@@ -157,6 +175,12 @@ export default async function CustomerDashboard() {
                       <span className="text-gray-600">Номер:</span> {driver.vehicle_number}
                     </p>
                   )}
+                  <p className="text-gray-700 mt-2">
+                    <span className="text-gray-600">Баланс:</span> 
+                    <span className="font-semibold text-green-600 ml-1">
+                      {driverBalances[driver.id]?.amount?.toFixed(2) || '0.00'} {driverBalances[driver.id]?.currency || 'BYN'}
+                    </span>
+                  </p>
                 </div>
               </a>
             ))}

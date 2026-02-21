@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { formatAddressForOrder } from '@/lib/utils/formatAddress'
 import { formatReadyTime } from '@/lib/utils/formatReadyTime'
@@ -708,7 +709,7 @@ export default function CustomerOrdersPage() {
                     const isCancelled = order.status === 'cancelled'
                     
                     return (
-                      <a
+                      <Link
                         key={order.id}
                         href={`/dashboard/customer/orders/${order.id}`}
                         className={`block border border-gray-200 rounded-lg p-4 transition cursor-pointer ${
@@ -763,7 +764,7 @@ export default function CustomerOrdersPage() {
                             <p className="font-semibold text-gray-900 text-lg">{order.final_price} BYN</p>
                           </div>
                         </div>
-                      </a>
+                      </Link>
                     )
                   })}
                 </div>

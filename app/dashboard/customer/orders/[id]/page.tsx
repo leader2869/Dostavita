@@ -6,7 +6,6 @@ import { ru } from 'date-fns/locale'
 import { DriverLocationMapWrapper } from '@/components/map/DriverLocationMapWrapper'
 import { OrderStatusRealtime } from '@/components/customer/OrderStatusRealtime'
 import { formatAddressForOrder } from '@/lib/utils/formatAddress'
-import { formatReadyTime } from '@/lib/utils/formatReadyTime'
 
 export default async function CustomerOrderDetailsPage({ params }: { params: { id: string } }) {
   const orderId = params.id
@@ -30,19 +29,41 @@ export default async function CustomerOrderDetailsPage({ params }: { params: { i
     redirect('/dashboard')
   }
 
-  // Получаем заказы организации
-  const { data: orders, error: ordersError } = await supabase
-    .rpc('get_organization_orders', { organization_user_id: user.id })
+  // Получаем заказ напрямую из таблицы orders
+  // Сначала пытаемся загрузить заказ напрямую
+  const { data: orderData, error: orderError } = await supabase
+    .from('orders')
+    .select(`
+      *,
+      executor:profiles!orders_executor_user_id_fkey(id, full_name, phone),
+      client:profiles!orders_client_id_fkey(id, full_name, phone),
+      customer:profiles!orders_customer_id_fkey(id, full_name, phone)
+    `)
+    .eq('id', orderId)
+    .single()
 
-  if (ordersError) {
-    console.error('Ошибка загрузки заказов:', ordersError)
-  }
-
-  const order = orders?.find((o: any) => o.id === orderId)
-
-  if (!order) {
+  if (orderError || !orderData) {
+    console.error('Ошибка загрузки заказа:', orderError)
     notFound()
   }
+
+  // Проверяем, что заказ принадлежит организации (создан ею) или выполняется водителем организации
+  const { data: drivers } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('organization_id', user.id)
+    .eq('role', 'driver')
+
+  const driverIds = drivers?.map((d: any) => d.id) || []
+  
+  const isOrganizationOrder = orderData.customer_id === user.id
+  const isDriverOrder = orderData.executor_user_id && driverIds.includes(orderData.executor_user_id)
+
+  if (!isOrganizationOrder && !isDriverOrder) {
+    notFound()
+  }
+
+  const order = orderData
 
   // Получаем информацию об отказах для этого заказа
   const { data: rejections } = await supabase
@@ -120,8 +141,6 @@ export default async function CustomerOrderDetailsPage({ params }: { params: { i
           <OrderStatusRealtime
             orderId={orderId}
             initialStatus={order.status}
-            getStatusLabel={getStatusLabel}
-            getStatusColor={getStatusColor}
             hasRejections={hasRejections}
             rejectionsCount={rejections?.length || 0}
           />
@@ -168,23 +187,6 @@ export default async function CustomerOrderDetailsPage({ params }: { params: { i
                 <p className="text-gray-900">{order.description}</p>
               </div>
             )}
-
-            {order.ready_at && (() => {
-              const { formattedTime, timeStatus, statusType } = formatReadyTime(order.ready_at)
-              return (
-                <div>
-                  <p className="text-sm text-gray-600">Заказ будет готов к выдаче</p>
-                  <p className="text-gray-900">
-                    {formattedTime}
-                    {timeStatus && (
-                      <span className={`ml-2 ${statusType === 'waiting' ? 'text-red-400 animate-blink' : statusType === 'upcoming' ? 'text-yellow-400 animate-blink' : 'text-gray-600'}`}>
-                        ({timeStatus})
-                      </span>
-                    )}
-                  </p>
-                </div>
-              )
-            })()}
 
             <div>
               <p className="text-sm text-gray-600">Стоимость</p>

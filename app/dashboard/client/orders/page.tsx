@@ -21,7 +21,7 @@ export default function ClientOrdersPage() {
   const [displayedCompletedOrdersCount, setDisplayedCompletedOrdersCount] = useState(10)
   const [completedOrders, setCompletedOrders] = useState<any[]>([])
   const [receivables, setReceivables] = useState<any[]>([])
-  const [period, setPeriod] = useState<Period>('today')
+  const [period, setPeriod] = useState<Period>('week')
   const [customStartDate, setCustomStartDate] = useState<string>('')
   const [customEndDate, setCustomEndDate] = useState<string>('')
   const [isActiveOrdersExpanded, setIsActiveOrdersExpanded] = useState(false)
