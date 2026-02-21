@@ -5,7 +5,7 @@ import { useRouter, useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { OrderMap } from '@/components/map/OrderMap'
 import { DriverLocationMap } from '@/components/map/DriverLocationMap'
-import { OrderActions } from '@/components/driver/OrderActions'
+import { ClientOrderActions } from '@/components/client/ClientOrderActions'
 import { OrderStatusProgress } from '@/components/orders/OrderStatusProgress'
 import { formatAddressForOrder } from '@/lib/utils/formatAddress'
 import { formatReadyTime } from '@/lib/utils/formatReadyTime'
@@ -19,6 +19,7 @@ export default function OrderDetailsPage() {
   const [driver, setDriver] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
 
   const loadOrder = useCallback(async () => {
     try {
@@ -358,10 +359,10 @@ export default function OrderDetailsPage() {
                   </div>
                 )}
 
-                {/* Кнопки действий (телефон, навигация, чат) - только для активных заказов */}
-                {order.status !== 'completed' && order.status !== 'cancelled' && (
+                {/* Кнопки действий (телефон, сообщение, поделиться) - только для активных заказов */}
+                {order.status !== 'completed' && order.status !== 'cancelled' && currentUserId && (
                   <div className="mt-4">
-                    <OrderActions order={order} />
+                    <ClientOrderActions order={order} userId={currentUserId} />
                   </div>
                 )}
               </div>

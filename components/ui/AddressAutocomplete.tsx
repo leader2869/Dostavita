@@ -71,14 +71,24 @@ export function AddressAutocomplete({
         query = `${searchQuery}, ${filterByRegion}`
       }
       
-      const response = await fetch(`/api/nominatim/search?q=${encodeURIComponent(query)}`)
+      console.log('🔍 AddressAutocomplete: Searching for:', query)
+      const apiUrl = `/api/nominatim/search?q=${encodeURIComponent(query)}`
+      console.log('🔍 AddressAutocomplete: API URL:', apiUrl)
+      
+      const response = await fetch(apiUrl)
+      
+      console.log('📡 AddressAutocomplete: Response status:', response.status, response.statusText)
       
       if (!response.ok) {
+        const errorText = await response.text()
+        console.error('❌ AddressAutocomplete: API error:', response.status, errorText)
         throw new Error('Ошибка поиска адреса')
       }
 
       const data = await response.json()
+      console.log('✅ AddressAutocomplete: Received data:', data)
       let results = data.results || []
+      console.log('✅ AddressAutocomplete: Results count:', results.length)
       
       // Дополнительная фильтрация по региону, если указан
       if (filterByRegion) {
@@ -107,7 +117,8 @@ export function AddressAutocomplete({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value
     setQuery(newValue)
-    onChange(newValue)
+    // Вызываем onChange с адресом, но без координат (они будут установлены при выборе результата)
+    onChange(newValue, undefined, undefined)
 
     // Очищаем предыдущий таймер
     if (debounceTimerRef.current) {
@@ -116,7 +127,12 @@ export function AddressAutocomplete({
 
     // Устанавливаем новый таймер для debounce
     debounceTimerRef.current = setTimeout(() => {
-      searchAddress(newValue)
+      if (newValue.trim().length >= 3) {
+        searchAddress(newValue)
+      } else {
+        setResults([])
+        setShowResults(false)
+      }
     }, 500) // Задержка 500мс
   }
 
@@ -197,7 +213,7 @@ export function AddressAutocomplete({
       </div>
 
       {showResults && results.length > 0 && (
-        <div className="absolute z-50 w-full mt-1 bg-gray-50 border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+        <div className="absolute z-[9999] w-full mt-1 bg-gray-50 border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
           {results.map((result, index) => (
             <button
               key={`${result.lat}-${result.lon}-${index}`}

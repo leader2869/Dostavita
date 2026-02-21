@@ -16,7 +16,7 @@ export default function ClientFinancePage() {
   const [receivables, setReceivables] = useState<any[]>([])
   const [transactions, setTransactions] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [period, setPeriod] = useState<Period>('today')
+  const [period, setPeriod] = useState<Period>('week')
   const [customStartDate, setCustomStartDate] = useState<string>('')
   const [customEndDate, setCustomEndDate] = useState<string>('')
   const [displayedTransactionsCount, setDisplayedTransactionsCount] = useState(10)

@@ -151,7 +151,15 @@ export function ClientOrderActions({ order, userId }: ClientOrderActionsProps) {
 
         {/* Кнопка поделиться - для всех активных заказов */}
         <button
-          onClick={handleShareClick}
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            handleShareClick(e)
+          }}
+          onMouseDown={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+          }}
           className="w-12 h-12 rounded-full flex items-center justify-center bg-brand-light/20 hover:bg-brand-light/40 text-brand-light hover:text-brand-dark transition-all"
           title="Поделиться заказом"
         >

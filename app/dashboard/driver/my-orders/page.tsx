@@ -17,7 +17,7 @@ export default function DriverMyOrdersPage() {
   const { user, loading: authLoading } = useAuthCheck()
   const [orders, setOrders] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [period, setPeriod] = useState<Period>('today')
+  const [period, setPeriod] = useState<Period>('week')
   const [displayedCount, setDisplayedCount] = useState(10)
 
   const getDateFilter = useCallback((period: Period) => {

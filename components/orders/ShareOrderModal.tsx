@@ -49,6 +49,25 @@ export function ShareOrderModal({ order, isOpen, onClose }: ShareOrderModalProps
     if (shareType === 'full') {
       // Вся информация по заказу
       let text = `📦 Заказ №${order.order_number || order.id.slice(0, 8)}\n\n`
+      
+      // Информация о водителе в самом начале
+      if (order.executor_user_id && driverInfo) {
+        text += `👤 Информация о водителе:\n`
+        if (driverInfo.full_name) {
+          text += `Имя: ${driverInfo.full_name}\n`
+        }
+        if (driverInfo.phone) {
+          text += `Телефон: ${driverInfo.phone}\n`
+        }
+        if (driverInfo.vehicle_brand || driverInfo.vehicle_model || driverInfo.vehicle_number) {
+          text += `🚗 Транспорт:\n`
+          if (driverInfo.vehicle_brand) text += `Марка: ${driverInfo.vehicle_brand}\n`
+          if (driverInfo.vehicle_model) text += `Модель: ${driverInfo.vehicle_model}\n`
+          if (driverInfo.vehicle_number) text += `Номер: ${driverInfo.vehicle_number}\n`
+        }
+        text += `\n`
+      }
+      
       text += `📍 Точка А (откуда):\n${formatAddressForOrder(order.pickup_address)}\n\n`
       text += `📍 Точка Б (куда):\n${formatAddressForOrder(order.delivery_address)}\n\n`
       
@@ -57,9 +76,6 @@ export function ShareOrderModal({ order, isOpen, onClose }: ShareOrderModalProps
       }
       if (order.recipient_phone) {
         text += `📞 Телефон получателя: ${order.recipient_phone}\n`
-      }
-      if (order.executor_user_id && driverInfo) {
-        text += `🚗 Телефон водителя: ${driverInfo.phone || 'не указан'}\n`
       }
       
       text += `\n💰 Стоимость доставки: ${order.final_price} BYN\n`
@@ -74,14 +90,6 @@ export function ShareOrderModal({ order, isOpen, onClose }: ShareOrderModalProps
       if (order.ready_at) {
         const readyDate = new Date(order.ready_at)
         text += `\n⏰ Заказ будет готов к выдаче: ${readyDate.toLocaleString('ru-RU')}\n`
-      }
-      
-      if (driverInfo) {
-        text += `\n🚗 Информация по транспорту:\n`
-        if (driverInfo.vehicle_brand) text += `Марка: ${driverInfo.vehicle_brand}\n`
-        if (driverInfo.vehicle_model) text += `Модель: ${driverInfo.vehicle_model}\n`
-        if (driverInfo.vehicle_type) text += `Тип: ${driverInfo.vehicle_type}\n`
-        if (driverInfo.vehicle_number) text += `Номер: ${driverInfo.vehicle_number}\n`
       }
       
       return text
@@ -135,8 +143,21 @@ export function ShareOrderModal({ order, isOpen, onClose }: ShareOrderModalProps
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      onClick={(e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        onClose()
+      }}
+    >
+      <div 
+        className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto"
+        onClick={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+        }}
+      >
         <div className="p-6">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-bold text-gray-900">Поделиться заказом</h2>
@@ -153,7 +174,7 @@ export function ShareOrderModal({ order, isOpen, onClose }: ShareOrderModalProps
           {/* Выбор типа шаринга */}
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Что поделить:
+              Чем поделиться:
             </label>
             <div className="flex gap-2">
               <button

@@ -18,7 +18,7 @@ export default function DriverFinancePage() {
   const [unpaidOrdersFromReceivables, setUnpaidOrdersFromReceivables] = useState<any[]>([])
   const [allUnpaidCompletedOrders, setAllUnpaidCompletedOrders] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [period, setPeriod] = useState<Period>('today')
+  const [period, setPeriod] = useState<Period>('week')
   const [customStartDate, setCustomStartDate] = useState<string>('')
   const [customEndDate, setCustomEndDate] = useState<string>('')
   const [depositAmount, setDepositAmount] = useState<string>('')

@@ -440,8 +440,8 @@ export default function SavedAddressesPage() {
       {/* Модальное окно для добавления/редактирования адреса */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
-          <div className="bg-gray-50 rounded-t-lg sm:rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] sm:max-h-[90vh] h-[90vh] sm:h-auto flex flex-col">
-            <form onSubmit={handleSaveAddress} className="flex flex-col flex-1 overflow-y-auto p-4 sm:p-6">
+          <div className="bg-gray-50 rounded-t-lg sm:rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] sm:max-h-[90vh] h-[90vh] sm:h-auto flex flex-col overflow-visible">
+            <form onSubmit={handleSaveAddress} className="flex flex-col flex-1 overflow-y-auto overflow-x-visible p-4 sm:p-6">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-bold text-gray-900">
                   {editingAddress ? 'Редактировать адрес' : 'Добавить адрес'}

@@ -209,41 +209,31 @@ export default function ClientOrdersPage() {
     return status === 'searching_courier' || status === 'courier_accepted' || status === 'courier_coming' || status === 'courier_delivering'
   }
 
-  // Функция фильтрации заказов по поисковому запросу
+  // Функция фильтрации заказов по поисковому запросу (только по номеру заказа)
   const filterOrdersBySearch = (orderList: any[]) => {
-    if (!searchQuery.trim()) return orderList
+    if (!searchQuery || !searchQuery.trim()) return orderList
 
-    const query = searchQuery.toLowerCase().trim()
+    // Нормализуем запрос: убираем пробелы
+    const query = searchQuery.trim()
     
     return orderList.filter((order: any) => {
-      // Поиск по номеру заказа
-      const orderNumber = String(order.order_number || order.id?.slice(0, 8) || '').toLowerCase()
-      if (orderNumber.includes(query)) return true
-
-      // Поиск по номеру телефона отправителя
-      if (order.sender_phone && order.sender_phone.toLowerCase().includes(query)) return true
-
-      // Поиск по номеру телефона получателя
-      if (order.recipient_phone && order.recipient_phone.toLowerCase().includes(query)) return true
-
-      // Поиск по адресу отправления
-      if (order.pickup_address && order.pickup_address.toLowerCase().includes(query)) return true
-
-      // Поиск по адресу доставки
-      if (order.delivery_address && order.delivery_address.toLowerCase().includes(query)) return true
-
-      // Поиск по ФИО отправителя (customer)
-      if (order.customer?.full_name && order.customer.full_name.toLowerCase().includes(query)) return true
-
-      // Поиск по ФИО получателя (client)
-      if (order.client?.full_name && order.client.full_name.toLowerCase().includes(query)) return true
-
-      // Поиск по телефону отправителя из профиля
-      if (order.customer?.phone && order.customer.phone.toLowerCase().includes(query)) return true
-
-      // Поиск по телефону получателя из профиля
-      if (order.client?.phone && order.client.phone.toLowerCase().includes(query)) return true
-
+      // Проверяем номер заказа
+      if (order.order_number != null && order.order_number !== undefined) {
+        // Приводим к строке и сравниваем точное совпадение
+        const orderNumberStr = String(order.order_number).trim()
+        if (orderNumberStr === query) {
+          return true
+        }
+      }
+      
+      // Если номер заказа отсутствует, проверяем первые 8 символов ID
+      if (order.id) {
+        const orderIdPrefix = String(order.id).slice(0, 8).trim()
+        if (orderIdPrefix === query) {
+          return true
+        }
+      }
+      
       return false
     })
   }
@@ -270,6 +260,39 @@ export default function ClientOrdersPage() {
   // Применяем фильтр поиска
   const activeOrders = filterOrdersBySearch(allActiveOrders)
   const completedOrdersFromAll = filterOrdersBySearch(filteredCompletedOrders)
+  
+  // Отладочное логирование (можно удалить после проверки)
+  useEffect(() => {
+    if (searchQuery.trim() && orders.length > 0) {
+      console.log('=== ОТЛАДКА ПОИСКА ===')
+      console.log('Поисковый запрос:', searchQuery)
+      console.log('Всего заказов:', orders.length)
+      console.log('Активных заказов (до фильтра):', allActiveOrders.length)
+      console.log('Завершенных заказов (до фильтра):', filteredCompletedOrders.length)
+      console.log('Пример активного заказа:', allActiveOrders[0] ? {
+        id: allActiveOrders[0]?.id,
+        order_number: allActiveOrders[0]?.order_number,
+        order_number_type: typeof allActiveOrders[0]?.order_number,
+        order_number_string: String(allActiveOrders[0]?.order_number || ''),
+        status: allActiveOrders[0]?.status
+      } : 'нет активных заказов')
+      console.log('Пример завершенного заказа:', filteredCompletedOrders[0] ? {
+        id: filteredCompletedOrders[0]?.id,
+        order_number: filteredCompletedOrders[0]?.order_number,
+        order_number_type: typeof filteredCompletedOrders[0]?.order_number,
+        order_number_string: String(filteredCompletedOrders[0]?.order_number || ''),
+        status: filteredCompletedOrders[0]?.status
+      } : 'нет завершенных заказов')
+      console.log('Отфильтровано активных:', activeOrders.length)
+      console.log('Отфильтровано завершенных:', completedOrdersFromAll.length)
+      if (activeOrders.length > 0) {
+        console.log('Найденные активные заказы:', activeOrders.map((o: any) => ({ id: o.id, order_number: o.order_number })))
+      }
+      if (completedOrdersFromAll.length > 0) {
+        console.log('Найденные завершенные заказы:', completedOrdersFromAll.map((o: any) => ({ id: o.id, order_number: o.order_number })))
+      }
+    }
+  }, [searchQuery, orders.length, allActiveOrders.length, filteredCompletedOrders.length, activeOrders.length, completedOrdersFromAll.length])
 
   // Вычисляем статистику
   const totalReceivables = receivables.reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0)
@@ -413,7 +436,7 @@ export default function ClientOrdersPage() {
         <div className="flex-1 min-w-[200px] max-w-md">
           <input
             type="text"
-            placeholder="Поиск по номеру заказа, телефону, адресу, ФИО..."
+            placeholder="Поиск по номеру заказа..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-light"
@@ -653,11 +676,11 @@ export default function ClientOrdersPage() {
           <div className="bg-gray-50 rounded-lg shadow p-6 mb-6">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold text-gray-900">Выполненные заказы</h2>
-              {completedOrders.length > 0 && (
+              {completedOrdersFromAll.length > 0 && (
                 <button
                   onClick={() => {
                     const filename = `Выполненные_заказы_${period}_${new Date().toISOString().split('T')[0]}`
-                    exportOrdersToExcel(completedOrders, filename)
+                    exportOrdersToExcel(completedOrdersFromAll, filename)
                   }}
                   className="bg-brand-light hover:bg-brand-dark text-white px-3 py-1.5 rounded text-xs font-medium transition flex items-center gap-1"
                   title="Экспорт выполненных заказов в Excel"
@@ -669,9 +692,9 @@ export default function ClientOrdersPage() {
                 </button>
               )}
             </div>
-            {completedOrders.length > 0 ? (
+            {completedOrdersFromAll.length > 0 ? (
               <div className="space-y-4">
-                {completedOrders.slice(0, displayedCompletedOrdersCount).map((order: any) => (
+                {completedOrdersFromAll.slice(0, displayedCompletedOrdersCount).map((order: any) => (
                   <div 
                     key={order.id} 
                     className="border border-gray-200 rounded-lg p-4 bg-gray-100/50 cursor-pointer hover:bg-gray-100 transition"
@@ -724,7 +747,7 @@ export default function ClientOrdersPage() {
                     </div>
                   </div>
                 ))}
-                {completedOrders.length > displayedCompletedOrdersCount && (
+                {completedOrdersFromAll.length > displayedCompletedOrdersCount && (
                   <div className="mt-4 text-center">
                     <button
                       onClick={() => setDisplayedCompletedOrdersCount(prev => prev + 10)}

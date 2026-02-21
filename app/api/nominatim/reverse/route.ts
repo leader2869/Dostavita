@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
       `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`,
       {
         headers: {
-          'User-Agent': 'Просто! Delivery Service',
+          'User-Agent': 'Prosto Delivery Service',
         },
       }
     )

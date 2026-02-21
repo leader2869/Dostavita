@@ -1,37 +1,77 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
 // Отключаем статическую генерацию, так как используем request.url
 export const dynamic = 'force-dynamic'
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
-    const query = searchParams.get('q')
-
-    if (!query || query.trim().length === 0) {
+    // Используем search string напрямую, избегая создания URL объекта
+    const searchString = request.nextUrl.search
+    
+    if (!searchString) {
       return NextResponse.json(
         { error: 'Поисковый запрос обязателен' },
         { status: 400 }
       )
     }
 
+    // Извлекаем параметр q из query string вручную
+    const urlMatch = searchString.match(/[?&]q=([^&]*)/)
+    
+    if (!urlMatch || !urlMatch[1]) {
+      return NextResponse.json(
+        { error: 'Поисковый запрос обязателен' },
+        { status: 400 }
+      )
+    }
+
+    // Параметр уже закодирован в URL, декодируем его
+    let query: string
+    try {
+      query = decodeURIComponent(urlMatch[1])
+    } catch (e) {
+      console.error('Ошибка декодирования query:', e)
+      // Если декодирование не удалось, используем как есть
+      query = urlMatch[1]
+    }
+
+    query = query.trim()
+
+    if (query.length === 0) {
+      return NextResponse.json(
+        { error: 'Поисковый запрос обязателен' },
+        { status: 400 }
+      )
+    }
+
+    // Правильно кодируем запрос для UTF-8 для Nominatim API
+    const encodedQuery = encodeURIComponent(query)
+
     // Nominatim требует указания User-Agent
     // accept-language=ru для получения адресов на русском языке
-    const response = await fetch(
-      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=5&addressdetails=1&countrycodes=by&accept-language=ru`,
-      {
-        headers: {
-          'User-Agent': 'Просто! Delivery App (contact@prosto.of.by)',
-          'Accept-Language': 'ru',
-        },
-      }
-    )
+    const nominatimUrl = `https://nominatim.openstreetmap.org/search?q=${encodedQuery}&format=json&limit=10&addressdetails=1&countrycodes=by&accept-language=ru`
+    
+    console.log('🔍 Nominatim search request:', nominatimUrl)
+    console.log('🔍 Original query:', query)
+    console.log('🔍 Encoded query:', encodedQuery)
+    
+    const response = await fetch(nominatimUrl, {
+      headers: {
+        'User-Agent': 'Prosto Delivery App (contact@prosto.of.by)',
+        'Accept-Language': 'ru',
+      },
+    })
+
+    console.log('📡 Nominatim response status:', response.status, response.statusText)
 
     if (!response.ok) {
+      const errorText = await response.text()
+      console.error('❌ Nominatim API error:', response.status, response.statusText, errorText)
       throw new Error(`Nominatim API error: ${response.statusText}`)
     }
 
     const data = await response.json()
+    console.log('✅ Nominatim results count:', data?.length || 0)
 
     // Форматируем результаты для удобства использования
     const results = data.map((item: any) => {
