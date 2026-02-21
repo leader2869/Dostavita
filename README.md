@@ -6,7 +6,7 @@
 
 - **Frontend**: Next.js 14 (App Router), React, TypeScript
 - **Backend**: Supabase (PostgreSQL, Auth, Realtime)
-- **Карты**: Mapbox
+- **Карты**: Leaflet
 - **Стили**: Tailwind CSS
 - **State Management**: Zustand
 - **Валидация**: Zod
@@ -15,7 +15,6 @@
 
 - Node.js 18+ и npm/yarn
 - Аккаунт Supabase (уже настроен)
-- Аккаунт Mapbox
 - Аккаунт GitHub (уже настроен)
 
 ## 🛠️ Установка и запуск
@@ -34,7 +33,6 @@ npm install
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
-NEXT_PUBLIC_MAPBOX_TOKEN=your_mapbox_access_token
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
@@ -94,4 +92,4 @@ npm run dev
 
 - [Документация Next.js](https://nextjs.org/docs)
 - [Документация Supabase](https://supabase.com/docs)
-- [Документация Mapbox](https://docs.mapbox.com)
+- [Документация Leaflet](https://leafletjs.com/)

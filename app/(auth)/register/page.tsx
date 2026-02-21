@@ -10,7 +10,7 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState('')
   const [phone, setPhone] = useState('')
-  const [role, setRole] = useState<'client' | 'customer' | 'driver'>('client')
+  const role: 'client' = 'client' // Только регистрация клиента
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -180,19 +180,12 @@ export default function RegisterPage() {
         </div>
 
         <div>
-          <label htmlFor="role" className="block text-sm font-medium text-gray-900">
+          <label className="block text-sm font-medium text-gray-900 mb-2">
             Роль
           </label>
-          <select
-            id="role"
-            value={role}
-            onChange={(e) => setRole(e.target.value as 'client' | 'customer' | 'driver')}
-            className="mt-1 block w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-light focus:border-brand-light"
-          >
-            <option value="client">Клиент (может быть отправителем или получателем)</option>
-            <option value="customer">Организация (бары, рестораны, магазины)</option>
-            <option value="driver">Исполнитель (Водитель)</option>
-          </select>
+          <div className="px-3 py-2 bg-gray-100 text-gray-700 border border-gray-300 rounded-md">
+            Пользователь (можете оформить доставку)
+          </div>
         </div>
 
         {error && (
