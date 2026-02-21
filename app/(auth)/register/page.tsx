@@ -119,7 +119,7 @@ export default function RegisterPage() {
 
   return (
     <div className="bg-white p-8 rounded-lg shadow-md border border-gray-200">
-      <h1 className="text-5xl font-bold text-center mb-6 text-brand-light" style={{ fontFamily: 'var(--font-amatic-sc), cursive' }}>Регистрация в Просто!</h1>
+      <h1 className="text-5xl font-bold text-center mb-6 text-brand-light font-amatic-sc">Просто!Регистрация</h1>
       
       <form onSubmit={handleRegister} className="space-y-4">
         <div>
