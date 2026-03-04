@@ -1,21 +1,13 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
-import { NextResponse } from 'next/server'
+import { getAuthUser } from '@/lib/api/auth'
+import { apiSuccess, apiError, maskInternalMessage } from '@/lib/api/response'
 
 export async function POST() {
   try {
     const supabase = createServerSupabaseClient()
-
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Не авторизован' },
-        { status: 401 }
-      )
-    }
+    const auth = await getAuthUser(supabase)
+    if (!auth.ok) return auth.response
+    const user = auth.user
 
     // Проверяем, существует ли профиль
     const { data: existingProfile } = await supabase
@@ -25,10 +17,7 @@ export async function POST() {
       .maybeSingle()
 
     if (existingProfile) {
-      return NextResponse.json(
-        { error: 'Профиль уже существует' },
-        { status: 400 }
-      )
+      return apiError('Профиль уже существует', 400)
     }
 
     // Создаем профиль через серверный клиент (обходит RLS)
@@ -36,7 +25,7 @@ export async function POST() {
       .from('profiles')
       .insert({
         id: user.id,
-        email: user.email || '',
+        email: user.email ?? '',
         full_name: null,
         phone: null,
         role: 'client',
@@ -46,19 +35,14 @@ export async function POST() {
 
     if (createError) {
       console.error('Ошибка создания профиля:', createError)
-      return NextResponse.json(
-        { error: createError.message },
-        { status: 500 }
-      )
+      return apiError(maskInternalMessage(createError.message), 500)
     }
 
-    return NextResponse.json({ profile: newProfile })
-  } catch (error: any) {
+    return apiSuccess({ profile: newProfile })
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Внутренняя ошибка сервера'
     console.error('Ошибка API:', error)
-    return NextResponse.json(
-      { error: error.message || 'Внутренняя ошибка сервера' },
-      { status: 500 }
-    )
+    return apiError(maskInternalMessage(message), 500)
   }
 }
 

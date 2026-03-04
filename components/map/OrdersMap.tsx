@@ -6,6 +6,7 @@ import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import Link from 'next/link'
 import { useGeolocation } from '@/hooks/useGeolocation'
+import { getOrderStatusLabel, getOrderStatusColorHex } from '@/lib/utils/orderStatus'
 
 // Исправление иконок по умолчанию для Leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl
@@ -71,44 +72,6 @@ function MapBounds({ orders, userLocation }: { orders: Order[], userLocation?: {
   }, [map, orders, userLocation])
 
   return null
-}
-
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case 'searching_courier':
-      return '#fbbf24' // желтый
-    case 'courier_accepted':
-      return '#fb923c' // оранжевый
-    case 'courier_coming':
-      return '#3b82f6' // синий
-    case 'courier_delivering':
-      return '#8b5cf6' // фиолетовый
-    case 'completed':
-      return '#10b981' // зеленый
-    case 'cancelled':
-      return '#ef4444' // красный
-    default:
-      return '#6b7280' // серый
-  }
-}
-
-const getStatusLabel = (status: string) => {
-  switch (status) {
-    case 'searching_courier':
-      return 'Ищем курьера'
-    case 'courier_accepted':
-      return 'Курьер принял заказ'
-    case 'courier_coming':
-      return 'Курьер едет к отправителю'
-    case 'courier_delivering':
-      return 'Курьер едет к получателю'
-    case 'completed':
-      return 'Заказ завершен'
-    case 'cancelled':
-      return 'Отменен'
-    default:
-      return status
-  }
 }
 
 // Компонент для обновления центра карты
@@ -220,7 +183,7 @@ export function OrdersMap({ orders, height = '600px', zoom = 15, role = 'client'
             }
           }
 
-          const statusColor = getStatusColor(order.status)
+          const statusColor = getOrderStatusColorHex(order.status)
 
           return (
             <div key={order.id}>
@@ -245,7 +208,7 @@ export function OrdersMap({ orders, height = '600px', zoom = 15, role = 'client'
                       <div className="mb-2">{order.pickup_address}</div>
                       <div className="mb-2">
                         <span className="px-2 py-1 rounded text-xs" style={{ backgroundColor: `${statusColor}20`, color: statusColor }}>
-                          {getStatusLabel(order.status)}
+                          {getOrderStatusLabel(order.status)}
                         </span>
                       </div>
                       {order.final_price && (
@@ -283,7 +246,7 @@ export function OrdersMap({ orders, height = '600px', zoom = 15, role = 'client'
                       <div className="mb-2">{order.delivery_address}</div>
                       <div className="mb-2">
                         <span className="px-2 py-1 rounded text-xs" style={{ backgroundColor: `${statusColor}20`, color: statusColor }}>
-                          {getStatusLabel(order.status)}
+                          {getOrderStatusLabel(order.status)}
                         </span>
                       </div>
                       {order.final_price && (

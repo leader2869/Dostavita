@@ -60,7 +60,7 @@ export function usePushNotifications() {
 
       // Проверяем наличие VAPID ключа
       const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
-      console.log('VAPID ключ проверка:', vapidKey ? 'найден' : 'не найден', vapidKey ? `(${vapidKey.substring(0, 20)}...)` : '')
+      if (process.env.NODE_ENV === 'development') console.log('VAPID ключ проверка:', vapidKey ? 'найден' : 'не найден', vapidKey ? `(${vapidKey.substring(0, 20)}...)` : '')
       
       if (!vapidKey || vapidKey.trim() === '') {
         console.warn('VAPID ключ не настроен. Push-подписка недоступна, но уведомления через Service Worker будут работать.')

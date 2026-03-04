@@ -1,12 +1,21 @@
 // Service Worker для обработки push-уведомлений
+// Не кэшируем чанки Next.js (/_next/), чтобы после деплоя не было 404 на main-app.js, layout.js и т.д.
+
 self.addEventListener('install', (event) => {
-  console.log('Service Worker установлен')
   self.skipWaiting()
 })
 
 self.addEventListener('activate', (event) => {
-  console.log('Service Worker активирован')
   event.waitUntil(self.clients.claim())
+})
+
+// Запросы к _next и прочим скриптам — только сеть, без кэша (избегаем 404 после новой сборки)
+self.addEventListener('fetch', (event) => {
+  const url = new URL(event.request.url)
+  if (url.pathname.startsWith('/_next/') || url.pathname.endsWith('.js') || url.pathname.endsWith('.css')) {
+    event.respondWith(fetch(event.request))
+    return
+  }
 })
 
 self.addEventListener('push', (event) => {

@@ -1,30 +1,28 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
-import { NextResponse } from 'next/server'
+import { getAuthUser } from '@/lib/api/auth'
+import { apiSuccess, apiError, maskInternalMessage } from '@/lib/api/response'
 
 export async function POST() {
   try {
     const supabase = createServerSupabaseClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const auth = await getAuthUser(supabase)
+    if (!auth.ok) return auth.response
 
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Не авторизован' }, { status: 401 })
-    }
-
-    // Удаляем подписку из базы данных
     const { error: deleteError } = await supabase
       .from('push_subscriptions')
       .delete()
-      .eq('user_id', user.id)
+      .eq('user_id', auth.user.id)
 
     if (deleteError) {
       console.error('Ошибка удаления push-подписки:', deleteError)
-      return NextResponse.json({ error: 'Ошибка удаления подписки' }, { status: 500 })
+      return apiError(maskInternalMessage(deleteError.message), 500)
     }
 
-    return NextResponse.json({ success: true })
-  } catch (error: any) {
+    return apiSuccess()
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Внутренняя ошибка сервера'
     console.error('Ошибка отписки от push-уведомлений:', error)
-    return NextResponse.json({ error: error.message || 'Внутренняя ошибка сервера' }, { status: 500 })
+    return apiError(maskInternalMessage(message), 500)
   }
 }
 

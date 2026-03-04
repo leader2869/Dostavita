@@ -9,10 +9,11 @@ import * as XLSX from 'xlsx'
 export function exportToExcel<T extends Record<string, any>>(
   data: T[],
   filename: string,
-  sheetName: string = 'Данные'
+  sheetName: string = 'Данные',
+  onEmpty?: () => void
 ) {
   if (!data || data.length === 0) {
-    alert('Нет данных для экспорта')
+    onEmpty ? onEmpty() : alert('Нет данных для экспорта')
     return
   }
 
@@ -32,7 +33,11 @@ export function exportToExcel<T extends Record<string, any>>(
 /**
  * Экспортирует заказы в Excel
  */
-export function exportOrdersToExcel(orders: any[], filename: string = 'Заказы') {
+export function exportOrdersToExcel(
+  orders: any[],
+  filename: string = 'Заказы',
+  onEmpty?: () => void
+) {
   const formattedOrders = orders.map((order) => ({
     'Номер заказа': order.order_number || order.id.slice(0, 8),
     'Откуда': order.pickup_address || '',
@@ -48,13 +53,17 @@ export function exportOrdersToExcel(orders: any[], filename: string = 'Зака�
     'Готов к выдаче': order.ready_at ? new Date(order.ready_at).toLocaleString('ru-RU') : '',
   }))
 
-  exportToExcel(formattedOrders, filename, 'Заказы')
+  exportToExcel(formattedOrders, filename, 'Заказы', onEmpty)
 }
 
 /**
  * Экспортирует транзакции в Excel
  */
-export function exportTransactionsToExcel(transactions: any[], filename: string = 'Транзакции') {
+export function exportTransactionsToExcel(
+  transactions: any[],
+  filename: string = 'Транзакции',
+  onEmpty?: () => void
+) {
   const formattedTransactions = transactions.map((transaction) => ({
     'Дата': transaction.created_at ? new Date(transaction.created_at).toLocaleString('ru-RU') : '',
     'Тип': transaction.type === 'credit' ? 'Начисление' : 'Списание',
@@ -63,13 +72,17 @@ export function exportTransactionsToExcel(transactions: any[], filename: string 
     'ID заказа': transaction.order_id || '',
   }))
 
-  exportToExcel(formattedTransactions, filename, 'Транзакции')
+  exportToExcel(formattedTransactions, filename, 'Транзакции', onEmpty)
 }
 
 /**
  * Экспортирует дебиторку в Excel
  */
-export function exportReceivablesToExcel(receivables: any[], filename: string = 'Дебиторка') {
+export function exportReceivablesToExcel(
+  receivables: any[],
+  filename: string = 'Дебиторка',
+  onEmpty?: () => void
+) {
   const formattedReceivables = receivables.map((receivable) => ({
     'ID заказа': receivable.order_id || '',
     'Номер заказа': receivable.order_number || '',
@@ -81,7 +94,7 @@ export function exportReceivablesToExcel(receivables: any[], filename: string = 
     'Дата создания': receivable.created_at ? new Date(receivable.created_at).toLocaleString('ru-RU') : '',
   }))
 
-  exportToExcel(formattedReceivables, filename, 'Дебиторка')
+  exportToExcel(formattedReceivables, filename, 'Дебиторка', onEmpty)
 }
 
 /**

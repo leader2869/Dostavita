@@ -2,40 +2,16 @@ import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { BackButton } from '@/components/ui/BackButton'
 import type { User } from '@/lib/types'
+import { getCachedUserAndProfile } from '@/lib/supabase/cached-auth'
 
 export default async function AdminPersonnelPage() {
   const supabase = createServerSupabaseClient()
-  
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser()
+  const { user, profile, authError } = await getCachedUserAndProfile()
 
-  if (authError || !user) {
-    redirect('/login')
-  }
-
-  // Используем RPC функцию для получения профиля (обходит RLS)
-  let { data: profile, error: profileError } = await supabase
-    .rpc('get_user_profile', { user_id: user.id })
-    .single()
-  
-  // Fallback на прямой запрос
-  if (profileError || !profile) {
-    const { data: directProfile } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .maybeSingle()
-    
-    if (directProfile) {
-      profile = directProfile as User
-    }
-  }
-
-  if (!profile || ((profile as User).role !== 'admin' && (profile as User).role !== 'superadmin')) {
-    redirect('/dashboard')
-  }
+  if (authError || !user) redirect('/login')
+  if (!profile) redirect('/login')
+  const role = (profile as User).role
+  if (role !== 'admin' && role !== 'superadmin') redirect('/dashboard')
 
   // Получаем всех водителей через RPC функцию (обходит RLS)
   let { data: drivers, error: driversError } = await supabase
@@ -52,9 +28,7 @@ export default async function AdminPersonnelPage() {
     }
   }))
   
-  // Fallback на прямой запрос, если RPC не работает
   if (driversError || !drivers) {
-    console.log('AdminPersonnelPage - RPC не сработал, пробуем прямой запрос...')
     const { data: directDrivers } = await supabase
       .from('drivers')
       .select(`
@@ -76,8 +50,6 @@ export default async function AdminPersonnelPage() {
   } else {
     drivers = driversWithProfiles
   }
-  
-  console.log('AdminPersonnelPage - Водителей загружено:', drivers?.length || 0)
 
   return (
     <div>

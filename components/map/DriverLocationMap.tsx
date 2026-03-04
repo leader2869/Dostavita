@@ -341,7 +341,7 @@ export function DriverLocationMap({
       )
       .subscribe((status) => {
         if (status === 'SUBSCRIBED') {
-          console.log('Подписка на обновления местоположения водителя активна')
+          if (process.env.NODE_ENV === 'development') console.log('Подписка на обновления местоположения водителя активна')
         } else if (status === 'CHANNEL_ERROR') {
           console.warn('Ошибка подключения к Realtime (не критично, данные обновляются через API)')
         }

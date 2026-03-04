@@ -23,7 +23,7 @@ export function DriverPushNotifications({ driverUserId }: DriverPushNotification
     const handleUserInteraction = async () => {
       const success = await subscribe()
       if (success) {
-        console.log('Подписка на push-уведомления успешна')
+        if (process.env.NODE_ENV === 'development') console.log('Подписка на push-уведомления успешна')
         // Удаляем обработчики после успешной подписки
         document.removeEventListener('click', handleUserInteraction)
         document.removeEventListener('touchstart', handleUserInteraction)
@@ -109,7 +109,7 @@ export function DriverPushNotifications({ driverUserId }: DriverPushNotification
       )
       .subscribe((status) => {
         if (status === 'SUBSCRIBED') {
-          console.log('Подписка на новые заказы активна')
+          if (process.env.NODE_ENV === 'development') console.log('Подписка на новые заказы активна')
         }
       })
 

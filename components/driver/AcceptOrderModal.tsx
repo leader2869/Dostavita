@@ -77,12 +77,6 @@ export function AcceptOrderModal({ orderId, onClose, onSuccess }: AcceptOrderMod
         throw new Error('Не авторизован')
       }
 
-      console.log('=== Accepting order ===')
-      console.log('Order ID:', orderId)
-      console.log('User ID:', user.id)
-      console.log('Order status:', order?.status)
-      console.log('Driver profile:', driver ? 'Found' : 'Not found')
-
       // Проверяем статус заказа перед принятием
       const { data: orderCheck, error: orderCheckError } = await supabase
         .from('orders')
@@ -91,11 +85,8 @@ export function AcceptOrderModal({ orderId, onClose, onSuccess }: AcceptOrderMod
         .single()
 
       if (orderCheckError) {
-        console.error('Error checking order:', orderCheckError)
         throw new Error('Не удалось проверить статус заказа')
       }
-
-      console.log('Order before accept:', orderCheck)
 
       // Если заказ уже принят другим водителем
       if (orderCheck?.executor_user_id && orderCheck.executor_user_id !== user.id) {
@@ -109,7 +100,6 @@ export function AcceptOrderModal({ orderId, onClose, onSuccess }: AcceptOrderMod
 
       // Если заказ отменен, сначала активируем его (меняем статус на searching_courier)
       if (order?.status === 'cancelled') {
-        console.log('Reactivating cancelled order...')
         const { error: reactivateError } = await supabase
           .from('orders')
           .update({ 
@@ -118,32 +108,21 @@ export function AcceptOrderModal({ orderId, onClose, onSuccess }: AcceptOrderMod
           })
           .eq('id', orderId)
         
-        if (reactivateError) {
-          console.error('Error reactivating order:', reactivateError)
-          throw reactivateError
-        }
+        if (reactivateError) throw reactivateError
       }
 
-      // Вызываем RPC для принятия заказа
-      console.log('Calling accept_order RPC...')
       const { data, error: rpcError } = await supabase.rpc('accept_order', {
         order_uuid: orderId,
         driver_user_uuid: user.id,
       })
 
-      console.log('RPC result:', { data, error: rpcError })
-
       if (rpcError) {
-        console.error('RPC Error details:', JSON.stringify(rpcError, null, 2))
         throw new Error(rpcError.message || 'Ошибка при принятии заказа')
       }
 
       if (data === false || data === null) {
-        console.error('RPC returned false/null')
         throw new Error('Не удалось принять заказ. Убедитесь, что заказ доступен и у вас заполнен профиль водителя (тип транспорта и номер водительского удостоверения).')
       }
-
-      console.log('Order accepted successfully!')
       
       // После успешного принятия заказа перенаправляем на детали заказа
       if (onSuccess) {
@@ -153,7 +132,6 @@ export function AcceptOrderModal({ orderId, onClose, onSuccess }: AcceptOrderMod
       // Модальное окно закроется автоматически при переходе на другую страницу
       window.location.href = `/dashboard/driver/orders/${orderId}`
     } catch (err: any) {
-      console.error('Ошибка при принятии заказа:', err)
       const errorMessage = err.message || 'Не удалось принять заказ'
       setError(errorMessage)
       setAccepting(false)

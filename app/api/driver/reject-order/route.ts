@@ -1,31 +1,20 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { requireRole } from '@/lib/api/auth'
+import { parseBody } from '@/lib/api/validate'
+import { rejectOrderSchema } from '@/lib/api/validate'
 
 export async function POST(request: Request) {
   try {
     const supabase = createServerSupabaseClient()
-    const { orderId } = await request.json()
+    const bodyResult = await parseBody(request, rejectOrderSchema)
+    if (!bodyResult.ok) return bodyResult.response
+    const { orderId } = bodyResult.data
 
-    if (!orderId) {
-      return NextResponse.json(
-        { error: 'ID заказа не указан' },
-        { status: 400 }
-      )
-    }
+    const auth = await requireRole(supabase, 'driver')
+    if (!auth.ok) return auth.response
+    const { user } = auth
 
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Не авторизован' },
-        { status: 401 }
-      )
-    }
-
-    // Проверяем, что заказ существует и имеет статус searching_courier
     const { data: order, error: orderError } = await supabase
       .from('orders')
       .select('id, status')

@@ -14,7 +14,8 @@ interface DashboardNavProps {
 export function DashboardNav({ profile: initialProfile, userId }: DashboardNavProps) {
   const supabase = createClient()
   const [profile, setProfile] = useState<User>(initialProfile)
-  const [avatarKey, setAvatarKey] = useState(Date.now())
+  // Стабильное начальное значение, чтобы не было расхождения при гидрации (server vs client Date.now())
+  const [avatarKey, setAvatarKey] = useState(0)
 
   // Загружаем актуальный профиль и слушаем изменения
   useEffect(() => {

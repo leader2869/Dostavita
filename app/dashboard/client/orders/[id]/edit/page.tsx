@@ -1,13 +1,21 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import dynamic from 'next/dynamic'
 import { useRouter, useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import type { Region } from '@/lib/types'
 import { AddressAutocomplete } from '@/components/ui/AddressAutocomplete'
-import { OrderMap } from '@/components/map/OrderMap'
-import { AddressPickerMap } from '@/components/map/AddressPickerMap'
 import { formatAddressForCard } from '@/lib/utils/formatAddress'
+
+const OrderMap = dynamic(
+  () => import('@/components/map/OrderMap').then((m) => ({ default: m.OrderMap })),
+  { ssr: false }
+)
+const AddressPickerMap = dynamic(
+  () => import('@/components/map/AddressPickerMap').then((m) => ({ default: m.AddressPickerMap })),
+  { ssr: false }
+)
 
 export default function EditOrderPage() {
   const router = useRouter()
@@ -52,26 +60,15 @@ export default function EditOrderPage() {
 
   // Функция для определения региона по адресу
   const detectRegionFromAddress = useCallback((address: string, addressDetails?: any) => {
-    console.log('detectRegionFromAddress вызвана:', { address, addressDetails, regionsCount: regions.length })
-    
-    if (!address || !regions.length) {
-      console.log('Пропуск: нет адреса или регионов не загружены')
-      return
-    }
+    if (!address || !regions.length) return
 
     const addressLower = address.toLowerCase()
     
-    // Проверяем по названию области из адреса (Nominatim возвращает address.state)
     if (addressDetails?.state) {
       const stateName = addressDetails.state.toLowerCase()
-      console.log('Проверяем state:', stateName)
-      
-      // Сопоставляем область с регионом
       if (stateName.includes('минск') && !stateName.includes('область')) {
-        // Минск (город)
         const minskRegion = regions.find(r => r.name.toLowerCase() === 'минск')
         if (minskRegion) {
-          console.log('Найден регион Минск:', minskRegion.id)
           setSelectedRegion(minskRegion.id)
           setRegionAutoDetected(true)
           setPickupRegionName('Минск')
@@ -80,7 +77,6 @@ export default function EditOrderPage() {
       } else if (stateName.includes('минская область') || stateName.includes('минская')) {
         const region = regions.find(r => r.name.toLowerCase() === 'минская область')
         if (region) {
-          console.log('Найден регион Минская область:', region.id)
           setSelectedRegion(region.id)
           setRegionAutoDetected(true)
           setPickupRegionName('Минская область')
@@ -89,7 +85,6 @@ export default function EditOrderPage() {
       } else if (stateName.includes('брестская область') || stateName.includes('брестская')) {
         const region = regions.find(r => r.name.toLowerCase() === 'брестская область')
         if (region) {
-          console.log('Найден регион Брестская область:', region.id)
           setSelectedRegion(region.id)
           setRegionAutoDetected(true)
           setPickupRegionName('Брестская область')
@@ -98,7 +93,6 @@ export default function EditOrderPage() {
       } else if (stateName.includes('витебская область') || stateName.includes('витебская')) {
         const region = regions.find(r => r.name.toLowerCase() === 'витебская область')
         if (region) {
-          console.log('Найден регион Витебская область:', region.id)
           setSelectedRegion(region.id)
           setRegionAutoDetected(true)
           setPickupRegionName('Витебская область')
@@ -107,7 +101,6 @@ export default function EditOrderPage() {
       } else if (stateName.includes('гомельская область') || stateName.includes('гомельская')) {
         const region = regions.find(r => r.name.toLowerCase() === 'гомельская область')
         if (region) {
-          console.log('Найден регион Гомельская область:', region.id)
           setSelectedRegion(region.id)
           setRegionAutoDetected(true)
           setPickupRegionName('Гомельская область')
@@ -116,7 +109,6 @@ export default function EditOrderPage() {
       } else if (stateName.includes('гродненская область') || stateName.includes('гродненская')) {
         const region = regions.find(r => r.name.toLowerCase() === 'гродненская область')
         if (region) {
-          console.log('Найден регион Гродненская область:', region.id)
           setSelectedRegion(region.id)
           setRegionAutoDetected(true)
           setPickupRegionName('Гродненская область')
@@ -125,7 +117,6 @@ export default function EditOrderPage() {
       } else if (stateName.includes('могилевская область') || stateName.includes('могилевская')) {
         const region = regions.find(r => r.name.toLowerCase() === 'могилевская область')
         if (region) {
-          console.log('Найден регион Могилевская область:', region.id)
           setSelectedRegion(region.id)
           setRegionAutoDetected(true)
           setPickupRegionName('Могилевская область')
@@ -138,15 +129,12 @@ export default function EditOrderPage() {
     for (const region of regions) {
       const regionNameLower = region.name.toLowerCase()
       if (addressLower.includes(regionNameLower)) {
-        console.log('Найден регион по названию в адресе:', region.name, region.id)
         setSelectedRegion(region.id)
         setRegionAutoDetected(true)
         setPickupRegionName(region.name)
         return
       }
     }
-    
-    console.log('Регион не найден для адреса:', address)
   }, [regions])
 
   const loadRegions = useCallback(async () => {
@@ -160,7 +148,6 @@ export default function EditOrderPage() {
 
       // Если RPC не работает, пробуем прямой запрос
       if (error || !data) {
-        console.log('RPC не сработал, пробуем прямой запрос регионов...')
         const result = await supabase
           .from('regions')
           .select('*')
@@ -182,9 +169,7 @@ export default function EditOrderPage() {
         // Фильтруем только активные регионы, если использовали RPC
         const activeRegions = data.filter((r: Region) => r.is_active !== false)
         setRegions(activeRegions)
-        console.log('Загружено регионов:', activeRegions.length)
       } else {
-        console.warn('Регионы не загружены: data is null')
         setError('Не удалось загрузить регионы')
       }
     } catch (err: any) {
@@ -613,14 +598,12 @@ export default function EditOrderPage() {
               id="pickupAddress"
               value={pickupAddress}
               onChange={(address, coordinates, addressDetails) => {
-                console.log('AddressAutocomplete onChange:', { address, coordinates, addressDetails })
                 setPickupAddress(address)
                 setPickupCoordinates(coordinates)
                 // Автоматически определяем регион по адресу отправления
                 if (address && regions.length > 0) {
                   detectRegionFromAddress(address, addressDetails)
                 } else {
-                  console.log('Регионы еще не загружены или адрес пуст')
                 }
               }}
               placeholder="Начните вводить адрес отправления"
@@ -917,7 +900,6 @@ export default function EditOrderPage() {
             id="region"
             value={selectedRegion}
             onChange={(e) => {
-              console.log('Выбран регион:', e.target.value)
               setSelectedRegion(e.target.value)
             }}
             disabled={!pickupAddress || regionAutoDetected || loadingRegions || regions.length === 0}
@@ -1039,15 +1021,16 @@ export default function EditOrderPage() {
                     )
                     if (response.ok) {
                       const data = await response.json()
-                      if (data.address) {
+                      const payload = data.data ?? data
+                      if (payload.address) {
                         if (mapPickerType === 'pickup') {
-                          setPickupAddress(data.address)
+                          setPickupAddress(payload.address)
                           setPickupCoordinates(coordinates)
                           if (regions.length > 0) {
-                            detectRegionFromAddress(data.address, data.addressDetails)
+                            detectRegionFromAddress(payload.address, payload.addressDetails)
                           }
                         } else {
-                          setDeliveryAddress(data.address)
+                          setDeliveryAddress(payload.address)
                           setDeliveryCoordinates(coordinates)
                         }
                         setShowMapPicker(false)

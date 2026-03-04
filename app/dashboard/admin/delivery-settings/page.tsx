@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { useDashboardUser } from '@/contexts/DashboardAuthContext'
 import { BackButton } from '@/components/ui/BackButton'
 
 interface DeliverySetting {
@@ -15,38 +16,17 @@ interface DeliverySetting {
 export default function DeliverySettingsPage() {
   const router = useRouter()
   const supabase = createClient()
+  const { profile } = useDashboardUser()
   const [settings, setSettings] = useState<DeliverySetting[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
-  const [isSuperadmin, setIsSuperadmin] = useState(false)
+  const isSuperadmin = profile.role === 'superadmin'
 
-  const checkRole = useCallback(async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        router.push('/login')
-        return
-      }
-
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single()
-
-      if (profile?.role !== 'superadmin') {
-        router.push('/dashboard')
-        return
-      }
-
-      setIsSuperadmin(true)
-    } catch (err) {
-      console.error('Ошибка проверки роли:', err)
-      router.push('/dashboard')
-    }
-  }, [supabase, router])
+  useEffect(() => {
+    if (profile.role !== 'superadmin') router.push('/dashboard')
+  }, [profile.role, router])
 
   const loadSettings = useCallback(async () => {
     try {
@@ -74,6 +54,10 @@ export default function DeliverySettingsPage() {
       setLoading(false)
     }
   }, [supabase])
+
+  useEffect(() => {
+    if (profile.role === 'superadmin') loadSettings()
+  }, [profile.role, loadSettings])
 
   const handleSave = async (setting: DeliverySetting, newValue: number) => {
     if (newValue < 1) {

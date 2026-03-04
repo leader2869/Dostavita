@@ -3,12 +3,18 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { toastSuccess } from '@/lib/utils/toast'
+import { useDashboardUser } from '@/contexts/DashboardAuthContext'
+import type { User } from '@/lib/types'
+
+type ClientProfileRow = User & { organization_name?: string }
 
 export default function ClientProfilePage() {
   const router = useRouter()
   const supabase = createClient()
+  const { userId, user, profile: contextProfile } = useDashboardUser()
   
-  const [profile, setProfile] = useState<any>(null)
+  const [profile, setProfile] = useState<ClientProfileRow | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -24,29 +30,24 @@ export default function ClientProfilePage() {
   useEffect(() => {
     const loadProfile = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) {
-          router.push('/login')
-          return
-        }
-
         const { data, error: fetchError } = await supabase
           .from('profiles')
           .select('*')
-          .eq('id', user.id)
+          .eq('id', userId)
           .maybeSingle()
 
         if (fetchError) {
           throw fetchError
         }
 
-        if (data) {
-          setProfile(data)
-          setFullName(data.full_name || '')
-          setPhone(data.phone || '')
-          setEmail(data.email || user.email || '')
-          setOrganizationName(data.organization_name || '')
-          setAvatarUrl(data.avatar_url || null)
+        const row = data as ClientProfileRow | null
+        if (row) {
+          setProfile(row)
+          setFullName(row.full_name || '')
+          setPhone(row.phone || '')
+          setEmail(row.email || user.email || '')
+          setOrganizationName(row.organization_name || '')
+          setAvatarUrl(row.avatar_url || null)
         } else {
           // Профиль не найден, создаем его через API route (обходит RLS)
           const response = await fetch('/api/profile/create', {
@@ -58,8 +59,8 @@ export default function ClientProfilePage() {
             throw new Error(errorData.error || 'Ошибка создания профиля')
           }
 
-          const { profile: newProfile } = await response.json()
-
+          const res = await response.json()
+          const newProfile = (res.data?.profile ?? res.profile) as ClientProfileRow | undefined
           if (newProfile) {
             setProfile(newProfile)
             setFullName(newProfile.full_name || '')
@@ -69,15 +70,15 @@ export default function ClientProfilePage() {
             setAvatarUrl(newProfile.avatar_url || null)
           }
         }
-      } catch (err: any) {
-        setError(err.message)
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : 'Ошибка загрузки')
       } finally {
         setLoading(false)
       }
     }
 
     loadProfile()
-  }, [supabase, router])
+  }, [supabase, userId, user.email])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -85,9 +86,6 @@ export default function ClientProfilePage() {
     setError(null)
 
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('Не авторизован')
-
       const { error: updateError } = await supabase
         .from('profiles')
         .update({
@@ -95,12 +93,12 @@ export default function ClientProfilePage() {
           organization_name: organizationName || null,
           // Телефон не обновляем - его можно изменить только через админа
         })
-        .eq('id', user.id)
+        .eq('id', userId)
 
       if (updateError) throw updateError
 
       // Обновляем профиль в состоянии
-      setProfile({ ...profile, full_name: fullName, organization_name: organizationName, phone: phone })
+      setProfile((prev) => (prev ? { ...prev, full_name: fullName, organization_name: organizationName || undefined, phone } : null))
       
       // Показываем сообщение об успешном сохранении
       setSaved(true)
@@ -144,13 +142,14 @@ export default function ClientProfilePage() {
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.error || 'Ошибка загрузки аватара')
+        throw new Error(errorData.error?.message ?? errorData.error ?? 'Ошибка загрузки аватара')
       }
 
-      const { avatar_url } = await response.json()
+      const res = await response.json()
+      const avatar_url = res.data?.avatar_url ?? res.avatar_url
       setAvatarUrl(avatar_url)
-      setProfile({ ...profile, avatar_url })
-      alert('Аватар успешно загружен')
+      setProfile((prev) => (prev ? { ...prev, avatar_url: avatar_url ?? null } : null))
+      toastSuccess('Аватар успешно загружен')
     } catch (err: any) {
       setError(err.message)
     } finally {

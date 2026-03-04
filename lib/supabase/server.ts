@@ -1,13 +1,15 @@
 // Серверный Supabase клиент
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { getSupabaseClientEnv } from '@/lib/config'
 
 export function createServerSupabaseClient() {
+  const { url, anonKey } = getSupabaseClientEnv()
   const cookieStore = cookies()
 
   return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    url,
+    anonKey,
     {
       cookies: {
         getAll() {

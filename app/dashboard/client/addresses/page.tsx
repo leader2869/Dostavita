@@ -1,10 +1,10 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { BackButton } from '@/components/ui/BackButton'
 import { AddressAutocomplete } from '@/components/ui/AddressAutocomplete'
+import { useDashboardUser } from '@/contexts/DashboardAuthContext'
 import type { Region } from '@/lib/types'
 import { formatAddressForCard } from '@/lib/utils/formatAddress'
 
@@ -25,8 +25,8 @@ interface SavedAddress {
 }
 
 export default function SavedAddressesPage() {
-  const router = useRouter()
   const supabase = createClient()
+  const { userId } = useDashboardUser()
   const [addresses, setAddresses] = useState<SavedAddress[]>([])
   const [regions, setRegions] = useState<Region[]>([])
   const [loading, setLoading] = useState(true)
@@ -48,20 +48,13 @@ export default function SavedAddressesPage() {
 
   const loadAddresses = useCallback(async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        router.push('/login')
-        return
-      }
-
       const { data: addressesData, error: addressesError } = await supabase
-        .rpc('get_user_saved_addresses', { user_uuid: user.id })
+        .rpc('get_user_saved_addresses', { user_uuid: userId })
 
       if (addressesError) {
         console.error('Ошибка загрузки адресов:', addressesError)
         setError('Ошибка загрузки адресов')
       } else {
-        console.log('Загруженные адреса:', addressesData)
         // Убеждаемся, что поля entrance, floor, apartment присутствуют
         const addressesWithDetails = (addressesData || []).map((addr: any) => ({
           ...addr,
@@ -69,7 +62,6 @@ export default function SavedAddressesPage() {
           floor: addr.floor || null,
           apartment: addr.apartment || null,
         }))
-        console.log('Адреса с деталями:', addressesWithDetails)
         setAddresses(addressesWithDetails)
       }
     } catch (err: any) {
@@ -78,7 +70,7 @@ export default function SavedAddressesPage() {
     } finally {
       setLoading(false)
     }
-  }, [supabase, router])
+  }, [supabase, userId])
 
   const loadRegions = useCallback(async () => {
     try {
@@ -203,11 +195,6 @@ export default function SavedAddressesPage() {
     setError(null)
 
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        throw new Error('Пользователь не авторизован')
-      }
-
       if (!address || !label) {
         throw new Error('Заполните все обязательные поля')
       }
@@ -243,14 +230,14 @@ export default function SavedAddressesPage() {
           await supabase
             .from('saved_addresses')
             .update({ is_default: false })
-            .eq('user_id', user.id)
+            .eq('user_id', userId)
             .eq('address_type', addressType)
         }
 
         const { error: insertError } = await supabase
           .from('saved_addresses')
           .insert({
-            user_id: user.id,
+            user_id: userId,
             label,
             address,
             coordinates: point,

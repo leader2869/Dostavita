@@ -8,7 +8,7 @@
 - **Backend**: Supabase (PostgreSQL, Auth, Realtime)
 - **Карты**: Leaflet
 - **Стили**: Tailwind CSS
-- **State Management**: Zustand
+- **Состояние дашборда**: React Context (`useDashboardUser`)
 - **Валидация**: Zod
 
 ## 📋 Предварительные требования

@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useAvailableOrdersCount } from '@/hooks/useAvailableOrdersCount'
+import { getOrderStatusLabel } from '@/lib/utils/orderStatus'
 
 export function DriverBottomNavigation() {
   const pathname = usePathname()
@@ -234,21 +235,7 @@ export function DriverBottomNavigation() {
                 <div className="text-center text-gray-600 py-8">Нет активных заказов</div>
               ) : (
                 <div className="space-y-3">
-                  {activeOrders.map((order) => {
-                    const getStatusLabel = (status: string) => {
-                      switch (status) {
-                        case 'courier_accepted':
-                          return 'Курьер принял заказ'
-                        case 'courier_coming':
-                          return 'Курьер едет к отправителю'
-                        case 'courier_delivering':
-                          return 'Курьер едет к получателю'
-                        default:
-                          return status
-                      }
-                    }
-
-                    return (
+                  {activeOrders.map((order) => (
                       <div
                         key={order.id}
                         className="bg-gray-100 rounded-lg p-4 cursor-pointer hover:bg-gray-200 transition border border-gray-300"
@@ -269,7 +256,7 @@ export function DriverBottomNavigation() {
                               Куда: {formatAddressForCard(order.delivery_address)}
                             </p>
                             <span className="inline-block mt-2 px-2 py-1 bg-blue-500/20 text-blue-600 text-xs rounded">
-                              {getStatusLabel(order.status)}
+                              {getOrderStatusLabel(order.status)}
                             </span>
                           </div>
                           <svg className="w-5 h-5 text-gray-600 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -277,8 +264,7 @@ export function DriverBottomNavigation() {
                           </svg>
                         </div>
                       </div>
-                    )
-                  })}
+                    ))}
                 </div>
               )}
             </div>

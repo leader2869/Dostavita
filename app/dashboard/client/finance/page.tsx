@@ -5,73 +5,38 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { formatAddressForOrder } from '@/lib/utils/formatAddress'
 import { exportReceivablesToExcel } from '@/lib/utils/exportToExcel'
-
-type Period = 'today' | 'week' | 'month' | 'all' | 'custom'
+import { useDateFilter } from '@/hooks/useDateFilter'
+import { useDashboardUser } from '@/contexts/DashboardAuthContext'
 
 export default function ClientFinancePage() {
   const router = useRouter()
   const supabase = createClient()
-  
-  const [user, setUser] = useState<any>(null)
+  const { userId } = useDashboardUser()
+  const {
+    period,
+    setPeriod,
+    customStartDate,
+    setCustomStartDate,
+    customEndDate,
+    setCustomEndDate,
+    getDateFilter,
+  } = useDateFilter('week')
+
   const [receivables, setReceivables] = useState<any[]>([])
   const [transactions, setTransactions] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [period, setPeriod] = useState<Period>('week')
-  const [customStartDate, setCustomStartDate] = useState<string>('')
-  const [customEndDate, setCustomEndDate] = useState<string>('')
   const [displayedTransactionsCount, setDisplayedTransactionsCount] = useState(10)
   const [expandedOrganizations, setExpandedOrganizations] = useState<Set<string>>(new Set())
   const [displayedOrdersCount, setDisplayedOrdersCount] = useState<Record<string, number>>({})
 
-  const getDateFilter = useCallback((period: Period) => {
-    const now = new Date()
-    switch (period) {
-      case 'today':
-        return {
-          start: new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString(),
-          end: now.toISOString()
-        }
-      case 'week':
-        const weekAgo = new Date(now)
-        weekAgo.setDate(weekAgo.getDate() - 7)
-        return {
-          start: weekAgo.toISOString(),
-          end: now.toISOString()
-        }
-      case 'month':
-        const monthAgo = new Date(now)
-        monthAgo.setMonth(monthAgo.getMonth() - 1)
-        return {
-          start: monthAgo.toISOString(),
-          end: now.toISOString()
-        }
-      case 'custom':
-        return {
-          start: customStartDate ? new Date(customStartDate).toISOString() : null,
-          end: customEndDate ? new Date(customEndDate + 'T23:59:59').toISOString() : null
-        }
-      default:
-        return { start: null, end: null }
-    }
-  }, [customStartDate, customEndDate])
-
   const loadData = useCallback(async () => {
     try {
-      const { data: { user: currentUser } } = await supabase.auth.getUser()
-      
-      if (!currentUser) {
-        router.push('/login')
-        return
-      }
-
-      setUser(currentUser)
-
-      const dateFilter = getDateFilter(period as Period)
+      const dateFilter = getDateFilter()
 
       // Получаем дебиторку клиента (всегда за все время)
       const { data: receivablesData, error: receivablesError } = await supabase
         .rpc('get_client_receivables', {
-          client_user_id: currentUser.id,
+          client_user_id: userId,
           start_date: null,
           end_date: null
         })
@@ -86,7 +51,7 @@ export default function ClientFinancePage() {
       // Получаем транзакции через RPC функцию, которая обходит RLS
       const { data: transactionsData, error: transactionsError } = await supabase
         .rpc('get_client_transactions', {
-          client_user_id: currentUser.id,
+          client_user_id: userId,
           start_date: dateFilter.start,
           end_date: dateFilter.end
         })
@@ -114,11 +79,7 @@ export default function ClientFinancePage() {
           } : null
         }))
         
-        console.log('Транзакции загружены через RPC:', formattedTransactions.length, 'транзакций')
-        if (formattedTransactions.length > 0) {
-          console.log('Пример транзакции:', formattedTransactions[0])
-        }
-        
+
         setTransactions(formattedTransactions)
       }
 
@@ -127,7 +88,7 @@ export default function ClientFinancePage() {
       console.error('Ошибка загрузки данных:', err)
       setLoading(false)
     }
-  }, [supabase, router, period, customStartDate, customEndDate, getDateFilter])
+  }, [supabase, userId, period, customStartDate, customEndDate, getDateFilter])
 
   useEffect(() => {
     loadData()
@@ -416,7 +377,7 @@ export default function ClientFinancePage() {
                       <p className="text-gray-900 font-medium text-sm mt-1">
                         {transaction.description}
                       </p>
-                      {transaction.order && transaction.type === 'credit' && transaction.user_id !== user?.id && (
+                      {transaction.order && transaction.type === 'credit' && transaction.user_id !== userId && (
                         <p className="text-gray-600 text-xs mt-1">
                           Оплата водителем
                         </p>

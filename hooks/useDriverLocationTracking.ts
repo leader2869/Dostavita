@@ -25,12 +25,9 @@ export function useDriverLocationTracking({
   useEffect(() => {
     let isMounted = true
     
-    console.log('useDriverLocationTracking: enabled =', enabled, 'orderId =', orderId)
-    
-    if (!enabled) {
-      console.log('Отслеживание местоположения отключено')
-      return
-    }
+    if (process.env.NODE_ENV === 'development') console.log('useDriverLocationTracking: enabled =', enabled, 'orderId =', orderId)
+
+    if (!enabled) return
 
     if (!navigator.geolocation) {
       const errorMsg = 'Геолокация не поддерживается вашим браузером'
@@ -45,11 +42,9 @@ export function useDriverLocationTracking({
       if (!isMounted) return
       
       try {
-        console.log('Отправка местоположения:', {
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-          orderId,
-        })
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Отправка местоположения:', { latitude: position.coords.latitude, longitude: position.coords.longitude, orderId })
+        }
 
         const response = await fetch('/api/driver/update-location', {
           method: 'POST',
@@ -75,7 +70,7 @@ export function useDriverLocationTracking({
         }
 
         const result = await response.json()
-        console.log('Местоположение успешно отправлено:', result)
+        if (process.env.NODE_ENV === 'development') console.log('Местоположение успешно отправлено:', result)
         if (isMounted) {
           setError(null)
         }

@@ -1,6 +1,9 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
-import { NextResponse } from 'next/server'
 import webpush from 'web-push'
+import { requireRole } from '@/lib/api/auth'
+import { parseBody } from '@/lib/api/validate'
+import { notifyDriversSchema } from '@/lib/api/validate'
+import { apiSuccess, apiError, maskInternalMessage } from '@/lib/api/response'
 
 // Настройка VAPID деталей
 if (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
@@ -12,19 +15,18 @@ if (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
 }
 
 /**
- * API endpoint для отправки push-уведомлений водителям о новом заказе
- * Вызывается автоматически при создании нового заказа
+ * API endpoint для отправки push-уведомлений водителям о новом заказе.
+ * Вызывается при создании заказа. Доступ: customer или client.
  */
 export async function POST(request: Request) {
   try {
-    const body = await request.json()
-    const { orderId, orderNumber, finalPrice } = body
-
-    if (!orderId) {
-      return NextResponse.json({ error: 'orderId обязателен' }, { status: 400 })
-    }
-
     const supabase = createServerSupabaseClient()
+    const auth = await requireRole(supabase, ['customer', 'client'])
+    if (!auth.ok) return auth.response
+
+    const bodyResult = await parseBody(request, notifyDriversSchema)
+    if (!bodyResult.ok) return bodyResult.response
+    const { orderId } = bodyResult.data
 
     // Получаем информацию о заказе
     const { data: order, error: orderError } = await supabase
@@ -33,17 +35,8 @@ export async function POST(request: Request) {
       .eq('id', orderId)
       .single()
 
-    if (orderError || !order) {
-      return NextResponse.json({ error: 'Заказ не найден' }, { status: 404 })
-    }
-
-    // Проверяем, что заказ в статусе "ищем курьера"
-    if (order.status !== 'searching_courier') {
-      return NextResponse.json(
-        { error: 'Заказ не в статусе searching_courier' },
-        { status: 400 }
-      )
-    }
+    if (orderError || !order) return apiError('Заказ не найден', 404)
+    if (order.status !== 'searching_courier') return apiError('Заказ не в статусе поиска курьера', 400)
 
     // Получаем всех водителей с активными push-подписками
     const { data: subscriptions, error: subsError } = await supabase
@@ -53,12 +46,9 @@ export async function POST(request: Request) {
 
     if (subsError) {
       console.error('Ошибка получения подписок:', subsError)
-      return NextResponse.json({ error: 'Ошибка получения подписок' }, { status: 500 })
+      return apiError(maskInternalMessage(subsError.message), 500)
     }
-
-    if (!subscriptions || subscriptions.length === 0) {
-      return NextResponse.json({ message: 'Нет активных подписок' }, { status: 200 })
-    }
+    if (!subscriptions || subscriptions.length === 0) return apiSuccess({ message: 'Нет активных подписок' })
 
     // Проверяем, какие водители не отказались от этого заказа
     const { data: rejections } = await supabase
@@ -73,9 +63,7 @@ export async function POST(request: Request) {
       (sub) => !rejectedDriverIds.has(sub.user_id)
     )
 
-    if (validSubscriptions.length === 0) {
-      return NextResponse.json({ message: 'Нет водителей для уведомления' }, { status: 200 })
-    }
+    if (validSubscriptions.length === 0) return apiSuccess({ message: 'Нет водителей для уведомления' })
 
     // Отправляем уведомление каждому водителю
     const results = await Promise.allSettled(
@@ -138,18 +126,11 @@ export async function POST(request: Request) {
     const successful = results.filter((r) => r.status === 'fulfilled' && r.value.success).length
     const failed = results.length - successful
 
-    return NextResponse.json({
-      success: true,
-      sent: successful,
-      failed,
-      total: validSubscriptions.length,
-    })
-  } catch (error: any) {
+    return apiSuccess({ sent: successful, failed, total: validSubscriptions.length })
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Внутренняя ошибка сервера'
     console.error('Ошибка отправки push-уведомлений водителям:', error)
-    return NextResponse.json(
-      { error: error.message || 'Внутренняя ошибка сервера' },
-      { status: 500 }
-    )
+    return apiError(maskInternalMessage(message), 500)
   }
 }
 

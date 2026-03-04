@@ -128,3 +128,13 @@ export interface Transaction {
   description: string
   created_at: string
 }
+
+// Типы для ответов RPC (Supabase). Postgres возвращает DECIMAL/BIGINT как строки в JSON.
+/** Строка результата get_organization_finances */
+export interface OrganizationFinanceRow {
+  driver_id: string
+  driver_full_name: string | null
+  completed_orders_count: string
+  total_earnings: string
+  balance: string
+}

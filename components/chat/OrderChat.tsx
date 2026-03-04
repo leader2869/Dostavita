@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { toastError } from '@/lib/utils/toast'
 
 interface OrderChatProps {
   orderId: string
@@ -315,7 +316,7 @@ export function OrderChat({ orderId, currentUserId, onClose }: OrderChatProps) {
       // Удаляем временное сообщение при ошибке
       setMessages(prev => prev.filter(m => m.id !== tempMessage.id))
       setNewMessage(messageText) // Возвращаем текст в поле ввода
-      alert('Не удалось отправить сообщение')
+      toastError('Не удалось отправить сообщение')
     } finally {
       setSending(false)
     }

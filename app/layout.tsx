@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import './globals.css'
 import Script from 'next/script'
 import { Amatic_SC } from 'next/font/google'
+import { Toaster } from '@/components/ui/Toaster'
+import { SupabaseEnvLoader } from '@/components/SupabaseEnvLoader'
 
 const amaticSC = Amatic_SC({
   weight: '700',
@@ -32,29 +34,42 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? ''
+  const supabaseEnvScript =
+    supabaseUrl && supabaseAnonKey
+      ? `window.__SUPABASE_ENV__={url:${JSON.stringify(supabaseUrl)},anonKey:${JSON.stringify(supabaseAnonKey)}};`
+      : ''
+
   return (
     <html lang="ru" suppressHydrationWarning className={amaticSC.variable}>
       <head>
         <link rel="icon" href="/icon-32x32.png" sizes="32x32" type="image/png" />
         <link rel="icon" href="/icon-192x192.png" sizes="192x192" type="image/png" />
         <link rel="apple-touch-icon" href="/apple-icon-180x180.png" sizes="180x180" />
+        {supabaseEnvScript ? (
+          <script dangerouslySetInnerHTML={{ __html: supabaseEnvScript }} />
+        ) : null}
         <Script id="register-sw" strategy="afterInteractive">
           {`
             if ('serviceWorker' in navigator) {
               window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                  .then((registration) => {
-                    console.log('Service Worker зарегистрирован:', registration.scope)
-                  })
-                  .catch((error) => {
+                navigator.serviceWorker.register('/sw.js').catch((error) => {
+                  if (process.env.NODE_ENV === 'development') {
                     console.error('Ошибка регистрации Service Worker:', error)
-                  })
+                  }
+                })
               })
             }
           `}
         </Script>
       </head>
-      <body style={{ backgroundColor: '#ffffff', margin: 0, padding: 0 }}>{children}</body>
+      <body style={{ backgroundColor: '#ffffff', margin: 0, padding: 0 }}>
+        <SupabaseEnvLoader>
+          {children}
+          <Toaster />
+        </SupabaseEnvLoader>
+      </body>
     </html>
   )
 }

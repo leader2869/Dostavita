@@ -1,4 +1,24 @@
 /** @type {import('next').NextConfig} */
+
+// Принудительно загружаем .env.local до чтения process.env (на случай порядка загрузки)
+const path = require('path')
+const fs = require('fs')
+const envPath = path.resolve(process.cwd(), '.env.local')
+if (fs.existsSync(envPath)) {
+  const content = fs.readFileSync(envPath, 'utf8')
+  content.split('\n').forEach((line) => {
+    const trimmed = line.trim()
+    if (trimmed && !trimmed.startsWith('#')) {
+      const eq = trimmed.indexOf('=')
+      if (eq > 0) {
+        const key = trimmed.slice(0, eq).trim()
+        const value = trimmed.slice(eq + 1).trim().replace(/^["']|["']$/g, '')
+        if (key && !process.env[key]) process.env[key] = value
+      }
+    }
+  })
+}
+
 const nextConfig = {
   reactStrictMode: true,
   images: {

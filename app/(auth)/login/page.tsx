@@ -19,14 +19,26 @@ export default function LoginPage() {
       setCheckingAuth(true)
       try {
         const supabase = createClient()
-        const { data: { user } } = await supabase.auth.getUser()
-        if (user) {
-          // Используем window.location для надежного редиректа
+
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Timeout')), 5000)
+        )
+        const authPromise = supabase.auth.getUser()
+        const { data: { user }, error } = await Promise.race([authPromise, timeoutPromise]) as any
+
+        if (error) {
+          // Не показываем ошибку пользователю, просто не редиректим
+        } else if (user) {
           window.location.href = '/dashboard'
           return
         }
-      } catch (err) {
-        console.error('Ошибка при проверке аутентификации:', err)
+      } catch (err: any) {
+        const msg = err?.message ?? ''
+        if (msg.includes('Supabase:') || msg.includes('NEXT_PUBLIC_SUPABASE')) {
+          setError('Ключи Supabase не подхватились. Убедитесь, что в .env.local есть NEXT_PUBLIC_SUPABASE_URL и NEXT_PUBLIC_SUPABASE_ANON_KEY. Затем удалите папку .next, перезапустите сервер (npm run dev) и обновите страницу. Проверка: /api/env-check')
+        } else if (msg.includes('fetch failed') || msg.includes('Timeout') || msg.includes('Network')) {
+          setError('Проблема с подключением к серверу. Проверьте интернет-соединение.')
+        }
       } finally {
         setCheckingAuth(false)
       }
@@ -46,51 +58,39 @@ export default function LoginPage() {
     setError(null)
 
     try {
-      console.log('Начинаем вход...')
       const supabase = createClient()
-      
-      console.log('Вызываем signInWithPassword...')
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
 
-      console.log('Результат signInWithPassword:', { hasUser: !!data?.user, error: signInError?.message })
-
       if (signInError) {
-        console.error('Ошибка входа:', signInError)
         setError(signInError.message || 'Ошибка входа. Проверьте email и пароль.')
         setLoading(false)
         return
       }
 
       if (data.user) {
-        console.log('Пользователь найден, проверяем getUser()...')
-        
-        // Проверяем, что пользователь аутентифицирован
         const { data: { user: verifiedUser }, error: userError } = await supabase.auth.getUser()
-        console.log('Результат getUser():', { hasUser: !!verifiedUser, error: userError?.message })
         
         if (userError || !verifiedUser) {
-          console.error('Ошибка getUser():', userError)
           setError('Ошибка аутентификации. Попробуйте еще раз.')
           setLoading(false)
           return
         }
 
-        console.log('Аутентификация успешна, переходим в дашборд...')
-        console.log('User ID:', verifiedUser.id)
-        
-        // Используем window.location для полной перезагрузки страницы
         window.location.href = '/dashboard'
       } else {
-        console.error('Пользователь не найден в data')
         setError('Пользователь не найден')
         setLoading(false)
       }
-    } catch (err: any) {
-      console.error('Исключение при входе:', err)
-      setError(err.message || 'Ошибка входа')
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Ошибка входа'
+      if (typeof msg === 'string' && (msg.includes('Supabase:') || msg.includes('NEXT_PUBLIC_SUPABASE'))) {
+        setError('Ключи Supabase не подхватились. Удалите папку .next и перезапустите: npm run dev. Проверка: /api/env-check')
+      } else {
+        setError(msg)
+      }
       setLoading(false)
     }
   }

@@ -4,77 +4,40 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { ClientOrderActions } from '@/components/client/ClientOrderActions'
+import { toastError, toastSuccess } from '@/lib/utils/toast'
 import { formatAddressForOrder } from '@/lib/utils/formatAddress'
 import { formatReadyTime } from '@/lib/utils/formatReadyTime'
+import { getOrderStatusLabel, getOrderStatusColor, isActiveOrderStatus } from '@/lib/utils/orderStatus'
 import { exportOrdersToExcel } from '@/lib/utils/exportToExcel'
-
-type Period = 'today' | 'week' | 'month' | 'all' | 'custom'
+import { useDateFilter } from '@/hooks/useDateFilter'
+import { useDashboardUser } from '@/contexts/DashboardAuthContext'
 
 export default function ClientOrdersPage() {
   const router = useRouter()
   const supabase = createClient()
+  const { userId } = useDashboardUser()
+  const {
+    period,
+    setPeriod,
+    customStartDate,
+    setCustomStartDate,
+    customEndDate,
+    setCustomEndDate,
+    getDateFilter,
+  } = useDateFilter('week')
   const [orders, setOrders] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [completedFilter, setCompletedFilter] = useState<'all' | 'unpaid' | 'cancelled'>('all')
   const [displayedCompletedOrdersCount, setDisplayedCompletedOrdersCount] = useState(10)
   const [completedOrders, setCompletedOrders] = useState<any[]>([])
   const [receivables, setReceivables] = useState<any[]>([])
-  const [period, setPeriod] = useState<Period>('week')
-  const [customStartDate, setCustomStartDate] = useState<string>('')
-  const [customEndDate, setCustomEndDate] = useState<string>('')
   const [isActiveOrdersExpanded, setIsActiveOrdersExpanded] = useState(false)
-
-  const getDateFilter = useCallback((period: Period) => {
-    const now = new Date()
-    switch (period) {
-      case 'today':
-        return {
-          start: new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString(),
-          end: now.toISOString()
-        }
-      case 'week':
-        const weekAgo = new Date(now)
-        weekAgo.setDate(weekAgo.getDate() - 7)
-        return {
-          start: weekAgo.toISOString(),
-          end: now.toISOString()
-        }
-      case 'month':
-        const monthAgo = new Date(now)
-        monthAgo.setMonth(monthAgo.getMonth() - 1)
-        return {
-          start: monthAgo.toISOString(),
-          end: now.toISOString()
-        }
-      case 'custom':
-        return {
-          start: customStartDate ? new Date(customStartDate).toISOString() : null,
-          end: customEndDate ? new Date(customEndDate + 'T23:59:59').toISOString() : null
-        }
-      default:
-        return { start: null, end: null }
-    }
-  }, [customStartDate, customEndDate])
 
   const loadData = useCallback(async () => {
     let isMounted = true
     
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      
-      if (!user) {
-        if (isMounted) {
-          router.push('/login')
-        }
-        return
-      }
-
-      if (isMounted) {
-        setCurrentUserId(user.id)
-      }
-
       // Получаем все заказы с информацией о профилях для поиска
       const { data: ordersData, error } = await supabase
         .from('orders')
@@ -84,7 +47,7 @@ export default function ClientOrdersPage() {
           client:profiles!orders_client_id_fkey(id, full_name, phone),
           executor:profiles!orders_executor_user_id_fkey(id, full_name, organization_id)
         `)
-        .or(`customer_id.eq.${user.id},client_id.eq.${user.id}`)
+        .or(`customer_id.eq.${userId},client_id.eq.${userId}`)
         .order('created_at', { ascending: false })
 
       if (!isMounted) return
@@ -96,7 +59,7 @@ export default function ClientOrdersPage() {
       }
 
       // Загружаем выполненные заказы с фильтром по периоду
-      const dateFilter = getDateFilter(period as Period)
+      const dateFilter = getDateFilter()
       let completedOrdersQuery = supabase
         .from('orders')
         .select(`
@@ -104,7 +67,7 @@ export default function ClientOrdersPage() {
           executor:profiles!orders_executor_user_id_fkey(id, full_name, organization_id),
           customer:profiles!orders_customer_id_fkey(full_name)
         `)
-        .or(`customer_id.eq.${user.id},client_id.eq.${user.id}`)
+        .or(`customer_id.eq.${userId},client_id.eq.${userId}`)
         .eq('status', 'completed')
         .order('completed_at', { ascending: false })
 
@@ -128,7 +91,7 @@ export default function ClientOrdersPage() {
       // Загружаем долги (всегда за все время)
       const { data: receivablesData, error: receivablesError } = await supabase
         .rpc('get_client_receivables', {
-          client_user_id: user.id,
+          client_user_id: userId,
           start_date: null,
           end_date: null
         })
@@ -155,7 +118,7 @@ export default function ClientOrdersPage() {
     return () => {
       isMounted = false
     }
-  }, [supabase, router, period, customStartDate, customEndDate, getDateFilter])
+  }, [supabase, userId, period, customStartDate, customEndDate, getDateFilter])
 
   useEffect(() => {
     loadData()
@@ -166,48 +129,7 @@ export default function ClientOrdersPage() {
     setDisplayedCompletedOrdersCount(10)
   }, [period, customStartDate, customEndDate, completedFilter, searchQuery])
 
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'searching_courier':
-        return 'Ищем курьера'
-      case 'courier_accepted':
-        return 'Курьер принял заказ'
-      case 'courier_coming':
-        return 'Курьер едет к отправителю'
-      case 'courier_delivering':
-        return 'Курьер едет к получателю'
-      case 'completed':
-        return 'Заказ завершен'
-      case 'cancelled':
-        return 'Отменен'
-      default:
-        return status
-    }
-  }
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'searching_courier':
-        return 'text-yellow-400 bg-yellow-400/20 border-yellow-400/50'
-      case 'courier_accepted':
-        return 'text-orange-400 bg-orange-400/20 border-orange-400/50'
-      case 'courier_coming':
-        return 'text-blue-400 bg-blue-400/20 border-blue-400/50'
-      case 'courier_delivering':
-        return 'text-purple-400 bg-purple-400/20 border-purple-400/50'
-      case 'completed':
-        return 'text-brand-light bg-brand-light/20 border-green-400/50'
-      case 'cancelled':
-        return 'text-red-400 bg-red-400/20 border-red-400/50'
-      default:
-        return 'text-gray-600 bg-gray-400/20 border-gray-400/50'
-    }
-  }
-
-  const shouldBlink = (status: string) => {
-    // Мигают только активные статусы
-    return status === 'searching_courier' || status === 'courier_accepted' || status === 'courier_coming' || status === 'courier_delivering'
-  }
+  const shouldBlink = (status: string) => isActiveOrderStatus(status)
 
   // Функция фильтрации заказов по поисковому запросу (только по номеру заказа)
   const filterOrdersBySearch = (orderList: any[]) => {
@@ -261,39 +183,6 @@ export default function ClientOrdersPage() {
   const activeOrders = filterOrdersBySearch(allActiveOrders)
   const completedOrdersFromAll = filterOrdersBySearch(filteredCompletedOrders)
   
-  // Отладочное логирование (можно удалить после проверки)
-  useEffect(() => {
-    if (searchQuery.trim() && orders.length > 0) {
-      console.log('=== ОТЛАДКА ПОИСКА ===')
-      console.log('Поисковый запрос:', searchQuery)
-      console.log('Всего заказов:', orders.length)
-      console.log('Активных заказов (до фильтра):', allActiveOrders.length)
-      console.log('Завершенных заказов (до фильтра):', filteredCompletedOrders.length)
-      console.log('Пример активного заказа:', allActiveOrders[0] ? {
-        id: allActiveOrders[0]?.id,
-        order_number: allActiveOrders[0]?.order_number,
-        order_number_type: typeof allActiveOrders[0]?.order_number,
-        order_number_string: String(allActiveOrders[0]?.order_number || ''),
-        status: allActiveOrders[0]?.status
-      } : 'нет активных заказов')
-      console.log('Пример завершенного заказа:', filteredCompletedOrders[0] ? {
-        id: filteredCompletedOrders[0]?.id,
-        order_number: filteredCompletedOrders[0]?.order_number,
-        order_number_type: typeof filteredCompletedOrders[0]?.order_number,
-        order_number_string: String(filteredCompletedOrders[0]?.order_number || ''),
-        status: filteredCompletedOrders[0]?.status
-      } : 'нет завершенных заказов')
-      console.log('Отфильтровано активных:', activeOrders.length)
-      console.log('Отфильтровано завершенных:', completedOrdersFromAll.length)
-      if (activeOrders.length > 0) {
-        console.log('Найденные активные заказы:', activeOrders.map((o: any) => ({ id: o.id, order_number: o.order_number })))
-      }
-      if (completedOrdersFromAll.length > 0) {
-        console.log('Найденные завершенные заказы:', completedOrdersFromAll.map((o: any) => ({ id: o.id, order_number: o.order_number })))
-      }
-    }
-  }, [searchQuery, orders.length, allActiveOrders.length, filteredCompletedOrders.length, activeOrders.length, completedOrdersFromAll.length])
-
   // Вычисляем статистику
   const totalReceivables = receivables.reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0)
   const totalCompletedAmount = completedOrders.reduce((sum, o) => sum + (parseFloat(o.final_price) || 0), 0)
@@ -339,10 +228,10 @@ export default function ClientOrdersPage() {
             <div className="flex items-center gap-3 mb-2">
               <span
                 className={`inline-block px-3 py-1 rounded-full text-xs font-semibold border ${
-                  getStatusColor(order.status)
+                  getOrderStatusColor(order.status)
                 } ${shouldBlink(order.status) ? 'animate-blink' : ''}`}
               >
-                {getStatusLabel(order.status)}
+                {getOrderStatusLabel(order.status)}
               </span>
               {isUnpaid && (
                 <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold border bg-yellow-200/50 text-yellow-700 border-yellow-300/50">
@@ -405,14 +294,14 @@ export default function ClientOrdersPage() {
                   })
                   const data = await response.json()
                   if (response.ok) {
-                    alert('Заказ успешно отменен')
+                    toastSuccess('Заказ успешно отменен')
                     window.location.reload()
                   } else {
-                    alert(data.error || 'Не удалось отменить заказ')
+                    toastError(data.error || 'Не удалось отменить заказ')
                   }
                 } catch (error) {
                   console.error('Ошибка отмены заказа:', error)
-                  alert('Произошла ошибка при отмене заказа')
+                  toastError('Произошла ошибка при отмене заказа')
                 }
               }}
               className="flex-1 bg-red-300 text-gray-900 px-3 py-1.5 rounded text-xs hover:bg-red-400 transition"
@@ -423,7 +312,7 @@ export default function ClientOrdersPage() {
         )}
         {/* Кнопки телефона, сообщения и поделиться для активных заказов */}
         {order.status !== 'completed' && order.status !== 'cancelled' && (
-          <ClientOrderActions order={order} userId={currentUserId || ''} />
+          <ClientOrderActions order={order} userId={userId} />
         )}
       </div>
     )
@@ -445,7 +334,7 @@ export default function ClientOrdersPage() {
         <button
           onClick={() => {
             const filename = `Мои_заказы_${new Date().toISOString().split('T')[0]}`
-            exportOrdersToExcel(orders, filename)
+            exportOrdersToExcel(orders, filename, () => toastError('Нет данных для экспорта'))
           }}
           className="bg-brand-light hover:bg-brand-dark text-white px-4 py-2 rounded-md text-sm font-medium transition flex items-center gap-2"
           title="Экспорт заказов в Excel"
@@ -584,9 +473,9 @@ export default function ClientOrdersPage() {
                             Заказ {order.order_number ? `№${order.order_number}` : 'без номера'}
                           </p>
                           <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold border ${
-                            getStatusColor(order.status)
+                            getOrderStatusColor(order.status)
                           } ${shouldBlink(order.status) ? 'animate-blink' : ''}`}>
-                            {getStatusLabel(order.status)}
+                            {getOrderStatusLabel(order.status)}
                           </span>
                         </div>
                         <div className="mt-2 space-y-1 text-sm">
@@ -637,14 +526,14 @@ export default function ClientOrdersPage() {
                                   })
                                   const data = await response.json()
                                   if (response.ok) {
-                                    alert('Заказ успешно отменен')
+                                    toastSuccess('Заказ успешно отменен')
                                     window.location.reload()
                                   } else {
-                                    alert(data.error || 'Не удалось отменить заказ')
+                                    toastError(data.error || 'Не удалось отменить заказ')
                                   }
                                 } catch (error) {
                                   console.error('Ошибка отмены заказа:', error)
-                                  alert('Произошла ошибка при отмене заказа')
+                                  toastError('Произошла ошибка при отмене заказа')
                                 }
                               }}
                               className="flex-1 bg-red-300 text-gray-900 px-3 py-1.5 rounded text-xs hover:bg-red-400 transition"
@@ -655,7 +544,7 @@ export default function ClientOrdersPage() {
                         )}
                         {order.status !== 'completed' && order.status !== 'cancelled' && (
                           <div onClick={(e) => e.stopPropagation()}>
-                            <ClientOrderActions order={order} userId={currentUserId || ''} />
+                            <ClientOrderActions order={order} userId={userId} />
                           </div>
                         )}
                       </div>
@@ -680,7 +569,9 @@ export default function ClientOrdersPage() {
                 <button
                   onClick={() => {
                     const filename = `Выполненные_заказы_${period}_${new Date().toISOString().split('T')[0]}`
-                    exportOrdersToExcel(completedOrdersFromAll, filename)
+                    exportOrdersToExcel(completedOrdersFromAll, filename, () =>
+                      toastError('Нет данных для экспорта')
+                    )
                   }}
                   className="bg-brand-light hover:bg-brand-dark text-white px-3 py-1.5 rounded text-xs font-medium transition flex items-center gap-1"
                   title="Экспорт выполненных заказов в Excel"

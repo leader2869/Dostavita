@@ -1,29 +1,25 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
+import { apiSuccess, apiError, maskInternalMessage } from '@/lib/api/response'
+import { checkRateLimit, getClientIp } from '@/lib/rate-limit'
 
-// Отключаем статическую генерацию, так как используем request.url
 export const dynamic = 'force-dynamic'
 
-export async function GET(request: NextRequest) {
-  try {
-    // Используем search string напрямую, избегая создания URL объекта
-    const searchString = request.nextUrl.search
-    
-    if (!searchString) {
-      return NextResponse.json(
-        { error: 'Поисковый запрос обязателен' },
-        { status: 400 }
-      )
-    }
+/** Nominatim: 1 запрос в секунду на IP */
+const NOMINATIM_WINDOW_MS = 1100
+const NOMINATIM_MAX_REQUESTS = 1
 
-    // Извлекаем параметр q из query string вручную
+export async function GET(request: NextRequest) {
+  const ip = getClientIp(request)
+  if (!checkRateLimit(`nominatim:${ip}`, { windowMs: NOMINATIM_WINDOW_MS, maxRequests: NOMINATIM_MAX_REQUESTS })) {
+    return apiError('Слишком частые запросы. Подождите секунду.', 429)
+  }
+
+  try {
+    const searchString = request.nextUrl.search
+    if (!searchString) return apiError('Поисковый запрос обязателен', 400)
+
     const urlMatch = searchString.match(/[?&]q=([^&]*)/)
-    
-    if (!urlMatch || !urlMatch[1]) {
-      return NextResponse.json(
-        { error: 'Поисковый запрос обязателен' },
-        { status: 400 }
-      )
-    }
+    if (!urlMatch || !urlMatch[1]) return apiError('Поисковый запрос обязателен', 400)
 
     // Параметр уже закодирован в URL, декодируем его
     let query: string
@@ -37,12 +33,7 @@ export async function GET(request: NextRequest) {
 
     query = query.trim()
 
-    if (query.length === 0) {
-      return NextResponse.json(
-        { error: 'Поисковый запрос обязателен' },
-        { status: 400 }
-      )
-    }
+    if (query.length === 0) return apiError('Поисковый запрос обязателен', 400)
 
     // Правильно кодируем запрос для UTF-8 для Nominatim API
     const encodedQuery = encodeURIComponent(query)
@@ -51,18 +42,12 @@ export async function GET(request: NextRequest) {
     // accept-language=ru для получения адресов на русском языке
     const nominatimUrl = `https://nominatim.openstreetmap.org/search?q=${encodedQuery}&format=json&limit=10&addressdetails=1&countrycodes=by&accept-language=ru`
     
-    console.log('🔍 Nominatim search request:', nominatimUrl)
-    console.log('🔍 Original query:', query)
-    console.log('🔍 Encoded query:', encodedQuery)
-    
     const response = await fetch(nominatimUrl, {
       headers: {
         'User-Agent': 'Prosto Delivery App (contact@prosto.of.by)',
         'Accept-Language': 'ru',
       },
     })
-
-    console.log('📡 Nominatim response status:', response.status, response.statusText)
 
     if (!response.ok) {
       const errorText = await response.text()
@@ -71,7 +56,6 @@ export async function GET(request: NextRequest) {
     }
 
     const data = await response.json()
-    console.log('✅ Nominatim results count:', data?.length || 0)
 
     // Форматируем результаты для удобства использования
     const results = data.map((item: any) => {
@@ -113,13 +97,11 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    return NextResponse.json({ results })
-  } catch (error: any) {
+    return apiSuccess({ results })
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Ошибка поиска адреса'
     console.error('Ошибка поиска адреса через Nominatim:', error)
-    return NextResponse.json(
-      { error: error.message || 'Ошибка поиска адреса' },
-      { status: 500 }
-    )
+    return apiError(maskInternalMessage(message), 500)
   }
 }
 

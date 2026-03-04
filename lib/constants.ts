@@ -1,5 +1,11 @@
 // Константы приложения
 
+/** Максимальный размер файла аватара в байтах (5 MB) */
+export const MAX_AVATAR_SIZE_BYTES = 5 * 1024 * 1024
+
+/** Максимальный размер файла в чате (5 MB) */
+export const MAX_CHAT_PHOTO_SIZE_BYTES = 5 * 1024 * 1024
+
 export const ORDER_STATUS_LABELS = {
   searching_courier: 'Ищем курьера',
   courier_accepted: 'Курьер принял заказ',

@@ -16,43 +16,15 @@ export function PaymentModal({ order, isOpen, onClose, onSuccess }: PaymentModal
   const [error, setError] = useState<string | null>(null)
   const supabase = createClient()
 
-  console.log('=== PaymentModal render ===')
-  console.log('isOpen:', isOpen)
-  console.log('order:', order)
-  console.log('order.id:', order?.id)
-  console.log('order.id type:', typeof order?.id)
-  console.log('order.is_paid:', order?.is_paid)
-  console.log('Will show modal?', isOpen && (order?.is_paid === false || order?.is_paid === null))
+  if (!isOpen) return null
 
-  if (!isOpen) {
-    console.log('❌ Modal not shown - isOpen is false')
-    return null
-  }
-  
-  // Проверяем, что order существует и имеет валидный id
-  if (!order || !order.id) {
-    console.error('❌ Modal not shown - order or order.id is missing')
-    console.error('Order:', order)
-    return null
-  }
-  
-  // Не показываем модальное окно, если оплата уже обработана (is_paid === true)
-  if (order.is_paid === true) {
-    console.log('❌ Modal not shown - is_paid is already true (payment processed)')
-    return null
-  }
-  
-  console.log('✅ Modal will be shown')
+  if (!order || !order.id) return null
+
+  if (order.is_paid === true) return null
 
   const handlePayment = async (isPaid: boolean) => {
     setProcessing(true)
     setError(null)
-
-    console.log('=== Processing payment ===')
-    console.log('Order ID:', order.id)
-    console.log('Order ID type:', typeof order.id)
-    console.log('isPaid (payment_status):', isPaid)
-    console.log('Order final_price:', order.final_price)
 
     // Проверяем, что order.id является валидным UUID
     // UUID должен быть строкой длиной 36 символов в формате: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
@@ -60,8 +32,6 @@ export function PaymentModal({ order, isOpen, onClose, onSuccess }: PaymentModal
     
     // Строгая проверка: order.id должен существовать, быть строкой, не быть "0" или пустой строкой, и быть валидным UUID
     if (!order || !order.id) {
-      console.error('❌ Order or order.id is missing')
-      console.error('Order object:', order)
       setError('Ошибка: Заказ не найден. Пожалуйста, обновите страницу.')
       setProcessing(false)
       return
@@ -71,9 +41,6 @@ export function PaymentModal({ order, isOpen, onClose, onSuccess }: PaymentModal
     
     // Проверяем, что это не "0" или пустая строка
     if (orderIdStr === '0' || orderIdStr === '' || orderIdStr === 'null' || orderIdStr === 'undefined') {
-      console.error('❌ Invalid order ID (0, empty, null, or undefined):', orderIdStr)
-      console.error('Order object:', order)
-      console.error('Order ID type:', typeof order.id)
       setError('Ошибка: Неверный ID заказа. Пожалуйста, обновите страницу.')
       setProcessing(false)
       return
@@ -81,11 +48,7 @@ export function PaymentModal({ order, isOpen, onClose, onSuccess }: PaymentModal
     
     // Проверяем формат UUID
     if (!uuidRegex.test(orderIdStr)) {
-      console.error('❌ Invalid UUID format:', orderIdStr)
-      console.error('Order object:', order)
-      console.error('Order ID type:', typeof order.id)
-      console.error('Order ID length:', orderIdStr.length)
-      setError(`Ошибка: Неверный формат ID заказа (${orderIdStr}). Пожалуйста, обновите страницу.`)
+      setError('Ошибка: Неверный формат ID заказа. Пожалуйста, обновите страницу.')
       setProcessing(false)
       return
     }
@@ -93,59 +56,21 @@ export function PaymentModal({ order, isOpen, onClose, onSuccess }: PaymentModal
     try {
       // Финальная проверка перед вызовом RPC - убеждаемся, что это не "0"
       if (orderIdStr === '0' || orderIdStr.length !== 36) {
-        console.error('❌ Final validation failed before RPC call')
-        console.error('orderIdStr:', orderIdStr)
-        console.error('orderIdStr length:', orderIdStr.length)
-        console.error('orderIdStr === "0":', orderIdStr === '0')
         setError('Ошибка: Неверный ID заказа. Пожалуйста, обновите страницу.')
         setProcessing(false)
         return
       }
-      
-      console.log('Using order_uuid:', orderIdStr)
-      console.log('Order UUID validation passed')
-      console.log('Calling RPC with parameters:', {
-        order_uuid: orderIdStr,
-        payment_status: isPaid,
-        order_uuid_type: typeof orderIdStr,
-        order_uuid_length: orderIdStr.length
-      })
-      
+
       const { data, error: rpcError } = await supabase.rpc('process_order_payment', {
         order_uuid: orderIdStr,
         payment_status: isPaid,
       })
 
-      console.log('RPC result:', { data, error: rpcError })
-
-      if (rpcError) {
-        console.error('RPC error:', rpcError)
-        console.error('RPC error details:', JSON.stringify(rpcError, null, 2))
-        throw rpcError
-      }
+      if (rpcError) throw rpcError
 
       if (data === false) {
-        console.error('Function returned false - payment processing failed')
-        console.error('Possible reasons:')
-        console.error('1. Миграция 087 не применена (вспомогательные функции не созданы)')
-        console.error('2. Заказ уже обработан (is_paid = true)')
-        console.error('3. Заказ не в правильном статусе (должен быть courier_delivering или completed)')
-        console.error('4. Вспомогательные функции не могут обойти RLS')
-        console.error('5. Заказ не принадлежит текущему водителю')
-        
-        // Проверяем статус заказа
-        const { data: orderCheck } = await supabase
-          .from('orders')
-          .select('id, status, is_paid, executor_user_id')
-          .eq('id', order.id)
-          .single()
-        
-        console.error('Order check:', orderCheck)
-        
-        throw new Error('Не удалось обработать оплату. Проверьте логи в консоли для деталей.')
+        throw new Error('Не удалось обработать оплату.')
       }
-
-      console.log('✅ Payment processed successfully, isPaid:', isPaid)
 
       // Проверяем баланс после обработки оплаты
       if (isPaid) {
@@ -155,56 +80,11 @@ export function PaymentModal({ order, isOpen, onClose, onSuccess }: PaymentModal
           await new Promise(resolve => setTimeout(resolve, 2000))
           
           // Проверяем баланс через обычный запрос
-          const { data: balanceData, error: balanceError } = await supabase
+          await supabase
             .from('balances')
             .select('amount, currency, updated_at')
             .eq('user_id', user.id)
             .maybeSingle()
-          
-          console.log('=== Balance check after payment ===')
-          console.log('User ID:', user.id)
-          console.log('Balance data:', balanceData)
-          console.log('Balance error:', balanceError)
-          console.log('Balance amount:', balanceData?.amount)
-          
-          // Если баланс не найден, проверяем через прямой запрос к базе
-          if (!balanceData && !balanceError) {
-            console.warn('⚠️ Баланс не найден после обработки оплаты!')
-            console.warn('Это может означать, что:')
-            console.warn('1. Миграция 085 не применена')
-            console.warn('2. RLS все еще блокирует создание баланса')
-            console.warn('3. Функция process_order_payment не смогла создать баланс')
-          }
-          
-          // Проверяем транзакции
-          const { data: transactionsData, error: transactionsError } = await supabase
-            .from('transactions')
-            .select('*')
-            .eq('order_id', order.id)
-            .order('created_at', { ascending: false })
-            .limit(5)
-          
-          console.log('=== Transaction check after payment ===')
-          console.log('Transactions data:', transactionsData)
-          console.log('Transactions count:', transactionsData?.length || 0)
-          console.log('Transactions error:', transactionsError)
-          
-          if (!transactionsData || transactionsData.length === 0) {
-            console.warn('⚠️ Транзакции не найдены после обработки оплаты!')
-            console.warn('Это может означать, что функция не создала транзакцию')
-          }
-          
-          // Проверяем, обновился ли заказ
-          const { data: orderData, error: orderError } = await supabase
-            .from('orders')
-            .select('is_paid, final_price')
-            .eq('id', order.id)
-            .single()
-          
-          console.log('=== Order check after payment ===')
-          console.log('Order is_paid:', orderData?.is_paid)
-          console.log('Order final_price:', orderData?.final_price)
-          console.log('Order error:', orderError)
         }
       }
 

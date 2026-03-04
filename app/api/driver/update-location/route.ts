@@ -1,42 +1,19 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { requireRole } from '@/lib/api/auth'
+import { parseBody } from '@/lib/api/validate'
+import { updateLocationSchema } from '@/lib/api/validate'
 
 export async function POST(request: Request) {
   try {
     const supabase = createServerSupabaseClient()
-    const body = await request.json()
-    const { latitude, longitude, accuracy, heading, speed, order_id } = body
+    const bodyResult = await parseBody(request, updateLocationSchema)
+    if (!bodyResult.ok) return bodyResult.response
+    const { latitude, longitude, accuracy, heading, speed, order_id } = bodyResult.data
 
-    if (!latitude || !longitude) {
-      return NextResponse.json(
-        { error: 'Широта и долгота обязательны' },
-        { status: 400 }
-      )
-    }
-
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Не авторизован' },
-        { status: 401 }
-      )
-    }
-
-    // Проверяем, что пользователь - водитель (используем простую функцию без рекурсии)
-    const { data: isDriver, error: roleCheckError } = await supabase
-      .rpc('check_driver_role', { p_user_id: user.id })
-
-    if (roleCheckError || !isDriver) {
-      console.error('Ошибка проверки роли водителя:', roleCheckError)
-      return NextResponse.json(
-        { error: 'Доступ запрещен. Только водители могут обновлять местоположение' },
-        { status: 403 }
-      )
-    }
+    const auth = await requireRole(supabase, 'driver')
+    if (!auth.ok) return auth.response
+    const { user } = auth
 
     // Сохраняем точку трека в driver_locations
     // Каждая запись - это точка трека водителя, сохраняемая каждую минуту
@@ -45,12 +22,12 @@ export async function POST(request: Request) {
       .from('driver_locations')
       .insert({
         driver_id: user.id,
-        order_id: order_id || null,
-        latitude: latitude.toString(),
-        longitude: longitude.toString(),
-        accuracy: accuracy || null,
-        heading: heading || null,
-        speed: speed || null,
+        order_id: order_id ?? null,
+        latitude: String(latitude),
+        longitude: String(longitude),
+        accuracy: accuracy ?? null,
+        heading: heading ?? null,
+        speed: speed ?? null,
       })
       .select()
       .single()
@@ -67,8 +44,8 @@ export async function POST(request: Request) {
     // Используем RPC функцию для обхода RLS
     const { error: updateProfileError } = await supabase.rpc('update_driver_location', {
       p_driver_id: user.id,
-      p_longitude: parseFloat(longitude.toString()),
-      p_latitude: parseFloat(latitude.toString()),
+      p_longitude: Number(longitude),
+      p_latitude: Number(latitude),
     })
 
     if (updateProfileError) {

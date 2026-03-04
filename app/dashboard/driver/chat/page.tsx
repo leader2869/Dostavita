@@ -2,27 +2,22 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { useDashboardUser } from '@/contexts/DashboardAuthContext'
 import { DriverClientChatsSection } from '@/components/driver/DriverClientChatsSection'
 
 export default function DriverChatPage() {
   const supabase = createClient()
-  const [user, setUser] = useState<any>(null)
+  const { userId } = useDashboardUser()
   const [activeOrders, setActiveOrders] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const { data: { user: currentUser } } = await supabase.auth.getUser()
-        if (!currentUser) return
-
-        setUser(currentUser)
-
-        // Загружаем активные заказы водителя
         const { data: ordersData, error: ordersError } = await supabase
           .from('orders')
           .select('id, order_number, pickup_address, delivery_address, status, created_at, client_id')
-          .eq('executor_user_id', currentUser.id)
+          .eq('executor_user_id', userId)
           .in('status', ['courier_accepted', 'courier_coming', 'courier_delivering'])
           .order('created_at', { ascending: false })
 
@@ -37,7 +32,7 @@ export default function DriverChatPage() {
     }
 
     loadData()
-  }, [])
+  }, [supabase, userId])
 
   if (loading) {
     return (
@@ -51,12 +46,10 @@ export default function DriverChatPage() {
     <div className="pb-20">
       <h1 className="text-3xl font-bold mb-6 text-gray-900">Чаты</h1>
 
-      {user && (
-        <DriverClientChatsSection
-          driverUserId={user.id}
-          activeOrders={activeOrders}
-        />
-      )}
+      <DriverClientChatsSection
+        driverUserId={userId}
+        activeOrders={activeOrders}
+      />
 
       {activeOrders.length === 0 && (
         <div className="bg-gray-50 rounded-lg shadow p-6">

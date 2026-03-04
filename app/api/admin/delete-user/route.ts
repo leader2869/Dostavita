@@ -1,72 +1,34 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
-import { NextResponse } from 'next/server'
+import { requireSuperadmin } from '@/lib/api/auth'
+import { parseBody } from '@/lib/api/validate'
+import { adminDeleteUserSchema } from '@/lib/api/validate'
+import { apiSuccess, apiError, maskInternalMessage } from '@/lib/api/response'
 
 export async function POST(request: Request) {
   try {
     const supabase = createServerSupabaseClient()
+    const bodyResult = await parseBody(request, adminDeleteUserSchema)
+    if (!bodyResult.ok) return bodyResult.response
+    const { userId } = bodyResult.data
 
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
+    const auth = await requireSuperadmin(supabase)
+    if (!auth.ok) return auth.response
+    const { user } = auth
 
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Не авторизован' },
-        { status: 401 }
-      )
-    }
+    if (userId === user.id) return apiError('Нельзя удалить самого себя', 400)
 
-    // Проверяем, что пользователь - суперадмин
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-
-    if (!profile || profile.role !== 'superadmin') {
-      return NextResponse.json(
-        { error: 'Доступ запрещен' },
-        { status: 403 }
-      )
-    }
-
-    const body = await request.json()
-    const { userId } = body
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'ID пользователя не указан' },
-        { status: 400 }
-      )
-    }
-
-    // Нельзя удалить самого себя
-    if (userId === user.id) {
-      return NextResponse.json(
-        { error: 'Нельзя удалить самого себя' },
-        { status: 400 }
-      )
-    }
-
-    // Удаляем пользователя через admin API (удалит и профиль из-за CASCADE)
     const { error: deleteError } = await supabase.auth.admin.deleteUser(userId)
 
     if (deleteError) {
       console.error('Ошибка удаления пользователя:', deleteError)
-      return NextResponse.json(
-        { error: deleteError.message },
-        { status: 500 }
-      )
+      return apiError(maskInternalMessage(deleteError.message), 500)
     }
 
-    return NextResponse.json({ success: true })
-  } catch (error: any) {
+    return apiSuccess()
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Внутренняя ошибка сервера'
     console.error('Ошибка API:', error)
-    return NextResponse.json(
-      { error: error.message || 'Внутренняя ошибка сервера' },
-      { status: 500 }
-    )
+    return apiError(maskInternalMessage(message), 500)
   }
 }
 

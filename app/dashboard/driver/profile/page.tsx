@@ -3,12 +3,14 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { toastError, toastSuccess } from '@/lib/utils/toast'
+import { useDashboardUser } from '@/contexts/DashboardAuthContext'
 import type { User } from '@/lib/types'
 
 export default function DriverProfilePage() {
   const router = useRouter()
   const supabase = createClient()
-  
+  const { userId } = useDashboardUser()
   const [profile, setProfile] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -31,16 +33,10 @@ export default function DriverProfilePage() {
 
   const loadProfile = useCallback(async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        router.push('/login')
-        return
-      }
-
       const { data, error: fetchError } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', user.id)
+        .eq('id', userId)
         .single()
 
       if (fetchError) {
@@ -61,7 +57,7 @@ export default function DriverProfilePage() {
         // Если водитель привязан к организации, получаем информацию об организации
         if (data.organization_id) {
           const { data: orgData, error: orgError } = await supabase
-            .rpc('get_driver_organization_info', { driver_user_id: user.id })
+            .rpc('get_driver_organization_info', { driver_user_id: userId })
             .single()
           
           if (!orgError && orgData) {
@@ -71,7 +67,7 @@ export default function DriverProfilePage() {
 
         // Получаем запросы на присоединение к организации
         const { data: requestsData, error: requestsError } = await supabase
-          .rpc('get_driver_requests', { driver_user_id: user.id })
+          .rpc('get_driver_requests', { driver_user_id: userId })
         
         if (!requestsError && requestsData) {
           setRequests(requestsData || [])
@@ -84,7 +80,7 @@ export default function DriverProfilePage() {
     } finally {
       setLoading(false)
     }
-  }, [supabase, router])
+  }, [supabase, userId])
 
   useEffect(() => {
     loadProfile()
@@ -96,9 +92,6 @@ export default function DriverProfilePage() {
     setError(null)
 
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('Не авторизован')
-
       // Используем API route для создания/обновления профиля (обходит RLS)
       const response = await fetch('/api/driver/profile', {
         method: 'POST',
@@ -162,7 +155,7 @@ export default function DriverProfilePage() {
       if (profile) {
         setProfile({ ...profile, avatar_url })
       }
-      alert('Аватар успешно загружен')
+      toastSuccess('Аватар успешно загружен')
     } catch (err: any) {
       setError(err.message)
     } finally {
@@ -195,7 +188,7 @@ export default function DriverProfilePage() {
         throw new Error(data.error || 'Ошибка обработки запроса')
       }
 
-      alert(data.message)
+      toastSuccess(data.message)
       await loadProfile() // Обновляем профиль и запросы
     } catch (err: any) {
       setError(err.message)

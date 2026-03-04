@@ -28,7 +28,10 @@ export function useOrderUnreadMessagesCount(orderId: string, userId: string | nu
           .is('read_at', null) // Только непрочитанные сообщения
 
         if (messagesError) {
-          console.error('Ошибка загрузки сообщений для заказа:', messagesError)
+          // CORS/сеть: не спамим консоль (настройте origin приложения в Supabase → Settings → API)
+          if (process.env.NODE_ENV === 'development' && messagesError.message !== 'Load failed') {
+            console.error('Ошибка загрузки сообщений для заказа:', messagesError)
+          }
           if (isMounted) {
             setCount(0)
             setLoading(false)
@@ -43,7 +46,11 @@ export function useOrderUnreadMessagesCount(orderId: string, userId: string | nu
           setLoading(false)
         }
       } catch (err) {
-        console.error('Ошибка подсчета непрочитанных сообщений для заказа:', err)
+        // CORS/сеть (Load failed): не логируем каждый заказ — настройте Supabase CORS
+        const isNetworkError = err instanceof TypeError && (err.message === 'Load failed' || err.message === 'Failed to fetch')
+        if (process.env.NODE_ENV === 'development' && !isNetworkError) {
+          console.error('Ошибка подсчета непрочитанных сообщений для заказа:', err)
+        }
         if (isMounted) {
           setCount(0)
           setLoading(false)

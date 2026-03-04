@@ -3,11 +3,13 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { toastSuccess } from '@/lib/utils/toast'
+import { useDashboardUser } from '@/contexts/DashboardAuthContext'
 
 export default function CustomerProfilePage() {
   const router = useRouter()
   const supabase = createClient()
-  
+  const { userId, user } = useDashboardUser()
   const [profile, setProfile] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -23,21 +25,13 @@ export default function CustomerProfilePage() {
   useEffect(() => {
     const loadProfile = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) {
-          router.push('/login')
-          return
-        }
-
         const { data, error: fetchError } = await supabase
           .from('profiles')
           .select('*')
-          .eq('id', user.id)
+          .eq('id', userId)
           .maybeSingle()
 
-        if (fetchError) {
-          throw fetchError
-        }
+        if (fetchError) throw fetchError
 
         if (data) {
           setProfile(data)
@@ -46,18 +40,13 @@ export default function CustomerProfilePage() {
           setEmail(data.email || user.email || '')
           setAvatarUrl(data.avatar_url || null)
         } else {
-          // Профиль не найден, создаем его через API route (обходит RLS)
-          const response = await fetch('/api/profile/create', {
-            method: 'POST',
-          })
-
+          const response = await fetch('/api/profile/create', { method: 'POST' })
           if (!response.ok) {
             const errorData = await response.json()
-            throw new Error(errorData.error || 'Ошибка создания профиля')
+            throw new Error(errorData.error?.message ?? errorData.error ?? 'Ошибка создания профиля')
           }
-
-          const { profile: newProfile } = await response.json()
-
+          const res = await response.json()
+          const newProfile = res.data?.profile ?? res.profile
           if (newProfile) {
             setProfile(newProfile)
             setFullName(newProfile.full_name || '')
@@ -66,15 +55,15 @@ export default function CustomerProfilePage() {
             setAvatarUrl(newProfile.avatar_url || null)
           }
         }
-      } catch (err: any) {
-        setError(err.message)
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : 'Ошибка загрузки')
       } finally {
         setLoading(false)
       }
     }
 
     loadProfile()
-  }, [supabase, router])
+  }, [supabase, userId, user.email])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -82,16 +71,12 @@ export default function CustomerProfilePage() {
     setError(null)
 
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('Не авторизован')
-
       const { error: updateError } = await supabase
         .from('profiles')
         .update({
           full_name: fullName,
-          // Телефон не обновляем - его можно изменить только через админа
         })
-        .eq('id', user.id)
+        .eq('id', userId)
 
       if (updateError) throw updateError
 
@@ -134,7 +119,7 @@ export default function CustomerProfilePage() {
       const { avatar_url } = await response.json()
       setAvatarUrl(avatar_url)
       setProfile({ ...profile, avatar_url })
-      alert('Аватар успешно загружен')
+      toastSuccess('Аватар успешно загружен')
     } catch (err: any) {
       setError(err.message)
     } finally {

@@ -7,32 +7,30 @@ export default function DebugAuthPage() {
   const [session, setSession] = useState<any>(null)
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [configError, setConfigError] = useState<string | null>(null)
 
   useEffect(() => {
     const checkAuth = async () => {
-      const supabase = createClient()
-      
-      // Проверяем сессию
-      const { data: { session: sessionData } } = await supabase.auth.getSession()
-      setSession(sessionData)
-      
-      // Проверяем пользователя
-      const { data: { user: userData }, error } = await supabase.auth.getUser()
-      setUser(userData)
-      
-      console.log('Debug Auth - Session:', sessionData)
-      console.log('Debug Auth - User:', userData)
-      console.log('Debug Auth - Error:', error)
-      
-      setLoading(false)
+      try {
+        const supabase = createClient()
+        const { data: { session: sessionData } } = await supabase.auth.getSession()
+        setSession(sessionData)
+        const { data: { user: userData } } = await supabase.auth.getUser()
+        setUser(userData)
+      } catch (err: any) {
+        const msg = err?.message ?? ''
+        if (msg.includes('Supabase:') || msg.includes('NEXT_PUBLIC_SUPABASE')) {
+          setConfigError('Задайте NEXT_PUBLIC_SUPABASE_URL и NEXT_PUBLIC_SUPABASE_ANON_KEY в .env.local')
+        }
+      } finally {
+        setLoading(false)
+      }
     }
-    
     checkAuth()
   }, [])
 
-  if (loading) {
-    return <div>Загрузка...</div>
-  }
+  if (loading) return <div>Загрузка...</div>
+  if (configError) return <div className="p-8 text-red-600">{configError}</div>
 
   return (
     <div className="p-8">

@@ -1,16 +1,14 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { BackButton } from '@/components/ui/BackButton'
 import { formatDistanceToNow } from 'date-fns'
 import { ru } from 'date-fns/locale'
+import { toastSuccess } from '@/lib/utils/toast'
 
 export default function DriverRequestsPage() {
-  const router = useRouter()
   const supabase = createClient()
-  
   const [requests, setRequests] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [responding, setResponding] = useState<string | null>(null)
@@ -23,13 +21,6 @@ export default function DriverRequestsPage() {
 
   const loadRequests = useCallback(async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      
-      if (!user) {
-        router.push('/login')
-        return
-      }
-
       const response = await fetch('/api/driver/requests')
       const data = await response.json()
 
@@ -45,7 +36,7 @@ export default function DriverRequestsPage() {
     } finally {
       setLoading(false)
     }
-  }, [supabase, router])
+  }, [])
 
   useEffect(() => {
     loadRequests()
@@ -76,7 +67,7 @@ export default function DriverRequestsPage() {
         throw new Error(data.error || 'Ошибка обработки запроса')
       }
 
-      alert(data.message)
+      toastSuccess(data.message)
       await loadRequests() // Обновляем список запросов
     } catch (err: any) {
       setError(err.message)

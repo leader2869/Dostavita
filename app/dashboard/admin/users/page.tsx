@@ -4,11 +4,13 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { BackButton } from '@/components/ui/BackButton'
+import { toastSuccess } from '@/lib/utils/toast'
+import { useDashboardUser } from '@/contexts/DashboardAuthContext'
 
 export default function AdminUsersPage() {
   const router = useRouter()
   const supabase = createClient()
-  
+  const { profile } = useDashboardUser()
   const [users, setUsers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [editingUser, setEditingUser] = useState<any | null>(null)
@@ -26,20 +28,7 @@ export default function AdminUsersPage() {
 
   const loadUsers = useCallback(async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        router.push('/login')
-        return
-      }
-
-      // Проверяем роль
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single()
-
-      if (!profile || (profile.role !== 'admin' && profile.role !== 'superadmin')) {
+      if (profile.role !== 'admin' && profile.role !== 'superadmin') {
         router.push('/dashboard')
         return
       }
@@ -67,7 +56,7 @@ export default function AdminUsersPage() {
     } finally {
       setLoading(false)
     }
-  }, [supabase, router])
+  }, [supabase, router, profile.role])
 
   const handleEdit = (user: any) => {
     setEditingUser(user)
@@ -113,7 +102,7 @@ export default function AdminUsersPage() {
       setShowEditModal(false)
       setEditingUser(null)
       await loadUsers()
-      alert('Пользователь успешно обновлен')
+      toastSuccess('Пользователь успешно обновлен')
     } catch (err: any) {
       setError(err.message)
     } finally {
@@ -146,7 +135,7 @@ export default function AdminUsersPage() {
       setShowDeleteModal(false)
       setUserToDelete(null)
       await loadUsers()
-      alert('Пользователь успешно удален')
+      toastSuccess('Пользователь успешно удален')
     } catch (err: any) {
       setError(err.message)
     } finally {

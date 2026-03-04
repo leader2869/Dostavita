@@ -62,16 +62,6 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
     setIsMounted(true)
   }, [])
 
-  // Отладка: логируем cancelledOrders (скрытые заказы)
-  useEffect(() => {
-    console.log('AvailableOrdersList - cancelledOrders (скрытые заказы):', cancelledOrders)
-    console.log('AvailableOrdersList - cancelledOrders length:', cancelledOrders?.length || 0)
-    console.log('AvailableOrdersList - cancelledOrders is array:', Array.isArray(cancelledOrders))
-    if (cancelledOrders && cancelledOrders.length > 0) {
-      console.log('AvailableOrdersList - первый скрытый заказ:', cancelledOrders[0])
-    }
-  }, [cancelledOrders])
-
   // Синхронизируем локальное состояние с пропсами при обновлении
   // НО исключаем заказы, от которых водитель отказался
   useEffect(() => {
@@ -148,7 +138,6 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
           return updated
         })
       } else {
-        console.log('Отказ успешно сохранен:', orderId)
         // Подтверждаем, что отказ сохранен - обновляем ref
         rejectedOrderIdsRef.current = new Set([...rejectedOrderIdsRef.current, orderId])
       }
@@ -171,10 +160,6 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
         (hiddenOrder) => !orders.some((order) => order.id === hiddenOrder.id)
       )
     : []
-
-  console.log('AvailableOrdersList - showCancelled:', showCancelled)
-  console.log('AvailableOrdersList - uniqueHiddenOrders:', uniqueHiddenOrders)
-  console.log('AvailableOrdersList - orders count:', orders.length)
 
   if (orders.length === 0 && uniqueHiddenOrders.length === 0) {
     return (

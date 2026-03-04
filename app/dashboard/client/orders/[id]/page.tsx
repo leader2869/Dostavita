@@ -1,14 +1,23 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import dynamic from 'next/dynamic'
 import { useRouter, useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { OrderMap } from '@/components/map/OrderMap'
-import { DriverLocationMap } from '@/components/map/DriverLocationMap'
 import { ClientOrderActions } from '@/components/client/ClientOrderActions'
+
+const OrderMap = dynamic(
+  () => import('@/components/map/OrderMap').then((m) => ({ default: m.OrderMap })),
+  { ssr: false }
+)
+const DriverLocationMap = dynamic(
+  () => import('@/components/map/DriverLocationMap').then((m) => ({ default: m.DriverLocationMap })),
+  { ssr: false }
+)
 import { OrderStatusProgress } from '@/components/orders/OrderStatusProgress'
 import { formatAddressForOrder } from '@/lib/utils/formatAddress'
 import { formatReadyTime } from '@/lib/utils/formatReadyTime'
+import { getOrderStatusLabel } from '@/lib/utils/orderStatus'
 
 export default function OrderDetailsPage() {
   const router = useRouter()
@@ -64,7 +73,6 @@ export default function OrderDetailsPage() {
           if (!driverError && driverData && driverData.length > 0) {
             setDriver(driverData[0])
           } else if (driverError) {
-            console.warn('Ошибка загрузки профиля водителя через RPC:', driverError)
             // Пробуем прямой запрос как fallback (если RPC не работает)
             const { data: directDriverData, error: directError } = await supabase
               .from('profiles')
@@ -74,12 +82,9 @@ export default function OrderDetailsPage() {
             
             if (!directError && directDriverData) {
               setDriver(directDriverData)
-            } else if (directError) {
-              console.warn('Ошибка загрузки профиля водителя через прямой запрос:', directError)
             }
           }
-        } catch (driverErr: any) {
-          console.warn('Ошибка при загрузке данных водителя:', driverErr)
+        } catch {
           // Продолжаем работу без информации о водителе
         }
       }
@@ -101,8 +106,6 @@ export default function OrderDetailsPage() {
 
     let isMounted = true
 
-    console.log('🔔 Подписываемся на изменения заказа:', orderId)
-
     // Подписываемся на все изменения заказов (без фильтра для обхода возможных проблем с RLS)
     const channel = supabase
       .channel(`order_status_${orderId}`)
@@ -115,10 +118,7 @@ export default function OrderDetailsPage() {
         },
         (payload) => {
           const updatedOrder = payload.new as any
-          // Проверяем, что это наш заказ
           if (updatedOrder.id === orderId && isMounted) {
-            console.log('📦 Получено обновление заказа:', updatedOrder)
-            console.log('✅ Обновляем статус заказа:', updatedOrder.status)
             setOrder((prevOrder: any) => {
               if (prevOrder && prevOrder.id === updatedOrder.id) {
                 return { ...prevOrder, ...updatedOrder }
@@ -129,11 +129,8 @@ export default function OrderDetailsPage() {
         }
       )
       .subscribe((status) => {
-        console.log('📡 Статус подписки Realtime:', status)
-        if (status === 'SUBSCRIBED') {
-          console.log('✅ Успешно подписались на изменения заказа')
-        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
-          console.error('❌ Ошибка подписки Realtime:', status)
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+          console.error('Ошибка подписки Realtime:', status)
         }
       })
 
@@ -152,7 +149,6 @@ export default function OrderDetailsPage() {
           .single()
 
         if (!error && orderData && orderData.status !== order?.status) {
-          console.log('🔄 Polling: статус изменился', orderData.status)
           setOrder((prevOrder: any) => {
             if (prevOrder && prevOrder.id === orderData.id) {
               return { ...prevOrder, ...orderData }
@@ -168,29 +164,9 @@ export default function OrderDetailsPage() {
     return () => {
       isMounted = false
       clearInterval(pollInterval)
-      console.log('🔕 Отписываемся от изменений заказа')
       supabase.removeChannel(channel)
     }
   }, [orderId, supabase, order])
-
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'searching_courier':
-        return 'Ищем курьера'
-      case 'courier_accepted':
-        return 'Курьер принял заказ'
-      case 'courier_coming':
-        return 'Курьер едет к отправителю'
-      case 'courier_delivering':
-        return 'Курьер едет к получателю'
-      case 'completed':
-        return 'Заказ завершен'
-      case 'cancelled':
-        return 'Отменен'
-      default:
-        return status
-    }
-  }
 
   const getItemTypeLabel = (itemType: string | null) => {
     switch (itemType) {
@@ -383,7 +359,7 @@ export default function OrderDetailsPage() {
 
             <div>
               <p className="text-sm text-gray-600">Статус</p>
-              <p className="text-gray-900">{getStatusLabel(order.status)}</p>
+              <p className="text-gray-900">{getOrderStatusLabel(order.status)}</p>
             </div>
 
             <div>

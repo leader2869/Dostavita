@@ -80,18 +80,11 @@ export default function AcceptOrderPage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Не авторизован')
 
-      console.log('=== Accepting order ===')
-      console.log('Order ID:', orderId)
-      console.log('User ID:', user.id)
-      
-      // Сначала проверяем заказ до принятия
       const { data: orderBefore, error: orderBeforeError } = await supabase
         .from('orders')
         .select('id, status, executor_user_id')
         .eq('id', orderId)
         .single()
-      
-      console.log('Order BEFORE accept:', { orderBefore, orderBeforeError })
       
       // Если заказ отменен, сначала активируем его (меняем статус на searching_courier)
       if (isReactivating && order?.status === 'cancelled') {
@@ -113,33 +106,15 @@ export default function AcceptOrderPage() {
         driver_user_uuid: user.id,
       })
 
-      console.log('Accept order RPC result:')
-      console.log('  - Success:', data)
-      console.log('  - Error:', rpcError)
-      if (rpcError) {
-        console.error('RPC Error details:', JSON.stringify(rpcError, null, 2))
-      }
-
       if (rpcError) {
         console.error('RPC Error:', rpcError)
         throw rpcError
       }
 
       if (data === false || data === null) {
-        console.error('Function returned false/null - order was not accepted')
-        console.error('Possible reasons:')
-        console.error('  1. Order status is not searching_courier')
-        console.error('  2. Driver profile missing vehicle_type or license_number')
-        console.error('  3. Function accept_order not found or wrong signature')
         throw new Error('Не удалось принять заказ. Убедитесь, что заказ доступен и у вас заполнен профиль водителя (тип транспорта и номер водительского удостоверения).')
       }
-      
-      console.log('✅ Function returned:', data)
-      console.log('✅ Order should be accepted now')
 
-      // Проверяем, что заказ был обновлен
-      // Используем RPC функцию для обхода RLS, если обычный запрос не работает
-      console.log('Проверяем заказ после принятия...')
       const { data: updatedOrder, error: checkError } = await supabase
         .from('orders')
         .select('id, executor_user_id, status, accepted_at')
@@ -147,32 +122,14 @@ export default function AcceptOrderPage() {
         .eq('executor_user_id', user.id) // Добавляем фильтр по executor_user_id для RLS
         .single()
       
-      // Если не получилось через обычный запрос, пробуем через RPC
       if (checkError && checkError.code === 'PGRST116') {
-        console.log('Обычный запрос не сработал, пробуем через RPC...')
-        const { data: orderViaRpc, error: rpcCheckError } = await supabase.rpc('get_order_by_id', {
-          order_id: orderId
-        })
-        if (!rpcCheckError && orderViaRpc) {
-          console.log('Заказ получен через RPC:', orderViaRpc)
-        }
+        await supabase.rpc('get_order_by_id', { order_id: orderId })
       }
       
-      console.log('=== Order AFTER accept ===')
-      console.log('Updated order:', updatedOrder)
-      console.log('Check error:', checkError)
-      
-      // После успешного принятия заказа перенаправляем на страницу деталей заказа
-      console.log('✅ Заказ принят успешно, переходим на страницу деталей заказа')
       router.push(`/dashboard/driver/orders/${orderId}`)
-    } catch (err: any) {
-      console.error('❌ ОШИБКА при принятии заказа:', err)
-      console.error('Error message:', err.message)
-      console.error('Error details:', JSON.stringify(err, null, 2))
-      if (err.stack) {
-        console.error('Error stack:', err.stack)
-      }
-      setError(err.message || 'Не удалось принять заказ')
+    } catch (err: unknown) {
+      console.error('Ошибка при принятии заказа:', err instanceof Error ? err.message : err)
+      setError(err instanceof Error ? err.message : 'Не удалось принять заказ')
       setAccepting(false)
       // НЕ делаем редирект при ошибке, чтобы пользователь мог увидеть ошибку
     }

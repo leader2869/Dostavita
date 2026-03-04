@@ -1,6 +1,7 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
-import { NextResponse } from 'next/server'
 import webpush from 'web-push'
+import { apiError, apiSuccess, maskInternalMessage } from '@/lib/api/response'
+import { requireRole } from '@/lib/api/auth'
 
 // Настройка VAPID деталей
 if (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
@@ -22,34 +23,16 @@ interface SendPushNotificationRequest {
 export async function POST(request: Request) {
   try {
     const supabase = createServerSupabaseClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Не авторизован' }, { status: 401 })
-    }
-
-    // Проверяем, что пользователь - админ или суперадмин
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-
-    if (!profile || (profile.role !== 'admin' && profile.role !== 'superadmin')) {
-      return NextResponse.json({ error: 'Недостаточно прав' }, { status: 403 })
-    }
+    const auth = await requireRole(supabase, ['admin', 'superadmin'])
+    if (!auth.ok) return auth.response
 
     const body: SendPushNotificationRequest = await request.json()
     const { userId, title, body: notificationBody, data, tag } = body
 
     if (!userId || !title || !notificationBody) {
-      return NextResponse.json(
-        { error: 'Необходимы userId, title и body' },
-        { status: 400 }
-      )
+      return apiError('Необходимы userId, title и body', 400)
     }
 
-    // Получаем все подписки пользователя
     const { data: subscriptions, error: subsError } = await supabase
       .from('push_subscriptions')
       .select('endpoint, p256dh_key, auth_key')
@@ -57,14 +40,11 @@ export async function POST(request: Request) {
 
     if (subsError) {
       console.error('Ошибка получения подписок:', subsError)
-      return NextResponse.json({ error: 'Ошибка получения подписок' }, { status: 500 })
+      return apiError('Ошибка получения подписок', 500)
     }
 
     if (!subscriptions || subscriptions.length === 0) {
-      return NextResponse.json(
-        { error: 'У пользователя нет активных подписок' },
-        { status: 404 }
-      )
+      return apiError('У пользователя нет активных подписок', 404)
     }
 
     // Отправляем уведомление на каждую подписку
@@ -121,8 +101,7 @@ export async function POST(request: Request) {
     const successful = results.filter((r) => r.status === 'fulfilled' && r.value.success).length
     const failed = results.length - successful
 
-    return NextResponse.json({
-      success: true,
+    return apiSuccess({
       sent: successful,
       failed,
       total: subscriptions.length,
@@ -130,10 +109,7 @@ export async function POST(request: Request) {
     })
   } catch (error: any) {
     console.error('Ошибка отправки push-уведомления:', error)
-    return NextResponse.json(
-      { error: error.message || 'Внутренняя ошибка сервера' },
-      { status: 500 }
-    )
+    return apiError(maskInternalMessage(error?.message) || 'Внутренняя ошибка сервера', 500)
   }
 }
 

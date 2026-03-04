@@ -1,20 +1,35 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { OrdersMap } from '@/components/map/OrdersMap'
 import { AddressAutocomplete } from '@/components/ui/AddressAutocomplete'
-import { AddressPickerMap } from '@/components/map/AddressPickerMap'
-import { SinglePointMap } from '@/components/map/SinglePointMap'
+import { toastError, toastSuccess } from '@/lib/utils/toast'
 import { formatAddressForCard, formatAddressForOrder } from '@/lib/utils/formatAddress'
+
+const OrdersMap = dynamic(
+  () => import('@/components/map/OrdersMap').then((m) => ({ default: m.OrdersMap })),
+  { ssr: false }
+)
+const AddressPickerMap = dynamic(
+  () => import('@/components/map/AddressPickerMap').then((m) => ({ default: m.AddressPickerMap })),
+  { ssr: false }
+)
+const SinglePointMap = dynamic(
+  () => import('@/components/map/SinglePointMap').then((m) => ({ default: m.SinglePointMap })),
+  { ssr: false }
+)
 import { formatReadyTime } from '@/lib/utils/formatReadyTime'
+import { getOrderStatusLabel, getOrderStatusColor, isActiveOrderStatus } from '@/lib/utils/orderStatus'
 import { ClientOrderActions } from '@/components/client/ClientOrderActions'
+import { useDashboardUser } from '@/contexts/DashboardAuthContext'
 import type { Region } from '@/lib/types'
 
 export default function ClientDashboard() {
   const router = useRouter()
   const supabase = createClient()
+  const { userId } = useDashboardUser()
   const [orders, setOrders] = useState<any[]>([])
   const [savedAddresses, setSavedAddresses] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -36,24 +51,10 @@ export default function ClientDashboard() {
   const [error, setError] = useState<string | null>(null)
   const [showCallDriverModal, setShowCallDriverModal] = useState(false)
   const [ordersWithDrivers, setOrdersWithDrivers] = useState<any[]>([])
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
-
-  useEffect(() => {
-    const loadUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        setCurrentUserId(user.id)
-      }
-    }
-    loadUser()
-  }, [supabase])
 
   const loadSavedAddresses = useCallback(async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-
     const { data: addressesData, error: addressesError } = await supabase
-      .rpc('get_user_saved_addresses', { user_uuid: user.id })
+      .rpc('get_user_saved_addresses', { user_uuid: userId })
 
     if (addressesError) {
       console.error('Ошибка загрузки адресов:', addressesError)
@@ -61,7 +62,7 @@ export default function ClientDashboard() {
       // Берем первые 3 адреса
       setSavedAddresses((addressesData || []).slice(0, 3))
     }
-  }, [supabase])
+  }, [supabase, userId])
 
   const loadRegions = useCallback(async () => {
     try {
@@ -78,14 +79,11 @@ export default function ClientDashboard() {
 
   // Загрузка заказов с информацией о курьерах
   const loadOrdersWithDrivers = useCallback(async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-
     // Получаем активные заказы (не completed и не cancelled)
     const { data: ordersData, error } = await supabase
       .from('orders')
       .select('id, order_number, pickup_address, delivery_address, status, executor_user_id, final_price, created_at, ready_at, item_type, description')
-      .or(`customer_id.eq.${user.id},client_id.eq.${user.id}`)
+      .or(`customer_id.eq.${userId},client_id.eq.${userId}`)
       .not('status', 'in', '(completed,cancelled)')
       .order('created_at', { ascending: false })
 
@@ -108,44 +106,32 @@ export default function ClientDashboard() {
       return
     }
 
-    // Загружаем информацию о курьерах для каждого заказа
-    const ordersWithDriverInfo = await Promise.all(
-      ordersWithExecutors.map(async (order) => {
-        const { data: driverData } = await supabase
-          .from('profiles')
-          .select('id, full_name, phone')
-          .eq('id', order.executor_user_id)
-          .maybeSingle()
+    // Один запрос профилей для всех курьеров (вместо N+1)
+    const executorIds = [...new Set(ordersWithExecutors.map((o) => o.executor_user_id).filter(Boolean))] as string[]
+    const { data: driversData } = await supabase
+      .from('profiles')
+      .select('id, full_name, phone')
+      .in('id', executorIds)
 
-        return {
-          ...order,
-          driver: driverData || null,
-        }
-      })
-    )
+    const driversMap = new Map((driversData || []).map((d) => [d.id, d]))
 
-    // Сохраняем все заказы с курьерами (даже если у водителя нет телефона)
-    setOrdersWithDrivers(ordersWithDriverInfo.filter(order => order.driver))
-  }, [supabase])
+    const ordersWithDriverInfo = ordersWithExecutors.map((order) => ({
+      ...order,
+      driver: driversMap.get(order.executor_user_id) || null,
+    }))
+
+    setOrdersWithDrivers(ordersWithDriverInfo.filter((order) => order.driver))
+  }, [supabase, userId])
 
   useEffect(() => {
     let isMounted = true
     
     const loadData = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      
-      if (!user) {
-        if (isMounted) {
-          router.push('/login')
-        }
-        return
-      }
-
       // Получаем только активные заказы (не completed и не cancelled)
       const { data: ordersData, error } = await supabase
         .from('orders')
         .select('*')
-        .or(`customer_id.eq.${user.id},client_id.eq.${user.id}`)
+        .or(`customer_id.eq.${userId},client_id.eq.${userId}`)
         .not('status', 'in', '(completed,cancelled)')
         .order('created_at', { ascending: false })
         .limit(5)
@@ -175,51 +161,9 @@ export default function ClientDashboard() {
     return () => {
       isMounted = false
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []) // Убрали зависимости, чтобы избежать лишних перезагрузок
+  }, [userId, supabase, loadSavedAddresses, loadOrdersWithDrivers])
 
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'searching_courier':
-        return 'Ищем курьера'
-      case 'courier_accepted':
-        return 'Курьер принял заказ'
-      case 'courier_coming':
-        return 'Курьер едет к отправителю'
-      case 'courier_delivering':
-        return 'Курьер едет к получателю'
-      case 'completed':
-        return 'Заказ завершен'
-      case 'cancelled':
-        return 'Отменен'
-      default:
-        return status
-    }
-  }
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'searching_courier':
-        return 'text-yellow-400 bg-yellow-400/20 border-yellow-400/50'
-      case 'courier_accepted':
-        return 'text-orange-400 bg-orange-400/20 border-orange-400/50'
-      case 'courier_coming':
-        return 'text-blue-400 bg-blue-400/20 border-blue-400/50'
-      case 'courier_delivering':
-        return 'text-purple-400 bg-purple-400/20 border-purple-400/50'
-      case 'completed':
-        return 'text-brand-light bg-brand-light/20 border-green-400/50'
-      case 'cancelled':
-        return 'text-red-400 bg-red-400/20 border-red-400/50'
-      default:
-        return 'text-gray-600 bg-gray-400/20 border-gray-400/50'
-    }
-  }
-
-  const shouldBlink = (status: string) => {
-    // Мигают только активные статусы
-    return status === 'searching_courier' || status === 'courier_accepted' || status === 'courier_coming' || status === 'courier_delivering'
-  }
+  const shouldBlink = (status: string) => isActiveOrderStatus(status)
 
   const detectRegionFromAddress = useCallback((addr: string, addressDetails?: any) => {
     if (!addr || !regions.length) return
@@ -386,7 +330,7 @@ export default function ClientDashboard() {
 
   const handleCallDriver = () => {
     if (ordersWithDrivers.length === 0) {
-      alert('У вас нет активных заказов с курьерами')
+      toastError('У вас нет активных заказов с курьерами')
       return
     }
 
@@ -459,10 +403,10 @@ export default function ClientDashboard() {
                         <span className="text-sm text-gray-600">Статус: </span>
                         <span
                           className={`inline-block px-3 py-1 rounded-full text-xs font-semibold border ${
-                            getStatusColor(order.status)
+                            getOrderStatusColor(order.status)
                           } ${shouldBlink(order.status) ? 'animate-blink' : ''}`}
                         >
-                          {getStatusLabel(order.status)}
+                          {getOrderStatusLabel(order.status)}
                         </span>
                       </div>
                       {order.item_type && (
@@ -533,14 +477,14 @@ export default function ClientDashboard() {
                             })
                             const data = await response.json()
                             if (response.ok) {
-                              alert('Заказ успешно отменен')
+                              toastSuccess('Заказ успешно отменен')
                               window.location.reload()
                             } else {
-                              alert(data.error || 'Не удалось отменить заказ')
+                              toastError(data.error || 'Не удалось отменить заказ')
                             }
                           } catch (error) {
                             console.error('Ошибка отмены заказа:', error)
-                            alert('Произошла ошибка при отмене заказа')
+                            toastError('Произошла ошибка при отмене заказа')
                           }
                         }}
                         className="flex-1 bg-red-300 text-gray-900 px-3 py-1.5 rounded text-xs hover:bg-red-400 transition"
@@ -551,7 +495,7 @@ export default function ClientDashboard() {
                   )}
                   {/* Кнопки телефона, сообщения и поделиться для активных заказов */}
                   {order.status !== 'completed' && order.status !== 'cancelled' && (
-                    <ClientOrderActions order={order} userId={currentUserId || ''} />
+                    <ClientOrderActions order={order} userId={userId} />
                   )}
                 </div>
               )

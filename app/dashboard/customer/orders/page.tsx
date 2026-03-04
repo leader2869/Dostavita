@@ -6,15 +6,18 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { formatAddressForOrder } from '@/lib/utils/formatAddress'
 import { formatReadyTime } from '@/lib/utils/formatReadyTime'
+import { getOrderStatusLabel, getOrderStatusColor } from '@/lib/utils/orderStatus'
 import { exportOrdersToExcel } from '@/lib/utils/exportToExcel'
-
-type Period = 'today' | 'week' | 'month' | 'all'
+import { useDateFilter } from '@/hooks/useDateFilter'
+import { toastError } from '@/lib/utils/toast'
+import { useDashboardUser } from '@/contexts/DashboardAuthContext'
 
 export default function CustomerOrdersPage() {
   const router = useRouter()
   const supabase = createClient()
-  
-  const [user, setUser] = useState<any>(null)
+  const { userId, profile } = useDashboardUser()
+  const { period, setPeriod, getDateFilter } = useDateFilter('week')
+
   const [loading, setLoading] = useState(true)
   const [availableOrders, setAvailableOrders] = useState<any[]>([])
   const [activeOrders, setActiveOrders] = useState<any[]>([])
@@ -23,65 +26,14 @@ export default function CustomerOrdersPage() {
   const [drivers, setDrivers] = useState<any[]>([])
   const [assigningDriver, setAssigningDriver] = useState<string | null>(null)
   const [selectedDriverForOrder, setSelectedDriverForOrder] = useState<{ [orderId: string]: string }>({})
-  const [period, setPeriod] = useState<Period>('week')
   const [displayedCompletedOrdersCount, setDisplayedCompletedOrdersCount] = useState(10)
   const [completedFilter, setCompletedFilter] = useState<'all' | 'unpaid' | 'cancelled'>('all')
   const [showActiveOrders, setShowActiveOrders] = useState(false)
   const [showCompletedOrders, setShowCompletedOrders] = useState(true)
 
-  const getDateFilter = useCallback((period: Period) => {
-    const now = new Date()
-    switch (period) {
-      case 'today':
-        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0)
-        const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999)
-        return {
-          start: todayStart.toISOString(),
-          end: todayEnd.toISOString()
-        }
-      case 'week':
-        const weekAgo = new Date(now)
-        weekAgo.setDate(weekAgo.getDate() - 7)
-        weekAgo.setHours(0, 0, 0, 0)
-        const weekEnd = new Date(now)
-        weekEnd.setHours(23, 59, 59, 999)
-        return {
-          start: weekAgo.toISOString(),
-          end: weekEnd.toISOString()
-        }
-      case 'month':
-        const monthAgo = new Date(now)
-        monthAgo.setMonth(monthAgo.getMonth() - 1)
-        monthAgo.setHours(0, 0, 0, 0)
-        const monthEnd = new Date(now)
-        monthEnd.setHours(23, 59, 59, 999)
-        return {
-          start: monthAgo.toISOString(),
-          end: monthEnd.toISOString()
-        }
-      case 'all':
-      default:
-        return { start: null, end: null }
-    }
-  }, [])
-
   const loadData = useCallback(async () => {
     try {
-      const { data: { user: currentUser } } = await supabase.auth.getUser()
-      
-      if (!currentUser) {
-        router.push('/login')
-        return
-      }
-
-      setUser(currentUser)
-
-      // Проверяем роль
-      const { data: profile } = await supabase
-        .rpc('get_user_profile', { user_id: currentUser.id })
-        .single()
-
-      if (!profile || (profile as any).role !== 'customer') {
+      if (profile.role !== 'customer') {
         router.push('/dashboard')
         return
       }
@@ -90,7 +42,7 @@ export default function CustomerOrdersPage() {
       const { data: driversData } = await supabase
         .from('profiles')
         .select('id, full_name, phone')
-        .eq('organization_id', currentUser.id)
+        .eq('organization_id', userId)
         .eq('role', 'driver')
 
       const ids = driversData?.map((d: any) => d.id) || []
@@ -101,7 +53,7 @@ export default function CustomerOrdersPage() {
       const { data: available } = await supabase
         .from('orders')
         .select('*')
-        .eq('customer_id', currentUser.id)
+        .eq('customer_id', userId)
         .eq('status', 'searching_courier')
         .order('created_at', { ascending: false })
 
@@ -134,7 +86,7 @@ export default function CustomerOrdersPage() {
       setActiveOrders(active)
 
       // Получаем завершенные заказы с фильтром по периоду
-      const dateFilter = getDateFilter(period)
+      const dateFilter = getDateFilter()
       
       // Получаем все завершенные заказы всех водителей организации
       let completed: any[] = []
@@ -158,10 +110,6 @@ export default function CustomerOrdersPage() {
           console.error('Ошибка загрузки завершенных заказов:', completedError)
         }
         
-        console.log('Загружено завершенных заказов:', driverCompleted?.length || 0)
-        console.log('ID водителей:', ids)
-        console.log('Фильтр по дате:', dateFilter)
-        
         // Фильтруем на клиенте по дате
         let filteredCompleted = (driverCompleted || []).filter((order: any) => {
           // Если фильтр не задан, показываем все
@@ -181,39 +129,17 @@ export default function CustomerOrdersPage() {
             orderDate = new Date(order.created_at)
           }
           
-          if (!orderDate) {
-            console.log('Заказ без даты:', order.id, order.status)
-            return true
-          }
+          if (!orderDate) return true
           
           const filterStart = dateFilter.start ? new Date(dateFilter.start) : null
           const filterEnd = dateFilter.end ? new Date(dateFilter.end) : null
           
           // Проверяем фильтр по дате
-          if (filterStart) {
-            if (orderDate < filterStart) {
-              console.log('Заказ отфильтрован (раньше начала):', order.id, orderDate, filterStart)
-              return false
-            }
-          }
-          
-          if (filterEnd) {
-            if (orderDate > filterEnd) {
-              console.log('Заказ отфильтрован (позже конца):', order.id, orderDate, filterEnd)
-              return false
-            }
-          }
+          if (filterStart && orderDate < filterStart) return false
+          if (filterEnd && orderDate > filterEnd) return false
           
           return true
         })
-        
-        console.log('Отфильтровано завершенных заказов:', filteredCompleted.length)
-        if (filteredCompleted.length === 0 && (driverCompleted || []).length > 0) {
-          console.log('Пример заказа:', driverCompleted?.[0])
-          console.log('Дата заказа:', driverCompleted?.[0]?.completed_at || driverCompleted?.[0]?.created_at)
-          console.log('Фильтр start:', dateFilter.start)
-          console.log('Фильтр end:', dateFilter.end)
-        }
         
         completed = filteredCompleted.map((order: any) => ({
           ...order,
@@ -242,49 +168,11 @@ export default function CustomerOrdersPage() {
     } finally {
       setLoading(false)
     }
-  }, [supabase, router, period, getDateFilter])
+  }, [supabase, router, userId, profile.role, period, getDateFilter])
 
   useEffect(() => {
     loadData()
   }, [loadData])
-
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'searching_courier':
-        return 'Ищем курьера'
-      case 'courier_accepted':
-        return 'Курьер принял заказ'
-      case 'courier_coming':
-        return 'Курьер едет к отправителю'
-      case 'courier_delivering':
-        return 'Курьер едет к получателю'
-      case 'completed':
-        return 'Заказ завершен'
-      case 'cancelled':
-        return 'Отменен'
-      default:
-        return status
-    }
-  }
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'searching_courier':
-        return 'text-yellow-400 bg-yellow-400/20 border-yellow-400/50'
-      case 'courier_accepted':
-        return 'text-orange-400 bg-orange-400/20 border-orange-400/50'
-      case 'courier_coming':
-        return 'text-blue-400 bg-blue-400/20 border-blue-400/50'
-      case 'courier_delivering':
-        return 'text-purple-400 bg-purple-400/20 border-purple-400/50'
-      case 'completed':
-        return 'text-brand-light bg-brand-light/20 border-green-400/50'
-      case 'cancelled':
-        return 'text-red-400 bg-red-400/20 border-red-400/50'
-      default:
-        return 'text-gray-600 bg-gray-400/20 border-gray-400/50'
-    }
-  }
 
   // Фильтруем завершенные заказы
   const filteredCompletedOrders = completedOrders.filter((order: any) => {
@@ -301,7 +189,9 @@ export default function CustomerOrdersPage() {
   const hasMoreCompleted = displayedCompletedOrdersCount < filteredCompletedOrders.length
 
   const handleExportCompleted = () => {
-    exportOrdersToExcel(filteredCompletedOrders, 'Завершенные заказы')
+    exportOrdersToExcel(filteredCompletedOrders, 'Завершенные заказы', () =>
+          toastError('Нет данных для экспорта')
+        )
   }
 
   const handleAssignDriver = async (orderId: string, driverId: string) => {
@@ -317,7 +207,7 @@ export default function CustomerOrdersPage() {
 
       if (error) {
         console.error('Ошибка назначения водителя:', error)
-        alert('Не удалось назначить водителя. Попробуйте еще раз.')
+        toastError('Не удалось назначить водителя. Попробуйте еще раз.')
         return
       }
 
@@ -331,11 +221,11 @@ export default function CustomerOrdersPage() {
           return newState
         })
       } else {
-        alert('Не удалось назначить водителя. Возможно, заказ уже был принят или водитель недоступен.')
+        toastError('Не удалось назначить водителя. Возможно, заказ уже был принят или водитель недоступен.')
       }
     } catch (err: any) {
       console.error('Ошибка назначения водителя:', err)
-      alert('Произошла ошибка при назначении водителя.')
+      toastError('Произошла ошибка при назначении водителя.')
     } finally {
       setAssigningDriver(null)
     }
@@ -381,10 +271,10 @@ export default function CustomerOrdersPage() {
                           <span className="text-sm text-gray-600">Статус: </span>
                           <span
                             className={`inline-block px-3 py-1 rounded-full text-xs font-semibold border ${
-                              getStatusColor(order.status)
+                              getOrderStatusColor(order.status)
                             }`}
                           >
-                            {getStatusLabel(order.status)}
+                            {getOrderStatusLabel(order.status)}
                           </span>
                         </div>
                         {order.item_type && (
@@ -511,10 +401,10 @@ export default function CustomerOrdersPage() {
                         <span className="text-sm text-gray-600">Статус: </span>
                         <span
                           className={`inline-block px-3 py-1 rounded-full text-xs font-semibold border ${
-                            getStatusColor(order.status)
+                            getOrderStatusColor(order.status)
                           }`}
                         >
-                          {getStatusLabel(order.status)}
+                          {getOrderStatusLabel(order.status)}
                         </span>
                       </div>
                       {order.item_type && (
@@ -740,10 +630,10 @@ export default function CustomerOrdersPage() {
                               <span className="text-sm text-gray-600">Статус: </span>
                               <span
                                 className={`inline-block px-3 py-1 rounded-full text-xs font-semibold border ${
-                                  getStatusColor(order.status)
+                                  getOrderStatusColor(order.status)
                                 }`}
                               >
-                                {getStatusLabel(order.status)}
+                                {getOrderStatusLabel(order.status)}
                               </span>
                             </div>
                             {order.driver_full_name && (

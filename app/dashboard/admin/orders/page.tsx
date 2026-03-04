@@ -2,50 +2,24 @@ import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { BackButton } from '@/components/ui/BackButton'
 import type { User } from '@/lib/types'
+import { getCachedUserAndProfile } from '@/lib/supabase/cached-auth'
 import { formatAddressForOrder } from '@/lib/utils/formatAddress'
-import { ExportOrdersButton } from '@/components/admin/ExportOrdersButton'
+import { ExportOrdersButton } from '@/components/ExportOrdersButton'
 
 export default async function AdminOrdersPage() {
   const supabase = createServerSupabaseClient()
-  
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser()
+  const { user, profile, authError } = await getCachedUserAndProfile()
 
-  if (authError || !user) {
-    redirect('/login')
-  }
-
-  // Используем RPC функцию для получения профиля (обходит RLS)
-  let { data: profile, error: profileError } = await supabase
-    .rpc('get_user_profile', { user_id: user.id })
-    .single()
-  
-  // Fallback на прямой запрос
-  if (profileError || !profile) {
-    const { data: directProfile } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .maybeSingle()
-    
-    if (directProfile) {
-      profile = directProfile as User
-    }
-  }
-
-  if (!profile || ((profile as User).role !== 'admin' && (profile as User).role !== 'superadmin')) {
-    redirect('/dashboard')
-  }
+  if (authError || !user) redirect('/login')
+  if (!profile) redirect('/login')
+  const role = (profile as User).role
+  if (role !== 'admin' && role !== 'superadmin') redirect('/dashboard')
 
   // Получаем все заказы через RPC функцию (обходит RLS)
   let { data: orders, error: ordersError } = await supabase
     .rpc('get_all_orders_for_admin', { limit_count: 100 })
   
-  // Fallback на прямой запрос, если RPC не работает
   if (ordersError || !orders) {
-    console.log('AdminOrdersPage - RPC не сработал, пробуем прямой запрос...')
     const { data: directOrders } = await supabase
       .from('orders')
       .select('*')
@@ -56,8 +30,6 @@ export default async function AdminOrdersPage() {
       orders = directOrders
     }
   }
-  
-  console.log('AdminOrdersPage - Заказов загружено:', orders?.length || 0)
 
   return (
     <div>

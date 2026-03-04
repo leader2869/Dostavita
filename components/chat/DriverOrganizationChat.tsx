@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Image from 'next/image'
+import { toastError } from '@/lib/utils/toast'
+import { MAX_CHAT_PHOTO_SIZE_BYTES } from '@/lib/constants'
 
 interface DriverOrganizationChatProps {
   organizationId: string
@@ -385,7 +387,7 @@ export function DriverOrganizationChat({
       // Удаляем временное сообщение при ошибке
       setMessages(prev => prev.filter(m => m.id !== tempMessage.id))
       setNewMessage(messageText) // Возвращаем текст в поле ввода
-      alert('Не удалось отправить сообщение')
+      toastError('Не удалось отправить сообщение')
     } finally {
       setSending(false)
     }
@@ -393,12 +395,12 @@ export function DriverOrganizationChat({
 
   const handlePhotoUpload = async (file: File) => {
     if (!file.type.startsWith('image/')) {
-      alert('Пожалуйста, выберите изображение')
+      toastError('Пожалуйста, выберите изображение')
       return
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      alert('Размер файла не должен превышать 5 МБ')
+    if (file.size > MAX_CHAT_PHOTO_SIZE_BYTES) {
+      toastError('Размер файла не должен превышать 5 МБ')
       return
     }
 
@@ -463,7 +465,7 @@ export function DriverOrganizationChat({
     } catch (err: any) {
       console.error('Ошибка загрузки фото:', err)
       const errorMessage = err?.message || err?.error?.message || 'Не удалось загрузить фото'
-      alert(`Ошибка загрузки фото: ${errorMessage}`)
+      toastError(`Ошибка загрузки фото: ${errorMessage}`)
     } finally {
       setUploadingPhoto(false)
       if (fileInputRef.current) {

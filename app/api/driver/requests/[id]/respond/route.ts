@@ -1,5 +1,8 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { requireRole } from '@/lib/api/auth'
+import { parseBody } from '@/lib/api/validate'
+import { paramsIdSchema, respondToRequestSchema } from '@/lib/api/validate'
 
 export async function POST(
   request: Request,
@@ -7,47 +10,22 @@ export async function POST(
 ) {
   try {
     const supabase = createServerSupabaseClient()
-    const requestId = params.id
-    const body = await request.json()
-    const { response } = body // 'accepted' или 'rejected'
-
-    if (!requestId || !response) {
+    const paramsResult = paramsIdSchema.safeParse(params)
+    if (!paramsResult.success) {
       return NextResponse.json(
-        { error: 'ID запроса и ответ обязательны' },
+        { error: 'ID запроса обязателен' },
         { status: 400 }
       )
     }
+    const requestId = paramsResult.data.id
 
-    if (response !== 'accepted' && response !== 'rejected') {
-      return NextResponse.json(
-        { error: 'Ответ должен быть "accepted" или "rejected"' },
-        { status: 400 }
-      )
-    }
+    const bodyResult = await parseBody(request, respondToRequestSchema)
+    if (!bodyResult.ok) return bodyResult.response
+    const { response } = bodyResult.data
 
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Не авторизован' },
-        { status: 401 }
-      )
-    }
-
-    // Проверяем, что пользователь - водитель
-    const { data: profile } = await supabase
-      .rpc('get_user_profile', { user_id: user.id })
-      .single()
-
-    if (!profile || (profile as any).role !== 'driver') {
-      return NextResponse.json(
-        { error: 'Доступ запрещен' },
-        { status: 403 }
-      )
-    }
+    const auth = await requireRole(supabase, 'driver')
+    if (!auth.ok) return auth.response
+    const { user } = auth
 
     // Отвечаем на запрос через RPC функцию
     const { data: success, error: respondError } = await supabase

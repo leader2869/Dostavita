@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { toastError } from '@/lib/utils/toast'
 import { OrderChat } from '@/components/chat/OrderChat'
 import { useOrderUnreadMessagesCount } from '@/hooks/useOrderUnreadMessagesCount'
 
@@ -221,7 +222,7 @@ export function OrderActions({ order, onStopPropagation, vertical = false }: Ord
     if (selectedNavType === 'full') {
       // Весь маршрут: текущее местоположение → точка А (промежуточная) → точка Б (конечная)
       if (!driverLocation || !pickupCoords || !deliveryCoords) {
-        alert('Не все координаты доступны для построения полного маршрута')
+        toastError('Не все координаты доступны для построения полного маршрута')
         setShowNavAppMenu(false)
         setSelectedNavType(null)
         return
@@ -257,7 +258,7 @@ export function OrderActions({ order, onStopPropagation, vertical = false }: Ord
       const coords = selectedNavType === 'pickup' ? pickupCoords : deliveryCoords
       
       if (!coords) {
-        alert('Координаты недоступны')
+        toastError('Координаты недоступны')
         setShowNavAppMenu(false)
         setSelectedNavType(null)
         return

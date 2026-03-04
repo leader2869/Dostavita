@@ -2,49 +2,20 @@ import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { BackButton } from '@/components/ui/BackButton'
 import type { User } from '@/lib/types'
+import { getCachedUserAndProfile } from '@/lib/supabase/cached-auth'
 
 export default async function AdminTariffsPage() {
   const supabase = createServerSupabaseClient()
-  
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser()
+  const { user, profile, authError } = await getCachedUserAndProfile()
 
-  if (authError || !user) {
-    redirect('/login')
-  }
-
-  // Используем RPC функцию для получения профиля (обходит RLS)
-  let { data: profile, error: profileError } = await supabase
-    .rpc('get_user_profile', { user_id: user.id })
-    .single()
-  
-  // Fallback на прямой запрос
-  if (profileError || !profile) {
-    const { data: directProfile } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .maybeSingle()
-    
-    if (directProfile) {
-      profile = directProfile as User
-    }
-  }
-
-  if (!profile || (profile as User).role !== 'superadmin') {
-    redirect('/dashboard')
-  }
+  if (authError || !user) redirect('/login')
+  if (!profile || (profile as User).role !== 'superadmin') redirect('/dashboard')
 
   // Получаем все регионы через RPC функцию (обходит RLS)
-  console.log('AdminTariffsPage - Загружаем регионы...')
   let { data: regions, error: regionsError } = await supabase
     .rpc('get_all_regions')
   
-  // Fallback на прямой запрос, если RPC не работает
   if (regionsError || !regions) {
-    console.log('AdminTariffsPage - RPC не сработал, пробуем прямой запрос...')
     const { data: directRegions, error: directError } = await supabase
       .from('regions')
       .select('*')
@@ -55,12 +26,6 @@ export default async function AdminTariffsPage() {
       regionsError = null
     }
   }
-  
-  console.log('AdminTariffsPage - Результат загрузки регионов:', {
-    count: regions?.length || 0,
-    error: regionsError?.message,
-    regions: regions
-  })
 
   return (
     <div>

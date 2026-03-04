@@ -3,31 +3,19 @@ import { redirect, notFound } from 'next/navigation'
 import { BackButton } from '@/components/ui/BackButton'
 import { formatDistanceToNowStrict } from 'date-fns'
 import { ru } from 'date-fns/locale'
+import { getCachedUserAndProfile } from '@/lib/supabase/cached-auth'
 import { DriverLocationMapWrapper } from '@/components/map/DriverLocationMapWrapper'
 import { OrderStatusRealtime } from '@/components/customer/OrderStatusRealtime'
 import { formatAddressForOrder } from '@/lib/utils/formatAddress'
+import { getOrderStatusLabel, getOrderStatusColor } from '@/lib/utils/orderStatus'
 
 export default async function CustomerOrderDetailsPage({ params }: { params: { id: string } }) {
   const orderId = params.id
   const supabase = createServerSupabaseClient()
-  
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser()
+  const { user, profile, authError } = await getCachedUserAndProfile()
 
-  if (authError || !user) {
-    redirect('/login')
-  }
-
-  // Проверяем роль
-  const { data: profile } = await supabase
-    .rpc('get_user_profile', { user_id: user.id })
-    .single()
-
-  if (!profile || (profile as any).role !== 'customer') {
-    redirect('/dashboard')
-  }
+  if (authError || !user) redirect('/login')
+  if (!profile || (profile as { role: string }).role !== 'customer') redirect('/dashboard')
 
   // Получаем заказ напрямую из таблицы orders
   // Сначала пытаемся загрузить заказ напрямую
@@ -70,44 +58,6 @@ export default async function CustomerOrderDetailsPage({ params }: { params: { i
     .from('order_rejections')
     .select('*')
     .eq('order_id', orderId)
-
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'searching_courier':
-        return 'Ищем курьера'
-      case 'courier_accepted':
-        return 'Курьер принял заказ'
-      case 'courier_coming':
-        return 'Курьер едет к отправителю'
-      case 'courier_delivering':
-        return 'Курьер едет к получателю'
-      case 'completed':
-        return 'Заказ завершен'
-      case 'cancelled':
-        return 'Отменен'
-      default:
-        return status
-    }
-  }
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'searching_courier':
-        return 'text-yellow-400 bg-yellow-400/20 border-yellow-400/50'
-      case 'courier_accepted':
-        return 'text-orange-400 bg-orange-400/20 border-orange-400/50'
-      case 'courier_coming':
-        return 'text-blue-400 bg-blue-400/20 border-blue-400/50'
-      case 'courier_delivering':
-        return 'text-purple-400 bg-purple-400/20 border-purple-400/50'
-      case 'completed':
-        return 'text-brand-light bg-brand-light/20 border-green-400/50'
-      case 'cancelled':
-        return 'text-red-400 bg-red-400/20 border-red-400/50'
-      default:
-        return 'text-gray-600 bg-gray-400/20 border-gray-400/50'
-    }
-  }
 
   const getItemTypeLabel = (itemType: string) => {
     switch (itemType) {

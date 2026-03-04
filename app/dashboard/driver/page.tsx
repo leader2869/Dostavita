@@ -2,6 +2,7 @@ import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import type { User } from '@/lib/types'
+import { getCachedUserAndProfile } from '@/lib/supabase/cached-auth'
 import { AvailableOrdersList } from '@/components/driver/AvailableOrdersList'
 import { DriverLocationTracker } from '@/components/driver/DriverLocationTracker'
 import { DriverPushNotifications } from '@/components/driver/DriverPushNotifications'
@@ -10,56 +11,16 @@ import { formatAddressForOrder } from '@/lib/utils/formatAddress'
 import { ORDER_STATUS_LABELS } from '@/lib/constants'
 import { formatReadyTime } from '@/lib/utils/formatReadyTime'
 
-// Отключаем кеширование, чтобы данные всегда были актуальными
 export const dynamic = 'force-dynamic'
 
 export default async function DriverDashboard() {
   const supabase = createServerSupabaseClient()
-  
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser()
+  const { user, profile, authError } = await getCachedUserAndProfile()
 
-  if (authError || !user) {
-    redirect('/login')
-  }
+  if (authError || !user) redirect('/login')
+  if (!profile || (profile as User).role !== 'driver') redirect('/dashboard')
 
-  // Используем RPC функцию для получения профиля (обходит RLS)
-  let { data: profile, error: profileError } = await supabase
-    .rpc('get_user_profile', { user_id: user.id })
-    .single()
-  
-  // Fallback на прямой запрос
-  if (profileError || !profile) {
-    const { data: directProfile } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .maybeSingle()
-    
-    if (directProfile) {
-      profile = directProfile as User
-    }
-  }
-
-  // Если organization_id не в профиле, получаем его отдельно
-  let organizationId = (profile as any)?.organization_id
-  if (!organizationId) {
-    const { data: orgData } = await supabase
-      .from('profiles')
-      .select('organization_id')
-      .eq('id', user.id)
-      .single()
-    
-    if (orgData) {
-      organizationId = orgData.organization_id
-    }
-  }
-
-  if (!profile || (profile as User).role !== 'driver') {
-    redirect('/dashboard')
-  }
+  const organizationId = (profile as { organization_id?: string }).organization_id
 
          // Получаем доступные заказы (все заказы со статусом "ищем курьера")
          // Включаем заказы, которые были отменены, но сейчас снова активны (статус searching_courier)
@@ -71,76 +32,54 @@ export default async function DriverDashboard() {
            .limit(10)
 
   // Получаем заказы, от которых водитель отказался (скрытые заказы)
-  // Это заказы со статусом searching_courier, которые есть в order_rejections для этого водителя
-  console.log('Driver Dashboard - Запрос скрытых заказов для user.id:', user.id)
-  
   const { data: rejectedOrders, error: rejectedOrdersError } = await supabase
     .rpc('get_driver_rejected_orders', { p_driver_user_id: user.id })
 
   if (rejectedOrdersError) {
     console.error('Ошибка загрузки скрытых заказов:', rejectedOrdersError)
-    console.error('Ошибка детали:', JSON.stringify(rejectedOrdersError, null, 2))
   }
   
-  console.log('Driver Dashboard - User ID:', user.id)
-  console.log('Driver Dashboard - Rejected orders (raw):', rejectedOrders)
-  console.log('Driver Dashboard - Rejected orders count:', rejectedOrders?.length || 0)
-  console.log('Driver Dashboard - Rejected orders is array:', Array.isArray(rejectedOrders))
-  
-  // Проверяем напрямую через запрос для сравнения
   const { data: directRejections, error: directRejectionsError } = await supabase
     .from('order_rejections')
     .select('order_id')
     .eq('driver_user_id', user.id)
   
-  console.log('Driver Dashboard - Direct rejections count:', directRejections?.length || 0)
-  console.log('Driver Dashboard - Direct rejections:', directRejections)
   if (directRejectionsError) {
-    console.error('Driver Dashboard - Direct rejections error:', directRejectionsError)
+    console.error('Ошибка загрузки отказов (direct):', directRejectionsError)
   }
   
-  // Если есть отказы, проверяем заказы
   if (directRejections && directRejections.length > 0) {
     const rejectionOrderIds = directRejections.map(r => r.order_id)
-    console.log('Driver Dashboard - Rejection order IDs:', rejectionOrderIds)
     
-           const { data: rejectedOrdersDirect, error: rejectedOrdersDirectError } = await supabase
+    const { data: rejectedOrdersDirect, error: rejectedOrdersDirectError } = await supabase
              .from('orders')
              .select('id, order_number, status, pickup_address, delivery_address, final_price, item_type, description, created_at, cancelled_at, ready_at')
              .in('id', rejectionOrderIds)
              .eq('status', 'searching_courier')
     
-    console.log('Driver Dashboard - Direct rejected orders (searching_courier):', rejectedOrdersDirect)
-    console.log('Driver Dashboard - Direct rejected orders count:', rejectedOrdersDirect?.length || 0)
     if (rejectedOrdersDirectError) {
-      console.error('Driver Dashboard - Direct rejected orders error:', rejectedOrdersDirectError)
+      console.error('Ошибка загрузки отклонённых заказов:', rejectedOrdersDirectError)
     }
   }
   
-  // Для обратной совместимости используем rejectedOrders как cancelledOrders (скрытые заказы)
   let cancelledOrders = rejectedOrders || []
   
-  // Fallback: если RPC функция не вернула данные, но есть прямые отказы, используем прямой запрос
   if ((!cancelledOrders || cancelledOrders.length === 0) && directRejections && directRejections.length > 0) {
-    console.log('Driver Dashboard - RPC функция не вернула данные, используем fallback')
     const rejectionOrderIds = directRejections.map(r => r.order_id)
-           const { data: fallbackOrders, error: fallbackError } = await supabase
+    const { data: fallbackOrders, error: fallbackError } = await supabase
              .from('orders')
              .select('id, order_number, pickup_address, delivery_address, final_price, item_type, description, created_at, cancelled_at, status, ready_at')
              .in('id', rejectionOrderIds)
              .eq('status', 'searching_courier')
     
     if (!fallbackError && fallbackOrders) {
-      console.log('Driver Dashboard - Fallback orders found:', fallbackOrders.length)
       cancelledOrders = fallbackOrders
     } else if (fallbackError) {
-      console.error('Driver Dashboard - Fallback error:', fallbackError)
+      console.error('Ошибка fallback загрузки отклонённых заказов:', fallbackError)
     }
   }
   
-  // Дополнительная проверка: если функция вернула null или undefined, используем пустой массив
   if (!cancelledOrders) {
-    console.warn('Driver Dashboard - cancelledOrders is null/undefined, using empty array')
     cancelledOrders = []
   }
 
@@ -158,11 +97,6 @@ export default async function DriverDashboard() {
   const rejectedOrderIds = new Set(rejections?.map(r => r.order_id) || [])
   const filteredOrders = availableOrders?.filter(order => !rejectedOrderIds.has(order.id)) || []
 
-  console.log('Driver Dashboard - Rejections count:', rejections?.length || 0)
-  console.log('Driver Dashboard - Rejected order IDs:', Array.from(rejectedOrderIds))
-  console.log('Driver Dashboard - Available orders before filter:', availableOrders?.length || 0)
-  console.log('Driver Dashboard - Filtered orders after rejections:', filteredOrders?.length || 0)
-
   // Получаем активные заказы водителя (где executor_user_id равен ID текущего пользователя)
   // Пробуем сначала без фильтра по статусу, чтобы увидеть все заказы
   const { data: allMyOrders, error: allOrdersError } = await supabase
@@ -172,26 +106,11 @@ export default async function DriverDashboard() {
     .order('created_at', { ascending: false })
     .limit(20)
 
-  console.log('Driver Dashboard - User ID:', user.id)
-  console.log('Driver Dashboard - All My Orders (no status filter):', allMyOrders?.length || 0, allMyOrders)
   if (allOrdersError) {
-    console.error('Ошибка загрузки всех заказов водителя:', allOrdersError)
+    console.error('Ошибка загрузки заказов водителя:', allOrdersError)
   }
 
-  // Проверяем все заказы с executor_user_id (без фильтра по статусу) для отладки
-  const { data: allOrdersDebug, error: debugError } = await supabase
-    .from('orders')
-    .select('id, executor_user_id, status, created_at')
-    .eq('executor_user_id', user.id)
-    .order('created_at', { ascending: false })
-    .limit(10)
-  
-  console.log('Driver Dashboard - All orders with executor_user_id (for debugging):', allOrdersDebug?.length || 0)
-
-  // Фильтруем только активные заказы, которые водитель выполняет
-  // Статусы: courier_coming (едет за посылкой) и courier_delivering (доставляет заказ)
-  // НЕ включаем searching_courier - это статус для доступных заказов, а не для выполняемых
-         const { data: myOrders, error: myOrdersError } = await supabase
+  const { data: myOrders, error: myOrdersError } = await supabase
            .from('orders')
            .select('id, order_number, pickup_address, delivery_address, final_price, item_type, description, created_at, cancelled_at, status, customer_id, client_id, executor_user_id, sender_phone, recipient_phone, pickup_coordinates, delivery_coordinates, ready_at')
            .eq('executor_user_id', user.id)
@@ -199,18 +118,9 @@ export default async function DriverDashboard() {
            .order('created_at', { ascending: false })
            .limit(10)
 
-  // Логирование для отладки
   if (myOrdersError) {
     console.error('Ошибка загрузки активных заказов водителя:', myOrdersError)
   }
-  console.log('Driver Dashboard - User ID:', user.id)
-  console.log('Driver Dashboard - Active Orders count:', myOrders?.length || 0)
-  console.log('Driver Dashboard - Active Orders:', myOrders?.map((o: any) => ({
-    id: o.id?.slice(0, 8),
-    status: o.status,
-    executor_user_id: o.executor_user_id,
-    created_at: o.created_at
-  })))
 
   return (
     <>

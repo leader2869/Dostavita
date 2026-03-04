@@ -1,22 +1,19 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
-import { NextResponse } from 'next/server'
-import { NextRequest } from 'next/server'
+import { getAuthUser } from '@/lib/api/auth'
+import { parseBody } from '@/lib/api/validate'
+import { pushRegisterSchema } from '@/lib/api/validate'
+import { apiSuccess, apiError, maskInternalMessage } from '@/lib/api/response'
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
     const supabase = createServerSupabaseClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const auth = await getAuthUser(supabase)
+    if (!auth.ok) return auth.response
+    const { user } = auth
 
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Не авторизован' }, { status: 401 })
-    }
-
-    const body = await request.json()
-    const { subscription } = body
-
-    if (!subscription) {
-      return NextResponse.json({ error: 'Подписка не предоставлена' }, { status: 400 })
-    }
+    const bodyResult = await parseBody(request, pushRegisterSchema)
+    if (!bodyResult.ok) return bodyResult.response
+    const { subscription } = bodyResult.data
 
     // Сохраняем подписку в базе данных
     // Проверяем, существует ли уже подписка для этого пользователя и endpoint
@@ -29,11 +26,10 @@ export async function POST(request: NextRequest) {
 
     if (fetchError) {
       console.error('Ошибка получения существующей подписки:', fetchError)
-      return NextResponse.json({ error: 'Ошибка базы данных' }, { status: 500 })
+      return apiError(maskInternalMessage(fetchError.message), 500)
     }
 
     if (existingSubscription) {
-      // Если подписка уже существует, обновляем её
       const { error: updateError } = await supabase
         .from('push_subscriptions')
         .update({
@@ -45,10 +41,9 @@ export async function POST(request: NextRequest) {
 
       if (updateError) {
         console.error('Ошибка обновления push-подписки:', updateError)
-        return NextResponse.json({ error: 'Ошибка обновления подписки' }, { status: 500 })
+        return apiError(maskInternalMessage(updateError.message), 500)
       }
     } else {
-      // Если подписки нет, создаем новую
       const { error: insertError } = await supabase
         .from('push_subscriptions')
         .insert({
@@ -60,14 +55,15 @@ export async function POST(request: NextRequest) {
 
       if (insertError) {
         console.error('Ошибка сохранения push-подписки:', insertError)
-        return NextResponse.json({ error: 'Ошибка сохранения подписки' }, { status: 500 })
+        return apiError(maskInternalMessage(insertError.message), 500)
       }
     }
 
-    return NextResponse.json({ success: true })
-  } catch (error: any) {
+    return apiSuccess()
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Внутренняя ошибка сервера'
     console.error('Ошибка регистрации push-подписки:', error)
-    return NextResponse.json({ error: error.message || 'Внутренняя ошибка сервера' }, { status: 500 })
+    return apiError(maskInternalMessage(message), 500)
   }
 }
 

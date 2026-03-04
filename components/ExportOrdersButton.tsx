@@ -1,16 +1,27 @@
 'use client'
 
 import { exportOrdersToExcel } from '@/lib/utils/exportToExcel'
+import { toastError } from '@/lib/utils/toast'
 
 interface ExportOrdersButtonProps {
-  orders: any[]
+  orders: unknown[]
+  /** Имя файла. Если не задано, используется defaultFilenamePrefix + дата */
   filename?: string
+  /** Префикс имени файла по умолчанию (дата подставится автоматически) */
+  defaultFilenamePrefix?: string
 }
 
-export function ExportOrdersButton({ orders, filename }: ExportOrdersButtonProps) {
+const DEFAULT_PREFIX = 'Заказы_'
+
+export function ExportOrdersButton({
+  orders,
+  filename,
+  defaultFilenamePrefix = DEFAULT_PREFIX,
+}: ExportOrdersButtonProps) {
   const handleExport = () => {
-    const exportFilename = filename || `Заказы_${new Date().toISOString().split('T')[0]}`
-    exportOrdersToExcel(orders, exportFilename)
+    const date = new Date().toISOString().split('T')[0]
+    const exportFilename = filename ?? `${defaultFilenamePrefix}${date}`
+    exportOrdersToExcel(orders, exportFilename, () => toastError('Нет данных для экспорта'))
   }
 
   return (
@@ -26,4 +37,3 @@ export function ExportOrdersButton({ orders, filename }: ExportOrdersButtonProps
     </button>
   )
 }
-

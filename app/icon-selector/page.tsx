@@ -460,11 +460,6 @@ export default function IconSelectorPage() {
 
   const handleSelect = (id: number) => {
     setSelectedIcon(id)
-    const icon = carIcons.find(i => i.id === id)
-    if (icon) {
-      console.log('Выбрана иконка:', icon.name)
-      console.log('SVG код:', icon.svg)
-    }
   }
 
   return (

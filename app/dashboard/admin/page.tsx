@@ -1,43 +1,20 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import type { User } from '@/lib/types'
+import { getCachedUserAndProfile } from '@/lib/supabase/cached-auth'
 import { formatDistanceToNow } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { formatAddressForOrder } from '@/lib/utils/formatAddress'
+import { getOrderStatusLabel } from '@/lib/utils/orderStatus'
 
 export default async function AdminDashboard() {
   const supabase = createServerSupabaseClient()
-  
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser()
+  const { user, profile, authError } = await getCachedUserAndProfile()
 
-  if (authError || !user) {
-    redirect('/login')
-  }
-
-  // Используем RPC функцию для получения профиля (обходит RLS)
-  let { data: profile, error: profileError } = await supabase
-    .rpc('get_user_profile', { user_id: user.id })
-    .single()
-  
-  // Fallback на прямой запрос
-  if (profileError || !profile) {
-    const { data: directProfile } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .maybeSingle()
-    
-    if (directProfile) {
-      profile = directProfile as User
-    }
-  }
-
-  if (!profile || ((profile as User).role !== 'admin' && (profile as User).role !== 'superadmin')) {
-    redirect('/dashboard')
-  }
+  if (authError || !user) redirect('/login')
+  if (!profile) redirect('/login')
+  const role = (profile as User).role
+  if (role !== 'admin' && role !== 'superadmin') redirect('/dashboard')
 
   // Получаем статистику через RPC функцию (обходит RLS)
   const { data: stats, error: statsError } = await supabase
@@ -50,8 +27,6 @@ export default async function AdminDashboard() {
   let ordersCount = (stats as { orders_count?: number } | null)?.orders_count || 0
   
   if (statsError || !stats) {
-    console.log('AdminDashboard - RPC не сработал, пробуем прямые запросы...')
-    
     const { count: ordersCountDirect } = await supabase
       .from('orders')
       .select('*', { count: 'exact', head: true })
@@ -68,13 +43,6 @@ export default async function AdminDashboard() {
     if (usersCountDirect !== null) usersCount = usersCountDirect
     if (driversCountDirect !== null) driversCount = driversCountDirect
   }
-  
-  console.log('AdminDashboard - Статистика:', {
-    users: usersCount,
-    drivers: driversCount,
-    orders: ordersCount,
-    error: statsError?.message
-  })
 
   // Получаем счетчики заказов
   // 1. Активные заказы (searching_courier, courier_coming, courier_delivering)
@@ -153,9 +121,7 @@ export default async function AdminDashboard() {
     .order('created_at', { ascending: true })
     .limit(20)
   
-  // Fallback, если прямой запрос не работает
   if (activeOrdersError || !activeOrders) {
-    console.log('AdminDashboard - Прямой запрос активных заказов не сработал, пробуем RPC...')
     const { data: allOrders } = await supabase
       .rpc('get_all_orders_for_admin', { limit_count: 100 })
     
@@ -226,19 +192,19 @@ export default async function AdminDashboard() {
               
               if (order.status === 'searching_courier') {
                 statusTime = new Date(order.created_at)
-                statusLabel = 'Ищем курьера'
+                statusLabel = getOrderStatusLabel(order.status)
               } else if (order.status === 'courier_accepted') {
                 statusTime = order.accepted_at ? new Date(order.accepted_at) : new Date(order.created_at)
-                statusLabel = 'Курьер принял заказ'
+                statusLabel = getOrderStatusLabel(order.status)
               } else if (order.status === 'courier_coming') {
                 statusTime = order.accepted_at ? new Date(order.accepted_at) : new Date(order.created_at)
-                statusLabel = 'Курьер едет к отправителю'
+                statusLabel = getOrderStatusLabel(order.status)
               } else if (order.status === 'courier_delivering') {
                 statusTime = order.picked_up_at ? new Date(order.picked_up_at) : 
                             order.started_delivery_at ? new Date(order.started_delivery_at) :
                             order.accepted_at ? new Date(order.accepted_at) : 
                             new Date(order.created_at)
-                statusLabel = 'Курьер едет к получателю'
+                statusLabel = getOrderStatusLabel(order.status)
               }
 
               const timeAgo = statusTime ? formatDistanceToNow(statusTime, {
@@ -283,15 +249,7 @@ export default async function AdminDashboard() {
                         б) {formatAddressForOrder(order.delivery_address)}
                       </p>
                       <p className="text-sm text-gray-600 mt-1">
-                        Статус: {
-                          order.status === 'searching_courier' ? 'Ищем курьера' :
-                          order.status === 'courier_accepted' ? 'Курьер принял заказ' :
-                          order.status === 'courier_coming' ? 'Курьер едет к отправителю' :
-                          order.status === 'courier_delivering' ? 'Курьер едет к получателю' :
-                          order.status === 'completed' ? 'Заказ завершен' :
-                          order.status === 'cancelled' ? 'Отменен' :
-                          order.status
-                        }
+                        Статус: {getOrderStatusLabel(order.status)}
                       </p>
                     </div>
                     <div className="text-right ml-4">

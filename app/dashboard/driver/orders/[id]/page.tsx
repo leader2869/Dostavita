@@ -52,12 +52,6 @@ export default function OrderDetailsPage() {
         throw new Error('Заказ не найден или не имеет ID')
       }
       
-      // Логируем для отладки
-      console.log('=== Order loaded ===')
-      console.log('Order ID:', data.id)
-      console.log('Order ID type:', typeof data.id)
-      console.log('Order data:', data)
-      
       setOrder(data)
     } catch (err: any) {
       setError(err.message)
@@ -117,26 +111,10 @@ export default function OrderDetailsPage() {
         .eq('id', orderId)
         .single()
       
-      console.log('=== After pickup_order ===')
-      console.log('orderData:', orderData)
-      console.log('orderError:', orderError)
-      console.log('is_paid value:', orderData?.is_paid)
-      console.log('is_paid type:', typeof orderData?.is_paid)
-      console.log('is_paid === false:', orderData?.is_paid === false)
-      console.log('is_paid === null:', orderData?.is_paid === null)
-      console.log('Current order state:', order)
-      console.log('Current order.id:', order?.id)
-      
-      // Модальное окно открывается, если оплата еще не обработана (false или null)
       const shouldOpen = orderData && (orderData.is_paid === false || orderData.is_paid === null)
-      console.log('shouldOpen:', shouldOpen)
       
       if (shouldOpen) {
-        console.log('✅ Opening payment modal')
-        // Убеждаемся, что order.id существует и валиден перед открытием модального окна
         if (!order || !order.id || String(order.id).trim() === '0') {
-          console.error('❌ Cannot open payment modal - order or order.id is missing or invalid')
-          console.error('Current order state:', order)
           // Перезагружаем заказ еще раз
           await loadOrder()
           // Проверяем еще раз после перезагрузки
@@ -146,14 +124,8 @@ export default function OrderDetailsPage() {
             setError('Ошибка: Не удалось загрузить данные заказа. Пожалуйста, обновите страницу.')
           }
         } else {
-          console.log('✅ Order ID is valid:', order.id)
           setShowPaymentModal(true)
         }
-      } else {
-        console.log('❌ Payment modal NOT opened')
-        console.log('  - orderData exists:', !!orderData)
-        console.log('  - is_paid value:', orderData?.is_paid)
-        console.log('  - is_paid type:', typeof orderData?.is_paid)
       }
     } catch (err: any) {
       setError(err.message)
@@ -186,7 +158,6 @@ export default function OrderDetailsPage() {
         
         // Если нет ни оплаты, ни receivables - показываем модальное окно
         if (!receivableCheck) {
-          console.log('⚠️ Заказ не оплачен и нет receivables. Показываем модальное окно оплаты.')
           if (order && order.id && String(order.id).trim() !== '0') {
             setShowPaymentModal(true)
             setProcessing(false)
@@ -216,7 +187,6 @@ export default function OrderDetailsPage() {
         if (data.success === false) {
           // Если требуется обработка оплаты, показываем модальное окно
           if (data.error === 'payment_required') {
-            console.log('⚠️ Требуется обработка оплаты. Показываем модальное окно.')
             if (order && order.id && String(order.id).trim() !== '0') {
               setShowPaymentModal(true)
               setProcessing(false)
@@ -364,17 +334,9 @@ export default function OrderDetailsPage() {
   }, [isSwiping, swipeStartX, swipeProgress, hasNextStatus, processing])
 
   const handlePaymentSuccess = async () => {
-    console.log('=== handlePaymentSuccess called ===')
-    // Закрываем модальное окно
     setShowPaymentModal(false)
-    
-    // Небольшая задержка для обновления данных в базе
     await new Promise(resolve => setTimeout(resolve, 500))
-    
-    // Перезагружаем заказ, чтобы получить обновленный is_paid
     await loadOrder()
-    console.log('Order reloaded after payment')
-    // Остаемся на странице деталей заказа
   }
 
   if (loading) {

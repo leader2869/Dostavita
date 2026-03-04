@@ -71,24 +71,19 @@ export function AddressAutocomplete({
         query = `${searchQuery}, ${filterByRegion}`
       }
       
-      console.log('🔍 AddressAutocomplete: Searching for:', query)
       const apiUrl = `/api/nominatim/search?q=${encodeURIComponent(query)}`
-      console.log('🔍 AddressAutocomplete: API URL:', apiUrl)
-      
       const response = await fetch(apiUrl)
-      
-      console.log('📡 AddressAutocomplete: Response status:', response.status, response.statusText)
-      
+
       if (!response.ok) {
-        const errorText = await response.text()
-        console.error('❌ AddressAutocomplete: API error:', response.status, errorText)
+        if (process.env.NODE_ENV === 'development') {
+          const errorText = await response.text()
+          console.error('AddressAutocomplete API error:', response.status, errorText)
+        }
         throw new Error('Ошибка поиска адреса')
       }
 
       const data = await response.json()
-      console.log('✅ AddressAutocomplete: Received data:', data)
-      let results = data.results || []
-      console.log('✅ AddressAutocomplete: Results count:', results.length)
+      let results = data.data?.results ?? data.results ?? []
       
       // Дополнительная фильтрация по региону, если указан
       if (filterByRegion) {

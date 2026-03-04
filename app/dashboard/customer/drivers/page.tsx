@@ -3,14 +3,15 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { useDashboardUser } from '@/contexts/DashboardAuthContext'
 import { DriverOrganizationChatButton } from '@/components/chat/DriverOrganizationChatButton'
 import { DriverLocationMap } from '@/components/map/DriverLocationMap'
+import { toastError, toastSuccess } from '@/lib/utils/toast'
 
 export default function CustomerDriversPage() {
   const router = useRouter()
   const supabase = createClient()
-  
-  const [user, setUser] = useState<any>(null)
+  const { userId, profile } = useDashboardUser()
   const [drivers, setDrivers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [showAddModal, setShowAddModal] = useState(false)
@@ -42,28 +43,13 @@ export default function CustomerDriversPage() {
 
   const loadDrivers = useCallback(async () => {
     try {
-      const { data: { user: currentUser } } = await supabase.auth.getUser()
-      
-      if (!currentUser) {
-        router.push('/login')
-        return
-      }
-
-      setUser(currentUser)
-
-      // Проверяем роль
-      const { data: profile } = await supabase
-        .rpc('get_user_profile', { user_id: currentUser.id })
-        .single()
-
-      if (!profile || (profile as any).role !== 'customer') {
+      if (profile.role !== 'customer') {
         router.push('/dashboard')
         return
       }
 
-      // Получаем водителей организации
       const { data: driversData, error: driversError } = await supabase
-        .rpc('get_organization_drivers', { organization_user_id: currentUser.id })
+        .rpc('get_organization_drivers', { organization_user_id: userId })
 
       if (driversError) {
         console.error('Ошибка загрузки водителей:', driversError)
@@ -77,7 +63,7 @@ export default function CustomerDriversPage() {
     } finally {
       setLoading(false)
     }
-  }, [supabase, router])
+  }, [supabase, router, userId, profile.role])
 
   useEffect(() => {
     loadDrivers()
@@ -206,7 +192,7 @@ export default function CustomerDriversPage() {
       setShowAddModal(false)
       setSearchQuery('')
       setSearchResults([])
-      alert('Запрос на привязку водителя успешно отправлен. Водитель получит уведомление.')
+      toastSuccess('Запрос на привязку водителя успешно отправлен. Водитель получит уведомление.')
     } catch (err: any) {
       setError(err.message)
     } finally {
@@ -242,7 +228,7 @@ export default function CustomerDriversPage() {
 
       if (!response.ok) {
         if (data.requires_manual_registration) {
-          alert('Создание пользователей через API недоступно. Попросите водителя зарегистрироваться самостоятельно, а затем отправьте ему запрос на привязку.')
+          toastError('Создание пользователей через API недоступно. Попросите водителя зарегистрироваться самостоятельно, а затем отправьте ему запрос на привязку.')
         }
         throw new Error(data.error || 'Ошибка создания водителя')
       }
@@ -260,7 +246,7 @@ export default function CustomerDriversPage() {
       setNewDriverVehicleModel('')
       setNewDriverVehicleNumber('')
       setNewDriverLicenseNumber('')
-      alert('Аккаунт водителя успешно создан и привязан к организации')
+      toastSuccess('Аккаунт водителя успешно создан и привязан к организации')
     } catch (err: any) {
       setError(err.message)
     } finally {
@@ -292,7 +278,7 @@ export default function CustomerDriversPage() {
 
       // Обновляем список водителей
       await loadDrivers()
-      alert('Водитель успешно отвязан от организации')
+      toastSuccess('Водитель успешно отвязан от организации')
     } catch (err: any) {
       setError(err.message)
     }
@@ -324,16 +310,14 @@ export default function CustomerDriversPage() {
             >
               Найти водителя
             </button>
-            {user && (
-              <DriverOrganizationChatButton
-                organizationId={user.id}
+            <DriverOrganizationChatButton
+                organizationId={userId}
                 driverId={null}
-                currentUserId={user.id}
+                currentUserId={userId}
                 currentUserRole="customer"
                 className=""
                 showLabel={true}
               />
-            )}
           </div>
         </div>
       </div>
@@ -408,16 +392,14 @@ export default function CustomerDriversPage() {
                   >
                     Отследить
                   </button>
-                  {user && (
-                    <DriverOrganizationChatButton
-                      organizationId={user.id}
-                      driverId={driver.id}
-                      currentUserId={user.id}
-                      currentUserRole="customer"
-                      className="px-3 py-2 text-sm"
-                      showLabel={false}
-                    />
-                  )}
+                  <DriverOrganizationChatButton
+                    organizationId={userId}
+                    driverId={driver.id}
+                    currentUserId={userId}
+                    currentUserRole="customer"
+                    className="px-3 py-2 text-sm"
+                    showLabel={false}
+                  />
                   <button
                     onClick={() => handleDetachDriver(driver.id)}
                     className="px-3 py-2 bg-red-300 text-gray-900 rounded text-sm hover:bg-red-400 transition"

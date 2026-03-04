@@ -1,26 +1,32 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-
-type Period = 'today' | 'yesterday' | 'week' | 'custom'
+import { useDateFilter } from '@/hooks/useDateFilter'
+import { fetchOrCreateBalance } from '@/lib/utils/balance'
+import { toastError, toastSuccess } from '@/lib/utils/toast'
+import { useDashboardUser } from '@/contexts/DashboardAuthContext'
 
 export default function DriverFinancePage() {
-  const router = useRouter()
   const supabase = createClient()
-  
-  const [user, setUser] = useState<any>(null)
-  const [profile, setProfile] = useState<any>(null)
+  const { userId, profile } = useDashboardUser()
+  const organizationId = (profile as { organization_id?: string }).organization_id
+  const {
+    period,
+    setPeriod,
+    customStartDate,
+    setCustomStartDate,
+    customEndDate,
+    setCustomEndDate,
+    getDateFilter,
+  } = useDateFilter('week')
+
   const [balance, setBalance] = useState<any>(null)
   const [transactions, setTransactions] = useState<any[]>([])
   const [completedOrders, setCompletedOrders] = useState<any[]>([])
   const [unpaidOrdersFromReceivables, setUnpaidOrdersFromReceivables] = useState<any[]>([])
   const [allUnpaidCompletedOrders, setAllUnpaidCompletedOrders] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [period, setPeriod] = useState<Period>('week')
-  const [customStartDate, setCustomStartDate] = useState<string>('')
-  const [customEndDate, setCustomEndDate] = useState<string>('')
   const [depositAmount, setDepositAmount] = useState<string>('')
   const [showDepositModal, setShowDepositModal] = useState(false)
   const [cashDepositRequests, setCashDepositRequests] = useState<any[]>([])
@@ -29,106 +35,21 @@ export default function DriverFinancePage() {
   const [unpaidOrderSearch, setUnpaidOrderSearch] = useState<string>('')
   const [displayedUnpaidOrdersCount, setDisplayedUnpaidOrdersCount] = useState(5)
 
-  const getDateFilter = useCallback((period: Period) => {
-    const now = new Date()
-    switch (period) {
-      case 'today':
-        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0)
-        const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999)
-        return { start: todayStart.toISOString(), end: todayEnd.toISOString() }
-      case 'yesterday':
-        const yesterday = new Date(now)
-        yesterday.setDate(now.getDate() - 1)
-        const yesterdayStart = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate(), 0, 0, 0, 0)
-        const yesterdayEnd = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate(), 23, 59, 59, 999)
-        return { start: yesterdayStart.toISOString(), end: yesterdayEnd.toISOString() }
-      case 'week':
-        const weekStart = new Date(now)
-        weekStart.setDate(now.getDate() - 7)
-        weekStart.setHours(0, 0, 0, 0)
-        const weekEnd = new Date(now)
-        weekEnd.setHours(23, 59, 59, 999)
-        return { start: weekStart.toISOString(), end: weekEnd.toISOString() }
-      case 'custom':
-        if (customStartDate && customEndDate) {
-          const start = new Date(customStartDate)
-          start.setHours(0, 0, 0, 0)
-          const end = new Date(customEndDate)
-          end.setHours(23, 59, 59, 999)
-          return { start: start.toISOString(), end: end.toISOString() }
-        }
-        return { start: null, end: null }
-      default:
-        return { start: null, end: null }
-    }
-  }, [customStartDate, customEndDate])
-
   const loadData = useCallback(async () => {
     let isMounted = true
     
     try {
-      const { data: { user: currentUser } } = await supabase.auth.getUser()
-      
-      if (!currentUser) {
-        if (isMounted) {
-          router.push('/login')
-        }
-        return
-      }
-
-      if (isMounted) {
-        setUser(currentUser)
-      }
-
-      // Получаем профиль водителя (для проверки organization_id)
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('id, organization_id, role')
-        .eq('id', currentUser.id)
-        .single()
-      
-      if (isMounted && profileData) {
-        setProfile(profileData)
-      }
-
-      // Получаем баланс
-      const { data: balanceData, error: balanceError } = await supabase
-        .from('balances')
-        .select('*')
-        .eq('user_id', currentUser.id)
-        .maybeSingle()
-      
       if (!isMounted) return
-      
-      if (balanceError) {
-        console.error('Ошибка загрузки баланса:', balanceError)
-        // Если баланс не найден, создаем его с нулевым значением
-        if (balanceError.code === 'PGRST116') {
-          const { data: newBalance } = await supabase
-            .from('balances')
-            .insert({
-              user_id: currentUser.id,
-              amount: 0.00,
-              currency: 'BYN',
-            })
-            .select()
-            .single()
-          if (isMounted) {
-            setBalance(newBalance)
-          }
-        }
-      } else {
-        if (isMounted) {
-          setBalance(balanceData)
-        }
-      }
+
+      const balanceData = await fetchOrCreateBalance(supabase, userId)
+      if (isMounted) setBalance(balanceData)
 
       // Получаем транзакции с фильтром по периоду
-      const dateFilter = getDateFilter(period as Period)
+      const dateFilter = getDateFilter()
       let transactionsQuery = supabase
         .from('transactions')
         .select('*')
-        .eq('user_id', currentUser.id)
+        .eq('user_id', userId)
         .order('created_at', { ascending: false })
 
       if (dateFilter.start) {
@@ -147,18 +68,14 @@ export default function DriverFinancePage() {
       if (isMounted) {
         setTransactions(transactionsData || [])
         setDisplayedTransactionsCount(10) // Сбрасываем счетчик при загрузке новых данных
-        console.log('Загружено транзакций:', transactionsData?.length || 0)
       }
 
       // Получаем завершенные заказы с фильтром по периоду для статистики
       let ordersQuery = supabase
         .from('orders')
         .select('id, order_number, final_price, completed_at, is_paid, pickup_address, delivery_address, created_at')
-        .eq('executor_user_id', currentUser.id)
+        .eq('executor_user_id', userId)
         .eq('status', 'completed')
-        
-      console.log('=== Loading completed orders ===')
-      console.log('Executor user ID:', currentUser.id)
 
       if (dateFilter.start) {
         ordersQuery = ordersQuery.gte('completed_at', dateFilter.start)
@@ -169,15 +86,11 @@ export default function DriverFinancePage() {
 
       const { data: ordersData, error: ordersError } = await ordersQuery
       
-      console.log('=== Completed orders loaded ===')
-      console.log('Orders count:', ordersData?.length || 0)
-      console.log('Orders error:', ordersError)
-      
       // Получаем неоплаченные заказы из receivables по driver_user_id (БЕЗ фильтра по дате)
       let receivablesQuery = supabase
         .from('receivables')
         .select('id, order_id, amount, currency, status, created_at')
-        .eq('driver_user_id', currentUser.id)
+        .eq('driver_user_id', userId)
         .eq('status', 'unpaid')
       
       // УБИРАЕМ фильтр по дате для receivables, чтобы показывать все неоплаченные заказы
@@ -194,23 +107,9 @@ export default function DriverFinancePage() {
       const { data: allUnpaidCompletedOrders, error: unpaidOrdersError } = await supabase
         .from('orders')
         .select('id, order_number, final_price, completed_at, is_paid, pickup_address, delivery_address, created_at')
-        .eq('executor_user_id', currentUser.id)
+        .eq('executor_user_id', userId)
         .eq('status', 'completed')
         .or('is_paid.is.null,is_paid.eq.false')
-      
-      console.log('=== All unpaid completed orders loaded ===')
-      console.log('Unpaid completed orders count:', allUnpaidCompletedOrders?.length || 0)
-      console.log('Unpaid orders error:', unpaidOrdersError)
-      
-      console.log('=== Receivables loaded ===')
-      console.log('Receivables count:', receivablesData?.length || 0)
-      console.log('Receivables error:', receivablesError)
-      if (receivablesData && receivablesData.length > 0) {
-        console.log('Первая receivable:', JSON.stringify(receivablesData[0], null, 2))
-        console.log('receivablesData[0].order_id:', receivablesData[0].order_id)
-        console.log('receivablesData[0].order_id type:', typeof receivablesData[0].order_id)
-        console.log('receivablesData[0].order_id length:', receivablesData[0].order_id?.length)
-      }
       
       // Получаем данные заказов для receivables
       let receivablesWithOrders: any[] = []
@@ -218,21 +117,11 @@ export default function DriverFinancePage() {
         const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
         const orderIds = receivablesData
           .map((r: any) => {
-            if (!r.order_id) {
-              console.warn('⚠️ receivable без order_id:', r)
-              return null
-            }
+            if (!r.order_id) return null
             const isValid = uuidRegex.test(String(r.order_id))
-            if (!isValid) {
-              console.warn('⚠️ receivable с невалидным order_id:', r.order_id, 'receivable:', r)
-              return null
-            }
-            return r.order_id
+            return isValid ? r.order_id : null
           })
           .filter((id: any): id is string => id !== null)
-        
-        console.log('orderIds для загрузки:', orderIds)
-        console.log('orderIds count:', orderIds.length)
         
         if (orderIds.length > 0) {
           const { data: ordersData, error: ordersError } = await supabase
@@ -240,52 +129,34 @@ export default function DriverFinancePage() {
             .select('id, order_number, final_price, completed_at, is_paid, pickup_address, delivery_address, created_at')
             .in('id', orderIds)
           
-          console.log('Orders loaded for receivables:', ordersData?.length || 0)
-          console.log('Orders error:', ordersError)
-          if (ordersData && ordersData.length > 0) {
-            console.log('Первая order:', JSON.stringify(ordersData[0], null, 2))
-          }
-          
           if (ordersError) {
             console.error('Ошибка загрузки заказов для receivables:', ordersError)
           } else {
             // Объединяем receivables с orders
             receivablesWithOrders = receivablesData.map((receivable: any) => {
               const order = ordersData?.find((o: any) => o.id === receivable.order_id)
-              if (!order) {
-                console.warn('⚠️ Заказ не найден для receivable:', receivable.order_id, 'receivable:', receivable)
-              }
               return {
                 ...receivable,
                 orders: order
               }
             })
-            console.log('receivablesWithOrders count:', receivablesWithOrders.length)
           }
-        } else {
-          console.warn('⚠️ Нет валидных order_id для загрузки заказов')
         }
       }
       
       if (isMounted) {
         setCompletedOrders(ordersData || [])
         // Сохраняем receivables с данными заказов для отображения неоплаченных заказов
-        console.log('🔵 Сохраняем receivablesWithOrders:', receivablesWithOrders.length)
-        if (receivablesWithOrders.length > 0) {
-          console.log('🔵 Первая receivable с order:', receivablesWithOrders[0])
-          console.log('🔵 Первая receivable.orders:', receivablesWithOrders[0].orders)
-          console.log('🔵 Первая receivable.orders.id:', receivablesWithOrders[0].orders?.id)
-        }
         setUnpaidOrdersFromReceivables(receivablesWithOrders || [])
         // Сохраняем все неоплаченные завершенные заказы в отдельное состояние
         setAllUnpaidCompletedOrders(allUnpaidCompletedOrders || [])
         
         // Загружаем запросы на сдачу кассы
-        if (profileData?.organization_id) {
+        if (organizationId) {
           const { data: requestsData, error: requestsError } = await supabase
             .from('cash_deposit_requests')
             .select('*')
-            .eq('driver_user_id', currentUser.id)
+            .eq('driver_user_id', userId)
             .order('created_at', { ascending: false })
           
           if (requestsError) {
@@ -305,7 +176,7 @@ export default function DriverFinancePage() {
         setLoading(false)
       }
     }
-  }, [period, getDateFilter, customStartDate, customEndDate, supabase, router]) // Добавили supabase и router обратно
+  }, [period, getDateFilter, customStartDate, customEndDate, supabase, userId, organizationId])
 
   useEffect(() => {
     loadData()
@@ -330,16 +201,7 @@ export default function DriverFinancePage() {
   // Преобразуем данные из receivables в формат для отображения
   const unpaidOrdersFromReceivablesList = (unpaidOrdersFromReceivables || []).map((receivable: any) => {
     const order = receivable.orders
-    console.log('=== Формирование unpaidOrders из receivables ===')
-    console.log('receivable:', receivable)
-    console.log('receivable.orders:', order)
-    console.log('order.id:', order?.id)
-    
-    if (!order || !order.id) {
-      console.error('❌ ОШИБКА: order или order.id отсутствует!')
-      console.error('receivable:', JSON.stringify(receivable, null, 2))
-      return null
-    }
+    if (!order || !order.id) return null
     
     return {
       id: order.id,
@@ -351,21 +213,11 @@ export default function DriverFinancePage() {
       delivery_address: order.delivery_address,
       created_at: order.created_at,
       receivable_id: receivable.id,
-      _debug_receivable: receivable
     }
   }).filter((order: any) => {
-    if (!order) return false
-    // Фильтруем заказы с валидными UUID
-    if (!order.id) {
-      console.warn('⚠️ Заказ без ID отфильтрован:', order)
-      return false
-    }
+    if (!order || !order.id) return false
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-    const isValid = uuidRegex.test(String(order.id))
-    if (!isValid) {
-      console.warn('⚠️ Заказ с невалидным UUID отфильтрован:', order)
-    }
-    return isValid
+    return uuidRegex.test(String(order.id))
   })
   
   // Также проверяем завершенные заказы с is_paid = false/null (используем отдельно загруженные данные)
@@ -552,12 +404,12 @@ export default function DriverFinancePage() {
                                 request_id: request.id
                               })
                               if (error) {
-                                alert(`Ошибка: ${error.message}`)
+                                toastError(error.message)
                               } else {
                                 loadData()
                               }
                             } catch (err: any) {
-                              alert(`Ошибка: ${err.message}`)
+                              toastError(err.message)
                             }
                           }}
                           className="text-red-400 hover:text-red-300 text-xs font-medium ml-2"
@@ -573,7 +425,7 @@ export default function DriverFinancePage() {
             return null
           })()}
           
-          {profile?.organization_id && (
+          {organizationId && (
             <>
               <button
                 onClick={() => setShowDepositModal(true)}
@@ -656,7 +508,7 @@ export default function DriverFinancePage() {
                           // Проверяем, что UUID валиден
                           const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
                           if (!uuidRegex.test(orderUuid)) {
-                            alert(`Ошибка: Невалидный ID заказа. Пожалуйста, обновите страницу.`)
+                            toastError('Невалидный ID заказа. Пожалуйста, обновите страницу.')
                             return
                           }
                           
@@ -666,17 +518,17 @@ export default function DriverFinancePage() {
                           })
                           
                           if (error) {
-                            alert(`Ошибка: ${error.message}`)
+                            toastError(error.message)
                           } else if (data === false) {
-                            alert('Не удалось обработать оплату. Возможно, заказ уже обработан или не найден.')
+                            toastError('Не удалось обработать оплату. Возможно, заказ уже обработан или не найден.')
                           } else {
-                            alert('Оплата успешно принята! Деньги начислены на ваш баланс.')
+                            toastSuccess('Оплата успешно принята! Деньги начислены на ваш баланс.')
                             setTimeout(() => {
                               loadData()
                             }, 2000)
                           }
                         } catch (err: any) {
-                          alert(`Ошибка: ${err.message || 'Не удалось обработать оплату'}`)
+                          toastError(err.message || 'Не удалось обработать оплату')
                         }
                       }}
                       className="mt-2 bg-green-300 text-gray-900 px-3 py-1.5 rounded text-sm hover:bg-green-400 transition"
@@ -752,7 +604,7 @@ export default function DriverFinancePage() {
                 onClick={async () => {
                   const amount = parseFloat(depositAmount)
                   if (!amount || amount <= 0) {
-                    alert('Введите корректную сумму')
+                    toastError('Введите корректную сумму')
                     return
                   }
                   // Проверяем доступный баланс с учетом уже отправленных запросов
@@ -761,28 +613,28 @@ export default function DriverFinancePage() {
                   const availableBalance = parseFloat(balance?.amount || 0) - pendingAmount
                   
                   if (amount > availableBalance) {
-                    alert(`Недостаточно средств. Доступно для нового запроса: ${availableBalance.toFixed(2)} BYN`)
+                    toastError(`Недостаточно средств. Доступно для нового запроса: ${availableBalance.toFixed(2)} BYN`)
                     return
                   }
                   
                   try {
                     const { data: requestId, error } = await supabase.rpc('deposit_cash_to_organization', {
-                      driver_user_id: user.id,
+                      driver_user_id: userId,
                       amount_to_deposit: amount
                     })
                     
                     if (error) {
                       console.error('Ошибка создания запроса:', error)
-                      alert(`Ошибка: ${error.message}`)
+                      toastError(error.message)
                     } else {
-                      alert('Запрос на сдачу кассы отправлен! Деньги останутся на вашем балансе до принятия запроса организацией.')
+                      toastSuccess('Запрос на сдачу кассы отправлен! Деньги останутся на вашем балансе до принятия запроса организацией.')
                       setShowDepositModal(false)
                       setDepositAmount('')
                       loadData()
                     }
                   } catch (err: any) {
                     console.error('Ошибка создания запроса:', err)
-                    alert(`Ошибка: ${err.message || 'Не удалось создать запрос'}`)
+                    toastError(err.message || 'Не удалось создать запрос')
                   }
                 }}
                 className="flex-1 bg-green-300 text-gray-900 px-4 py-2 rounded-md hover:bg-green-400 transition"

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { formatAddressForOrder } from '@/lib/utils/formatAddress'
+import { toastError, toastSuccess } from '@/lib/utils/toast'
 
 interface ShareOrderModalProps {
   order: any
@@ -133,10 +134,10 @@ export function ShareOrderModal({ order, isOpen, onClose }: ShareOrderModalProps
   const copyToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(formatShareText())
-      alert('Текст скопирован в буфер обмена!')
+      toastSuccess('Текст скопирован в буфер обмена!')
     } catch (err) {
       console.error('Ошибка копирования:', err)
-      alert('Не удалось скопировать текст')
+      toastError('Не удалось скопировать текст')
     }
   }
 

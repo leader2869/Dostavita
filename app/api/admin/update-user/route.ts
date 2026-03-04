@@ -1,53 +1,26 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { requireSuperadmin } from '@/lib/api/auth'
+import { parseBody } from '@/lib/api/validate'
+import { adminUpdateUserSchema } from '@/lib/api/validate'
 
 export async function POST(request: Request) {
   try {
     const supabase = createServerSupabaseClient()
+    const bodyResult = await parseBody(request, adminUpdateUserSchema)
+    if (!bodyResult.ok) return bodyResult.response
+    const { userId, fullName, phone, role, email } = bodyResult.data
 
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Не авторизован' },
-        { status: 401 }
-      )
-    }
-
-    // Проверяем, что пользователь - суперадмин
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-
-    if (!profile || profile.role !== 'superadmin') {
-      return NextResponse.json(
-        { error: 'Доступ запрещен' },
-        { status: 403 }
-      )
-    }
-
-    const body = await request.json()
-    const { userId, fullName, phone, role, email } = body
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'ID пользователя не указан' },
-        { status: 400 }
-      )
-    }
+    const auth = await requireSuperadmin(supabase)
+    if (!auth.ok) return auth.response
 
     // Обновляем профиль
     const { error: updateError } = await supabase
       .from('profiles')
       .update({
-        full_name: fullName || null,
-        phone: phone || null,
-        role: role || 'client',
+        full_name: fullName ?? null,
+        phone: phone ?? null,
+        role: role ?? 'client',
       })
       .eq('id', userId)
 

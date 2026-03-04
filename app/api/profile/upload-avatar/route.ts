@@ -1,46 +1,26 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
-import { NextResponse } from 'next/server'
+import { getAuthUser } from '@/lib/api/auth'
+import { apiSuccess, apiError, maskInternalMessage } from '@/lib/api/response'
+import { MAX_AVATAR_SIZE_BYTES } from '@/lib/constants'
 
 export async function POST(request: Request) {
   try {
     const supabase = createServerSupabaseClient()
-
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Не авторизован' },
-        { status: 401 }
-      )
-    }
+    const auth = await getAuthUser(supabase)
+    if (!auth.ok) return auth.response
+    const user = auth.user
 
     const formData = await request.formData()
     const file = formData.get('avatar') as File
 
     if (!file) {
-      return NextResponse.json(
-        { error: 'Файл не найден' },
-        { status: 400 }
-      )
+      return apiError('Файл не найден', 400)
     }
-
-    // Проверяем тип файла
     if (!file.type.startsWith('image/')) {
-      return NextResponse.json(
-        { error: 'Файл должен быть изображением' },
-        { status: 400 }
-      )
+      return apiError('Файл должен быть изображением', 400)
     }
-
-    // Проверяем размер файла (макс 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      return NextResponse.json(
-        { error: 'Размер файла не должен превышать 5MB' },
-        { status: 400 }
-      )
+    if (file.size > MAX_AVATAR_SIZE_BYTES) {
+      return apiError('Размер файла не должен превышать 5MB', 400)
     }
 
     // Bucket должен быть создан вручную в Supabase Dashboard
@@ -61,10 +41,7 @@ export async function POST(request: Request) {
 
     if (uploadError) {
       console.error('Ошибка загрузки файла:', uploadError)
-      return NextResponse.json(
-        { error: uploadError.message },
-        { status: 500 }
-      )
+      return apiError(maskInternalMessage(uploadError.message), 500)
     }
 
     // Получаем публичный URL
@@ -82,19 +59,14 @@ export async function POST(request: Request) {
 
     if (updateError) {
       console.error('Ошибка обновления профиля:', updateError)
-      return NextResponse.json(
-        { error: updateError.message },
-        { status: 500 }
-      )
+      return apiError(maskInternalMessage(updateError.message), 500)
     }
 
-    return NextResponse.json({ avatar_url: avatarUrl })
-  } catch (error: any) {
+    return apiSuccess({ avatar_url: avatarUrl })
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Внутренняя ошибка сервера'
     console.error('Ошибка API:', error)
-    return NextResponse.json(
-      { error: error.message || 'Внутренняя ошибка сервера' },
-      { status: 500 }
-    )
+    return apiError(maskInternalMessage(message), 500)
   }
 }
 

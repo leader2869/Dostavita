@@ -1,40 +1,23 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { requireRole } from '@/lib/api/auth'
+import { parseBody } from '@/lib/api/validate'
+import { searchDriversSchema } from '@/lib/api/validate'
 
 export async function POST(request: Request) {
   try {
     const supabase = createServerSupabaseClient()
-    const body = await request.json()
-    const { search } = body
+    const bodyResult = await parseBody(request, searchDriversSchema)
+    if (!bodyResult.ok) return bodyResult.response
+    const { search } = bodyResult.data
 
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
+    const auth = await requireRole(supabase, 'customer')
+    if (!auth.ok) return auth.response
+    const { user } = auth
 
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Не авторизован' },
-        { status: 401 }
-      )
-    }
-
-    // Проверяем, что пользователь - организация
-    const { data: profile } = await supabase
-      .rpc('get_user_profile', { user_id: user.id })
-      .single()
-
-    if (!profile || (profile as any).role !== 'customer') {
-      return NextResponse.json(
-        { error: 'Доступ запрещен' },
-        { status: 403 }
-      )
-    }
-
-    // Ищем водителей через RPC функцию (обходит RLS)
     const { data: drivers, error: driversError } = await supabase
-      .rpc('search_available_drivers', { 
-        search_term: search && search.trim() ? search.trim() : null 
+      .rpc('search_available_drivers', {
+        search_term: search?.trim() || null,
       })
 
     if (driversError) {

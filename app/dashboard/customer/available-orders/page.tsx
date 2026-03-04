@@ -5,12 +5,15 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { formatAddressForOrder } from '@/lib/utils/formatAddress'
 import { formatReadyTime } from '@/lib/utils/formatReadyTime'
+import { getOrderStatusLabel, getOrderStatusColor } from '@/lib/utils/orderStatus'
+import { toastError } from '@/lib/utils/toast'
+import { useDashboardUser } from '@/contexts/DashboardAuthContext'
 
 export default function AvailableOrdersPage() {
   const router = useRouter()
   const supabase = createClient()
+  const { userId, profile } = useDashboardUser()
   
-  const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [availableOrders, setAvailableOrders] = useState<any[]>([])
   const [activeOrders, setActiveOrders] = useState<any[]>([])
@@ -21,21 +24,7 @@ export default function AvailableOrdersPage() {
 
   const loadData = useCallback(async () => {
     try {
-      const { data: { user: currentUser } } = await supabase.auth.getUser()
-      
-      if (!currentUser) {
-        router.push('/login')
-        return
-      }
-
-      setUser(currentUser)
-
-      // Проверяем роль
-      const { data: profile } = await supabase
-        .rpc('get_user_profile', { user_id: currentUser.id })
-        .single()
-
-      if (!profile || (profile as any).role !== 'customer') {
+      if (profile.role !== 'customer') {
         router.push('/dashboard')
         return
       }
@@ -44,7 +33,7 @@ export default function AvailableOrdersPage() {
       const { data: driversData } = await supabase
         .from('profiles')
         .select('id, full_name, phone')
-        .eq('organization_id', currentUser.id)
+        .eq('organization_id', userId)
         .eq('role', 'driver')
 
       const ids = driversData?.map((d: any) => d.id) || []
@@ -91,41 +80,11 @@ export default function AvailableOrdersPage() {
     } finally {
       setLoading(false)
     }
-  }, [supabase, router])
+  }, [supabase, router, userId, profile.role])
 
   useEffect(() => {
     loadData()
   }, [loadData])
-
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'searching_courier':
-        return 'Ищем курьера'
-      case 'courier_accepted':
-        return 'Курьер принял заказ'
-      case 'courier_coming':
-        return 'Курьер едет к отправителю'
-      case 'courier_delivering':
-        return 'Курьер едет к получателю'
-      default:
-        return status
-    }
-  }
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'searching_courier':
-        return 'text-yellow-400 bg-yellow-400/20 border-yellow-400/50'
-      case 'courier_accepted':
-        return 'text-orange-400 bg-orange-400/20 border-orange-400/50'
-      case 'courier_coming':
-        return 'text-blue-400 bg-blue-400/20 border-blue-400/50'
-      case 'courier_delivering':
-        return 'text-purple-400 bg-purple-400/20 border-purple-400/50'
-      default:
-        return 'text-gray-600 bg-gray-400/20 border-gray-400/50'
-    }
-  }
 
   // Компонент для отображения схемы статусов с временем
   const StatusTimeline = ({ order }: { order: any }) => {
@@ -263,7 +222,7 @@ export default function AvailableOrdersPage() {
 
       if (error) {
         console.error('Ошибка назначения водителя:', error)
-        alert('Не удалось назначить водителя. Попробуйте еще раз.')
+        toastError('Не удалось назначить водителя. Попробуйте еще раз.')
         return
       }
 
@@ -277,11 +236,11 @@ export default function AvailableOrdersPage() {
           return newState
         })
       } else {
-        alert('Не удалось назначить водителя. Возможно, заказ уже был принят или водитель недоступен.')
+        toastError('Не удалось назначить водителя. Возможно, заказ уже был принят или водитель недоступен.')
       }
     } catch (err: any) {
       console.error('Ошибка назначения водителя:', err)
-      alert('Произошла ошибка при назначении водителя.')
+      toastError('Произошла ошибка при назначении водителя.')
     } finally {
       setAssigningDriver(null)
     }
@@ -339,10 +298,10 @@ export default function AvailableOrdersPage() {
                           <span className="text-sm text-gray-600">Статус: </span>
                           <span
                             className={`inline-block px-3 py-1 rounded-full text-xs font-semibold border ${
-                              getStatusColor(order.status)
+                              getOrderStatusColor(order.status)
                             }`}
                           >
-                            {getStatusLabel(order.status)}
+                            {getOrderStatusLabel(order.status)}
                           </span>
                         </div>
                         {order.item_type && (

@@ -29,80 +29,60 @@ export default function CreateOrderPage() {
 
   // Функция для определения региона по адресу
   const detectRegionFromAddress = useCallback((address: string, addressDetails?: any) => {
-    console.log('detectRegionFromAddress вызвана:', { address, addressDetails, regionsCount: regions.length })
-    
-    if (!address || !regions.length) {
-      console.log('Пропуск: нет адреса или регионов не загружены')
-      return
-    }
+    if (!address || !regions.length) return
 
     const addressLower = address.toLowerCase()
     
-    // Проверяем по названию области из адреса (Nominatim возвращает address.state)
     if (addressDetails?.state) {
       const stateName = addressDetails.state.toLowerCase()
-      console.log('Проверяем state:', stateName)
-      
-      // Сопоставляем область с регионом
       if (stateName.includes('минск') && !stateName.includes('область')) {
-        // Минск (город)
         const minskRegion = regions.find(r => r.name.toLowerCase() === 'минск')
         if (minskRegion) {
-          console.log('Найден регион Минск:', minskRegion.id)
           setSelectedRegion(minskRegion.id)
           return
         }
       } else if (stateName.includes('минская область') || stateName.includes('минская')) {
         const region = regions.find(r => r.name.toLowerCase() === 'минская область')
         if (region) {
-          console.log('Найден регион Минская область:', region.id)
           setSelectedRegion(region.id)
           return
         }
       } else if (stateName.includes('брестская область') || stateName.includes('брестская')) {
         const region = regions.find(r => r.name.toLowerCase() === 'брестская область')
         if (region) {
-          console.log('Найден регион Брестская область:', region.id)
           setSelectedRegion(region.id)
           return
         }
       } else if (stateName.includes('витебская область') || stateName.includes('витебская')) {
         const region = regions.find(r => r.name.toLowerCase() === 'витебская область')
         if (region) {
-          console.log('Найден регион Витебская область:', region.id)
           setSelectedRegion(region.id)
           return
         }
       } else if (stateName.includes('гомельская область') || stateName.includes('гомельская')) {
         const region = regions.find(r => r.name.toLowerCase() === 'гомельская область')
         if (region) {
-          console.log('Найден регион Гомельская область:', region.id)
           setSelectedRegion(region.id)
           return
         }
       } else if (stateName.includes('гродненская область') || stateName.includes('гродненская')) {
         const region = regions.find(r => r.name.toLowerCase() === 'гродненская область')
         if (region) {
-          console.log('Найден регион Гродненская область:', region.id)
           setSelectedRegion(region.id)
           return
         }
       } else if (stateName.includes('могилевская область') || stateName.includes('могилёвская область') || stateName.includes('могилевская') || stateName.includes('могилёвская')) {
         const region = regions.find(r => r.name.toLowerCase().includes('могилевская область') || r.name.toLowerCase().includes('могилёвская область'))
         if (region) {
-          console.log('Найден регион Могилевская область:', region.id)
           setSelectedRegion(region.id)
           return
         }
       }
     }
 
-    // Fallback: проверяем по тексту адреса
-    console.log('Fallback: проверяем по тексту адреса')
     if (addressLower.includes('минск') && !addressLower.includes('область')) {
       const minskRegion = regions.find(r => r.name.toLowerCase() === 'минск')
       if (minskRegion) {
-        console.log('Найден регион Минск (fallback):', minskRegion.id)
         setSelectedRegion(minskRegion.id)
         setRegionAutoDetected(true)
         return
@@ -110,7 +90,6 @@ export default function CreateOrderPage() {
     } else if (addressLower.includes('минская область') || addressLower.includes('минская')) {
       const region = regions.find(r => r.name.toLowerCase() === 'минская область')
       if (region) {
-        console.log('Найден регион Минская область (fallback):', region.id)
         setSelectedRegion(region.id)
         setRegionAutoDetected(true)
         return
@@ -118,7 +97,6 @@ export default function CreateOrderPage() {
     } else if (addressLower.includes('брестская область') || addressLower.includes('брестская')) {
       const region = regions.find(r => r.name.toLowerCase() === 'брестская область')
       if (region) {
-        console.log('Найден регион Брестская область (fallback):', region.id)
         setSelectedRegion(region.id)
         setRegionAutoDetected(true)
         return
@@ -126,7 +104,6 @@ export default function CreateOrderPage() {
     } else if (addressLower.includes('витебская область') || addressLower.includes('витебская')) {
       const region = regions.find(r => r.name.toLowerCase() === 'витебская область')
       if (region) {
-        console.log('Найден регион Витебская область (fallback):', region.id)
         setSelectedRegion(region.id)
         setRegionAutoDetected(true)
         return
@@ -134,7 +111,6 @@ export default function CreateOrderPage() {
     } else if (addressLower.includes('гомельская область') || addressLower.includes('гомельская')) {
       const region = regions.find(r => r.name.toLowerCase() === 'гомельская область')
       if (region) {
-        console.log('Найден регион Гомельская область (fallback):', region.id)
         setSelectedRegion(region.id)
         setRegionAutoDetected(true)
         return
@@ -142,7 +118,6 @@ export default function CreateOrderPage() {
     } else if (addressLower.includes('гродненская область') || addressLower.includes('гродненская')) {
       const region = regions.find(r => r.name.toLowerCase() === 'гродненская область')
       if (region) {
-        console.log('Найден регион Гродненская область (fallback):', region.id)
         setSelectedRegion(region.id)
         setRegionAutoDetected(true)
         return
@@ -150,14 +125,11 @@ export default function CreateOrderPage() {
     } else if (addressLower.includes('могилевская область') || addressLower.includes('могилёвская область') || addressLower.includes('могилевская') || addressLower.includes('могилёвская')) {
       const region = regions.find(r => r.name.toLowerCase().includes('могилевская область') || r.name.toLowerCase().includes('могилёвская область'))
       if (region) {
-        console.log('Найден регион Могилевская область (fallback):', region.id)
         setSelectedRegion(region.id)
         setRegionAutoDetected(true)
         return
       }
     }
-    
-    console.log('Регион не найден для адреса:', address)
   }, [regions])
 
   const loadRegions = useCallback(async () => {
@@ -266,14 +238,10 @@ export default function CreateOrderPage() {
           <AddressAutocomplete
             value={pickupAddress}
             onChange={(address, coordinates, addressDetails) => {
-              console.log('AddressAutocomplete onChange:', { address, coordinates, addressDetails })
               setPickupAddress(address)
               setPickupCoordinates(coordinates)
-              // Автоматически определяем регион по адресу отправления
               if (address && regions.length > 0) {
                 detectRegionFromAddress(address, addressDetails)
-              } else {
-                console.log('Регионы еще не загружены или адрес пуст')
               }
             }}
             placeholder="Начните вводить адрес отправления"

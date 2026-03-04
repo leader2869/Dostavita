@@ -208,7 +208,7 @@ export function DriverChatSection({ driverUserId, organizationId }: DriverChatSe
 
                   setGeneralUnreadCount(generalUnread || 0)
                   setPersonalUnreadCount(personalUnread || 0)
-                  console.log('Счетчики обновлены после закрытия чата:', { general: generalUnread, personal: personalUnread })
+                  if (process.env.NODE_ENV === 'development') console.log('Счетчики обновлены после закрытия чата:', { general: generalUnread, personal: personalUnread })
                 } catch (err) {
                   console.error('Ошибка обновления счетчика:', err)
                 }
@@ -218,7 +218,7 @@ export function DriverChatSection({ driverUserId, organizationId }: DriverChatSe
           }}
           onMessagesRead={() => {
             // Обновляем счетчик сразу после того, как сообщения отмечены как прочитанные
-            console.log('onMessagesRead вызван, обновляем счетчик...')
+            if (process.env.NODE_ENV === 'development') console.log('onMessagesRead вызван, обновляем счетчик...')
             // Вызываем несколько раз с задержками для надежности
             loadUnreadCount()
             setTimeout(() => {

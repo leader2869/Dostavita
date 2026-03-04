@@ -1,43 +1,21 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
+import { requireRole } from '@/lib/api/auth'
+import { parseBody } from '@/lib/api/validate'
+import { createDriverSchema } from '@/lib/api/validate'
 
 export async function POST(request: Request) {
   try {
     const supabase = createServerSupabaseClient()
-    const body = await request.json()
-    const { email, password, full_name, phone, vehicle_type, vehicle_brand, vehicle_model, vehicle_number, license_number } = body
+    const bodyResult = await parseBody(request, createDriverSchema)
+    if (!bodyResult.ok) return bodyResult.response
 
-    if (!email || !password || !full_name || !vehicle_type || !license_number) {
-      return NextResponse.json(
-        { error: 'Email, пароль, имя, тип транспорта и номер удостоверения обязательны' },
-        { status: 400 }
-      )
-    }
+    const { email, password, full_name, phone, vehicle_type, vehicle_brand, vehicle_model, vehicle_number, license_number } = bodyResult.data
 
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Не авторизован' },
-        { status: 401 }
-      )
-    }
-
-    // Проверяем, что пользователь - организация
-    const { data: profile } = await supabase
-      .rpc('get_user_profile', { user_id: user.id })
-      .single()
-
-    if (!profile || (profile as any).role !== 'customer') {
-      return NextResponse.json(
-        { error: 'Доступ запрещен. Только организации могут создавать аккаунты водителей' },
-        { status: 403 }
-      )
-    }
+    const auth = await requireRole(supabase, 'customer')
+    if (!auth.ok) return auth.response
+    const { user } = auth
 
     // Создаем пользователя в auth через admin API
     // Для admin API нужен service role key

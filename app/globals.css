@@ -220,3 +220,8 @@ input:-webkit-autofill::first-line {
   position: relative;
   z-index: 2;
 }
+
+/* Скрыть только флаг в блоке атрибуции Leaflet (оставляем текст Leaflet | © OpenStreetMap) */
+.leaflet-control-attribution .leaflet-attribution-flag {
+  display: none !important;
+}

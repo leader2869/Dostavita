@@ -5,46 +5,20 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { useAuthCheck } from '@/hooks/useAuthCheck'
+import { useDateFilter } from '@/hooks/useDateFilter'
 import { formatAddressForOrder } from '@/lib/utils/formatAddress'
+import { getOrderStatusLabel, getOrderStatusColor, isActiveOrderStatus } from '@/lib/utils/orderStatus'
 import { OrderActions } from '@/components/driver/OrderActions'
 import { formatReadyTime } from '@/lib/utils/formatReadyTime'
-
-type Period = 'today' | 'yesterday' | 'week' | 'all'
 
 export default function DriverMyOrdersPage() {
   const router = useRouter()
   const supabase = createClient()
   const { user, loading: authLoading } = useAuthCheck()
+  const { period, setPeriod, getDateFilter } = useDateFilter('week')
   const [orders, setOrders] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [period, setPeriod] = useState<Period>('week')
   const [displayedCount, setDisplayedCount] = useState(10)
-
-  const getDateFilter = useCallback((period: Period) => {
-    const now = new Date()
-    switch (period) {
-      case 'today':
-        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0)
-        const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999)
-        return { start: todayStart.toISOString(), end: todayEnd.toISOString() }
-      case 'yesterday':
-        const yesterday = new Date(now)
-        yesterday.setDate(now.getDate() - 1)
-        const yesterdayStart = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate(), 0, 0, 0, 0)
-        const yesterdayEnd = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate(), 23, 59, 59, 999)
-        return { start: yesterdayStart.toISOString(), end: yesterdayEnd.toISOString() }
-      case 'week':
-        const weekStart = new Date(now)
-        weekStart.setDate(now.getDate() - 7)
-        weekStart.setHours(0, 0, 0, 0)
-        const weekEnd = new Date(now)
-        weekEnd.setHours(23, 59, 59, 999)
-        return { start: weekStart.toISOString(), end: weekEnd.toISOString() }
-      case 'all':
-      default:
-        return { start: null, end: null }
-    }
-  }, [])
 
   const loadOrders = useCallback(async () => {
     if (!user) return
@@ -53,7 +27,7 @@ export default function DriverMyOrdersPage() {
     setLoading(true)
 
     try {
-      const dateFilter = getDateFilter(period)
+      const dateFilter = getDateFilter()
       
       let query = supabase
         .from('orders')
@@ -62,7 +36,7 @@ export default function DriverMyOrdersPage() {
         .order('created_at', { ascending: false })
 
       // Применяем фильтр по дате, если выбран период
-      if (dateFilter.start && dateFilter.end) {
+      if (dateFilter.start != null && dateFilter.end != null) {
         query = query
           .gte('created_at', dateFilter.start)
           .lte('created_at', dateFilter.end)
@@ -102,44 +76,7 @@ export default function DriverMyOrdersPage() {
     loadOrders()
   }, [authLoading, user, period, loadOrders])
 
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'courier_accepted':
-        return 'Курьер принял заказ'
-      case 'courier_coming':
-        return 'Курьер едет к отправителю'
-      case 'courier_delivering':
-        return 'Курьер едет к получателю'
-      case 'completed':
-        return 'Заказ завершен'
-      case 'cancelled':
-        return 'Отменен'
-      default:
-        return status
-    }
-  }
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'courier_accepted':
-        return 'text-orange-400 bg-orange-400/20 border-orange-400/50'
-      case 'courier_coming':
-        return 'text-blue-400 bg-blue-400/20 border-blue-400/50'
-      case 'courier_delivering':
-        return 'text-purple-400 bg-purple-400/20 border-purple-400/50'
-      case 'completed':
-        return 'text-brand-light bg-brand-light/20 border-green-400/50'
-      case 'cancelled':
-        return 'text-red-400 bg-red-400/20 border-red-400/50'
-      default:
-        return 'text-gray-600 bg-gray-400/20 border-gray-400/50'
-    }
-  }
-
-  const shouldBlink = (status: string) => {
-    // Мигают только активные статусы
-    return status === 'courier_accepted' || status === 'courier_coming' || status === 'courier_delivering'
-  }
+  const shouldBlink = (status: string) => isActiveOrderStatus(status)
 
   // Разделяем заказы на активные и завершенные
   const activeOrders = orders.filter(order => 
@@ -192,10 +129,10 @@ export default function DriverMyOrdersPage() {
                 </h3>
                 <span
                   className={`inline-block px-3 py-1 rounded-full text-xs font-semibold border ${
-                    getStatusColor(order.status)
+                    getOrderStatusColor(order.status)
                   } ${shouldBlink(order.status) ? 'animate-blink' : ''}`}
                 >
-                  {getStatusLabel(order.status)}
+                  {getOrderStatusLabel(order.status)}
                 </span>
                 {isUnpaid && (
                   <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold border bg-red-200/50 text-red-700 border-red-300/50">

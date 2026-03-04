@@ -161,7 +161,7 @@ export function NewOrderNotification() {
           const updatedOrder = payload.new as any
           // Если заказ принят другим водителем (статус изменился с searching_courier)
           if (updatedOrder.status !== 'searching_courier') {
-            console.log('Заказ принят другим водителем, закрываем модальное окно')
+            if (process.env.NODE_ENV === 'development') console.log('Заказ принят другим водителем, закрываем модальное окно')
             // Помечаем заказ как показанный
             shownOrderIdsRef.current.add(newOrder.id)
             saveShownOrderIds()
@@ -234,7 +234,7 @@ export function NewOrderNotification() {
 
         // Если заказ уже принят (статус не searching_courier), закрываем модальное окно
         if (data && data.status !== 'searching_courier') {
-          console.log('Заказ уже принят, закрываем модальное окно')
+          if (process.env.NODE_ENV === 'development') console.log('Заказ уже принят, закрываем модальное окно')
           shownOrderIdsRef.current.add(newOrder.id)
           saveShownOrderIds()
           setShowAcceptModal(false)
