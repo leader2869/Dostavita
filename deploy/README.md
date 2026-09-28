@@ -9,7 +9,32 @@ Existing sites and servers are separate.
 This budget configuration has limited memory headroom for the application and Supabase.
 Measure memory usage under load before cutover; build application images outside the production server where possible.
 
-This is deployment preparation, not confirmation of a completed migration.
+## Current deployment (2026-09-28)
+
+The application and self-hosted Supabase are running on this server. DNS points
+`dostavita.by` to `201.34.159.235`, `www` to `dostavita.by`, and `api` to the server IP.
+Nginx terminates HTTPS; certificates for the application and API renew using Certbot's nginx plugin.
+The server has a 2 GB swap file. UFW permits SSH, HTTP and HTTPS; database/API container ports bind only to loopback.
+
+The source Supabase project is retained for recovery. Its application tables and
+Storage objects/buckets have `dostavita_migration_freeze` statement triggers to
+reject writes, preventing split-brain operation while old DNS/client caches expire.
+Do not unfreeze the source or reverse DNS after new writes without reconciling data.
+Vercel is also retained; it is no longer the destination of the primary domain.
+
+Private source exports are in `/opt/dostavita/private/backup-20260928T142845Z` and
+`/opt/dostavita/private/final-data.sql`, with a second copy on the operator's Mac.
+The final export's 52 COPY blocks matched the initial export. All 18 application
+table row counts and all 13 password hashes were verified after restoration.
+Eight Storage objects were restored and verified with SHA-256. Four avatar URLs
+were updated to the new API hostname. Existing push keys were preserved.
+
+Five empty Auth tables/column layouts absent from the pinned self-hosted version
+were omitted only in the working import (`data.compatible.sql`); original exports
+are unchanged. No nonempty table was omitted.
+
+Existing users must sign in again because the new instance uses new signing keys.
+SMTP has not been configured or validated; email delivery remains a follow-up.
 
 ## Layout
 
