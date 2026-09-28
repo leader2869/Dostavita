@@ -34,7 +34,17 @@ export async function POST(request: Request) {
       .select('driver_user_id').eq('order_id', order.id)
     if (rejectionError) throw rejectionError
     const rejected = new Set(rejections?.map((r) => r.driver_user_id))
-    const recipients = (subscriptions ?? []).filter((s) => !rejected.has(s.user_id))
+    const driverIds = [...new Set((subscriptions ?? []).map(s => s.user_id))]
+    const busyDrivers = new Set<string>()
+    if (driverIds.length > 0) {
+      const { data: activeOrders, error: activeError } = await admin.from('orders')
+        .select('executor_user_id')
+        .in('executor_user_id', driverIds)
+        .in('status', ['courier_accepted', 'courier_coming', 'courier_delivering'])
+      if (activeError) throw activeError
+      for (const active of activeOrders ?? []) if (active.executor_user_id) busyDrivers.add(active.executor_user_id)
+    }
+    const recipients = (subscriptions ?? []).filter((s) => !rejected.has(s.user_id) && !busyDrivers.has(s.user_id))
     return apiSuccess(await sendPush(admin, recipients, {
       title: 'Новый заказ!',
       body: `Заказ №${order.order_number || order.id.slice(0, 8)} - ${order.final_price} BYN`,

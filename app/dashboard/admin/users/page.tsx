@@ -212,6 +212,7 @@ export default function AdminUsersPage() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <div className="flex flex-wrap gap-2">
                       {profile.role === 'superadmin' && <Link href={`/dashboard/admin/users/${user.id}`} className="text-sky-700 underline">Карточка · баланс · пароль</Link>}
+                      {profile.role === 'superadmin' && <>
                       <button
                         onClick={() => handleEdit(user)}
                         className="text-brand-light hover:text-brand-light"
@@ -224,6 +225,8 @@ export default function AdminUsersPage() {
                       >
                         Удалить
                       </button>
+                      </>}
+                      {profile.role !== 'superadmin' && <span className="text-gray-500">Только просмотр</span>}
                     </div>
                   </td>
                 </tr>

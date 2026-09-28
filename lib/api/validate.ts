@@ -75,15 +75,15 @@ export const respondToRequestSchema = z.object({
 })
 
 /** Обновление местоположения водителя */
+const locationNumber = z.union([z.number(), z.string().trim().min(1)])
+  .transform(Number).pipe(z.number().finite())
 export const updateLocationSchema = z.object({
-  latitude: z.union([z.number(), z.string()]).transform((v) => Number(v)),
-  longitude: z.union([z.number(), z.string()]).transform((v) => Number(v)),
-  accuracy: z.union([z.number(), z.string()]).optional(),
-  heading: z.union([z.number(), z.string()]).optional().nullable(),
-  speed: z.union([z.number(), z.string()]).optional().nullable(),
+  latitude: locationNumber.pipe(z.number().min(-90).max(90)),
+  longitude: locationNumber.pipe(z.number().min(-180).max(180)),
+  accuracy: locationNumber.pipe(z.number().nonnegative()).optional(),
+  heading: locationNumber.pipe(z.number().min(0).lt(360)).optional().nullable(),
+  speed: locationNumber.pipe(z.number().nonnegative()).optional().nullable(),
   order_id: z.string().uuid().optional().nullable(),
-}).refine((d) => !Number.isNaN(d.latitude) && !Number.isNaN(d.longitude), {
-  message: 'Широта и долгота должны быть числами',
 })
 
 /** Push: подписка */

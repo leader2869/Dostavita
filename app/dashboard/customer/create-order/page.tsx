@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import type { Region } from '@/lib/types'
+import { toastError } from '@/lib/utils/toast'
 import { BackButton } from '@/components/ui/BackButton'
 import { AddressAutocomplete } from '@/components/ui/AddressAutocomplete'
 
@@ -133,11 +134,9 @@ export default function CreateOrderPage() {
   }, [regions])
 
   const loadRegions = useCallback(async () => {
-    const { data } = await supabase
-      .from('regions')
-      .select('*')
-      .eq('is_active', true)
-      .order('name')
+    const { data: allRegions, error } = await supabase.rpc('get_all_regions')
+    if (error) { setError('Не удалось загрузить тарифы. Обновите страницу.'); return }
+    const data = (allRegions as Region[] | null)?.filter(r => r.is_active).sort((a, b) => a.name.localeCompare(b.name))
 
     if (data) {
       setRegions(data)
@@ -157,9 +156,11 @@ export default function CreateOrderPage() {
     setError(null)
 
     try {
-      // Используем координаты из автодополнения или координаты по умолчанию (Минск)
-      const pickupCoords = pickupCoordinates || { lat: 53.9045, lon: 27.5615 }
-      const deliveryCoords = deliveryCoordinates || { lat: 53.9045, lon: 27.5615 }
+      if (!pickupCoordinates || !deliveryCoordinates) {
+        throw new Error('Выберите оба адреса из подсказок, чтобы определить точки доставки')
+      }
+      const pickupCoords = pickupCoordinates
+      const deliveryCoords = deliveryCoordinates
 
       const { data: user } = await supabase.auth.getUser()
       if (!user.user) {
@@ -212,10 +213,14 @@ export default function CreateOrderPage() {
             orderId: data.id,
           }),
         })
-        if (!notifyResponse.ok) console.error('Заказ создан, но push-рассылка не выполнена:', notifyResponse.status)
+        const notification = await notifyResponse.json().catch(() => null)
+        if (!notifyResponse.ok || notification?.data?.failed > 0) {
+          toastError('Заказ создан, но часть уведомлений не доставлена. Заказ доступен водителям в списке.')
+        }
       } catch (notifyError) {
         // Не блокируем создание заказа, если уведомления не отправились
         console.error('Ошибка отправки push-уведомлений:', notifyError)
+        toastError('Заказ создан, но уведомления не отправлены. Заказ доступен водителям в списке.')
       }
 
       router.push('/dashboard/customer')
@@ -229,6 +234,7 @@ export default function CreateOrderPage() {
     <div className="max-w-2xl mx-auto">
       <BackButton />
 
+      <p className="text-sm text-gray-600 mb-3">Стоимость фиксирована по выбранному региону. Расстояние и время маршрута справочные и не меняют тариф.</p>
       <form onSubmit={handleSubmit} className="bg-gray-50 rounded-lg shadow p-6 space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">

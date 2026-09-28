@@ -23,6 +23,7 @@ const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
   images: {
+    localPatterns: [{ pathname: '/**' }],
     remotePatterns: [
       {
         protocol: 'https',

@@ -55,8 +55,8 @@ export function useDriverLocationTracking({
             latitude: position.coords.latitude,
             longitude: position.coords.longitude,
             accuracy: position.coords.accuracy,
-            heading: position.coords.heading || null,
-            speed: position.coords.speed || null,
+            heading: position.coords.heading ?? null,
+            speed: position.coords.speed ?? null,
             order_id: orderId,
           }),
         })
@@ -88,7 +88,8 @@ export function useDriverLocationTracking({
       switch (error.code) {
         case error.PERMISSION_DENIED:
           errorMessage = 'Доступ к геолокации запрещен. Разрешите доступ в настройках браузера.'
-          setIsTracking(false) // Останавливаем отслеживание только при отказе в доступе
+          setIsTracking(false)
+          if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null }
           break
         case error.POSITION_UNAVAILABLE:
           errorMessage = 'Информация о местоположении недоступна. Проверьте настройки GPS.'
@@ -124,22 +125,9 @@ export function useDriverLocationTracking({
       setIsTracking(true)
     }
 
-    // Запрашиваем разрешение и начинаем отслеживание
-    // Используем более мягкие настройки для первоначального запроса
-    navigator.geolocation.getCurrentPosition(
-      () => {
-        // Разрешение получено, начинаем отслеживание
-        startTracking()
-      },
-      handleError,
-      { 
-        enableHighAccuracy: false, // Отключаем высокую точность для более быстрого получения
-        timeout: 15000, // Увеличиваем таймаут до 15 секунд
-        maximumAge: 60000, // Разрешаем использовать кэшированное местоположение
-      }
-    )
+    // Start retries immediately: an initial timeout must not disable tracking.
+    startTracking()
 
-    // Очистка при размонтировании
     return () => {
       isMounted = false
       if (watchIdRef.current !== null) {

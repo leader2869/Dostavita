@@ -78,31 +78,22 @@ export function NewOrderNotification() {
 
       const rejectedOrderIds = new Set(rejections?.map(r => r.order_id) || [])
 
-      // Получаем доступные заказы
-      const { data: availableOrders, error } = await supabase
-        .from('orders')
-        .select('id, order_number, pickup_address, delivery_address, final_price, item_type, description, created_at')
-        .eq('status', 'searching_courier')
-        .order('created_at', { ascending: false })
-        .limit(1)
-
-      if (error) {
-        console.error('Ошибка проверки доступных заказов:', error)
-        return
+      // Page until a candidate is found; an excluded newest order must not hide older ones.
+      let latestOrder: any = null
+      for (let offset = 0; !latestOrder; offset += 50) {
+        const { data: availableOrders, error } = await supabase
+          .from('orders')
+          .select('id, order_number, pickup_address, delivery_address, final_price, item_type, description, created_at')
+          .eq('status', 'searching_courier')
+          .eq('visibility', 'public')
+          .order('created_at', { ascending: false })
+          .order('id', { ascending: false })
+          .range(offset, offset + 49)
+        if (error) throw error
+        latestOrder = availableOrders?.find(order => !rejectedOrderIds.has(order.id) && !shownOrderIdsRef.current.has(order.id))
+        if (!availableOrders || availableOrders.length < 50) break
       }
-
-      if (!availableOrders || availableOrders.length === 0) {
-        return
-      }
-
-      // Фильтруем заказы, исключая те, от которых водитель отказался
-      const filteredOrders = availableOrders.filter(order => !rejectedOrderIds.has(order.id))
-
-      if (filteredOrders.length === 0) {
-        return
-      }
-
-      const latestOrder = filteredOrders[0]
+      if (!latestOrder) return
 
       // Проверяем, это новый заказ (не тот, который мы уже показывали)
       // И модальное окно не должно быть уже открыто
