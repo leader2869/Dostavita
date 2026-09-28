@@ -1,3 +1,4 @@
+import { loadDriverDashboardOrders } from '@/lib/driver-dashboard-orders'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -30,105 +31,8 @@ export default async function DriverDashboard() {
     .maybeSingle()
   const organizationId = affiliation?.organization_id
 
-         // Получаем доступные заказы (все заказы со статусом "ищем курьера")
-         // Включаем заказы, которые были отменены, но сейчас снова активны (статус searching_courier)
-         const { data: availableOrders } = await supabase
-           .from('orders')
-           .select('id, order_number, pickup_address, delivery_address, final_price, item_type, description, created_at, cancelled_at, ready_at')
-           .eq('status', 'searching_courier')
-           .order('created_at', { ascending: false })
-           .limit(10)
-
-  // Получаем заказы, от которых водитель отказался (скрытые заказы)
-  const { data: rejectedOrders, error: rejectedOrdersError } = await supabase
-    .rpc('get_driver_rejected_orders', { p_driver_user_id: user.id })
-
-  if (rejectedOrdersError) {
-    console.error('Ошибка загрузки скрытых заказов:', rejectedOrdersError)
-  }
-  
-  const { data: directRejections, error: directRejectionsError } = await supabase
-    .from('order_rejections')
-    .select('order_id')
-    .eq('driver_user_id', user.id)
-  
-  if (directRejectionsError) {
-    console.error('Ошибка загрузки отказов (direct):', directRejectionsError)
-  }
-  
-  if (directRejections && directRejections.length > 0) {
-    const rejectionOrderIds = directRejections.map(r => r.order_id)
-    
-    const { data: rejectedOrdersDirect, error: rejectedOrdersDirectError } = await supabase
-             .from('orders')
-             .select('id, order_number, status, pickup_address, delivery_address, final_price, item_type, description, created_at, cancelled_at, ready_at')
-             .in('id', rejectionOrderIds)
-             .eq('status', 'searching_courier')
-    
-    if (rejectedOrdersDirectError) {
-      console.error('Ошибка загрузки отклонённых заказов:', rejectedOrdersDirectError)
-    }
-  }
-  
-  let cancelledOrders = rejectedOrders || []
-  
-  if ((!cancelledOrders || cancelledOrders.length === 0) && directRejections && directRejections.length > 0) {
-    const rejectionOrderIds = directRejections.map(r => r.order_id)
-    const { data: fallbackOrders, error: fallbackError } = await supabase
-             .from('orders')
-             .select('id, order_number, pickup_address, delivery_address, final_price, item_type, description, created_at, cancelled_at, status, ready_at')
-             .in('id', rejectionOrderIds)
-             .eq('status', 'searching_courier')
-    
-    if (!fallbackError && fallbackOrders) {
-      cancelledOrders = fallbackOrders
-    } else if (fallbackError) {
-      console.error('Ошибка fallback загрузки отклонённых заказов:', fallbackError)
-    }
-  }
-  
-  if (!cancelledOrders) {
-    cancelledOrders = []
-  }
-
-  // Получаем отказы водителя, чтобы исключить их из списка
-  const { data: rejections, error: rejectionsError } = await supabase
-    .from('order_rejections')
-    .select('order_id')
-    .eq('driver_user_id', user.id)
-
-  if (rejectionsError) {
-    console.error('Ошибка загрузки отказов:', rejectionsError)
-  }
-
-  // Фильтруем заказы, исключая те, от которых водитель отказался
-  const rejectedOrderIds = new Set(rejections?.map(r => r.order_id) || [])
-  const filteredOrders = availableOrders?.filter(order => !rejectedOrderIds.has(order.id)) || []
-
-  // Получаем активные заказы водителя (где executor_user_id равен ID текущего пользователя)
-  // Пробуем сначала без фильтра по статусу, чтобы увидеть все заказы
-  const { data: allMyOrders, error: allOrdersError } = await supabase
-    .from('orders')
-    .select('id, executor_user_id, status, created_at, customer_id, client_id')
-    .eq('executor_user_id', user.id)
-    .order('created_at', { ascending: false })
-    .limit(20)
-
-  if (allOrdersError) {
-    console.error('Ошибка загрузки заказов водителя:', allOrdersError)
-  }
-
-  const { data: myOrders, error: myOrdersError } = await supabase
-           .from('orders')
-           .select('id, order_number, pickup_address, delivery_address, final_price, item_type, description, created_at, cancelled_at, status, customer_id, client_id, executor_user_id, sender_phone, recipient_phone, pickup_coordinates, delivery_coordinates, ready_at')
-           .eq('executor_user_id', user.id)
-           .in('status', ['courier_accepted', 'courier_coming', 'courier_delivering'])
-           .order('created_at', { ascending: false })
-           .limit(10)
-
-  if (myOrdersError) {
-    console.error('Ошибка загрузки активных заказов водителя:', myOrdersError)
-  }
+  const { available: filteredOrders, hidden: cancelledOrders, active: myOrders } =
+    await loadDriverDashboardOrders(supabase, user.id)
 
   return (
     <>
