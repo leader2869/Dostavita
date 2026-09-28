@@ -38,9 +38,9 @@ export default async function DashboardLayout({
         <div className="min-h-screen bg-white relative">
           <nav className="fixed top-0 left-0 right-0 bg-white shadow-sm border-b border-gray-200 z-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="flex justify-between h-16">
-                <div className="flex items-center">
-                  <h1 className="flex items-center gap-2 text-3xl font-bold text-gray-900 tracking-tight"><Image src="/icon.svg?v=dostavita-2" alt="" width={40} height={40} />Dostavita</h1>
+              <div className="flex justify-between gap-3 h-16">
+                <div className="flex min-w-0 flex-1 items-center">
+                  <h1 className="hidden shrink-0 items-center gap-2 text-3xl font-bold text-gray-900 tracking-tight md:flex"><Image src="/icon.svg?v=dostavita-2" alt="" width={40} height={40} />Dostavita</h1>
                   <PageTitle />
                 </div>
                 <DashboardNav profile={userProfile} userId={user.id} />
