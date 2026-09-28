@@ -5,6 +5,7 @@ import type { User } from '@/lib/types'
 import { getCachedUserAndProfile } from '@/lib/supabase/cached-auth'
 import { AvailableOrdersList } from '@/components/driver/AvailableOrdersList'
 import { DriverLocationTracker } from '@/components/driver/DriverLocationTracker'
+import { DriverChatSection } from '@/components/driver/DriverChatSection'
 import { DriverPushNotifications } from '@/components/driver/DriverPushNotifications'
 import { OrderActions } from '@/components/driver/OrderActions'
 import { formatAddressForOrder } from '@/lib/utils/formatAddress'
@@ -193,6 +194,11 @@ export default async function DriverDashboard() {
           />
         </div>
       </div>
+      {organizationId && (
+        <div className="mt-6">
+          <DriverChatSection driverUserId={user.id} organizationId={organizationId} />
+        </div>
+      )}
 
     </div>
     </>
