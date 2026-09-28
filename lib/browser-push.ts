@@ -30,7 +30,15 @@ export async function saveDevicePushSubscription(subscription: PushSubscription)
     await subscription.unsubscribe()
     throw new Error('Включите уведомления ещё раз для текущего аккаунта.')
   }
-  if (!response.ok) throw new Error('Подписка не сохранена. Проверьте сеть и повторите.')
+  if (!response.ok) {
+    const result = await response.json().catch(() => null)
+    const code = result?.error?.code
+    if (['PUSH_INVALID_SUBSCRIPTION', 'PUSH_UNSUPPORTED_PROVIDER'].includes(code)) {
+      throw new Error(result.error.message)
+    }
+    if (response.status === 401) throw new Error('Сессия истекла. Войдите в аккаунт заново и включите уведомления.')
+    throw new Error('Сервер не смог сохранить подписку. Повторите попытку позже.')
+  }
 }
 
 /** Removes this browser only. Also used before logout while its session is valid. */

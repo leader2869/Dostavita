@@ -45,3 +45,7 @@ test('logout revokes this browser even when server cleanup fails',async()=>{
  })
  await assert.rejects(removeDevicePushSubscription());assert.equal(revoked,1);assert.equal(body.endpoint,endpoint)
 })
+test('unsupported provider is distinguished from a network failure',async()=>{
+ const {saveDevicePushSubscription}=load('lib/browser-push.ts',{}, {setTimeout,clearTimeout,fetch:async()=>({ok:false,status:400,json:async()=>({error:{code:'PUSH_UNSUPPORTED_PROVIDER',message:'Unsupported push service'}})})})
+ await assert.rejects(saveDevicePushSubscription({endpoint,toJSON:()=>({keys:{auth:'test',p256dh:'test'}})}),/Unsupported push service/)
+})
