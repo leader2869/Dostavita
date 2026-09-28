@@ -12,17 +12,17 @@ interface TrackerEnvironment {
   isOnline: () => boolean
   isVisible: () => boolean
   fetch: typeof fetch
-  every: typeof setInterval
-  cancelEvery: typeof clearInterval
-  later: typeof setTimeout
-  cancelLater: typeof clearTimeout
+  every: (callback: () => void, delay: number) => number
+  cancelEvery: (id: number) => void
+  later: (callback: () => void, delay: number) => number
+  cancelLater: (id: number) => void
 }
 
 /** A foreground browser tracker; does not claim background execution guarantees. */
 export function startLocationTracker(options: TrackerOptions, env: TrackerEnvironment) {
   let stopped = false
   let busy = false
-  let timer: ReturnType<typeof setInterval> | null = null
+  let timer: number | null = null
   let requestController: AbortController | null = null
   const stopTimer = () => { if (timer !== null) { env.cancelEvery(timer); timer = null } }
   const setFailure = (message: string) => { options.onTracking(false); options.onError(message) }

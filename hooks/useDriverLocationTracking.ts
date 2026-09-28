@@ -23,7 +23,11 @@ export function useDriverLocationTracking({ enabled = true, interval = 60000, or
       isOnline: () => navigator.onLine,
       isVisible: () => document.visibilityState === 'visible',
       fetch: (input, init) => fetch(input, init),
-      every: setInterval, cancelEvery: clearInterval, later: setTimeout, cancelLater: clearTimeout,
+      // Browser timers require Window as their receiver, not the tracker environment.
+      every: (handler, timeout) => window.setInterval(handler, timeout),
+      cancelEvery: id => window.clearInterval(id),
+      later: (handler, timeout) => window.setTimeout(handler, timeout),
+      cancelLater: id => window.clearTimeout(id),
     })
   }, [enabled, interval, orderId])
   return { isTracking, error }

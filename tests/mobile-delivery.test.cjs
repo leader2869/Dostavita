@@ -85,3 +85,24 @@ test('a failed push registration never marks the device subscribed', async () =>
     assert.equal(state[1],false);assert.equal(state[2],false);assert.equal(state[3],'network failure');assert.deepEqual(order,['permission','registration'])
   } finally { if(previous===undefined)delete process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;else process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY=previous }
 })
+
+test('driver hook preserves browser timer receivers on startup, GPS upload and cleanup', async () => {
+  let effect, cleanup, position, uploads=0
+  const calls=[]
+  const browser={addEventListener(){},removeEventListener(){}}
+  for (const name of ['setInterval','clearInterval','setTimeout','clearTimeout']) {
+    browser[name]=function () { 'use strict'; assert.equal(this,browser,`${name} requires Window receiver`);calls.push(name);return 1 }
+  }
+  const {useDriverLocationTracking}=load('hooks/useDriverLocationTracking.ts', {
+    react:{useState:()=>[null,()=>{}],useEffect:fn=>{effect=fn}},
+  }, {window:browser,document:{visibilityState:'visible',addEventListener(){},removeEventListener(){}},
+    navigator:{onLine:true,geolocation:{getCurrentPosition(ok){position=ok}}},
+    fetch:async()=>{uploads++;return {ok:true}},AbortController,
+    setInterval:browser.setInterval,clearInterval:browser.clearInterval,setTimeout:browser.setTimeout,clearTimeout:browser.clearTimeout,
+  })
+  useDriverLocationTracking();cleanup=effect()
+  await position({coords:{latitude:53,longitude:27,accuracy:5}})
+  cleanup()
+  assert.equal(uploads,1)
+  assert.deepEqual(calls,['setInterval','setTimeout','clearTimeout','clearInterval'])
+})
