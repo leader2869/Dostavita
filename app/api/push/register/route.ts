@@ -17,48 +17,19 @@ export async function POST(request: Request) {
     const { subscription } = bodyResult.data
     if (!isTrustedPushEndpoint(subscription.endpoint)) return apiError('Недопустимый push-провайдер', 400)
 
-    // Сохраняем подписку в базе данных
-    // Проверяем, существует ли уже подписка для этого пользователя и endpoint
-    const { data: existingSubscription, error: fetchError } = await supabase
-      .from('push_subscriptions')
-      .select('*')
-      .eq('user_id', user.id)
-      .eq('endpoint', subscription.endpoint)
-      .maybeSingle()
-
-    if (fetchError) {
-      console.error('Ошибка получения существующей подписки:', fetchError)
-      return apiError(maskInternalMessage(fetchError.message), 500)
-    }
-
-    if (existingSubscription) {
-      const { error: updateError } = await supabase
-        .from('push_subscriptions')
-        .update({
-          p256dh_key: subscription.keys.p256dh,
-          auth_key: subscription.keys.auth,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', existingSubscription.id)
-
-      if (updateError) {
-        console.error('Ошибка обновления push-подписки:', updateError)
-        return apiError(maskInternalMessage(updateError.message), 500)
+    // Atomic per-device upsert. RLS never transfers another account's endpoint.
+    const { error } = await supabase.from('push_subscriptions').upsert({
+      user_id: user.id,
+      endpoint: subscription.endpoint,
+      p256dh_key: subscription.keys.p256dh,
+      auth_key: subscription.keys.auth,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'endpoint' })
+    if (error) {
+      if (error.code === '42501' || error.code === '23505') {
+        return apiError('Подписка принадлежит другой сессии. Включите уведомления заново.', 409)
       }
-    } else {
-      const { error: insertError } = await supabase
-        .from('push_subscriptions')
-        .insert({
-          user_id: user.id,
-          endpoint: subscription.endpoint,
-          p256dh_key: subscription.keys.p256dh,
-          auth_key: subscription.keys.auth,
-        })
-
-      if (insertError) {
-        console.error('Ошибка сохранения push-подписки:', insertError)
-        return apiError(maskInternalMessage(insertError.message), 500)
-      }
+      return apiError('Не удалось сохранить подписку. Попробуйте ещё раз.', 500)
     }
 
     return apiSuccess()

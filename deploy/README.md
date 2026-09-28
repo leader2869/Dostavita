@@ -48,7 +48,7 @@ SMTP has not been configured or validated; email delivery remains a follow-up.
 
 1. Export source roles, schema, data (including Auth), and Storage objects using official Supabase migration instructions. Keep original exports intact and private.
 2. Initialize self-hosted Supabase with new generated secrets; never start default credentials. Match extensions and PostgreSQL version.
-3. Restore on the new, isolated instance. Schema exports can omit ACLs, auth-schema triggers and Realtime publications. Apply migrations 123–125 after restoration, then run `psql -v ON_ERROR_STOP=1 -f deploy/verify-database.sql`. Confirm effective grants (including column grants), table counts, auth users, order/payment functions, RLS policies and private storage objects. A successful import or passing source tests alone is not a deployment gate.
+3. Restore on the new, isolated instance. Schema exports can omit ACLs, auth-schema triggers and Realtime publications. Apply migrations 123–126 after restoration, then run `psql -v ON_ERROR_STOP=1 -f deploy/verify-database.sql`. Confirm effective grants (including column grants), table counts, auth users, order/payment functions, RLS policies and private storage objects. A successful import or passing source tests alone is not a deployment gate.
 4. Build application with destination public URL/key. Supply service role and VAPID private key only at runtime. Preserve push keys or arrange re-subscription.
 5. Test on a separate staging hostname: login for roles, driver/company links, balances, orders, concurrent acceptance/payment, file uploads, realtime and push. Configure working SMTP before registration email tests.
 6. For final cutover, stop writes on the old app, take a fresh final export and import, verify counts and then change application DNS. Do not allow independent writes to old and new databases.
@@ -68,8 +68,10 @@ A database dump does not include Storage file content, SMTP configuration, or OA
 
 ## Audit repairs (2026-09-28)
 
-Migrations 123–125 restore effective grants and restrictive financial policies, company order assignment, input validation, atomic location writes, signup profiles, Realtime publications and private chat photos. Existing balances are never rewritten by these migrations. Preserve a fresh full database dump before applying them. After migration, run the invariant checker and exercise authenticated HTTP/Realtime/Storage against an isolated environment.
+Migrations 123–126 restore effective grants and restrictive financial policies, company order assignment, input validation, atomic location writes, signup profiles, Realtime publications and private chat photos. Existing balances are never rewritten by these migrations. Preserve a fresh full database dump before applying them. After migration, run the invariant checker and exercise authenticated HTTP/Realtime/Storage against an isolated environment.
 
 The private photo path is `driver-org-chat/<organization>/<driver-or-general>/<uploader>/<uuid>.<ext>`. Messages keep the object path; the application issues short-lived signed URLs after Storage authorizes the reader. Do not make this bucket public.
 
 When renaming containers in an isolated stack, preserve the Realtime network alias `realtime-dev.supabase-realtime`: upstream Envoy uses that DNS name and tenant host. Missing this alias causes WebSocket 503 even with a correct database publication.
+
+Migration 126 allows multiple push devices per user while retaining unique endpoints and owner-only RLS. Mobile push requires an explicit permission button and confirmed server registration. GPS retries transient errors and refreshes on reconnect/visibility; background execution on physical phones still requires device testing. SMTP setup is deferred at the owner's request.

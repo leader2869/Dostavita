@@ -18,5 +18,7 @@ BEGIN
   IF NOT EXISTS(SELECT 1 FROM pg_publication_tables WHERE pubname='supabase_realtime' AND schemaname='public' AND tablename=t) THEN RAISE EXCEPTION 'Realtime table missing: %',t; END IF;
  END LOOP;
  IF NOT EXISTS(SELECT 1 FROM storage.buckets WHERE id='chat-photos' AND public=false AND file_size_limit=5242880) THEN RAISE EXCEPTION 'Private chat photo bucket missing/misconfigured'; END IF;
+ IF EXISTS(SELECT 1 FROM pg_constraint WHERE conrelid='public.push_subscriptions'::regclass AND conname='push_subscriptions_user_id_key') THEN RAISE EXCEPTION 'Push still limited to one device'; END IF;
+ IF NOT EXISTS(SELECT 1 FROM pg_index WHERE indrelid='public.push_subscriptions'::regclass AND indexrelid=to_regclass('public.idx_push_subscriptions_endpoint') AND indisunique AND indisvalid) THEN RAISE EXCEPTION 'Unique push endpoint index missing'; END IF;
  RAISE NOTICE 'Deployment database invariants passed';
 END $$;

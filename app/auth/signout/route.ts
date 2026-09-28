@@ -17,14 +17,14 @@ export async function POST(request: NextRequest) {
   }
   
   // Получаем базовый URL из заголовков запроса
-  const origin = request.headers.get('origin') || request.nextUrl.origin
+  const origin = process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin
   const loginUrl = new URL('/login', origin)
   
   // НЕ добавляем параметр signedOut, чтобы избежать ошибки 405
   // Просто редиректим на /login
   
   // Создаем редирект с очисткой cookies
-  const response = NextResponse.redirect(loginUrl)
+  const response = NextResponse.redirect(loginUrl, 303)
   
   // Очищаем cookies сессии Supabase
   response.cookies.delete('sb-access-token')

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
-import Script from 'next/script'
+import { RegisterServiceWorker } from '@/components/pwa/RegisterServiceWorker'
 import { Amatic_SC } from 'next/font/google'
 import { Toaster } from '@/components/ui/Toaster'
 import { SupabaseEnvLoader } from '@/components/SupabaseEnvLoader'
@@ -51,22 +51,11 @@ export default function RootLayout({
         {supabaseEnvScript ? (
           <script dangerouslySetInnerHTML={{ __html: supabaseEnvScript }} />
         ) : null}
-        <Script id="register-sw" strategy="afterInteractive">
-          {`
-            if ('serviceWorker' in navigator) {
-              window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js').catch((error) => {
-                  if (process.env.NODE_ENV === 'development') {
-                    console.error('Ошибка регистрации Service Worker:', error)
-                  }
-                })
-              })
-            }
-          `}
-        </Script>
+
       </head>
       <body style={{ backgroundColor: '#ffffff', margin: 0, padding: 0 }}>
         <SupabaseEnvLoader>
+          <RegisterServiceWorker />
           {children}
           <Toaster />
         </SupabaseEnvLoader>

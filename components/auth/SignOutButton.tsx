@@ -1,5 +1,7 @@
 'use client'
 
+import { removeDevicePushSubscription } from '@/lib/browser-push'
+
 import { useState } from 'react'
 
 export function SignOutButton() {
@@ -8,11 +10,13 @@ export function SignOutButton() {
   const handleSignOut = async () => {
     setLoading(true)
     try {
+      await removeDevicePushSubscription().catch(() => console.warn('Подписка отключена локально; очистка на сервере будет повторена при доставке'))
       // Выполняем выход через API
       await fetch('/auth/signout', {
         method: 'POST',
         credentials: 'include',
       })
+      sessionStorage.removeItem('driver_shown_order_ids')
       // Используем window.location для надежного редиректа
       // Добавляем небольшую задержку для завершения запроса
       setTimeout(() => {

@@ -158,6 +158,12 @@ try:
  denied('outsider cannot upload into organization chat',lambda:act(other,f"INSERT INTO storage.objects(bucket_id,name) VALUES('chat-photos','{photo}')"))
  check('private bucket configured',sql("SELECT public FROM storage.buckets WHERE id='chat-photos'"),'f')
  check('realtime application tables restored',sql("SELECT count(*) FROM pg_publication_tables WHERE pubname='supabase_realtime' AND schemaname='public'"),'7')
+ sql((root/'supabase/migrations/126_push_multiple_devices.sql').read_text())
+ act(d,f"INSERT INTO push_subscriptions(user_id,endpoint,p256dh_key,auth_key) VALUES('{d}','https://fcm.googleapis.com/qa-one','key','key'),('{d}','https://fcm.googleapis.com/qa-two','key','key')")
+ check('one driver may register two push devices',act(d,"SELECT count(*) FROM push_subscriptions").splitlines()[-1],'2')
+ act(d,"DELETE FROM push_subscriptions WHERE endpoint='https://fcm.googleapis.com/qa-one'")
+ check('removing one device preserves another',act(d,"SELECT count(*) FROM push_subscriptions").splitlines()[-1],'1')
+ check('another user cannot see push keys',act(other,"SELECT count(*) FROM push_subscriptions").splitlines()[-1],'0')
  print('All security checks passed; no external data used.')
 except subprocess.CalledProcessError as e:
  print(e.stderr);raise
