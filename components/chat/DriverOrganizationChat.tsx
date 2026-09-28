@@ -295,13 +295,6 @@ export function DriverOrganizationChat({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [organizationId, driverId])
 
-  // Сбрасываем флаг при закрытии модального окна или изменении чата
-  useEffect(() => {
-    return () => {
-      setHasMarkedAsRead(false)
-    }
-  }, [driverId, organizationId])
-
   const handleSend = async () => {
     if ((!newMessage.trim() && !uploadingPhoto) || sending) return
 
