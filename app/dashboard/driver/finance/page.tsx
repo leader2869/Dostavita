@@ -367,11 +367,12 @@ export default function DriverFinancePage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         {/* Баланс */}
         <div className="bg-gray-50 rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold mb-4 text-gray-900">Баланс</h2>
+          <h2 className="text-xl font-semibold mb-4 text-gray-900">Касса — деньги за заказы</h2>
           <p className="text-3xl font-bold text-green-600">
             {balance?.amount ? parseFloat(balance.amount).toFixed(2) : '0.00'} {balance?.currency || 'BYN'}
           </p>
           
+          <p className="mt-2 text-sm text-gray-600">Полученные деньги за заказы. Расчёты по передаче этих денег компании ведутся отдельно от вашей зарплаты.</p>
           {/* Информация о запросах, ожидающих подтверждения */}
           {(() => {
             const pendingRequests = cashDepositRequests.filter((r: any) => r.status === 'pending')
@@ -502,7 +503,7 @@ export default function DriverFinancePage() {
                     <p className="text-xl font-bold text-red-400">{order.final_price} BYN</p>
                     <button
                       onClick={async () => {
-                        if (!confirm(`Принять оплату заказа №${order.order_number || order.id?.slice(0, 8) || 'N/A'}? Деньги будут начислены на ваш баланс.`)) {
+                        if (!confirm(`Принять оплату заказа №${order.order_number || order.id?.slice(0, 8) || 'N/A'}? Деньги будут учтены в кассе за заказы, а не в зарплате.`)) {
                           return
                         }
                         try {
@@ -525,7 +526,7 @@ export default function DriverFinancePage() {
                           } else if (data === false) {
                             toastError('Не удалось обработать оплату. Возможно, заказ уже обработан или не найден.')
                           } else {
-                            toastSuccess('Оплата успешно принята! Деньги начислены на ваш баланс.')
+                            toastSuccess('Оплата успешно принята! Деньги учтены в кассе за заказы.')
                             setTimeout(() => {
                               loadData()
                             }, 2000)
@@ -572,7 +573,7 @@ export default function DriverFinancePage() {
             <div className="bg-gray-50 rounded-lg shadow-xl p-6 max-w-md w-full">
               <h2 className="text-2xl font-bold mb-4 text-gray-900">Запрос на сдачу кассы</h2>
               <p className="text-gray-700 mb-2">
-                <span className="text-green-600 font-semibold">Доступный баланс:</span> <span className="text-green-600 font-semibold">
+                <span className="text-green-600 font-semibold">Доступно к сдаче кассы:</span> <span className="text-green-600 font-semibold">
                   {balance?.amount ? parseFloat(balance.amount).toFixed(2) : '0.00'} BYN
                 </span>
               </p>
@@ -585,7 +586,7 @@ export default function DriverFinancePage() {
                 Доступно для нового запроса: <span className="font-semibold text-green-600">{availableBalance.toFixed(2)} BYN</span>
               </p>
               <p className="text-gray-600 text-sm mb-4">
-                После отправки запроса деньги останутся на вашем балансе до принятия запроса организацией.
+                После отправки запроса деньги останутся в кассе до принятия запроса организацией.
               </p>
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -630,7 +631,7 @@ export default function DriverFinancePage() {
                       console.error('Ошибка создания запроса:', error)
                       toastError(error.message)
                     } else {
-                      toastSuccess('Запрос на сдачу кассы отправлен! Деньги останутся на вашем балансе до принятия запроса организацией.')
+                      toastSuccess('Запрос на сдачу кассы отправлен! Деньги останутся в кассе до принятия запроса организацией.')
                       setShowDepositModal(false)
                       setDepositAmount('')
                       loadData()

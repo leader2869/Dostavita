@@ -68,7 +68,7 @@ export function PayrollPanel({ driverId }: { driverId?: string }) {
   const input = 'mt-1 w-full rounded border border-gray-300 bg-white p-2 text-gray-900'
   return <section className="my-6 rounded-lg border bg-white p-4 text-gray-900" aria-label="Зарплата водителей">
     <h2 className="text-xl font-semibold">{data?.role === 'driver' ? 'Моя зарплата' : 'Зарплата водителей'}</h2>
-    <p className="mt-2 text-sm text-gray-600">Заработок от компании учитывается отдельно от денег, полученных от клиентов. Все суммы в BYN.</p>
+    <p className="mt-2 text-sm text-gray-600">Зарплата и касса — два независимых баланса. Сдача денег за заказы не уменьшает зарплату, а выплата зарплаты не уменьшает кассу. Все суммы в BYN.</p>
     {error && <p role="alert" className="my-2 text-red-700">{error} <button onClick={() => void load()} className="underline">Обновить</button></p>}
     {notice && <p role="status" className="my-2 text-green-700">{notice}</p>}
     {!data && !error && <p className="mt-3">Загрузка зарплаты…</p>}
@@ -81,7 +81,7 @@ export function PayrollPanel({ driverId }: { driverId?: string }) {
       <div className="my-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
         <div>Начислено за всё время<strong className="block">{money(selected.accrued)}</strong></div>
         <div>Выплачено<strong className="block">{money(selected.paid)}</strong></div>
-        <div>Осталось выплатить<strong className="block">{money(selected.outstanding)}</strong></div>
+        <div>Баланс зарплаты<strong className="block">{money(selected.outstanding)}</strong><span className="text-sm text-gray-600">{data?.role==='driver'?'Компания должна выплатить вам':'Компания должна выплатить водителю'}</span></div>
       </div>
       <p className="text-sm">Договорной оклад: {money(selected.monthly_amount)} в месяц. За заказ: {selected.order_mode==='percent'?`${selected.order_value}% от стоимости`:selected.order_mode==='fixed'?money(selected.order_value):'не настроено'}.</p>
       <p className="mt-1 text-sm text-gray-600">Оплата за заказ начисляется после завершения доставки, даже если клиент ещё не оплатил. Используется ставка на момент принятия заказа. Оклад за месяц компания начисляет вручную.</p>

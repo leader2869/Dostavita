@@ -151,7 +151,7 @@ export default async function CustomerDashboard() {
                     </p>
                   )}
                   <p className="text-gray-700 mt-2">
-                    <span className="text-gray-600">Баланс:</span> 
+                    <span className="text-gray-600">Касса:</span>
                     <span className="font-semibold text-green-600 ml-1">
                       {driverBalances[driver.id]?.amount?.toFixed(2) || '0.00'} {driverBalances[driver.id]?.currency || 'BYN'}
                     </span>

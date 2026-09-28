@@ -67,6 +67,10 @@ try:
  check('payment retry is idempotent',record('payment',2,request=request),payment)
  rejected('idempotency key cannot change amount',lambda:record('payment',3,request=request))
  check('payroll payment does not debit client cash',sql(f"SELECT amount::text FROM balances WHERE user_id='{d}'"),'10.00')
+ cash_request=act(d,f"SELECT deposit_cash_to_organization('{d}',5)").splitlines()[-1]
+ act(g,f"SELECT approve_cash_deposit_request('{cash_request}')")
+ check('cash handover reduces only client cash',sql(f"SELECT amount::text FROM balances WHERE user_id='{d}'"),'5.00')
+ check('cash handover leaves salary balance unchanged',sql("SELECT sum(CASE WHEN kind='payment' THEN -amount ELSE amount END)::text FROM driver_payroll_ledger"),'5.25')
  record('monthly',500,"'2026-09-01'")
  rejected('one monthly accrual per employer driver month',lambda:record('monthly',100,"'2026-09-01'"))
  rejected('future month cannot be accrued',lambda:record('monthly',1,"'2099-01-01'"))

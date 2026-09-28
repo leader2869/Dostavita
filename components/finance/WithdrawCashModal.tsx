@@ -30,7 +30,7 @@ export function WithdrawCashModal({
           <span className="text-gray-900 font-semibold">{driver.driver_full_name || 'Без имени'}</span>
         </p>
         <p className="text-gray-700 mb-4">
-          Доступный баланс водителя:{' '}
+          Доступная касса водителя:{' '}
           <span className="text-brand-light font-semibold">{maxBalance.toFixed(2)} BYN</span>
         </p>
         <div className="mb-4">

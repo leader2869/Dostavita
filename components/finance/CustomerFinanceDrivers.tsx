@@ -51,7 +51,7 @@ export function CustomerFinanceDrivers({
                         </span>
                       </p>
                       <p className="text-gray-700">
-                        Баланс:{' '}
+                        Касса к сдаче:{' '}
                         <span className="text-blue-400 font-semibold">
                           {balanceNum.toFixed(2)} BYN
                         </span>

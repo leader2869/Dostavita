@@ -164,7 +164,7 @@ export default async function DriverDetailsPage({ params }: { params: Promise<{ 
       {/* Финансы */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <div className="bg-gray-50 rounded-lg shadow p-6">
-          <h3 className="text-sm text-gray-600 mb-2">Баланс</h3>
+          <h3 className="text-sm text-gray-600 mb-2">Касса водителя — деньги за заказы</h3>
           <p className="text-3xl font-bold text-green-600">
             {displayBalance.amount ? parseFloat(displayBalance.amount).toFixed(2) : '0.00'} {displayBalance.currency || 'BYN'}
           </p>
