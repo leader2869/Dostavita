@@ -55,3 +55,12 @@ export function groupBoardOrders(orders: BoardOrder[], search: string, driverId:
   groups.completed.sort((a,b)=>(b.completed_at??'').localeCompare(a.completed_at??'') || b.id.localeCompare(a.id))
   return groups
 }
+
+export function formatSearchWait(createdAt: string, now: number): string {
+  const start = Date.parse(createdAt)
+  if (!Number.isFinite(start)) return 'Время неизвестно'
+  const minutes = Math.max(0, Math.floor((now-start)/60000))
+  if (minutes===0) return 'менее минуты'
+  const days=Math.floor(minutes/1440), hours=Math.floor(minutes%1440/60), rest=minutes%60
+  return [days?`${days} д`:null,hours?`${hours} ч`:null,`${rest} мин`].filter(Boolean).join(' ')
+}

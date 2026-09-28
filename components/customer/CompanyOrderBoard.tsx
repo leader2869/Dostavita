@@ -4,10 +4,12 @@ import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { BOARD_STATUSES, groupBoardOrders, type BoardStatus, type CompanyBoardData } from '@/lib/company-order-board'
+import { BoardDriverAssignment } from './BoardDriverAssignment'
+import { formatSearchWait } from '@/lib/company-order-board'
 import { formatAddressForOrder } from '@/lib/utils/formatAddress'
 
 const columns: Record<BoardStatus,{title:string;color:string}> = {
-  searching_courier:{title:'Ищут водителя',color:'border-amber-400 bg-amber-50'},
+  searching_courier:{title:'Поиск водителя',color:'border-amber-400 bg-amber-50'},
   courier_accepted:{title:'Водитель принял',color:'border-sky-400 bg-sky-50'},
   courier_coming:{title:'Едет к отправителю',color:'border-indigo-400 bg-indigo-50'},
   courier_delivering:{title:'Доставляет',color:'border-violet-400 bg-violet-50'},
@@ -17,6 +19,13 @@ const columns: Record<BoardStatus,{title:string;color:string}> = {
 
 export function CompanyOrderBoard({initialData,organizationId}:{initialData:CompanyBoardData;organizationId:string}) {
   const [data,setData]=useState(initialData)
+  const [now,setNow]=useState<number|null>(null)
+  useEffect(()=>{
+    const tick=()=>setNow(Date.now())
+    tick()
+    const timer=window.setInterval(tick,15000)
+    return()=>window.clearInterval(timer)
+  },[])
   const [search,setSearch]=useState('')
   const [driverId,setDriverId]=useState('')
   const [error,setError]=useState('')
@@ -58,7 +67,7 @@ export function CompanyOrderBoard({initialData,organizationId}:{initialData:Comp
     document.addEventListener('visibilitychange',visibleRefresh)
     return()=>{mounted.current=false;request.current?.abort();window.clearInterval(interval);window.clearTimeout(debounce);window.removeEventListener('online',visibleRefresh);document.removeEventListener('visibilitychange',visibleRefresh);void supabase.removeChannel(channel)}
   },[organizationId,refresh])
-  const groups=useMemo(()=>groupBoardOrders(data.orders,search,driverId),[data.orders,search,driverId])
+  const groups=useMemo(()=>groupBoardOrders(data.orders,search,driverId,now===null?undefined:new Date(now)),[data.orders,search,driverId,now])
   const names=new Map(data.drivers.map(driver=>[driver.id,driver.full_name]))
   const active=BOARD_STATUSES.slice(0,4).reduce((sum,status)=>sum+groups[status].length,0)
   return <section aria-label="Доска заказов" className="mb-8 min-w-0">
@@ -85,16 +94,19 @@ export function CompanyOrderBoard({initialData,organizationId}:{initialData:Comp
           <header className="flex items-center justify-between gap-2 p-3"><h2 className="text-sm font-bold text-gray-900">{info.title}</h2><span className="rounded-full bg-white px-2 py-0.5 text-sm font-semibold text-gray-700">{orders.length}</span></header>
           <div className="max-h-[65vh] space-y-3 overflow-y-auto px-3 pb-3">
             {orders.length===0&&<p className="rounded-lg border border-dashed border-gray-300 p-4 text-sm text-gray-500">Нет заказов</p>}
-            {orders.slice(0,limit).map(order=><Link key={order.id} href={`/dashboard/customer/orders/${order.id}`} className="block rounded-lg border border-gray-200 bg-white p-3 shadow-sm transition hover:border-brand-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-dark">
+            {orders.slice(0,limit).map(order=><article key={order.id} className="rounded-lg border border-gray-200 bg-white shadow-sm"><Link href={`/dashboard/customer/orders/${order.id}`} className="block rounded-lg p-3 transition hover:border-brand-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-dark">
               <div className="mb-2 flex items-center justify-between gap-2"><strong className="text-sm text-gray-900">№{order.order_number??order.id.slice(0,8)}</strong><span className="text-sm font-semibold text-gray-900">{Number(order.final_price).toFixed(2)} BYN</span></div>
               {status!=='completed'&&<><p className="text-xs font-medium uppercase text-gray-400">Откуда</p><p className="break-words text-sm text-gray-800">{formatAddressForOrder(order.pickup_address)}</p>
               <p className="mt-2 text-xs font-medium uppercase text-gray-400">Куда</p><p className="break-words text-sm text-gray-800">{formatAddressForOrder(order.delivery_address)}</p></>}
               <div className="mt-3 border-t pt-2 text-xs text-gray-600">
+                {status==='searching_courier'&&<p className="mb-2 font-semibold text-amber-800" title="Время с момента создания заказа">Поиск: {now===null?'…':formatSearchWait(order.created_at,now)}</p>}
                 <p>{order.executor_user_id?(names.get(order.executor_user_id)||'Водитель назначен'):'Водитель не назначен'}</p>
                 {status==='searching_courier'&&order.customer_id!==organizationId&&<p className="mt-1 text-amber-700">Общедоступный заказ</p>}
                 {status!=='completed'&&order.ready_at&&<p className="mt-1">Готовность: {new Date(order.ready_at).toLocaleString('ru-RU',{timeZone:'Europe/Minsk',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</p>}
               </div>
-            </Link>)}
+            </Link>
+            {status==='searching_courier'&&<BoardDriverAssignment orderId={order.id} drivers={data.drivers} onAssigned={refresh}/>}
+            </article>)}
             {status==='completed'&&orders.length>10&&<p className="text-xs text-gray-600">Показаны последние 10 из {orders.length} за сегодня.</p>}
             {status!=='completed'&&orders.length>limit&&<button onClick={()=>setLimits(previous=>({...previous,[status]:limit+20}))} className="w-full rounded-lg border bg-white p-2 text-sm text-gray-700">Показать ещё ({orders.length-limit})</button>}
           </div>
