@@ -22,11 +22,11 @@ self.addEventListener('push', (event) => {
   console.log('Получено push-уведомление:', event)
   
   const data = event.data ? event.data.json() : {}
-  const title = data.title || 'Новый заказ'
+  const title = data.title || 'Dostavita — новый заказ'
   const options = {
     body: data.body || 'У вас есть новый доступный заказ',
-    icon: '/icon-192x192.png',
-    badge: '/icon-192x192.png',
+    icon: '/icon-192x192.png?v=dostavita',
+    badge: '/icon-192x192.png?v=dostavita',
     tag: data.tag || 'new-order',
     data: data.data || {},
     requireInteraction: true,

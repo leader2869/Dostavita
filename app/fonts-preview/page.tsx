@@ -85,7 +85,7 @@ export default function FontsPreviewPage() {
     <div className="min-h-screen bg-white p-8">
       <div className="max-w-7xl mx-auto">
         <h1 className="text-4xl font-bold text-gray-900 mb-8 text-center">
-          Варианты шрифтов для логотипа "Просто!"
+          Варианты шрифтов для логотипа "Dostavita"
         </h1>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -106,7 +106,7 @@ export default function FontsPreviewPage() {
                   color: '#87ceeb', // Светло-голубой цвет бренда
                 }}
               >
-                Просто!
+                Dostavita
               </div>
               <div
                 className="text-lg"
@@ -117,7 +117,7 @@ export default function FontsPreviewPage() {
                   color: '#000000',
                 }}
               >
-                Просто!
+                Dostavita
               </div>
             </div>
           ))}
@@ -132,7 +132,7 @@ export default function FontsPreviewPage() {
             <li>• <strong>Смелые и выразительные:</strong> Oswald, Bebas Neue, Anton, Russo One</li>
             <li>• <strong>Игривые и неформальные:</strong> Pacifico, Dancing Script, Caveat, Amatic SC</li>
             <li>• <strong>Технологичные и футуристичные:</strong> Orbitron, Space Grotesk, Rubik</li>
-            <li>• <strong>Уникальные:</strong> Prosto One (идеально подходит по названию!), Londrina Solid</li>
+            <li>• <strong>Уникальные:</strong> Prosto One, Londrina Solid</li>
           </ul>
         </div>
       </div>

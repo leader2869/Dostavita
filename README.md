@@ -1,10 +1,12 @@
-# Просто! - Платформа для службы доставки
+# Dostavita - Платформа для службы доставки
 
 Платформа для службы доставки с поддержкой различных ролей пользователей, управления заказами, исполнителями и автопарками.
 
+Будущий основной адрес: **https://dostavita.by**. Домен ещё не подключён; текущий адрес приложения продолжает работать.
+
 ## 🚀 Технологии
 
-- **Frontend**: Next.js 14 (App Router), React, TypeScript
+- **Frontend**: Next.js 15 (App Router), React, TypeScript
 - **Backend**: Supabase (PostgreSQL, Auth, Realtime)
 - **Карты**: Leaflet
 - **Стили**: Tailwind CSS

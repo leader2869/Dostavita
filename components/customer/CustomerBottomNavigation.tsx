@@ -1,5 +1,7 @@
 'use client'
 
+import Image from 'next/image'
+
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useCashDepositRequestsCount } from '@/hooks/useCashDepositRequestsCount'
@@ -42,14 +44,14 @@ export function CustomerBottomNavigation() {
             </svg>
             <span className="text-xs">Заказы</span>
           </Link>
-          {/* Центральная кнопка "П!" в круге - крупнее остальных */}
+          {/* Центральная кнопка доставки в круге - крупнее остальных */}
           <button
             onClick={() => router.push('/dashboard/customer/available-orders')}
             className={`relative w-20 h-20 rounded-full bg-brand-light text-gray-900 flex items-center justify-center shadow-lg hover:bg-brand-dark transition-all z-10 -mt-6 font-amatic-sc ${
               isActive('/dashboard/customer/available-orders') ? 'ring-2 ring-brand-light' : ''
             }`}
           >
-            <span className="text-4xl font-bold">П!</span>
+            <Image src="/icon.svg?v=dostavita" alt="Dostavita" width={48} height={48} className="rounded-xl" />
           </button>
           <Link
             href="/dashboard/customer/finance"

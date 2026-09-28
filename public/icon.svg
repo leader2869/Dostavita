@@ -1,26 +1,12 @@
-<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <style>
-      @import url('https://fonts.googleapis.com/css2?family=Amatic+SC:wght@700&display=swap');
-      .logo-text {
-        font-family: 'Amatic SC', Arial, sans-serif;
-        font-weight: 700;
-        font-size: 280px;
-        fill: #1f2937;
-        text-anchor: middle;
-        dominant-baseline: middle;
-        letter-spacing: -5px;
-      }
-    </style>
-  </defs>
-  <!-- Квадратный фон с закругленными краями (как в приложении) -->
-  <rect x="0" y="0" width="512" height="512" rx="102" ry="102" fill="#87ceeb"/>
-  
-  <!-- Текст "П!" в центре с шрифтом Amatic SC Bold -->
-  <text 
-    x="256" 
-    y="320" 
-    class="logo-text"
-  >П!</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="112" fill="#87ceeb"/>
+  <g fill="none" stroke="#102c42" stroke-width="20" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M83 216h45M65 259h52M82 302h40"/>
+    <path fill="#fff" d="m139 266 40-67q12-19 35-19h76q20 0 34 18l43 57 43 16q16 6 16 23v34H130v-37q0-16 9-25Z"/>
+    <path fill="#102c42" stroke="none" d="m185 244 24-39h75q8 0 14 8l25 31H185Z"/>
+    <path stroke="#fff" stroke-width="12" d="M251 207v33"/>
+    <circle cx="190" cy="331" r="30" fill="#fff"/>
+    <circle cx="367" cy="331" r="30" fill="#fff"/>
+  </g>
+  <path d="m271 253-42 46h30l-7 27 45-51h-29l3-22Z" fill="#ff6a3d"/>
 </svg>
-

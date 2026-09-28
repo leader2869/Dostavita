@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
@@ -127,7 +128,11 @@ export default function RegisterPage() {
 
   return (
     <div className="bg-white p-8 rounded-lg shadow-md border border-gray-200">
-      <h1 className="text-5xl font-bold text-center mb-6 text-brand-light font-amatic-sc">Просто!Регистрация</h1>
+      <div className="flex flex-col items-center mb-6">
+        <Image src="/icon.svg?v=dostavita" alt="Быстрая доставка Dostavita" width={80} height={80} priority />
+        <h1 className="text-4xl font-bold tracking-tight text-gray-900 mt-3">Dostavita</h1>
+        <p className="text-gray-600 mt-2">Регистрация</p>
+      </div>
       
       {notice && <p role="status" className="mb-4 text-green-700">{notice}</p>}
       <form onSubmit={handleRegister} className="space-y-4">
