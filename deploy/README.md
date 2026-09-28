@@ -1,7 +1,13 @@
 # Timeweb deployment
 
-Project: Dostavita (2975851). Dedicated server: 9219953, 217.149.31.162.
-Ubuntu 24.04, 4 CPU, 8 GB RAM, 80 GB disk. Existing sites and servers are separate.
+Project: Dostavita (2975851). Dedicated server: 9220153, 201.34.159.235.
+Ubuntu 24.04, Novosibirsk NSK-1, 2 CPU, 4 GB RAM, 50 GB NVMe disk.
+Monthly total: RUB 1,800 (server 1,300 + one backup 300 + public IPv4 200).
+The unused server 9219953 and its public IP were deleted before ordering this replacement.
+Existing sites and servers are separate.
+
+This budget configuration has limited memory headroom for the application and Supabase.
+Measure memory usage under load before cutover; build application images outside the production server where possible.
 
 This is deployment preparation, not confirmation of a completed migration.
 
