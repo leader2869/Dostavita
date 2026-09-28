@@ -1,5 +1,7 @@
 # Настройка двойного деплоя: автоматический на Vercel, ручной на основной домен
 
+> План подключения dostavita.by после регистрации домена. Не менять рабочие адреса авторизации до готовности DNS и HTTPS.
+
 ## Вариант 1: Использовать "Promote to Production" (Рекомендуется)
 
 Это самый простой способ - автоматический деплой на preview домен, ручной промоушн на production.
@@ -8,7 +10,7 @@
 
 1. **В Vercel Dashboard → Settings → Domains:**
    - `dostavita.vercel.app` - оставьте как есть (это preview домен)
-   - `prosto.of.by` - отметьте как **Production Domain**
+   - `dostavita.by` - отметьте как **Production Domain**
 
 2. **Настройка автоматического деплоя:**
    - По умолчанию Vercel автоматически деплоит на `dostavita.vercel.app` при каждом push в `main`
@@ -19,7 +21,7 @@
    - Откройте Vercel Dashboard → Deployments
    - Найдите нужный деплой
    - Нажмите "..." → **Promote to Production**
-   - Это обновит `prosto.of.by` вручную
+   - Это обновит `dostavita.by` вручную
 
 ## Вариант 2: Использовать разные ветки
 
@@ -37,11 +39,11 @@
 
 3. **Настройка доменов:**
    - `dostavita.vercel.app` → привязан к ветке `main` (автоматический деплой)
-   - `prosto.of.by` → привязан к ветке `production` (ручной деплой через merge)
+   - `dostavita.by` → привязан к ветке `production` (ручной деплой через merge)
 
 4. **Процесс работы:**
    - Push в `main` → автоматический деплой на `dostavita.vercel.app`
-   - Когда готово → merge `main` в `production` → деплой на `prosto.of.by`
+   - Когда готово → merge `main` в `production` → деплой на `dostavita.by`
 
 ## Вариант 3: Два отдельных проекта в Vercel
 
@@ -49,7 +51,7 @@
 
 1. **Создайте второй проект в Vercel:**
    - Project 1: "Dostavita Dev" → `dostavita.vercel.app` → автоматический деплой
-   - Project 2: "Dostavita Production" → `prosto.of.by` → ручной деплой
+   - Project 2: "Dostavita Production" → `dostavita.by` → ручной деплой
 
 2. **Настройка автоматического деплоя (Dev):**
    - Подключите репозиторий к Project 1
@@ -88,7 +90,7 @@
    - Vercel Dashboard → Deployments
    - Найдите последний деплой
    - "..." → **Promote to Production**
-   → Обновление `prosto.of.by`
+   → Обновление `dostavita.by`
 
 ## Настройка в Vercel Dashboard
 
@@ -102,7 +104,7 @@
 
 1. Settings → Domains
 2. `dostavita.vercel.app` - автоматический деплой (по умолчанию)
-3. `prosto.of.by` - только через "Promote to Production"
+3. `dostavita.by` - только через "Promote to Production"
 
 ## Альтернатива: Использовать Vercel CLI для ручного деплоя
 

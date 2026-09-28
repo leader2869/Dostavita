@@ -13,19 +13,20 @@ const amaticSC = Amatic_SC({
 })
 
 export const metadata: Metadata = {
-  title: 'Просто!',
-  description: 'Платформа для службы доставки',
-  manifest: '/manifest.json',
+  title: 'Dostavita',
+  description: 'Dostavita — быстрая доставка',
+  applicationName: 'Dostavita',
+  manifest: '/manifest.json?v=dostavita',
   icons: {
     icon: [
-      { url: '/icon-32x32.png', sizes: '32x32', type: 'image/png' },
-      { url: '/icon-192x192.png', sizes: '192x192', type: 'image/png' },
-      { url: '/icon-512x512.png', sizes: '512x512', type: 'image/png' },
+      { url: '/icon-32x32.png?v=dostavita', sizes: '32x32', type: 'image/png' },
+      { url: '/icon-192x192.png?v=dostavita', sizes: '192x192', type: 'image/png' },
+      { url: '/icon-512x512.png?v=dostavita', sizes: '512x512', type: 'image/png' },
     ],
     apple: [
-      { url: '/apple-icon-180x180.png', sizes: '180x180', type: 'image/png' },
+      { url: '/apple-icon-180x180.png?v=dostavita', sizes: '180x180', type: 'image/png' },
     ],
-    shortcut: '/icon-32x32.png',
+    shortcut: '/icon-32x32.png?v=dostavita',
   },
 }
 
@@ -44,9 +45,9 @@ export default function RootLayout({
   return (
     <html lang="ru" suppressHydrationWarning className={amaticSC.variable}>
       <head>
-        <link rel="icon" href="/icon-32x32.png" sizes="32x32" type="image/png" />
-        <link rel="icon" href="/icon-192x192.png" sizes="192x192" type="image/png" />
-        <link rel="apple-touch-icon" href="/apple-icon-180x180.png" sizes="180x180" />
+        <link rel="icon" href="/icon-32x32.png?v=dostavita" sizes="32x32" type="image/png" />
+        <link rel="icon" href="/icon-192x192.png?v=dostavita" sizes="192x192" type="image/png" />
+        <link rel="apple-touch-icon" href="/apple-icon-180x180.png?v=dostavita" sizes="180x180" />
         {supabaseEnvScript ? (
           <script dangerouslySetInnerHTML={{ __html: supabaseEnvScript }} />
         ) : null}

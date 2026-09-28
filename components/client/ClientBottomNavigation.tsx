@@ -1,5 +1,7 @@
 'use client'
 
+import Image from 'next/image'
+
 import { usePathname, useRouter } from 'next/navigation'
 
 export function ClientBottomNavigation() {
@@ -77,12 +79,12 @@ export function ClientBottomNavigation() {
             )
           })}
 
-          {/* Центральная кнопка "П!" в круге - крупнее остальных */}
+          {/* Центральная кнопка доставки в круге - крупнее остальных */}
           <button
             onClick={() => router.push('/dashboard/client/create-order')}
             className="relative w-20 h-20 rounded-full bg-brand-light text-gray-900 flex items-center justify-center shadow-lg hover:bg-brand-dark transition-all z-10 -mt-6 font-amatic-sc"
           >
-            <span className="text-4xl font-bold">П!</span>
+            <Image src="/icon.svg?v=dostavita" alt="Dostavita" width={48} height={48} className="rounded-xl" />
           </button>
 
           {/* Последние две кнопки */}

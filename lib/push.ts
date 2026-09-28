@@ -8,7 +8,7 @@ export function configurePush(): boolean {
   const privateKey = process.env.VAPID_PRIVATE_KEY
   if (!publicKey || !privateKey) return false
   webpush.setVapidDetails(
-    process.env.VAPID_SUBJECT || 'https://prosto.of.by', publicKey, privateKey
+    process.env.VAPID_SUBJECT || 'https://dostavita.by', publicKey, privateKey
   )
   return true
 }

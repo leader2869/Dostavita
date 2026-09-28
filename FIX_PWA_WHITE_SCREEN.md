@@ -16,13 +16,13 @@
 
 1. Откройте **Supabase Dashboard** → **Settings** → **API**
 2. В разделе **URL Configuration**:
-   - **Site URL**: добавьте `https://prosto.of.by` (если еще не добавлен)
+   - **Site URL**: добавьте `https://dostavita.by` (если еще не добавлен)
    - Также добавьте домен, с которого открывается PWA
 3. В разделе **Additional Redirect URLs**:
-   - Добавьте: `https://prosto.of.by/**`
+   - Добавьте: `https://dostavita.by/**`
    - Добавьте: `https://dostavita.vercel.app/**` (если используете)
 4. В разделе **CORS** (если есть в настройках):
-   - Добавьте домен: `https://prosto.of.by`
+   - Добавьте домен: `https://dostavita.by`
    - Добавьте: `https://dostavita.vercel.app`
    - Для локальной разработки: `http://localhost:3000`
 
@@ -74,8 +74,8 @@
 ## Главное решение
 
 **Добавьте домен в Supabase Dashboard:**
-1. Settings → API → Site URL: `https://prosto.of.by`
-2. Settings → API → Additional Redirect URLs: `https://prosto.of.by/**`
+1. Settings → API → Site URL: `https://dostavita.by`
+2. Settings → API → Additional Redirect URLs: `https://dostavita.by/**`
 
 Это должно решить проблему с белым экраном в PWA.
 

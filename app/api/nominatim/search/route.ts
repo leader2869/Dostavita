@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
     
     const response = await fetch(nominatimUrl, {
       headers: {
-        'User-Agent': 'Prosto Delivery App (contact@prosto.of.by)',
+        'User-Agent': 'Dostavita Delivery (https://dostavita.by)',
         'Accept-Language': 'ru',
       },
     })
