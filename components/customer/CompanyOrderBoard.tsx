@@ -11,7 +11,7 @@ const columns: Record<BoardStatus,{title:string;color:string}> = {
   courier_accepted:{title:'Водитель принял',color:'border-sky-400 bg-sky-50'},
   courier_coming:{title:'Едет к отправителю',color:'border-indigo-400 bg-indigo-50'},
   courier_delivering:{title:'Доставляет',color:'border-violet-400 bg-violet-50'},
-  completed:{title:'Завершены',color:'border-emerald-400 bg-emerald-50'},
+  completed:{title:'Завершены сегодня',color:'border-emerald-400 bg-emerald-50'},
   cancelled:{title:'Отменены',color:'border-rose-300 bg-rose-50'},
 }
 
@@ -68,7 +68,7 @@ export function CompanyOrderBoard({initialData,organizationId}:{initialData:Comp
     </div>
     <div className="mb-4 grid grid-cols-3 gap-2 text-gray-900">
       <div className="rounded-xl border bg-white p-3"><p className="text-xs text-gray-600">В работе и поиске</p><strong className="text-2xl">{active}</strong></div>
-      <div className="rounded-xl border bg-white p-3"><p className="text-xs text-gray-600">Завершены</p><strong className="text-2xl">{groups.completed.length}</strong></div>
+      <div className="rounded-xl border bg-white p-3"><p className="text-xs text-gray-600">Завершены сегодня</p><strong className="text-2xl">{groups.completed.length}</strong></div>
       <div className="rounded-xl border bg-white p-3"><p className="text-xs text-gray-600">Водителей компании</p><strong className="text-2xl">{data.drivers.length}</strong></div>
     </div>
     <div className="mb-3 flex flex-wrap items-end gap-3">
@@ -77,26 +77,26 @@ export function CompanyOrderBoard({initialData,organizationId}:{initialData:Comp
       <button disabled={refreshing} onClick={()=>void refresh()} className="rounded-lg border bg-white px-3 py-2 text-sm text-gray-900 disabled:opacity-50">{refreshing?'Обновление…':'Обновить доску'}</button>
     </div>
     {error&&<p role="alert" className="mb-3 rounded bg-red-50 p-3 text-sm text-red-700">{error}</p>}
-    <p className="mb-3 text-xs text-gray-500">Все даты. Статусы обновляются автоматически.{updated&&` Обновлено в ${updated}.`} Прокрутите доску вправо, чтобы увидеть следующие статусы.</p>
+    <p className="mb-3 text-xs text-gray-500">Завершённые — за сегодня по времени Минска, последние 10. Статусы обновляются автоматически.{updated&&` Обновлено в ${updated}.`} Прокрутите доску вправо, чтобы увидеть следующие статусы.</p>
     <div className="flex gap-3 overflow-x-auto pb-4 snap-x snap-proximity" tabIndex={0} aria-label="Колонки статусов заказов">
       {BOARD_STATUSES.map(status=>{
-        const info=columns[status];const orders=groups[status];const limit=limits[status]??20
+        const info=columns[status];const orders=groups[status];const limit=status==='completed'?10:(limits[status]??20)
         return <section key={status} aria-label={info.title} className={`w-[min(82vw,280px)] shrink-0 snap-start rounded-xl border-t-4 ${info.color}`}>
           <header className="flex items-center justify-between gap-2 p-3"><h2 className="text-sm font-bold text-gray-900">{info.title}</h2><span className="rounded-full bg-white px-2 py-0.5 text-sm font-semibold text-gray-700">{orders.length}</span></header>
           <div className="max-h-[65vh] space-y-3 overflow-y-auto px-3 pb-3">
             {orders.length===0&&<p className="rounded-lg border border-dashed border-gray-300 p-4 text-sm text-gray-500">Нет заказов</p>}
             {orders.slice(0,limit).map(order=><Link key={order.id} href={`/dashboard/customer/orders/${order.id}`} className="block rounded-lg border border-gray-200 bg-white p-3 shadow-sm transition hover:border-brand-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-dark">
-              <div className="mb-3 flex items-center justify-between gap-2"><strong className="text-sm text-gray-900">№{order.order_number??order.id.slice(0,8)}</strong><span className="text-sm font-semibold text-gray-900">{Number(order.final_price).toFixed(2)} BYN</span></div>
-              <p className="text-xs font-medium uppercase text-gray-400">Откуда</p><p className="break-words text-sm text-gray-800">{formatAddressForOrder(order.pickup_address)}</p>
-              <p className="mt-2 text-xs font-medium uppercase text-gray-400">Куда</p><p className="break-words text-sm text-gray-800">{formatAddressForOrder(order.delivery_address)}</p>
+              <div className="mb-2 flex items-center justify-between gap-2"><strong className="text-sm text-gray-900">№{order.order_number??order.id.slice(0,8)}</strong><span className="text-sm font-semibold text-gray-900">{Number(order.final_price).toFixed(2)} BYN</span></div>
+              {status!=='completed'&&<><p className="text-xs font-medium uppercase text-gray-400">Откуда</p><p className="break-words text-sm text-gray-800">{formatAddressForOrder(order.pickup_address)}</p>
+              <p className="mt-2 text-xs font-medium uppercase text-gray-400">Куда</p><p className="break-words text-sm text-gray-800">{formatAddressForOrder(order.delivery_address)}</p></>}
               <div className="mt-3 border-t pt-2 text-xs text-gray-600">
                 <p>{order.executor_user_id?(names.get(order.executor_user_id)||'Водитель назначен'):'Водитель не назначен'}</p>
                 {status==='searching_courier'&&order.customer_id!==organizationId&&<p className="mt-1 text-amber-700">Общедоступный заказ</p>}
-                {order.ready_at&&<p className="mt-1">Готовность: {new Date(order.ready_at).toLocaleString('ru-RU',{timeZone:'Europe/Minsk',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</p>}
-                {status==='completed'&&<p className={order.is_paid?'mt-1 text-green-700':'mt-1 text-red-700'}>{order.is_paid?'Оплачен':'Не оплачен'}</p>}
+                {status!=='completed'&&order.ready_at&&<p className="mt-1">Готовность: {new Date(order.ready_at).toLocaleString('ru-RU',{timeZone:'Europe/Minsk',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</p>}
               </div>
             </Link>)}
-            {orders.length>limit&&<button onClick={()=>setLimits(previous=>({...previous,[status]:limit+20}))} className="w-full rounded-lg border bg-white p-2 text-sm text-gray-700">Показать ещё ({orders.length-limit})</button>}
+            {status==='completed'&&orders.length>10&&<p className="text-xs text-gray-600">Показаны последние 10 из {orders.length} за сегодня.</p>}
+            {status!=='completed'&&orders.length>limit&&<button onClick={()=>setLimits(previous=>({...previous,[status]:limit+20}))} className="w-full rounded-lg border bg-white p-2 text-sm text-gray-700">Показать ещё ({orders.length-limit})</button>}
           </div>
         </section>
       })}

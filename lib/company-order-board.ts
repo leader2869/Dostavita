@@ -6,11 +6,11 @@ export type BoardOrder = {
   id: string; order_number: number | null; status: BoardStatus; customer_id: string
   executor_user_id: string | null; payment_organization_id: string | null; visibility: string
   pickup_address: string; delivery_address: string; final_price: number; created_at: string
-  ready_at: string | null; is_paid: boolean | null
+  completed_at: string | null; ready_at: string | null; is_paid: boolean | null
 }
 export type BoardDriver = { id: string; full_name: string | null }
 export type CompanyBoardData = { orders: BoardOrder[]; drivers: BoardDriver[] }
-const fields = 'id,order_number,status,customer_id,executor_user_id,payment_organization_id,visibility,pickup_address,delivery_address,final_price,created_at,ready_at,is_paid'
+const fields = 'id,order_number,status,customer_id,executor_user_id,payment_organization_id,visibility,pickup_address,delivery_address,final_price,created_at,completed_at,ready_at,is_paid'
 
 async function pages(build: () => any): Promise<BoardOrder[]> {
   const rows: BoardOrder[] = []
@@ -41,13 +41,17 @@ export async function loadCompanyOrderBoard(supabase: SupabaseClient, organizati
     drivers:(drivers??[]).map((driver: BoardDriver)=>({id:driver.id,full_name:driver.full_name}))}
 }
 
-export function groupBoardOrders(orders: BoardOrder[], search: string, driverId: string) {
+export function groupBoardOrders(orders: BoardOrder[], search: string, driverId: string, now = new Date()) {
   const groups: Record<BoardStatus,BoardOrder[]> = {searching_courier:[],courier_accepted:[],courier_coming:[],courier_delivering:[],completed:[],cancelled:[]}
+  const day = (date: Date) => new Intl.DateTimeFormat('en-CA', {timeZone:'Europe/Minsk',year:'numeric',month:'2-digit',day:'2-digit'}).format(date)
+  const today = day(now)
   const term=search.trim().toLocaleLowerCase('ru-RU')
   for (const order of orders) {
+    if (order.status==='completed' && (!order.completed_at || day(new Date(order.completed_at))!==today)) continue
     if (driverId && order.executor_user_id!==driverId) continue
     if (term && !`${order.order_number??''} ${order.pickup_address} ${order.delivery_address}`.toLocaleLowerCase('ru-RU').includes(term)) continue
     groups[order.status]?.push(order)
   }
+  groups.completed.sort((a,b)=>(b.completed_at??'').localeCompare(a.completed_at??'') || b.id.localeCompare(a.id))
   return groups
 }

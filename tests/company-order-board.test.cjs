@@ -25,7 +25,7 @@ test('database failure cannot be shown as an empty board',async()=>{
  await assert.rejects(loadCompanyOrderBoard(db([],[],true),'org',true))
 })
 test('all six statuses are separate columns and filters combine',()=>{
- const rows=BOARD_STATUSES.map((status,i)=>order(String(i),{status,order_number:i+1,executor_user_id:'driver'}))
+ const rows=BOARD_STATUSES.map((status,i)=>order(String(i),{status,completed_at:new Date().toISOString(),order_number:i+1,executor_user_id:'driver'}))
  const groups=groupBoardOrders(rows,'','');for(const status of BOARD_STATUSES)assert.equal(groups[status].length,1)
  assert.equal(groupBoardOrders(rows,'витебск','driver').completed.length,1)
  assert.equal(groupBoardOrders(rows,'6','driver').cancelled.length,1)
@@ -48,4 +48,10 @@ test('board endpoint uses authenticated company, never a supplied account identi
   '@/lib/company-order-board':{loadCompanyOrderBoard:async(_,id)=>{company=id;return {orders:[],drivers:[]}}},
  })
  assert.equal((await GET()).status,200);assert.equal(company,'own-company')
+})
+
+test('completed column uses completion day in Minsk and newest completion first',()=>{
+ const now=new Date('2026-09-28T22:00:00Z')
+ const rows=[order('yesterday',{status:'completed',completed_at:'2026-09-28T20:59:59Z'}),order('older',{status:'completed',completed_at:'2026-09-28T21:00:00Z'}),order('newest',{status:'completed',completed_at:'2026-09-28T21:59:00Z'}),order('undated',{status:'completed',completed_at:null})]
+ assert.deepEqual(Array.from(groupBoardOrders(rows,'','',now).completed,o=>o.id),['newest','older'])
 })
