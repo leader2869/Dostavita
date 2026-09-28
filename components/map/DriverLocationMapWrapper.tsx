@@ -1,6 +1,11 @@
 'use client'
 
-import { DriverLocationMap } from './DriverLocationMap'
+import dynamic from 'next/dynamic'
+
+const DriverLocationMap = dynamic(
+  () => import('@/components/map/DriverLocationMap').then(module => module.DriverLocationMap),
+  { ssr: false }
+)
 
 interface DriverLocationMapWrapperProps {
   driverId: string
