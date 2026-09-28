@@ -176,7 +176,7 @@ export default function DriverFinancePage() {
         setLoading(false)
       }
     }
-  }, [period, getDateFilter, customStartDate, customEndDate, supabase, userId, organizationId])
+  }, [getDateFilter, supabase, userId, organizationId])
 
   useEffect(() => {
     loadData()

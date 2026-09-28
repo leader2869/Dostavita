@@ -81,7 +81,7 @@ export function useDriverOrganizationChatUnreadCount(driverUserId: string | null
       channel.unsubscribe()
       clearInterval(interval)
     }
-  }, [driverUserId, organizationId])
+  }, [driverUserId, organizationId, supabase])
 
   return { count: unreadCount }
 }

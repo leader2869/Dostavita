@@ -168,7 +168,7 @@ export default function CustomerOrdersPage() {
     } finally {
       setLoading(false)
     }
-  }, [supabase, router, userId, profile.role, period, getDateFilter])
+  }, [supabase, router, userId, profile.role, getDateFilter])
 
   useEffect(() => {
     loadData()

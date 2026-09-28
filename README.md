@@ -97,7 +97,7 @@ npm run dev
 ## Проверка сессий и push-уведомлений
 
 ```bash
-node --test tests/session-push.test.cjs
+node --test tests/*.test.cjs
 npm run type-check
 npm run lint
 npm run build

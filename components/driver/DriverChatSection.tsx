@@ -103,7 +103,7 @@ export function DriverChatSection({ driverUserId, organizationId }: DriverChatSe
       channel.unsubscribe()
       clearInterval(interval)
     }
-  }, [driverUserId, organizationId, loadUnreadCount])
+  }, [driverUserId, organizationId, loadUnreadCount, supabase])
 
   return (
     <>

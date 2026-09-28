@@ -143,7 +143,7 @@ export default function CustomerFinancePage() {
     } finally {
       setLoading(false)
     }
-  }, [supabase, router, period, customStartDate, customEndDate, getDateFilter])
+  }, [supabase, router, getDateFilter])
 
   useEffect(() => {
     loadData()

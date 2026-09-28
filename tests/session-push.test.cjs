@@ -1,29 +1,8 @@
 const { test } = require('node:test')
 const assert = require('node:assert/strict')
-const fs = require('node:fs')
-const path = require('node:path')
-const vm = require('node:vm')
-const ts = require('typescript')
 const { NextRequest } = require('next/server')
 
-// Load application TypeScript with explicit dependency doubles; never contact Supabase or push providers.
-function load(file, mocks = {}) {
-  const filename = path.resolve(__dirname, '..', file)
-  const js = ts.transpileModule(fs.readFileSync(filename, 'utf8'), {
-    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020, esModuleInterop: true },
-  }).outputText
-  const module = { exports: {} }
-  vm.runInNewContext(js, {
-    module, exports: module.exports, process, console: { error() {} },
-    require(name) {
-      if (name in mocks) return mocks[name]
-      if (name === 'server-only') return {}
-      if (name.startsWith('@/')) return load(name.slice(2) + '.ts', mocks)
-      return require(name)
-    },
-  }, { filename })
-  return module.exports
-}
+const { load } = require('./load-app.cjs')
 
 const id = '12345678-1234-4234-8234-123456789abc'
 function request(body = { orderId: id, orderNumber: 42, finalPrice: '10' }) {

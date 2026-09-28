@@ -161,7 +161,7 @@ export default function ClientDashboard() {
     return () => {
       isMounted = false
     }
-  }, [userId, supabase, loadSavedAddresses, loadOrdersWithDrivers])
+  }, [userId, supabase, loadSavedAddresses, loadOrdersWithDrivers, loadRegions])
 
   const shouldBlink = (status: string) => isActiveOrderStatus(status)
 

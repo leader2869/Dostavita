@@ -22,10 +22,10 @@ jobs:
         run: npm ci
 
       - name: Lint
-        run: npm run lint
+        run: npx eslint app components contexts hooks lib types middleware.ts --ext .ts,.tsx --max-warnings 0
 
-      - name: Session and push regression tests
-        run: node --test tests/session-push.test.cjs
+      - name: Role, session and push regression tests
+        run: node --test tests/*.test.cjs
 
       - name: Type check
         run: npm run type-check

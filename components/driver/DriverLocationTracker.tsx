@@ -65,7 +65,7 @@ export function DriverLocationTracker() {
       isMounted = false
       clearInterval(interval)
     }
-  }, []) // Убрали supabase из зависимостей
+  }, [supabase])
 
   // Показываем ошибку, если есть проблема с отслеживанием местоположения
   if (error) {

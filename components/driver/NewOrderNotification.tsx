@@ -141,7 +141,7 @@ export function NewOrderNotification() {
     }
 
     checkRole()
-  }, [])
+  }, [supabase])
 
   // Подписка на изменения статуса заказа в реальном времени
   useEffect(() => {
@@ -213,7 +213,7 @@ export function NewOrderNotification() {
         clearInterval(checkIntervalRef.current)
       }
     }
-  }, [isDriver, checkNewAvailableOrders])
+  }, [isDriver, checkNewAvailableOrders, supabase.auth])
 
   // Проверяем статус заказа перед показом модального окна
   useEffect(() => {
