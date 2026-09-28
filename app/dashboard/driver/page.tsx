@@ -21,7 +21,14 @@ export default async function DriverDashboard() {
   if (authError || !user) redirect('/login')
   if (!profile || (profile as User).role !== 'driver') redirect('/dashboard')
 
-  const organizationId = (profile as { organization_id?: string }).organization_id
+  // The legacy get_user_profile RPC omits organization_id. Read affiliation
+  // from the authenticated user's own row instead of assuming it is returned.
+  const { data: affiliation } = await supabase
+    .from('profiles')
+    .select('organization_id')
+    .eq('id', user.id)
+    .maybeSingle()
+  const organizationId = affiliation?.organization_id
 
          // Получаем доступные заказы (все заказы со статусом "ищем курьера")
          // Включаем заказы, которые были отменены, но сейчас снова активны (статус searching_courier)
