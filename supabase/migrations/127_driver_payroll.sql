@@ -115,7 +115,8 @@ BEGIN
  END IF;
  -- Historical employers retain the ability to settle an existing debt after detachment.
  PERFORM public.security_assert(public.security_owns_driver(p_driver_id) OR EXISTS(
-  SELECT 1 FROM public.driver_payroll_ledger WHERE organization_id=auth.uid() AND driver_id=p_driver_id AND kind IN ('order','monthly')));
+  SELECT 1 FROM public.driver_payroll_ledger WHERE organization_id=auth.uid() AND driver_id=p_driver_id AND kind IN ('order','monthly')) OR EXISTS(
+  SELECT 1 FROM public.driver_payroll_terms WHERE organization_id=auth.uid() AND driver_id=p_driver_id));
  IF p_kind='payment' THEN
   SELECT coalesce(sum(CASE WHEN kind='payment' THEN -amount ELSE amount END),0) INTO outstanding
   FROM public.driver_payroll_ledger WHERE organization_id=auth.uid() AND driver_id=p_driver_id;
