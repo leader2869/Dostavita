@@ -94,39 +94,39 @@ DECLARE
   caller_role TEXT;
 BEGIN
   -- Логируем входные параметры для отладки
-  RAISE NOTICE 'process_order_payment вызвана: order_uuid = %, payment_status = %', 
+  RAISE NOTICE 'process_order_payment вызвана: order_uuid = %, payment_status = %',
     order_uuid, payment_status;
-  
+
   -- Валидация входного параметра
   IF order_uuid IS NULL OR payment_status IS NULL THEN
     RAISE EXCEPTION 'order_uuid и payment_status обязательны';
   END IF;
-  
+
   -- Получаем роль текущего пользователя
   SELECT role INTO caller_role FROM public.profiles WHERE id = auth.uid();
-  
+
   IF caller_role IS NULL THEN
     RAISE EXCEPTION 'Пользователь не найден в профилях';
   END IF;
-  
+
   -- Получаем заказ (может быть в статусе courier_delivering или completed)
   SELECT * INTO order_record
   FROM public.orders o
   WHERE o.id = order_uuid
     AND (o.status = 'courier_delivering' OR o.status = 'completed')
   FOR UPDATE;
-  
+
   IF NOT FOUND THEN
     RAISE EXCEPTION 'Заказ не найден или не в правильном статусе. Заказ должен быть в статусе "доставляет" или "завершен"';
   END IF;
-  
+
   -- Получаем user_id водителя
   driver_user_id := order_record.executor_user_id;
-  
+
   IF driver_user_id IS NULL THEN
     RAISE EXCEPTION 'Водитель не назначен на заказ';
   END IF;
-  
+
   -- Проверяем права доступа и определяем, кому начисляются деньги
   IF caller_role = 'driver' THEN
     IF driver_user_id != auth.uid() THEN
@@ -142,7 +142,7 @@ BEGIN
   ELSE
     RAISE EXCEPTION 'Только водители и организации могут проводить оплату';
   END IF;
-  
+
   -- Если payment_status = true (принимаем оплату)
   IF payment_status THEN
     -- Если заказ уже оплачен, просто удаляем receivables и возвращаем успех
@@ -151,7 +151,7 @@ BEGIN
       RAISE NOTICE 'Заказ % уже оплачен. Дебиторка удалена, если существовала.', order_uuid;
       RETURN TRUE;
     END IF;
-    
+
     IF EXISTS (SELECT 1 FROM public.transactions WHERE order_id = order_uuid AND type = 'credit') THEN
       RAISE EXCEPTION 'У заказа уже есть начисление: требуется сверка оплаты';
     END IF;
@@ -160,7 +160,7 @@ BEGIN
     INSERT INTO public.balances (user_id, amount, currency, updated_at)
     VALUES (recipient_user_id, 0, 'BYN', NOW()) ON CONFLICT (user_id) DO NOTHING;
     PERFORM 1 FROM public.balances WHERE user_id = recipient_user_id FOR UPDATE;
-    
+
     -- Создаем транзакцию для получателя (водителя или организации)
     INSERT INTO public.transactions (user_id, order_id, amount, type, description, created_at, related_user_id)
     VALUES (
@@ -168,8 +168,8 @@ BEGIN
       order_uuid,
       order_record.final_price,
       'credit',
-      'Начисление за оплату Заказа №' || order_record.order_number::TEXT || 
-        CASE 
+      'Начисление за оплату Заказа №' || order_record.order_number::TEXT ||
+        CASE
           WHEN recipient_user_id = driver_user_id THEN ' (оплата водителем)'
           ELSE ' (оплата организацией)'
         END,
@@ -177,7 +177,7 @@ BEGIN
       driver_user_id  -- related_user_id всегда указывает на водителя, даже если оплата принята организацией
     )
     RETURNING id INTO transaction_id;
-    
+
     -- Начисление уже существует: AFTER-триггер не должен создавать второе.
     UPDATE public.orders SET is_paid = true WHERE id = order_uuid;
 
@@ -187,30 +187,30 @@ BEGIN
       SELECT public.calculate_driver_balance(recipient_user_id) INTO calculated_balance;
     ELSE
       -- Для организации: все credit - все debit
-      SELECT 
+      SELECT
         COALESCE(SUM(CASE WHEN type = 'credit' THEN amount ELSE 0 END), 0) -
         COALESCE(SUM(CASE WHEN type = 'debit' THEN amount ELSE 0 END), 0)
       INTO calculated_balance
       FROM public.transactions
       WHERE user_id = recipient_user_id;
     END IF;
-    
+
     -- Обновляем баланс получателя
     INSERT INTO public.balances (user_id, amount, currency, updated_at)
     VALUES (recipient_user_id, calculated_balance, 'BYN', NOW())
     ON CONFLICT (user_id) DO UPDATE
-    SET 
+    SET
       amount = calculated_balance,
       updated_at = NOW();
-    
-    RAISE NOTICE 'Транзакция создана для пользователя %: %, баланс обновлен: %', 
+
+    RAISE NOTICE 'Транзакция создана для пользователя %: %, баланс обновлен: %',
       recipient_user_id, transaction_id, calculated_balance;
-    
+
     -- Удаляем запись из receivables
     DELETE FROM public.receivables WHERE order_id = order_uuid;
-    
+
     RAISE NOTICE 'Дебиторка для заказа % удалена после оплаты', order_uuid;
-    
+
   ELSE
     IF order_record.is_paid IS TRUE THEN
       RAISE EXCEPTION 'Оплаченный заказ нельзя пометить неоплаченным';
@@ -221,27 +221,27 @@ BEGIN
     FROM public.receivables
     WHERE order_id = order_uuid
     LIMIT 1;
-    
+
     IF existing_receivable_id IS NOT NULL THEN
       RAISE NOTICE 'Дебиторка для заказа % уже существует (id: %). Пропускаем создание.', order_uuid, existing_receivable_id;
       RETURN TRUE;
     END IF;
-    
+
     -- Обновляем статус оплаты заказа
     UPDATE public.orders
     SET is_paid = false
     WHERE orders.id = order_uuid;
-    
+
     -- Определяем должника
     IF order_record.paid_by = 'sender' THEN
       debtor_user_id := order_record.client_id;
     ELSE
       debtor_user_id := NULL;
     END IF;
-    
+
     -- Получаем organization_id водителя
     SELECT organization_id INTO driver_org_id FROM public.profiles WHERE id = driver_user_id;
-    
+
     -- Создаем запись в receivables
     INSERT INTO public.receivables (
       order_id,
@@ -268,10 +268,10 @@ BEGIN
       NOW()
     )
     ON CONFLICT (order_id) DO NOTHING; -- Защита от дубликатов
-    
+
     RAISE NOTICE 'Создана дебиторка для заказа %', order_uuid;
   END IF;
-  
+
   RETURN TRUE;
 END;
 $$;
