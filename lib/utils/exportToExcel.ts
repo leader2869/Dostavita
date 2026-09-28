@@ -1,4 +1,24 @@
-import * as XLSX from 'xlsx'
+import writeExcelFile, { type SheetData } from 'write-excel-file/browser'
+import { toastError } from '@/lib/utils/toast'
+
+type ExportSheet = { sheet: string; data: SheetData }
+function toSheetData(rows: Record<string, unknown>[]): SheetData {
+  const keys = Array.from(new Set(rows.flatMap(row => Object.keys(row))))
+  return [keys, ...rows.map(row => keys.map(key => {
+    const value = row[key]
+    if (value == null) return null
+    if (typeof value === 'number' && Number.isFinite(value)) return value
+    if (typeof value === 'boolean') return value
+    // Text remains text, including strings that start with '='.
+    return String(value)
+  }))]
+}
+function saveWorkbook(sheets: ExportSheet[], filename: string) {
+  if (!sheets.length) return
+  void writeExcelFile(sheets).toFile(`${filename}.xlsx`).catch(() => {
+    toastError('Не удалось сформировать Excel-файл')
+  })
+}
 
 /**
  * Экспортирует данные в Excel файл
@@ -18,16 +38,16 @@ export function exportToExcel<T extends Record<string, any>>(
   }
 
   // Создаем рабочую книгу
-  const wb = XLSX.utils.book_new()
+  const wb: ExportSheet[] = []
 
   // Преобразуем данные в формат для Excel
-  const ws = XLSX.utils.json_to_sheet(data)
+  const ws = toSheetData(data)
 
   // Добавляем лист в книгу
-  XLSX.utils.book_append_sheet(wb, ws, sheetName)
+  wb.push({ data: ws, sheet: sheetName })
 
   // Генерируем файл и скачиваем
-  XLSX.writeFile(wb, `${filename}.xlsx`)
+  saveWorkbook(wb, filename)
 }
 
 /**
@@ -109,7 +129,7 @@ export function exportFinanceReportToExcel(
   },
   filename: string = 'Финансовый отчет'
 ) {
-  const wb = XLSX.utils.book_new()
+  const wb: ExportSheet[] = []
 
   // Сводка
   if (data.summary) {
@@ -117,8 +137,8 @@ export function exportFinanceReportToExcel(
       'Показатель': key,
       'Значение': typeof value === 'number' ? value.toFixed(2) : String(value),
     }))
-    const wsSummary = XLSX.utils.json_to_sheet(summaryData)
-    XLSX.utils.book_append_sheet(wb, wsSummary, 'Сводка')
+    const wsSummary = toSheetData(summaryData)
+    wb.push({ data: wsSummary, sheet: 'Сводка' })
   }
 
   // Заказы
@@ -132,8 +152,8 @@ export function exportFinanceReportToExcel(
       'Оплачен': order.is_paid ? 'Да' : 'Нет',
       'Дата завершения': order.completed_at ? new Date(order.completed_at).toLocaleString('ru-RU') : '',
     }))
-    const wsOrders = XLSX.utils.json_to_sheet(formattedOrders)
-    XLSX.utils.book_append_sheet(wb, wsOrders, 'Заказы')
+    const wsOrders = toSheetData(formattedOrders)
+    wb.push({ data: wsOrders, sheet: 'Заказы' })
   }
 
   // Транзакции
@@ -144,8 +164,8 @@ export function exportFinanceReportToExcel(
       'Сумма (BYN)': parseFloat(transaction.amount || 0).toFixed(2),
       'Описание': transaction.description || '',
     }))
-    const wsTransactions = XLSX.utils.json_to_sheet(formattedTransactions)
-    XLSX.utils.book_append_sheet(wb, wsTransactions, 'Транзакции')
+    const wsTransactions = toSheetData(formattedTransactions)
+    wb.push({ data: wsTransactions, sheet: 'Транзакции' })
   }
 
   // Дебиторка
@@ -158,10 +178,10 @@ export function exportFinanceReportToExcel(
       'Статус': receivable.status === 'unpaid' ? 'Неоплачено' : 'Оплачено',
       'Дата создания': receivable.created_at ? new Date(receivable.created_at).toLocaleString('ru-RU') : '',
     }))
-    const wsReceivables = XLSX.utils.json_to_sheet(formattedReceivables)
-    XLSX.utils.book_append_sheet(wb, wsReceivables, 'Дебиторка')
+    const wsReceivables = toSheetData(formattedReceivables)
+    wb.push({ data: wsReceivables, sheet: 'Дебиторка' })
   }
 
-  XLSX.writeFile(wb, `${filename}.xlsx`)
+  saveWorkbook(wb, filename)
 }
 

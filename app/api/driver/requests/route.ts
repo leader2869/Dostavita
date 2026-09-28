@@ -2,9 +2,11 @@ import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { requireRole } from '@/lib/api/auth'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   try {
-    const supabase = createServerSupabaseClient()
+    const supabase = await createServerSupabaseClient()
     const auth = await requireRole(supabase, 'driver')
     if (!auth.ok) return auth.response
     const { user } = auth

@@ -5,7 +5,7 @@ import { MAX_AVATAR_SIZE_BYTES } from '@/lib/constants'
 
 export async function POST(request: Request) {
   try {
-    const supabase = createServerSupabaseClient()
+    const supabase = await createServerSupabaseClient()
     const auth = await getAuthUser(supabase)
     if (!auth.ok) return auth.response
     const user = auth.user
@@ -16,7 +16,7 @@ export async function POST(request: Request) {
     if (!file) {
       return apiError('Файл не найден', 400)
     }
-    if (!file.type.startsWith('image/')) {
+    if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(file.type)) {
       return apiError('Файл должен быть изображением', 400)
     }
     if (file.size > MAX_AVATAR_SIZE_BYTES) {
@@ -27,7 +27,7 @@ export async function POST(request: Request) {
     // Storage -> Create bucket: название "avatars", публичный: Да
 
     // Генерируем уникальное имя файла
-    const fileExt = file.name.split('.').pop()
+    const fileExt = ({ 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/gif': 'gif' } as Record<string, string>)[file.type]
     const fileName = `${user.id}-${Date.now()}.${fileExt}`
     const filePath = `${user.id}/${fileName}`
 

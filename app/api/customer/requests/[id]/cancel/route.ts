@@ -5,11 +5,11 @@ import { paramsIdSchema } from '@/lib/api/validate'
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = createServerSupabaseClient()
-    const paramsResult = paramsIdSchema.safeParse(params)
+    const supabase = await createServerSupabaseClient()
+    const paramsResult = paramsIdSchema.safeParse(await params)
     if (!paramsResult.success) {
       return NextResponse.json(
         { error: 'ID запроса обязателен' },

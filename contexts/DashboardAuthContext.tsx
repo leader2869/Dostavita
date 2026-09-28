@@ -26,7 +26,7 @@ export interface DashboardAuthProviderProps {
 export function DashboardAuthProvider({ user, profile, children }: DashboardAuthProviderProps) {
   const value = useMemo<DashboardAuthValue>(
     () => ({ user, profile, userId: user.id }),
-    [user.id, user.email, profile]
+    [user, profile]
   )
   return (
     <DashboardAuthContext.Provider value={value}>

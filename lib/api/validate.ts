@@ -106,8 +106,6 @@ export const pushUnregisterSchema = z.object({
 /** Уведомление водителей о заказе */
 export const notifyDriversSchema = z.object({
   orderId: z.string().uuid('Некорректный ID заказа'),
-  orderNumber: z.string().optional(),
-  finalPrice: z.union([z.number(), z.string()]).optional(),
 })
 
 /** Admin: удаление пользователя */
@@ -163,10 +161,11 @@ export const profileCreateSchema = z.object({
 
 /** Profile: загрузка аватара — multipart, обрабатывается отдельно */
 
-/** Push: отправка (внутренний вызов) */
+/** Push: отправка администратором */
 export const pushSendSchema = z.object({
-  userId: z.string().uuid().optional(),
-  title: z.string(),
-  body: z.string(),
-  url: z.string().optional(),
+  userId: z.string().uuid(),
+  title: z.string().min(1).max(200),
+  body: z.string().min(1).max(2000),
+  data: z.record(z.unknown()).optional(),
+  tag: z.string().max(200).optional(),
 })

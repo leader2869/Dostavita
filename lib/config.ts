@@ -16,10 +16,10 @@ function getEnv(key: string): string | undefined {
 }
 
 /** URL проекта Supabase (публичный) */
-export const SUPABASE_URL = getEnv('NEXT_PUBLIC_SUPABASE_URL')
+export const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 
 /** Anon key Supabase (публичный, безопасен для клиента) */
-export const SUPABASE_ANON_KEY = getEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY')
+export const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
 const SUPABASE_CLIENT_MESSAGE =
   'NEXT_PUBLIC_SUPABASE_URL и NEXT_PUBLIC_SUPABASE_ANON_KEY должны быть заданы в .env.local. Настройки: https://supabase.com/dashboard/project/_/settings/api'
@@ -45,13 +45,13 @@ export function getSupabaseClientEnv(): { url: string; anonKey: string } {
 export const SUPABASE_SERVICE_ROLE_KEY = getEnv('SUPABASE_SERVICE_ROLE_KEY')
 
 /** Публичный VAPID ключ для push-уведомлений */
-export const VAPID_PUBLIC_KEY = getEnv('NEXT_PUBLIC_VAPID_PUBLIC_KEY')
+export const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
 
 /** Приватный VAPID ключ (только сервер) */
 export const VAPID_PRIVATE_KEY = getEnv('VAPID_PRIVATE_KEY')
 
 /** Базовый URL приложения */
-export const APP_URL = getEnv('NEXT_PUBLIC_APP_URL')
+export const APP_URL = process.env.NEXT_PUBLIC_APP_URL
 
 /**
  * Проверяет наличие обязательных переменных. Вызывать при старте серверных скриптов

@@ -108,7 +108,7 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
     return () => {
       isMounted = false
     }
-  }, [driverUserId]) // Убрали supabase из зависимостей, так как это стабильный объект
+  }, [driverUserId, supabase])
 
   const handleReject = async (orderId: string) => {
     // Добавляем заказ в список отказов для немедленного скрытия

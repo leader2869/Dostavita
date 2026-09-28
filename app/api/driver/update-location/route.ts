@@ -6,7 +6,7 @@ import { updateLocationSchema } from '@/lib/api/validate'
 
 export async function POST(request: Request) {
   try {
-    const supabase = createServerSupabaseClient()
+    const supabase = await createServerSupabaseClient()
     const bodyResult = await parseBody(request, updateLocationSchema)
     if (!bodyResult.ok) return bodyResult.response
     const { latitude, longitude, accuracy, heading, speed, order_id } = bodyResult.data

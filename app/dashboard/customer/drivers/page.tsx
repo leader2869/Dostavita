@@ -5,7 +5,12 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useDashboardUser } from '@/contexts/DashboardAuthContext'
 import { DriverOrganizationChatButton } from '@/components/chat/DriverOrganizationChatButton'
-import { DriverLocationMap } from '@/components/map/DriverLocationMap'
+import dynamic from 'next/dynamic'
+
+const DriverLocationMap = dynamic(
+  () => import('@/components/map/DriverLocationMap').then(module => module.DriverLocationMap),
+  { ssr: false }
+)
 import { toastError, toastSuccess } from '@/lib/utils/toast'
 
 export default function CustomerDriversPage() {

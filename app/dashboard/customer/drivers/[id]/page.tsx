@@ -11,9 +11,9 @@ import { getOrderStatusLabel, getOrderStatusColor } from '@/lib/utils/orderStatu
 import { DriverChatButton } from '@/components/customer/DriverChatButton'
 import { DriverOrdersHistory } from '@/components/customer/DriverOrdersHistory'
 
-export default async function DriverDetailsPage({ params }: { params: { id: string } }) {
-  const supabase = createServerSupabaseClient()
-  const driverId = params.id
+export default async function DriverDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+  const supabase = await createServerSupabaseClient()
+  const driverId = (await params).id
   const { user, profile, authError } = await getCachedUserAndProfile()
 
   if (authError || !user) redirect('/login')

@@ -8,7 +8,7 @@ function isRedirectError(err: unknown): boolean {
 
 export default async function Home() {
   try {
-    const supabase = createServerSupabaseClient()
+    const supabase = await createServerSupabaseClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (user) {

@@ -22,7 +22,10 @@ jobs:
         run: npm ci
 
       - name: Lint
-        run: npm run lint
+        run: npx eslint app components contexts hooks lib types middleware.ts --ext .ts,.tsx --max-warnings 0
+
+      - name: Role, session and push regression tests
+        run: node --test tests/*.test.cjs
 
       - name: Type check
         run: npm run type-check
@@ -32,3 +35,17 @@ jobs:
         env:
           NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
           NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
+
+  sql-concurrency:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install PostgreSQL
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql
+      - name: Test concurrent order acceptance and payment
+        run: |
+          export PG_BIN="$(find /usr/lib/postgresql -path '*/bin/initdb' | sort -V | tail -1 | xargs dirname)"
+          python3 tests/order-concurrency.py
+          python3 tests/security-regression.py

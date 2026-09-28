@@ -88,7 +88,7 @@ export default function ClientFinancePage() {
       console.error('Ошибка загрузки данных:', err)
       setLoading(false)
     }
-  }, [supabase, userId, period, customStartDate, customEndDate, getDateFilter])
+  }, [supabase, userId, getDateFilter])
 
   useEffect(() => {
     loadData()

@@ -8,7 +8,7 @@ import { formatAddressForOrder } from '@/lib/utils/formatAddress'
 import { getOrderStatusLabel } from '@/lib/utils/orderStatus'
 
 export default async function AdminDashboard() {
-  const supabase = createServerSupabaseClient()
+  const supabase = await createServerSupabaseClient()
   const { user, profile, authError } = await getCachedUserAndProfile()
 
   if (authError || !user) redirect('/login')

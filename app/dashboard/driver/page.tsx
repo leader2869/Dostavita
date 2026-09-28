@@ -14,7 +14,7 @@ import { formatReadyTime } from '@/lib/utils/formatReadyTime'
 export const dynamic = 'force-dynamic'
 
 export default async function DriverDashboard() {
-  const supabase = createServerSupabaseClient()
+  const supabase = await createServerSupabaseClient()
   const { user, profile, authError } = await getCachedUserAndProfile()
 
   if (authError || !user) redirect('/login')

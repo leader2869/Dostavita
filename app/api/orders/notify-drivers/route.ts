@@ -1,136 +1,48 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
-import webpush from 'web-push'
+import { createAdminSupabaseClient } from '@/lib/supabase/admin'
 import { requireRole } from '@/lib/api/auth'
-import { parseBody } from '@/lib/api/validate'
-import { notifyDriversSchema } from '@/lib/api/validate'
-import { apiSuccess, apiError, maskInternalMessage } from '@/lib/api/response'
+import { parseBody, notifyDriversSchema } from '@/lib/api/validate'
+import { apiSuccess, apiError } from '@/lib/api/response'
+import { configurePush, sendPush } from '@/lib/push'
 
-// Настройка VAPID деталей
-if (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
-  webpush.setVapidDetails(
-    'mailto:dostavita@example.com',
-    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
-    process.env.VAPID_PRIVATE_KEY
-  )
-}
-
-/**
- * API endpoint для отправки push-уведомлений водителям о новом заказе.
- * Вызывается при создании заказа. Доступ: customer или client.
- */
 export async function POST(request: Request) {
   try {
-    const supabase = createServerSupabaseClient()
+    const supabase = await createServerSupabaseClient()
     const auth = await requireRole(supabase, ['customer', 'client'])
     if (!auth.ok) return auth.response
+    const body = await parseBody(request, notifyDriversSchema)
+    if (!body.ok) return body.response
 
-    const bodyResult = await parseBody(request, notifyDriversSchema)
-    if (!bodyResult.ok) return bodyResult.response
-    const { orderId } = bodyResult.data
-
-    // Получаем информацию о заказе
-    const { data: order, error: orderError } = await supabase
-      .from('orders')
-      .select('id, order_number, final_price, status')
-      .eq('id', orderId)
-      .single()
-
-    if (orderError || !order) return apiError('Заказ не найден', 404)
-    if (order.status !== 'searching_courier') return apiError('Заказ не в статусе поиска курьера', 400)
-
-    // Получаем всех водителей с активными push-подписками
-    const { data: subscriptions, error: subsError } = await supabase
-      .from('push_subscriptions')
-      .select('user_id, endpoint, p256dh_key, auth_key')
-      .not('endpoint', 'is', null)
-
-    if (subsError) {
-      console.error('Ошибка получения подписок:', subsError)
-      return apiError(maskInternalMessage(subsError.message), 500)
+    // RLS может разрешать чтение чужих публичных заказов: проверяем создателя отдельно.
+    const { data: order, error } = await supabase.from('orders')
+      .select('id, customer_id, order_number, final_price, status, visibility')
+      .eq('id', body.data.orderId).single()
+    if (error || !order) return apiError('Заказ не найден', 404)
+    if (order.customer_id !== auth.user.id) return apiError('Доступ запрещен', 403)
+    if (order.status !== 'searching_courier' || order.visibility !== 'public') {
+      return apiError('Заказ недоступен для общей рассылки', 400)
     }
-    if (!subscriptions || subscriptions.length === 0) return apiSuccess({ message: 'Нет активных подписок' })
+    if (!configurePush()) return apiError('Push-уведомления не настроены', 503)
 
-    // Проверяем, какие водители не отказались от этого заказа
-    const { data: rejections } = await supabase
-      .from('order_rejections')
-      .select('driver_user_id')
-      .eq('order_id', orderId)
-
-    const rejectedDriverIds = new Set(rejections?.map((r) => r.driver_user_id) || [])
-
-    // Фильтруем подписки, исключая водителей, которые отказались от заказа
-    const validSubscriptions = subscriptions.filter(
-      (sub) => !rejectedDriverIds.has(sub.user_id)
-    )
-
-    if (validSubscriptions.length === 0) return apiSuccess({ message: 'Нет водителей для уведомления' })
-
-    // Отправляем уведомление каждому водителю
-    const results = await Promise.allSettled(
-      validSubscriptions.map(async (sub) => {
-        try {
-          const subscription = {
-            endpoint: sub.endpoint,
-            keys: {
-              p256dh: sub.p256dh_key,
-              auth: sub.auth_key,
-            },
-          }
-
-          const payload = JSON.stringify({
-            title: 'Новый заказ!',
-            body: `Заказ №${order.order_number || order.id.slice(0, 8)} - ${order.final_price} BYN`,
-            icon: '/icon-192x192.png',
-            badge: '/icon-192x192.png',
-            tag: `order-${order.id}`,
-            data: {
-              orderId: order.id,
-              url: '/dashboard/driver',
-            },
-            requireInteraction: true,
-            actions: [
-              {
-                action: 'view',
-                title: 'Посмотреть',
-              },
-              {
-                action: 'close',
-                title: 'Закрыть',
-              },
-            ],
-          })
-
-          await webpush.sendNotification(subscription, payload)
-          return { success: true, userId: sub.user_id }
-        } catch (error: any) {
-          console.error(`Ошибка отправки push-уведомления водителю ${sub.user_id}:`, error)
-
-          // Если подписка недействительна (410), удаляем её
-          if (error.statusCode === 410) {
-            await supabase
-              .from('push_subscriptions')
-              .delete()
-              .eq('endpoint', sub.endpoint)
-            return {
-              success: false,
-              userId: sub.user_id,
-              error: 'Подписка удалена (недействительна)',
-            }
-          }
-
-          return { success: false, userId: sub.user_id, error: error.message }
-        }
-      })
-    )
-
-    const successful = results.filter((r) => r.status === 'fulfilled' && r.value.success).length
-    const failed = results.length - successful
-
-    return apiSuccess({ sent: successful, failed, total: validSubscriptions.length })
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Внутренняя ошибка сервера'
-    console.error('Ошибка отправки push-уведомлений водителям:', error)
-    return apiError(maskInternalMessage(message), 500)
+    // Привилегированный клиент нужен только для подписок и отказов, после проверки заказа.
+    const admin = createAdminSupabaseClient()
+    const { data: subscriptions, error: subsError } = await admin.from('push_subscriptions')
+      .select('user_id, endpoint, p256dh_key, auth_key, profiles!inner(role)')
+      .eq('profiles.role', 'driver')
+    if (subsError) throw subsError
+    const { data: rejections, error: rejectionError } = await admin.from('order_rejections')
+      .select('driver_user_id').eq('order_id', order.id)
+    if (rejectionError) throw rejectionError
+    const rejected = new Set(rejections?.map((r) => r.driver_user_id))
+    const recipients = (subscriptions ?? []).filter((s) => !rejected.has(s.user_id))
+    return apiSuccess(await sendPush(admin, recipients, {
+      title: 'Новый заказ!',
+      body: `Заказ №${order.order_number || order.id.slice(0, 8)} - ${order.final_price} BYN`,
+      tag: `order-${order.id}`,
+      data: { orderId: order.id, url: '/dashboard/driver' },
+    }))
+  } catch {
+    console.error('Ошибка рассылки уведомлений о заказе')
+    return apiError('Не удалось отправить уведомления', 500)
   }
 }
-

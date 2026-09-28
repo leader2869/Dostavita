@@ -104,7 +104,7 @@ export function useAuthCheck(redirectOnFail = true) {
       mounted = false
       subscription.unsubscribe()
     }
-  }, [redirectOnFail]) // Убрали supabase и router из зависимостей - это стабильные объекты
+  }, [redirectOnFail, router, supabase.auth])
 
   return { user, loading, error }
 }

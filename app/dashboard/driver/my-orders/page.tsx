@@ -69,7 +69,7 @@ export default function DriverMyOrdersPage() {
     return () => {
       isMounted = false
     }
-  }, [user, period, supabase, getDateFilter])
+  }, [user, supabase, getDateFilter])
 
   useEffect(() => {
     if (authLoading || !user) return

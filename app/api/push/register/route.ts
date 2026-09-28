@@ -1,3 +1,4 @@
+import { isTrustedPushEndpoint } from '@/lib/push-endpoint'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { getAuthUser } from '@/lib/api/auth'
 import { parseBody } from '@/lib/api/validate'
@@ -6,7 +7,7 @@ import { apiSuccess, apiError, maskInternalMessage } from '@/lib/api/response'
 
 export async function POST(request: Request) {
   try {
-    const supabase = createServerSupabaseClient()
+    const supabase = await createServerSupabaseClient()
     const auth = await getAuthUser(supabase)
     if (!auth.ok) return auth.response
     const { user } = auth
@@ -14,6 +15,7 @@ export async function POST(request: Request) {
     const bodyResult = await parseBody(request, pushRegisterSchema)
     if (!bodyResult.ok) return bodyResult.response
     const { subscription } = bodyResult.data
+    if (!isTrustedPushEndpoint(subscription.endpoint)) return apiError('Недопустимый push-провайдер', 400)
 
     // Сохраняем подписку в базе данных
     // Проверяем, существует ли уже подписка для этого пользователя и endpoint

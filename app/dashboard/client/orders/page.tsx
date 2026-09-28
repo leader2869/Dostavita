@@ -118,7 +118,7 @@ export default function ClientOrdersPage() {
     return () => {
       isMounted = false
     }
-  }, [supabase, userId, period, customStartDate, customEndDate, getDateFilter])
+  }, [supabase, userId, getDateFilter])
 
   useEffect(() => {
     loadData()

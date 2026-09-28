@@ -4,7 +4,7 @@ import { apiSuccess, apiError, maskInternalMessage } from '@/lib/api/response'
 
 export async function POST() {
   try {
-    const supabase = createServerSupabaseClient()
+    const supabase = await createServerSupabaseClient()
     const auth = await getAuthUser(supabase)
     if (!auth.ok) return auth.response
 

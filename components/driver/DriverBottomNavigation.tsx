@@ -69,7 +69,7 @@ export function DriverBottomNavigation() {
       isMounted = false
       clearInterval(interval)
     }
-  }, []) // Убрали supabase из зависимостей
+  }, [supabase])
 
   const handleActiveOrderClick = () => {
     if (activeOrders.length === 0) {

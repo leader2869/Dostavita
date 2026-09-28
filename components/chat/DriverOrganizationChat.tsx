@@ -44,6 +44,12 @@ export function DriverOrganizationChat({
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [senderNames, setSenderNames] = useState<Record<string, string>>({})
   const [hasMarkedAsRead, setHasMarkedAsRead] = useState(false)
+  // Актуальные значения для обработчика Realtime без переподписки при каждом сообщении.
+  const senderNamesRef = useRef(senderNames)
+  const onMessagesReadRef = useRef(onMessagesRead)
+  useEffect(() => { senderNamesRef.current = senderNames }, [senderNames])
+  useEffect(() => { onMessagesReadRef.current = onMessagesRead }, [onMessagesRead])
+
 
   const chatType = driverId ? 'personal' : 'general'
   const chatTitle = driverId ? 'Личный чат' : 'Общий чат'
@@ -196,14 +202,12 @@ export function DriverOrganizationChat({
                       : m
                   ))
                   // Вызываем callback для обновления счетчика
-                  if (onMessagesRead) {
-                    onMessagesRead()
-                  }
+                  onMessagesReadRef.current?.()
                 }
               }
               
               // Загружаем имя отправителя, если его еще нет
-              if (!senderNames[newMessage.sender_id]) {
+              if (!senderNamesRef.current[newMessage.sender_id]) {
                 const { data: profile } = await supabase
                   .from('profiles')
                   .select('id, full_name, email')
@@ -234,7 +238,7 @@ export function DriverOrganizationChat({
       isMounted = false
       channel.unsubscribe()
     }
-  }, [organizationId, driverId, supabase])
+  }, [organizationId, driverId, currentUserId, supabase])
 
   // Отмечаем все непрочитанные сообщения как прочитанные при открытии модального окна
   useEffect(() => {

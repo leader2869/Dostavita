@@ -7,7 +7,7 @@ import { formatAddressForOrder } from '@/lib/utils/formatAddress'
 import { ExportOrdersButton } from '@/components/ExportOrdersButton'
 
 export default async function AdminOrdersPage() {
-  const supabase = createServerSupabaseClient()
+  const supabase = await createServerSupabaseClient()
   const { user, profile, authError } = await getCachedUserAndProfile()
 
   if (authError || !user) redirect('/login')

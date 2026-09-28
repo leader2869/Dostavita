@@ -1,10 +1,11 @@
+import Link from 'next/link'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import type { User } from '@/lib/types'
 import { getCachedUserAndProfile } from '@/lib/supabase/cached-auth'
 
 export default async function CustomerDashboard() {
-  const supabase = createServerSupabaseClient()
+  const supabase = await createServerSupabaseClient()
   const { user, profile, authError } = await getCachedUserAndProfile()
 
   if (authError || !user) redirect('/login')
@@ -98,17 +99,17 @@ export default async function CustomerDashboard() {
       <div className="bg-gray-50 rounded-lg shadow p-6 mb-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold text-gray-900">Мои водители</h2>
-          <a
+          <Link
             href="/dashboard/customer/drivers"
             className="text-brand-light hover:text-brand-dark text-sm"
           >
             Управление водителями →
-          </a>
+          </Link>
         </div>
         {drivers && drivers.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {drivers.slice(0, 6).map((driver: any) => (
-              <a
+              <Link
                 key={driver.id}
                 href={`/dashboard/customer/drivers/${driver.id}`}
                 className="block border border-gray-200 rounded-lg p-4 bg-gray-100 hover:bg-gray-200 transition cursor-pointer"
@@ -156,7 +157,7 @@ export default async function CustomerDashboard() {
                     </span>
                   </p>
                 </div>
-              </a>
+              </Link>
             ))}
           </div>
         ) : (

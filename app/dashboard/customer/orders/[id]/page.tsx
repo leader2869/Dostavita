@@ -9,9 +9,9 @@ import { OrderStatusRealtime } from '@/components/customer/OrderStatusRealtime'
 import { formatAddressForOrder } from '@/lib/utils/formatAddress'
 import { getOrderStatusLabel, getOrderStatusColor } from '@/lib/utils/orderStatus'
 
-export default async function CustomerOrderDetailsPage({ params }: { params: { id: string } }) {
-  const orderId = params.id
-  const supabase = createServerSupabaseClient()
+export default async function CustomerOrderDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+  const orderId = (await params).id
+  const supabase = await createServerSupabaseClient()
   const { user, profile, authError } = await getCachedUserAndProfile()
 
   if (authError || !user) redirect('/login')

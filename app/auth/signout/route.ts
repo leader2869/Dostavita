@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server'
 import { NextRequest } from 'next/server'
 
 export async function POST(request: NextRequest) {
-  const supabase = createServerSupabaseClient()
+  const supabase = await createServerSupabaseClient()
   
   try {
     // Выходим из аккаунта

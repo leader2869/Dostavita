@@ -32,7 +32,7 @@ export async function updateSession(request: NextRequest) {
 
   // Проверяем и обновляем сессию пользователя
   // Используем getUser() для безопасной проверки аутентификации
-  const { data: { user } } = await supabase.auth.getUser()
+  await supabase.auth.getUser()
   
   // Если пользователь не аутентифицирован и пытается зайти в защищенную зону,
   // редирект будет выполнен в layout дашборда

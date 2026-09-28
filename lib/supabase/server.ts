@@ -3,9 +3,9 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { getSupabaseClientEnv } from '@/lib/config'
 
-export function createServerSupabaseClient() {
+export async function createServerSupabaseClient() {
   const { url, anonKey } = getSupabaseClientEnv()
-  const cookieStore = cookies()
+  const cookieStore = await cookies()
 
   return createServerClient(
     url,
