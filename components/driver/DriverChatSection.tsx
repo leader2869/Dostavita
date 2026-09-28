@@ -26,7 +26,7 @@ export function DriverChatSection({ driverUserId, organizationId }: DriverChatSe
     try {
       // Подсчитываем непрочитанные сообщения в общем чате
       const { count: generalUnread, error: generalError } = await supabase
-        .from('driver_organization_messages')
+        .from('driver_organization_messages_for_me')
         .select('*', { count: 'exact', head: true })
         .eq('organization_id', organizationId)
         .is('driver_id', null)
@@ -41,7 +41,7 @@ export function DriverChatSection({ driverUserId, organizationId }: DriverChatSe
 
       // Подсчитываем непрочитанные сообщения в личном чате
       const { count: personalUnread, error: personalError } = await supabase
-        .from('driver_organization_messages')
+        .from('driver_organization_messages_for_me')
         .select('*', { count: 'exact', head: true })
         .eq('organization_id', organizationId)
         .eq('driver_id', driverUserId)
@@ -191,7 +191,7 @@ export function DriverChatSection({ driverUserId, organizationId }: DriverChatSe
               const loadUnreadCount = async () => {
                 try {
                   const { count: generalUnread } = await supabase
-                    .from('driver_organization_messages')
+                    .from('driver_organization_messages_for_me')
                     .select('*', { count: 'exact', head: true })
                     .eq('organization_id', organizationId)
                     .is('driver_id', null)
@@ -199,7 +199,7 @@ export function DriverChatSection({ driverUserId, organizationId }: DriverChatSe
                     .is('read_at', null)
 
                   const { count: personalUnread } = await supabase
-                    .from('driver_organization_messages')
+                    .from('driver_organization_messages_for_me')
                     .select('*', { count: 'exact', head: true })
                     .eq('organization_id', organizationId)
                     .eq('driver_id', driverUserId)

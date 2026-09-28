@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import Image from 'next/image'
 import { toastError } from '@/lib/utils/toast'
 import { MAX_CHAT_PHOTO_SIZE_BYTES } from '@/lib/constants'
+import { markOrgMessagesRead } from '@/lib/org-chat'
 
 interface DriverOrganizationChatProps {
   organizationId: string
@@ -67,7 +68,7 @@ export function DriverOrganizationChat({
   const loadMessages = async () => {
     try {
       let query = supabase
-        .from('driver_organization_messages')
+        .from('driver_organization_messages_for_me')
         .select('*')
         .eq('organization_id', organizationId)
 
@@ -113,7 +114,7 @@ export function DriverOrganizationChat({
     const initialLoad = async () => {
       try {
         let query = supabase
-          .from('driver_organization_messages')
+          .from('driver_organization_messages_for_me')
           .select('*')
           .eq('organization_id', organizationId)
 
@@ -171,13 +172,12 @@ export function DriverOrganizationChat({
           event: '*',
           schema: 'public',
           table: 'driver_organization_messages',
-          filter: driverId 
-            ? `organization_id=eq.${organizationId},driver_id=eq.${driverId}`
-            : `organization_id=eq.${organizationId},driver_id=is.null`
+          filter: `organization_id=eq.${organizationId}`
         },
         async (payload) => {
           if (payload.eventType === 'INSERT') {
-            const newMessage = payload.new as Message
+            const newMessage = { ...payload.new, read_at: null } as Message
+            if (newMessage.driver_id !== driverId) return
             
             if (isMounted) {
               // Проверяем, нет ли уже этого сообщения в списке (чтобы избежать дубликатов)
@@ -189,20 +189,17 @@ export function DriverOrganizationChat({
               
               // Если модальное окно открыто и сообщение от другого пользователя, отмечаем его как прочитанное
               if (newMessage.sender_id !== currentUserId && newMessage.read_at === null) {
-                const { error } = await supabase
-                  .from('driver_organization_messages')
-                  .update({ read_at: new Date().toISOString() })
-                  .eq('id', newMessage.id)
-
-                if (!error && isMounted) {
-                  // Обновляем локальное состояние
-                  setMessages(prev => prev.map(m => 
-                    m.id === newMessage.id 
-                      ? { ...m, read_at: new Date().toISOString() }
-                      : m
-                  ))
-                  // Вызываем callback для обновления счетчика
-                  onMessagesReadRef.current?.()
+                try {
+                  const receipts = await markOrgMessagesRead(supabase, [newMessage.id])
+                  if (isMounted && receipts.length) {
+                    setMessages(prev => prev.map(m => {
+                      const receipt = receipts.find(r => r.id === m.id)
+                      return receipt ? { ...m, read_at: receipt.read_at } : m
+                    }))
+                    onMessagesReadRef.current?.()
+                  }
+                } catch (error) {
+                  console.error('Ошибка отметки сообщений как прочитанных:', error)
                 }
               }
               
@@ -226,7 +223,7 @@ export function DriverOrganizationChat({
             const updatedMessage = payload.new as Message
             if (isMounted) {
               setMessages(prev =>
-                prev.map(m => m.id === updatedMessage.id ? updatedMessage : m)
+                prev.map(m => m.id === updatedMessage.id ? { ...updatedMessage, read_at: m.read_at } : m)
               )
             }
           }
@@ -267,21 +264,13 @@ export function DriverOrganizationChat({
 
         // Отмечаем их как прочитанные
         const messageIds = unreadMessages.map(m => m.id)
-        const { error } = await supabase
-          .from('driver_organization_messages')
-          .update({ read_at: new Date().toISOString() })
-          .in('id', messageIds)
-
-        if (error) {
-          console.error('Ошибка отметки сообщений как прочитанных:', error)
-        } else {
-          // Обновляем локальное состояние
-          setMessages(prev => prev.map(m => 
-            messageIds.includes(m.id) 
-              ? { ...m, read_at: new Date().toISOString() }
-              : m
-          ))
-          setHasMarkedAsRead(true)
+        const receipts = await markOrgMessagesRead(supabase, messageIds)
+        if (receipts.length) {
+          setMessages(prev => prev.map(m => {
+            const receipt = receipts.find(r => r.id === m.id)
+            return receipt ? { ...m, read_at: receipt.read_at } : m
+          }))
+          setHasMarkedAsRead(receipts.length === messageIds.length)
           // Вызываем callback для обновления счетчика непрочитанных сообщений
           // Вызываем несколько раз с задержками для надежности
           if (onMessagesRead) {
