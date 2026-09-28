@@ -13,42 +13,16 @@ export default async function AdminPersonnelPage() {
   const role = (profile as User).role
   if (role !== 'admin' && role !== 'superadmin') redirect('/dashboard')
 
-  // Получаем всех водителей через RPC функцию (обходит RLS)
-  let { data: drivers, error: driversError } = await supabase
-    .rpc('get_all_drivers')
-    .limit(100)
-  
-  // Преобразуем данные из RPC функции в формат с вложенным profiles
-  const driversWithProfiles = drivers?.map((d: any) => ({
-    ...d,
-    profiles: {
-      email: d.profile_email,
-      full_name: d.profile_full_name,
-      phone: d.profile_phone
-    }
-  }))
-  
-  if (driversError || !drivers) {
-    const { data: directDrivers } = await supabase
-      .from('drivers')
-      .select(`
-        *,
-        profiles:user_id (
-          email,
-          full_name,
-          phone
-        )
-      `)
-      .order('created_at', { ascending: false })
-      .limit(100)
-    
-    if (directDrivers) {
-      drivers = directDrivers
-    } else {
-      drivers = driversWithProfiles
-    }
-  } else {
-    drivers = driversWithProfiles
+  // Driver accounts and vehicle details live in profiles, not the legacy drivers table.
+  // This query uses the caller's session and retains the database's RLS checks.
+  const { data: drivers, error: driversError } = await supabase
+    .from('profiles')
+    .select('id, email, full_name, phone, vehicle_type, vehicle_brand, vehicle_model, vehicle_number, organization_name')
+    .eq('role', 'driver')
+    .order('created_at', { ascending: false })
+
+  const vehicleLabels: Record<string, string> = {
+    car: 'Автомобиль', motorcycle: 'Мотоцикл', bicycle: 'Велосипед', walking: 'Пешком',
   }
 
   return (
@@ -56,61 +30,47 @@ export default async function AdminPersonnelPage() {
       <BackButton />
       <h1 className="text-3xl font-bold mb-6 text-gray-900">Управление персоналом</h1>
 
-      <div className="bg-gray-50 rounded-lg shadow overflow-hidden">
+      {driversError && (
+        <div role="alert" className="mb-4 rounded border border-red-300 bg-red-50 p-4 text-red-800">
+          Не удалось загрузить персонал. Обновите страницу, чтобы повторить попытку.
+        </div>
+      )}
+      <div className="bg-gray-50 rounded-lg shadow overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-700">
           <thead className="bg-white">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">Водитель</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">Транспорт</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">Номер</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">Статус</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">Заказов</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">Рейтинг</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">Организация</th>
             </tr>
           </thead>
           <tbody className="bg-gray-50 divide-y divide-gray-700">
             {drivers && drivers.length > 0 ? (
-              drivers.map((driver: any) => (
+              drivers.map((driver) => (
                 <tr key={driver.id}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <div>
-                      <p className="font-medium text-gray-900">{driver.profiles?.full_name || driver.profiles?.email}</p>
-                      <p className="text-xs text-gray-600">{driver.profiles?.phone || '-'}</p>
+                      <p className="font-medium text-gray-900">{driver.full_name || driver.email}</p>
+                      <p className="text-xs text-gray-600">{driver.email}</p>
+                      <p className="text-xs text-gray-600">{driver.phone || '-'}</p>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {driver.vehicle_type === 'car' && 'Автомобиль'}
-                    {driver.vehicle_type === 'motorcycle' && 'Мотоцикл'}
-                    {driver.vehicle_type === 'bicycle' && 'Велосипед'}
-                    {driver.vehicle_type === 'walking' && 'Пешком'}
+                    {[vehicleLabels[driver.vehicle_type] || driver.vehicle_type, driver.vehicle_brand, driver.vehicle_model].filter(Boolean).join(' ') || '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                     {driver.vehicle_number || '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <span className={`px-2 py-1 rounded text-xs ${
-                      driver.shift_status === 'online' ? 'bg-brand-light text-gray-900' :
-                      driver.shift_status === 'offline' ? 'bg-gray-100 text-gray-900' :
-                      'bg-yellow-600 text-gray-900'
-                    }`}>
-                      {driver.shift_status === 'online' && 'Онлайн'}
-                      {driver.shift_status === 'offline' && 'Офлайн'}
-                      {driver.shift_status === 'break' && 'Перерыв'}
-                      {driver.shift_status === 'shift_closed' && 'Смена закрыта'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {driver.total_orders}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {driver.rating.toFixed(2)}
+                    {driver.organization_name || '—'}
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={6} className="px-6 py-4 text-center text-gray-600">
-                  Нет водителей
+                <td colSpan={4} className="px-6 py-4 text-center text-gray-600">
+                  {driversError ? 'Список персонала недоступен' : 'Нет водителей'}
                 </td>
               </tr>
             )}

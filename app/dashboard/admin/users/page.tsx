@@ -27,6 +27,8 @@ export default function AdminUsersPage() {
   const [editRole, setEditRole] = useState<string>('client')
 
   const loadUsers = useCallback(async () => {
+    setLoading(true)
+    setError(null)
     try {
       if (profile.role !== 'admin' && profile.role !== 'superadmin') {
         router.push('/dashboard')
@@ -37,26 +39,18 @@ export default function AdminUsersPage() {
       const { data: usersData, error: usersError } = await supabase
         .rpc('get_all_users')
 
-      if (usersError) {
-        // Fallback на прямой запрос
-        const { data: directUsers } = await supabase
-          .from('profiles')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(100)
-
-        if (directUsers) {
-          setUsers(directUsers)
-        }
-      } else {
-        setUsers(usersData || [])
-      }
+      if (usersError) throw usersError
+      setUsers(usersData || [])
     } catch (err: any) {
       setError(err.message)
     } finally {
       setLoading(false)
     }
   }, [supabase, router, profile.role])
+
+  useEffect(() => {
+    void loadUsers()
+  }, [loadUsers])
 
   const handleEdit = (user: any) => {
     setEditingUser(user)
@@ -176,7 +170,14 @@ export default function AdminUsersPage() {
       <BackButton />
       <h1 className="text-3xl font-bold mb-6 text-gray-900">Управление пользователями</h1>
 
-      <div className="bg-gray-50 rounded-lg shadow overflow-hidden">
+      {error && !showEditModal && !showDeleteModal && (
+        <div role="alert" className="mb-4 rounded border border-red-300 bg-red-50 p-4 text-red-800">
+          <p>Не удалось загрузить пользователей: {error}</p>
+          <button onClick={() => void loadUsers()} className="mt-2 underline">Повторить загрузку</button>
+        </div>
+      )}
+
+      <div className="bg-gray-50 rounded-lg shadow overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-700">
           <thead className="bg-white">
             <tr>
@@ -228,7 +229,7 @@ export default function AdminUsersPage() {
             ) : (
               <tr>
                 <td colSpan={6} className="px-6 py-4 text-center text-gray-600">
-                  Нет пользователей
+                  {error ? 'Список пользователей недоступен' : 'Нет пользователей'}
                 </td>
               </tr>
             )}
