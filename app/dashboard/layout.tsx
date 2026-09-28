@@ -40,7 +40,7 @@ export default async function DashboardLayout({
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="flex justify-between h-16">
                 <div className="flex items-center">
-                  <h1 className="flex items-center gap-2 text-3xl font-bold text-gray-900 tracking-tight"><Image src="/icon.svg?v=dostavita" alt="" width={40} height={40} />Dostavita</h1>
+                  <h1 className="flex items-center gap-2 text-3xl font-bold text-gray-900 tracking-tight"><Image src="/icon.svg?v=dostavita-2" alt="" width={40} height={40} />Dostavita</h1>
                   <PageTitle />
                 </div>
                 <DashboardNav profile={userProfile} userId={user.id} />

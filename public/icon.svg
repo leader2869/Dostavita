@@ -8,5 +8,5 @@
     <circle cx="190" cy="331" r="30" fill="#fff"/>
     <circle cx="367" cy="331" r="30" fill="#fff"/>
   </g>
-  <path d="m271 253-42 46h30l-7 27 45-51h-29l3-22Z" fill="#ff6a3d"/>
+  <path d="m271 245-42 46h30l-7 27 45-51h-29l3-22Z" fill="#ff6a3d"/>
 </svg>
