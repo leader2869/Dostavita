@@ -24,6 +24,9 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Session and push regression tests
+        run: node --test tests/session-push.test.cjs
+
       - name: Type check
         run: npm run type-check
 

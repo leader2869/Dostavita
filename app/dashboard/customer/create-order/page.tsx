@@ -203,17 +203,16 @@ export default function CreateOrderPage() {
 
       // Отправляем push-уведомления водителям о новом заказе
       try {
-        await fetch('/api/orders/notify-drivers', {
+        const notifyResponse = await fetch('/api/orders/notify-drivers', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
             orderId: data.id,
-            orderNumber: data.order_number,
-            finalPrice: data.final_price,
           }),
         })
+        if (!notifyResponse.ok) console.error('Заказ создан, но push-рассылка не выполнена:', notifyResponse.status)
       } catch (notifyError) {
         // Не блокируем создание заказа, если уведомления не отправились
         console.error('Ошибка отправки push-уведомлений:', notifyError)
