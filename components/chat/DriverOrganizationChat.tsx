@@ -44,7 +44,6 @@ export function DriverOrganizationChat({
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [senderNames, setSenderNames] = useState<Record<string, string>>({})
-  const [hasMarkedAsRead, setHasMarkedAsRead] = useState(false)
   // Актуальные значения для обработчика Realtime без переподписки при каждом сообщении.
   const senderNamesRef = useRef(senderNames)
   const onMessagesReadRef = useRef(onMessagesRead)
@@ -237,14 +236,8 @@ export function DriverOrganizationChat({
     }
   }, [organizationId, driverId, currentUserId, supabase])
 
-  // Отмечаем все непрочитанные сообщения как прочитанные при открытии модального окна
   useEffect(() => {
-    // Сбрасываем флаг при изменении чата (driverId или organizationId)
-    setHasMarkedAsRead(false)
-  }, [driverId, organizationId])
-
-  useEffect(() => {
-    if (hasMarkedAsRead || loading || messages.length === 0) return
+    if (loading || messages.length === 0) return
 
     const markMessagesAsRead = async () => {
       try {
@@ -253,14 +246,7 @@ export function DriverOrganizationChat({
           m => m.sender_id !== currentUserId && m.read_at === null
         )
 
-        if (unreadMessages.length === 0) {
-          setHasMarkedAsRead(true)
-          // Вызываем callback даже если нет непрочитанных сообщений
-          if (onMessagesRead) {
-            onMessagesRead()
-          }
-          return
-        }
+        if (unreadMessages.length === 0) return
 
         // Отмечаем их как прочитанные
         const messageIds = unreadMessages.map(m => m.id)
@@ -270,7 +256,6 @@ export function DriverOrganizationChat({
             const receipt = receipts.find(r => r.id === m.id)
             return receipt ? { ...m, read_at: receipt.read_at } : m
           }))
-          setHasMarkedAsRead(receipts.length === messageIds.length)
           // Вызываем callback для обновления счетчика непрочитанных сообщений
           // Вызываем несколько раз с задержками для надежности
           if (onMessagesRead) {
@@ -291,7 +276,7 @@ export function DriverOrganizationChat({
 
     return () => clearTimeout(timer)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [messages, currentUserId, loading, hasMarkedAsRead, onMessagesRead])
+  }, [messages, currentUserId, loading, onMessagesRead])
 
   // Автоматическое обновление сообщений каждые 3 секунды, пока модальное окно открыто
   useEffect(() => {
