@@ -51,7 +51,7 @@ export function CustomerBottomNavigation() {
               isActive('/dashboard/customer/available-orders') ? 'ring-2 ring-brand-light' : ''
             }`}
           >
-            <Image src="/icon.svg?v=dostavita" alt="Dostavita" width={48} height={48} className="rounded-xl" />
+            <Image src="/icon.svg?v=dostavita-2" alt="Dostavita" width={48} height={48} className="rounded-xl" />
           </button>
           <Link
             href="/dashboard/customer/finance"

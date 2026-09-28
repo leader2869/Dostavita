@@ -84,7 +84,7 @@ export function ClientBottomNavigation() {
             onClick={() => router.push('/dashboard/client/create-order')}
             className="relative w-20 h-20 rounded-full bg-brand-light text-gray-900 flex items-center justify-center shadow-lg hover:bg-brand-dark transition-all z-10 -mt-6 font-amatic-sc"
           >
-            <Image src="/icon.svg?v=dostavita" alt="Dostavita" width={48} height={48} className="rounded-xl" />
+            <Image src="/icon.svg?v=dostavita-2" alt="Dostavita" width={48} height={48} className="rounded-xl" />
           </button>
 
           {/* Последние две кнопки */}

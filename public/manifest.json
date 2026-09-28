@@ -8,12 +8,12 @@
   "theme_color": "#87ceeb",
   "icons": [
     {
-      "src": "/icon-192x192.png?v=dostavita",
+      "src": "/icon-192x192.png?v=dostavita-2",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/icon-512x512.png?v=dostavita",
+      "src": "/icon-512x512.png?v=dostavita-2",
       "sizes": "512x512",
       "type": "image/png"
     }

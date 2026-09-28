@@ -129,7 +129,7 @@ export default function RegisterPage() {
   return (
     <div className="bg-white p-8 rounded-lg shadow-md border border-gray-200">
       <div className="flex flex-col items-center mb-6">
-        <Image src="/icon.svg?v=dostavita" alt="Быстрая доставка Dostavita" width={80} height={80} priority />
+        <Image src="/icon.svg?v=dostavita-2" alt="Быстрая доставка Dostavita" width={80} height={80} priority />
         <h1 className="text-4xl font-bold tracking-tight text-gray-900 mt-3">Dostavita</h1>
         <p className="text-gray-600 mt-2">Регистрация</p>
       </div>

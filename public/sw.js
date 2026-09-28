@@ -25,8 +25,8 @@ self.addEventListener('push', (event) => {
   const title = data.title || 'Dostavita — новый заказ'
   const options = {
     body: data.body || 'У вас есть новый доступный заказ',
-    icon: '/icon-192x192.png?v=dostavita',
-    badge: '/icon-192x192.png?v=dostavita',
+    icon: '/icon-192x192.png?v=dostavita-2',
+    badge: '/icon-192x192.png?v=dostavita-2',
     tag: data.tag || 'new-order',
     data: data.data || {},
     requireInteraction: true,
