@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { BackButton } from '@/components/ui/BackButton'
 import { toastSuccess } from '@/lib/utils/toast'
@@ -209,7 +210,8 @@ export default function AdminUsersPage() {
                     {new Date(user.created_at).toLocaleDateString('ru-RU')}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
+                      {profile.role === 'superadmin' && <Link href={`/dashboard/admin/users/${user.id}`} className="text-sky-700 underline">Карточка · баланс · пароль</Link>}
                       <button
                         onClick={() => handleEdit(user)}
                         className="text-brand-light hover:text-brand-light"

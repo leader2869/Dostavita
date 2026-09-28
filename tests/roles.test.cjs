@@ -56,6 +56,7 @@ const endpoints = [
   ['push/send', 'POST', ['admin', 'superadmin'], { userId: id, title: 'Test', body: 'Test' }],
   ['admin/delete-user', 'POST', ['superadmin'], { userId: id }],
   ['admin/update-user', 'POST', ['superadmin'], { userId: id }],
+  ['admin/change-password', 'POST', ['superadmin'], { userId: id, password: 'test-password-1234' }],
   ['admin/reset-password', 'POST', ['superadmin'], { email: 'test@example.test' }],
 ]
 for (const [endpoint, method, allowed, body] of endpoints) {
