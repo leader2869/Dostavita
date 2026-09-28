@@ -1,3 +1,4 @@
+import { createAdminSupabaseClient } from '@/lib/supabase/admin'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { requireSuperadmin } from '@/lib/api/auth'
 import { parseBody } from '@/lib/api/validate'
@@ -6,7 +7,7 @@ import { apiSuccess, apiError, maskInternalMessage } from '@/lib/api/response'
 
 export async function POST(request: Request) {
   try {
-    const supabase = createServerSupabaseClient()
+    const supabase = await createServerSupabaseClient()
     const bodyResult = await parseBody(request, adminDeleteUserSchema)
     if (!bodyResult.ok) return bodyResult.response
     const { userId } = bodyResult.data
@@ -17,7 +18,7 @@ export async function POST(request: Request) {
 
     if (userId === user.id) return apiError('Нельзя удалить самого себя', 400)
 
-    const { error: deleteError } = await supabase.auth.admin.deleteUser(userId)
+    const { error: deleteError } = await createAdminSupabaseClient().auth.admin.deleteUser(userId)
 
     if (deleteError) {
       console.error('Ошибка удаления пользователя:', deleteError)

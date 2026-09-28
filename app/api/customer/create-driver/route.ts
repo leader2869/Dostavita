@@ -7,7 +7,7 @@ import { createDriverSchema } from '@/lib/api/validate'
 
 export async function POST(request: Request) {
   try {
-    const supabase = createServerSupabaseClient()
+    const supabase = await createServerSupabaseClient()
     const bodyResult = await parseBody(request, createDriverSchema)
     if (!bodyResult.ok) return bodyResult.response
 

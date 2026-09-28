@@ -7,7 +7,7 @@ import { configurePush, sendPush } from '@/lib/push'
 
 export async function POST(request: Request) {
   try {
-    const supabase = createServerSupabaseClient()
+    const supabase = await createServerSupabaseClient()
     const auth = await requireRole(supabase, ['customer', 'client'])
     if (!auth.ok) return auth.response
     const body = await parseBody(request, notifyDriversSchema)

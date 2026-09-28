@@ -48,3 +48,4 @@ jobs:
         run: |
           export PG_BIN="$(find /usr/lib/postgresql -path '*/bin/initdb' | sort -V | tail -1 | xargs dirname)"
           python3 tests/order-concurrency.py
+          python3 tests/security-regression.py

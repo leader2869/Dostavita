@@ -1,4 +1,5 @@
 import 'server-only'
+import { isTrustedPushEndpoint } from '@/lib/push-endpoint'
 import webpush from 'web-push'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
@@ -25,6 +26,7 @@ export async function sendPush(
   payload: Record<string, unknown>
 ) {
   const results = await Promise.allSettled(subscriptions.map(async (sub) => {
+    if (!isTrustedPushEndpoint(sub.endpoint)) return false
     try {
       await webpush.sendNotification({
         endpoint: sub.endpoint,

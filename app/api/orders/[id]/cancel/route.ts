@@ -5,11 +5,11 @@ import { apiSuccess, apiError, maskInternalMessage } from '@/lib/api/response'
 
 export async function POST(
   _request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = createServerSupabaseClient()
-    const parsed = paramsIdSchema.safeParse(params)
+    const supabase = await createServerSupabaseClient()
+    const parsed = paramsIdSchema.safeParse(await params)
     if (!parsed.success) return apiError('ID заказа обязателен', 400)
     const orderId = parsed.data.id
 
@@ -37,19 +37,24 @@ export async function POST(
       (userRole === 'customer' && order.customer_id === user.id)
     if (!hasAccess) return apiError('Нет прав для отмены этого заказа', 403)
 
-    const { error: updateError } = await supabase
+    const { data: cancelled, error: updateError } = await supabase
       .from('orders')
       .update({
         status: 'cancelled',
         cancelled_at: new Date().toISOString(),
       })
       .eq('id', orderId)
+      .eq('status', 'searching_courier')
+      .is('executor_user_id', null)
+      .select('id')
+      .maybeSingle()
 
     if (updateError) {
       console.error('Ошибка отмены заказа:', updateError)
       return apiError(maskInternalMessage(updateError.message), 500)
     }
 
+    if (!cancelled) return apiError('Заказ уже изменён другим пользователем', 409)
     return apiSuccess({ message: 'Заказ успешно отменен' })
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Внутренняя ошибка сервера'

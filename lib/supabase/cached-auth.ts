@@ -14,7 +14,7 @@ export const getCachedUserAndProfile = cache(async (): Promise<{
   profile: User | null
   authError: Error | null
 }> => {
-  const supabase = createServerSupabaseClient()
+  const supabase = await createServerSupabaseClient()
 
   let user: { id: string; email?: string; user_metadata?: Record<string, unknown> } | null = null
   let authError: Error | null = null

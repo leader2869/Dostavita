@@ -13,11 +13,13 @@ export default function RegisterPage() {
   const role: 'client' = 'client' // Только регистрация клиента
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [notice, setNotice] = useState<string | null>(null)
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError(null)
+    setNotice(null)
 
     try {
       const supabase = createClient()
@@ -37,6 +39,12 @@ export default function RegisterPage() {
 
       if (signUpError) {
         setError(signUpError.message)
+        setLoading(false)
+        return
+      }
+
+      if (data.user && !data.session) {
+        setNotice('Проверьте почту: подтвердите email по ссылке, затем войдите в аккаунт.')
         setLoading(false)
         return
       }
@@ -121,6 +129,7 @@ export default function RegisterPage() {
     <div className="bg-white p-8 rounded-lg shadow-md border border-gray-200">
       <h1 className="text-5xl font-bold text-center mb-6 text-brand-light font-amatic-sc">Просто!Регистрация</h1>
       
+      {notice && <p role="status" className="mb-4 text-green-700">{notice}</p>}
       <form onSubmit={handleRegister} className="space-y-4">
         <div>
           <label htmlFor="fullName" className="block text-sm font-medium text-gray-900">

@@ -6,7 +6,7 @@ import { searchDriversSchema } from '@/lib/api/validate'
 
 export async function POST(request: Request) {
   try {
-    const supabase = createServerSupabaseClient()
+    const supabase = await createServerSupabaseClient()
     const bodyResult = await parseBody(request, searchDriversSchema)
     if (!bodyResult.ok) return bodyResult.response
     const { search } = bodyResult.data

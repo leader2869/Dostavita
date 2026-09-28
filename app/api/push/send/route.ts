@@ -7,7 +7,7 @@ import { configurePush, sendPush } from '@/lib/push'
 
 export async function POST(request: Request) {
   try {
-    const auth = await requireRole(createServerSupabaseClient(), ['admin', 'superadmin'])
+    const auth = await requireRole(await createServerSupabaseClient(), ['admin', 'superadmin'])
     if (!auth.ok) return auth.response
     const body = await parseBody(request, pushSendSchema)
     if (!body.ok) return body.response

@@ -93,13 +93,13 @@ test('delivery removes expired subscriptions, keeps transient failures, exposes 
   const deleted = []
   const { sendPush } = load('lib/push.ts', {
     'web-push': { sendNotification: async ({ endpoint }) => {
-      if (endpoint !== 'ok') throw { statusCode: endpoint === 'expired' ? 410 : 503 }
+      if (!endpoint.endsWith('/ok')) throw { statusCode: endpoint.endsWith('/expired') ? 410 : 503 }
     } },
   })
   const result = await sendPush({ from: () => ({ delete: () => ({ eq: async (_, endpoint) => { deleted.push(endpoint); return { error: null } } }) }) },
-    ['ok', 'expired', 'temporary'].map((endpoint) => ({ endpoint, p256dh_key: 'secret', auth_key: 'secret' })), {})
+    ['ok', 'expired', 'temporary'].map((endpoint) => ({ endpoint: 'https://fcm.googleapis.com/'+endpoint, p256dh_key: 'secret', auth_key: 'secret' })), {})
   assert.equal(JSON.stringify(result), JSON.stringify({ sent: 1, failed: 2, total: 3 }))
-  assert.deepEqual(deleted, ['expired'])
+  assert.deepEqual(deleted, ['https://fcm.googleapis.com/expired'])
 })
 test('middleware propagates refreshed cookies to request and browser response', async () => {
   const { updateSession } = load('lib/supabase/middleware.ts', {

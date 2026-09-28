@@ -5,7 +5,7 @@ import type { User } from '@/lib/types'
 import { getCachedUserAndProfile } from '@/lib/supabase/cached-auth'
 
 export default async function AdminTariffsPage() {
-  const supabase = createServerSupabaseClient()
+  const supabase = await createServerSupabaseClient()
   const { user, profile, authError } = await getCachedUserAndProfile()
 
   if (authError || !user) redirect('/login')

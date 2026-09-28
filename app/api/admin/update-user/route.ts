@@ -1,3 +1,4 @@
+import { createAdminSupabaseClient } from '@/lib/supabase/admin'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { requireSuperadmin } from '@/lib/api/auth'
@@ -6,7 +7,7 @@ import { adminUpdateUserSchema } from '@/lib/api/validate'
 
 export async function POST(request: Request) {
   try {
-    const supabase = createServerSupabaseClient()
+    const supabase = await createServerSupabaseClient()
     const bodyResult = await parseBody(request, adminUpdateUserSchema)
     if (!bodyResult.ok) return bodyResult.response
     const { userId, fullName, phone, role, email } = bodyResult.data
@@ -14,34 +15,21 @@ export async function POST(request: Request) {
     const auth = await requireSuperadmin(supabase)
     if (!auth.ok) return auth.response
 
-    // Обновляем профиль
-    const { error: updateError } = await supabase
-      .from('profiles')
-      .update({
-        full_name: fullName ?? null,
-        phone: phone ?? null,
-        role: role ?? 'client',
-      })
-      .eq('id', userId)
+    const admin = createAdminSupabaseClient()
+    const patch: Record<string, string | null> = {}
+    if (fullName !== undefined) patch.full_name = fullName
+    if (phone !== undefined) patch.phone = phone
+    if (role !== undefined) patch.role = role
 
-    if (updateError) {
-      console.error('Ошибка обновления профиля:', updateError)
-      return NextResponse.json(
-        { error: updateError.message },
-        { status: 500 }
-      )
+    // Never report success when Auth rejects the email change.
+    if (email !== undefined) {
+      const { error } = await admin.auth.admin.updateUserById(userId, { email })
+      if (error) return NextResponse.json({ error: 'Не удалось изменить email' }, { status: 500 })
+      patch.email = email
     }
-
-    // Если изменился email, обновляем его в auth.users
-    if (email) {
-      const { error: emailError } = await supabase.auth.admin.updateUserById(userId, {
-        email: email,
-      })
-
-      if (emailError) {
-        console.error('Ошибка обновления email:', emailError)
-        // Не возвращаем ошибку, так как профиль уже обновлен
-      }
+    if (Object.keys(patch).length > 0) {
+      const { error } = await admin.from('profiles').update(patch).eq('id', userId)
+      if (error) return NextResponse.json({ error: 'Не удалось обновить профиль' }, { status: 500 })
     }
 
     return NextResponse.json({ success: true })

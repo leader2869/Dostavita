@@ -1,0 +1,2689 @@
+{
+  "columns": [
+    {
+      "name": "volume",
+      "type": "numeric",
+      "table": "orders",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "rating",
+      "type": "numeric",
+      "table": "drivers",
+      "default": "0.00",
+      "nullable": "YES"
+    },
+    {
+      "name": "total_orders",
+      "type": "int4",
+      "table": "drivers",
+      "default": "0",
+      "nullable": "YES"
+    },
+    {
+      "name": "shift_started_at",
+      "type": "timestamptz",
+      "table": "drivers",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "shift_ended_at",
+      "type": "timestamptz",
+      "table": "drivers",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "created_at",
+      "type": "timestamptz",
+      "table": "drivers",
+      "default": "now()",
+      "nullable": "YES"
+    },
+    {
+      "name": "id",
+      "type": "uuid",
+      "table": "regions",
+      "default": "uuid_generate_v4()",
+      "nullable": "NO"
+    },
+    {
+      "name": "base_price",
+      "type": "numeric",
+      "table": "regions",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "is_active",
+      "type": "bool",
+      "table": "regions",
+      "default": "true",
+      "nullable": "YES"
+    },
+    {
+      "name": "created_at",
+      "type": "timestamptz",
+      "table": "regions",
+      "default": "now()",
+      "nullable": "YES"
+    },
+    {
+      "name": "id",
+      "type": "uuid",
+      "table": "receivables",
+      "default": "uuid_generate_v4()",
+      "nullable": "NO"
+    },
+    {
+      "name": "order_id",
+      "type": "uuid",
+      "table": "receivables",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "debtor_user_id",
+      "type": "uuid",
+      "table": "receivables",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "amount",
+      "type": "numeric",
+      "table": "receivables",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "paid_at",
+      "type": "timestamptz",
+      "table": "receivables",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "created_at",
+      "type": "timestamptz",
+      "table": "receivables",
+      "default": "now()",
+      "nullable": "YES"
+    },
+    {
+      "name": "updated_at",
+      "type": "timestamptz",
+      "table": "receivables",
+      "default": "now()",
+      "nullable": "YES"
+    },
+    {
+      "name": "driver_user_id",
+      "type": "uuid",
+      "table": "receivables",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "organization_id",
+      "type": "uuid",
+      "table": "receivables",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "id",
+      "type": "uuid",
+      "table": "saved_addresses",
+      "default": "uuid_generate_v4()",
+      "nullable": "NO"
+    },
+    {
+      "name": "user_id",
+      "type": "uuid",
+      "table": "saved_addresses",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "coordinates",
+      "type": "geography",
+      "table": "saved_addresses",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "region_id",
+      "type": "uuid",
+      "table": "saved_addresses",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "is_default",
+      "type": "bool",
+      "table": "saved_addresses",
+      "default": "false",
+      "nullable": "YES"
+    },
+    {
+      "name": "created_at",
+      "type": "timestamptz",
+      "table": "saved_addresses",
+      "default": "now()",
+      "nullable": "YES"
+    },
+    {
+      "name": "updated_at",
+      "type": "timestamptz",
+      "table": "saved_addresses",
+      "default": "now()",
+      "nullable": "YES"
+    },
+    {
+      "name": "id",
+      "type": "uuid",
+      "table": "orders",
+      "default": "uuid_generate_v4()",
+      "nullable": "NO"
+    },
+    {
+      "name": "customer_id",
+      "type": "uuid",
+      "table": "orders",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "client_id",
+      "type": "uuid",
+      "table": "orders",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "driver_id",
+      "type": "uuid",
+      "table": "orders",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "executor_user_id",
+      "type": "uuid",
+      "table": "orders",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "pickup_coordinates",
+      "type": "point",
+      "table": "orders",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "delivery_coordinates",
+      "type": "point",
+      "table": "orders",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "weight",
+      "type": "numeric",
+      "table": "orders",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "base_price",
+      "type": "numeric",
+      "table": "orders",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "region_id",
+      "type": "uuid",
+      "table": "orders",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "final_price",
+      "type": "numeric",
+      "table": "orders",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "is_paid",
+      "type": "bool",
+      "table": "orders",
+      "default": "false",
+      "nullable": "YES"
+    },
+    {
+      "name": "created_at",
+      "type": "timestamptz",
+      "table": "orders",
+      "default": "now()",
+      "nullable": "YES"
+    },
+    {
+      "name": "accepted_at",
+      "type": "timestamptz",
+      "table": "orders",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "picked_up_at",
+      "type": "timestamptz",
+      "table": "orders",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "started_delivery_at",
+      "type": "timestamptz",
+      "table": "orders",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "completed_at",
+      "type": "timestamptz",
+      "table": "orders",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "cancelled_at",
+      "type": "timestamptz",
+      "table": "orders",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "order_number",
+      "type": "int4",
+      "table": "orders",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "started_coming_at",
+      "type": "timestamptz",
+      "table": "orders",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "ready_at",
+      "type": "timestamptz",
+      "table": "orders",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "max_delivery_time",
+      "type": "timestamptz",
+      "table": "orders",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "id",
+      "type": "uuid",
+      "table": "driver_locations",
+      "default": "uuid_generate_v4()",
+      "nullable": "NO"
+    },
+    {
+      "name": "driver_id",
+      "type": "uuid",
+      "table": "driver_locations",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "order_id",
+      "type": "uuid",
+      "table": "driver_locations",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "latitude",
+      "type": "numeric",
+      "table": "driver_locations",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "longitude",
+      "type": "numeric",
+      "table": "driver_locations",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "accuracy",
+      "type": "numeric",
+      "table": "driver_locations",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "heading",
+      "type": "numeric",
+      "table": "driver_locations",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "speed",
+      "type": "numeric",
+      "table": "driver_locations",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "created_at",
+      "type": "timestamptz",
+      "table": "driver_locations",
+      "default": "now()",
+      "nullable": "YES"
+    },
+    {
+      "name": "updated_at",
+      "type": "timestamptz",
+      "table": "driver_locations",
+      "default": "now()",
+      "nullable": "YES"
+    },
+    {
+      "name": "id",
+      "type": "uuid",
+      "table": "cash_deposit_requests",
+      "default": "uuid_generate_v4()",
+      "nullable": "NO"
+    },
+    {
+      "name": "driver_user_id",
+      "type": "uuid",
+      "table": "cash_deposit_requests",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "organization_id",
+      "type": "uuid",
+      "table": "cash_deposit_requests",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "amount",
+      "type": "numeric",
+      "table": "cash_deposit_requests",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "created_at",
+      "type": "timestamptz",
+      "table": "cash_deposit_requests",
+      "default": "now()",
+      "nullable": "YES"
+    },
+    {
+      "name": "updated_at",
+      "type": "timestamptz",
+      "table": "cash_deposit_requests",
+      "default": "now()",
+      "nullable": "YES"
+    },
+    {
+      "name": "approved_at",
+      "type": "timestamptz",
+      "table": "cash_deposit_requests",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "approved_by",
+      "type": "uuid",
+      "table": "cash_deposit_requests",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "rejected_at",
+      "type": "timestamptz",
+      "table": "cash_deposit_requests",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "rejected_by",
+      "type": "uuid",
+      "table": "cash_deposit_requests",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "cancelled_at",
+      "type": "timestamptz",
+      "table": "cash_deposit_requests",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "coord_dimension",
+      "type": "int4",
+      "table": "geography_columns",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "srid",
+      "type": "int4",
+      "table": "geography_columns",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "coord_dimension",
+      "type": "int4",
+      "table": "geometry_columns",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "srid",
+      "type": "int4",
+      "table": "geometry_columns",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "id",
+      "type": "uuid",
+      "table": "driver_organization_requests",
+      "default": "uuid_generate_v4()",
+      "nullable": "NO"
+    },
+    {
+      "name": "driver_user_id",
+      "type": "uuid",
+      "table": "driver_organization_requests",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "organization_user_id",
+      "type": "uuid",
+      "table": "driver_organization_requests",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "created_at",
+      "type": "timestamptz",
+      "table": "driver_organization_requests",
+      "default": "now()",
+      "nullable": "YES"
+    },
+    {
+      "name": "responded_at",
+      "type": "timestamptz",
+      "table": "driver_organization_requests",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "id",
+      "type": "uuid",
+      "table": "driver_organization_messages",
+      "default": "uuid_generate_v4()",
+      "nullable": "NO"
+    },
+    {
+      "name": "organization_id",
+      "type": "uuid",
+      "table": "driver_organization_messages",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "driver_id",
+      "type": "uuid",
+      "table": "driver_organization_messages",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "sender_id",
+      "type": "uuid",
+      "table": "driver_organization_messages",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "created_at",
+      "type": "timestamptz",
+      "table": "driver_organization_messages",
+      "default": "now()",
+      "nullable": "YES"
+    },
+    {
+      "name": "read_at",
+      "type": "timestamptz",
+      "table": "driver_organization_messages",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "id",
+      "type": "uuid",
+      "table": "order_rejections",
+      "default": "uuid_generate_v4()",
+      "nullable": "NO"
+    },
+    {
+      "name": "order_id",
+      "type": "uuid",
+      "table": "order_rejections",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "driver_user_id",
+      "type": "uuid",
+      "table": "order_rejections",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "created_at",
+      "type": "timestamptz",
+      "table": "order_rejections",
+      "default": "now()",
+      "nullable": "YES"
+    },
+    {
+      "name": "id",
+      "type": "uuid",
+      "table": "order_messages",
+      "default": "uuid_generate_v4()",
+      "nullable": "NO"
+    },
+    {
+      "name": "order_id",
+      "type": "uuid",
+      "table": "order_messages",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "sender_id",
+      "type": "uuid",
+      "table": "order_messages",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "created_at",
+      "type": "timestamptz",
+      "table": "order_messages",
+      "default": "now()",
+      "nullable": "YES"
+    },
+    {
+      "name": "read_at",
+      "type": "timestamptz",
+      "table": "order_messages",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "id",
+      "type": "uuid",
+      "table": "balances",
+      "default": "uuid_generate_v4()",
+      "nullable": "NO"
+    },
+    {
+      "name": "user_id",
+      "type": "uuid",
+      "table": "balances",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "amount",
+      "type": "numeric",
+      "table": "balances",
+      "default": "0.00",
+      "nullable": "YES"
+    },
+    {
+      "name": "updated_at",
+      "type": "timestamptz",
+      "table": "balances",
+      "default": "now()",
+      "nullable": "YES"
+    },
+    {
+      "name": "id",
+      "type": "uuid",
+      "table": "transactions",
+      "default": "uuid_generate_v4()",
+      "nullable": "NO"
+    },
+    {
+      "name": "user_id",
+      "type": "uuid",
+      "table": "transactions",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "order_id",
+      "type": "uuid",
+      "table": "transactions",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "amount",
+      "type": "numeric",
+      "table": "transactions",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "created_at",
+      "type": "timestamptz",
+      "table": "transactions",
+      "default": "now()",
+      "nullable": "YES"
+    },
+    {
+      "name": "related_user_id",
+      "type": "uuid",
+      "table": "transactions",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "id",
+      "type": "uuid",
+      "table": "delivery_settings",
+      "default": "uuid_generate_v4()",
+      "nullable": "NO"
+    },
+    {
+      "name": "setting_value",
+      "type": "int4",
+      "table": "delivery_settings",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "created_at",
+      "type": "timestamptz",
+      "table": "delivery_settings",
+      "default": "now()",
+      "nullable": "YES"
+    },
+    {
+      "name": "updated_at",
+      "type": "timestamptz",
+      "table": "delivery_settings",
+      "default": "now()",
+      "nullable": "YES"
+    },
+    {
+      "name": "id",
+      "type": "uuid",
+      "table": "push_subscriptions",
+      "default": "uuid_generate_v4()",
+      "nullable": "NO"
+    },
+    {
+      "name": "user_id",
+      "type": "uuid",
+      "table": "push_subscriptions",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "created_at",
+      "type": "timestamptz",
+      "table": "push_subscriptions",
+      "default": "now()",
+      "nullable": "YES"
+    },
+    {
+      "name": "updated_at",
+      "type": "timestamptz",
+      "table": "push_subscriptions",
+      "default": "now()",
+      "nullable": "YES"
+    },
+    {
+      "name": "id",
+      "type": "uuid",
+      "table": "profiles",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "created_at",
+      "type": "timestamptz",
+      "table": "profiles",
+      "default": "now()",
+      "nullable": "YES"
+    },
+    {
+      "name": "updated_at",
+      "type": "timestamptz",
+      "table": "profiles",
+      "default": "now()",
+      "nullable": "YES"
+    },
+    {
+      "name": "organization_id",
+      "type": "uuid",
+      "table": "profiles",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "current_location",
+      "type": "point",
+      "table": "profiles",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "location_updated_at",
+      "type": "timestamptz",
+      "table": "profiles",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "organization_attached_at",
+      "type": "timestamptz",
+      "table": "profiles",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "id",
+      "type": "uuid",
+      "table": "fleets",
+      "default": "uuid_generate_v4()",
+      "nullable": "NO"
+    },
+    {
+      "name": "user_id",
+      "type": "uuid",
+      "table": "fleets",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "total_drivers",
+      "type": "int4",
+      "table": "fleets",
+      "default": "0",
+      "nullable": "YES"
+    },
+    {
+      "name": "total_orders",
+      "type": "int4",
+      "table": "fleets",
+      "default": "0",
+      "nullable": "YES"
+    },
+    {
+      "name": "rating",
+      "type": "numeric",
+      "table": "fleets",
+      "default": "0.00",
+      "nullable": "YES"
+    },
+    {
+      "name": "created_at",
+      "type": "timestamptz",
+      "table": "fleets",
+      "default": "now()",
+      "nullable": "YES"
+    },
+    {
+      "name": "id",
+      "type": "uuid",
+      "table": "drivers",
+      "default": "uuid_generate_v4()",
+      "nullable": "NO"
+    },
+    {
+      "name": "user_id",
+      "type": "uuid",
+      "table": "drivers",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "fleet_id",
+      "type": "uuid",
+      "table": "drivers",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "is_available",
+      "type": "bool",
+      "table": "drivers",
+      "default": "true",
+      "nullable": "YES"
+    },
+    {
+      "name": "current_location",
+      "type": "point",
+      "table": "drivers",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "phone",
+      "type": "text",
+      "table": "profiles",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "paid_by",
+      "type": "text",
+      "table": "orders",
+      "default": "'sender'::text",
+      "nullable": "NO"
+    },
+    {
+      "name": "recipient_phone",
+      "type": "text",
+      "table": "orders",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "endpoint",
+      "type": "text",
+      "table": "push_subscriptions",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "p256dh_key",
+      "type": "text",
+      "table": "push_subscriptions",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "auth_key",
+      "type": "text",
+      "table": "push_subscriptions",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "sender_phone",
+      "type": "text",
+      "table": "orders",
+      "default": "''::text",
+      "nullable": "NO"
+    },
+    {
+      "name": "email",
+      "type": "text",
+      "table": "profiles",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "full_name",
+      "type": "text",
+      "table": "profiles",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "role",
+      "type": "text",
+      "table": "profiles",
+      "default": "'client'::text",
+      "nullable": "NO"
+    },
+    {
+      "name": "avatar_url",
+      "type": "text",
+      "table": "profiles",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "type",
+      "type": "text",
+      "table": "geography_columns",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "debtor_type",
+      "type": "text",
+      "table": "receivables",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "status",
+      "type": "text",
+      "table": "orders",
+      "default": "'searching_courier'::text",
+      "nullable": "NO"
+    },
+    {
+      "name": "type",
+      "type": "varchar",
+      "table": "geometry_columns",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "vehicle_type",
+      "type": "text",
+      "table": "profiles",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "vehicle_number",
+      "type": "text",
+      "table": "profiles",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "license_number",
+      "type": "text",
+      "table": "profiles",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "status",
+      "type": "text",
+      "table": "driver_organization_requests",
+      "default": "'pending'::text",
+      "nullable": "NO"
+    },
+    {
+      "name": "message",
+      "type": "text",
+      "table": "driver_organization_requests",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "visibility",
+      "type": "text",
+      "table": "orders",
+      "default": "'public'::text",
+      "nullable": "NO"
+    },
+    {
+      "name": "currency",
+      "type": "text",
+      "table": "receivables",
+      "default": "'BYN'::text",
+      "nullable": "YES"
+    },
+    {
+      "name": "status",
+      "type": "text",
+      "table": "receivables",
+      "default": "'unpaid'::text",
+      "nullable": "NO"
+    },
+    {
+      "name": "pickup_address",
+      "type": "text",
+      "table": "orders",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "vehicle_brand",
+      "type": "text",
+      "table": "profiles",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "vehicle_model",
+      "type": "text",
+      "table": "profiles",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "message",
+      "type": "text",
+      "table": "driver_organization_messages",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "photo_url",
+      "type": "text",
+      "table": "driver_organization_messages",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "organization_name",
+      "type": "text",
+      "table": "profiles",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "status",
+      "type": "text",
+      "table": "cash_deposit_requests",
+      "default": "'pending'::text",
+      "nullable": "NO"
+    },
+    {
+      "name": "delivery_address",
+      "type": "text",
+      "table": "orders",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "name",
+      "type": "text",
+      "table": "fleets",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "description",
+      "type": "text",
+      "table": "fleets",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "currency",
+      "type": "text",
+      "table": "cash_deposit_requests",
+      "default": "'BYN'::text",
+      "nullable": "YES"
+    },
+    {
+      "name": "description",
+      "type": "text",
+      "table": "orders",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "pickup_entrance",
+      "type": "text",
+      "table": "orders",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "message",
+      "type": "text",
+      "table": "order_messages",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "address_type",
+      "type": "text",
+      "table": "saved_addresses",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "label",
+      "type": "text",
+      "table": "saved_addresses",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "vehicle_type",
+      "type": "text",
+      "table": "drivers",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "vehicle_number",
+      "type": "text",
+      "table": "drivers",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "license_number",
+      "type": "text",
+      "table": "drivers",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "currency",
+      "type": "text",
+      "table": "balances",
+      "default": "'BYN'::text",
+      "nullable": "YES"
+    },
+    {
+      "name": "address",
+      "type": "text",
+      "table": "saved_addresses",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "item_type",
+      "type": "text",
+      "table": "orders",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "courier_comment",
+      "type": "text",
+      "table": "orders",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "pickup_floor",
+      "type": "text",
+      "table": "orders",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "pickup_apartment",
+      "type": "text",
+      "table": "orders",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "type",
+      "type": "text",
+      "table": "transactions",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "description",
+      "type": "text",
+      "table": "transactions",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "shift_status",
+      "type": "text",
+      "table": "drivers",
+      "default": "'offline'::text",
+      "nullable": "YES"
+    },
+    {
+      "name": "delivery_entrance",
+      "type": "text",
+      "table": "orders",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "entrance",
+      "type": "text",
+      "table": "saved_addresses",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "setting_key",
+      "type": "text",
+      "table": "delivery_settings",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "floor",
+      "type": "text",
+      "table": "saved_addresses",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "description",
+      "type": "text",
+      "table": "delivery_settings",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "apartment",
+      "type": "text",
+      "table": "saved_addresses",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "name",
+      "type": "text",
+      "table": "regions",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "delivery_floor",
+      "type": "text",
+      "table": "orders",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "delivery_apartment",
+      "type": "text",
+      "table": "orders",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "f_table_name",
+      "type": "name",
+      "table": "geography_columns",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "f_geography_column",
+      "type": "name",
+      "table": "geography_columns",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "f_geometry_column",
+      "type": "name",
+      "table": "geometry_columns",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "f_table_catalog",
+      "type": "name",
+      "table": "geography_columns",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "f_table_schema",
+      "type": "name",
+      "table": "geography_columns",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "f_table_catalog",
+      "type": "varchar",
+      "table": "geometry_columns",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "f_table_schema",
+      "type": "name",
+      "table": "geometry_columns",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "f_table_name",
+      "type": "name",
+      "table": "geometry_columns",
+      "default": null,
+      "nullable": "YES"
+    }
+  ],
+  "policies": [
+    {
+      "cmd": "SELECT",
+      "name": "All users can view names and emails for chats",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "profiles",
+      "using": "true"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Clients can view driver location for their orders",
+      "check": null,
+      "roles": [
+        "public"
+      ],
+      "table": "driver_locations",
+      "using": "(((order_id IS NOT NULL) AND (EXISTS ( SELECT 1\n   FROM orders\n  WHERE ((orders.id = driver_locations.order_id) AND ((orders.client_id = auth.uid()) OR (orders.customer_id = auth.uid())))))) OR ((order_id IS NULL) AND (EXISTS ( SELECT 1\n   FROM orders\n  WHERE ((orders.executor_user_id = driver_locations.driver_id) AND ((orders.client_id = auth.uid()) OR (orders.customer_id = auth.uid())) AND (orders.status = ANY (ARRAY['courier_coming'::text, 'courier_delivering'::text])))))))"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "Users can insert own profile",
+      "check": "(auth.uid() = id)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "profiles",
+      "using": null
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "Users can update own profile",
+      "check": "(auth.uid() = id)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "profiles",
+      "using": "(auth.uid() = id)"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Users can view own profile",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "profiles",
+      "using": "(auth.uid() = id)"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Drivers can view own orders",
+      "check": null,
+      "roles": [
+        "public"
+      ],
+      "table": "orders",
+      "using": "(executor_user_id = auth.uid())"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Drivers can view available orders",
+      "check": null,
+      "roles": [
+        "public"
+      ],
+      "table": "orders",
+      "using": "(status = 'searching_courier'::text)"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Clients can view driver profiles for their orders",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "profiles",
+      "using": "((auth.uid() = id) OR (EXISTS ( SELECT 1\n   FROM orders o\n  WHERE ((o.executor_user_id = profiles.id) AND ((o.client_id = auth.uid()) OR (o.customer_id = auth.uid())) AND (o.status = ANY (ARRAY['courier_coming'::text, 'courier_delivering'::text, 'completed'::text]))))))"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Users can view own transactions",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "transactions",
+      "using": "(user_id = auth.uid())"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Drivers can view cancelled orders",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "orders",
+      "using": "((status = 'cancelled'::text) AND check_driver_role(auth.uid()))"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "Clients can create orders",
+      "check": "((customer_id = auth.uid()) OR (client_id = auth.uid()))",
+      "roles": [
+        "public"
+      ],
+      "table": "orders",
+      "using": null
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Clients can view own orders",
+      "check": null,
+      "roles": [
+        "public"
+      ],
+      "table": "orders",
+      "using": "((customer_id = auth.uid()) OR (client_id = auth.uid()))"
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "Clients can update own orders",
+      "check": null,
+      "roles": [
+        "public"
+      ],
+      "table": "orders",
+      "using": "((customer_id = auth.uid()) OR (client_id = auth.uid()))"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Drivers can view own requests",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "driver_organization_requests",
+      "using": "(driver_user_id = auth.uid())"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Organizations can view own requests",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "driver_organization_requests",
+      "using": "((organization_user_id = auth.uid()) AND (EXISTS ( SELECT 1\n   FROM profiles\n  WHERE ((profiles.id = auth.uid()) AND (profiles.role = 'customer'::text)))))"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "Organizations can create requests",
+      "check": "((organization_user_id = auth.uid()) AND (EXISTS ( SELECT 1\n   FROM profiles\n  WHERE ((profiles.id = auth.uid()) AND (profiles.role = 'customer'::text)))))",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "driver_organization_requests",
+      "using": null
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "Drivers can update own requests",
+      "check": "(driver_user_id = auth.uid())",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "driver_organization_requests",
+      "using": "(driver_user_id = auth.uid())"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Organizations can view their drivers transactions",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "transactions",
+      "using": "((EXISTS ( SELECT 1\n   FROM profiles p\n  WHERE ((p.id = auth.uid()) AND (p.role = 'customer'::text)))) AND (EXISTS ( SELECT 1\n   FROM profiles d\n  WHERE ((d.id = transactions.user_id) AND (d.role = 'driver'::text) AND (d.organization_id = auth.uid())))))"
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "Organizations can cancel own requests",
+      "check": "((organization_user_id = auth.uid()) AND (status = 'cancelled'::text))",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "driver_organization_requests",
+      "using": "((organization_user_id = auth.uid()) AND (EXISTS ( SELECT 1\n   FROM profiles\n  WHERE ((profiles.id = auth.uid()) AND (profiles.role = 'customer'::text)))))"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Users can view own balance",
+      "check": null,
+      "roles": [
+        "public"
+      ],
+      "table": "balances",
+      "using": "(user_id = auth.uid())"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "Users can insert own balance",
+      "check": "(user_id = auth.uid())",
+      "roles": [
+        "public"
+      ],
+      "table": "balances",
+      "using": null
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "Users can update own balance",
+      "check": "(user_id = auth.uid())",
+      "roles": [
+        "public"
+      ],
+      "table": "balances",
+      "using": "(user_id = auth.uid())"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Admins can view all balances",
+      "check": null,
+      "roles": [
+        "public"
+      ],
+      "table": "balances",
+      "using": "(EXISTS ( SELECT 1\n   FROM profiles\n  WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::text, 'superadmin'::text])))))"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Superadmins can view delivery settings",
+      "check": null,
+      "roles": [
+        "public"
+      ],
+      "table": "delivery_settings",
+      "using": "(EXISTS ( SELECT 1\n   FROM profiles\n  WHERE ((profiles.id = auth.uid()) AND (profiles.role = 'superadmin'::text))))"
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "Superadmins can update delivery settings",
+      "check": null,
+      "roles": [
+        "public"
+      ],
+      "table": "delivery_settings",
+      "using": "(EXISTS ( SELECT 1\n   FROM profiles\n  WHERE ((profiles.id = auth.uid()) AND (profiles.role = 'superadmin'::text))))"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "Superadmins can insert delivery settings",
+      "check": "(EXISTS ( SELECT 1\n   FROM profiles\n  WHERE ((profiles.id = auth.uid()) AND (profiles.role = 'superadmin'::text))))",
+      "roles": [
+        "public"
+      ],
+      "table": "delivery_settings",
+      "using": null
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Users can view their own saved addresses",
+      "check": null,
+      "roles": [
+        "public"
+      ],
+      "table": "saved_addresses",
+      "using": "(auth.uid() = user_id)"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "Users can insert their own saved addresses",
+      "check": "(auth.uid() = user_id)",
+      "roles": [
+        "public"
+      ],
+      "table": "saved_addresses",
+      "using": null
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "Users can update their own saved addresses",
+      "check": null,
+      "roles": [
+        "public"
+      ],
+      "table": "saved_addresses",
+      "using": "(auth.uid() = user_id)"
+    },
+    {
+      "cmd": "DELETE",
+      "name": "Users can delete their own saved addresses",
+      "check": null,
+      "roles": [
+        "public"
+      ],
+      "table": "saved_addresses",
+      "using": "(auth.uid() = user_id)"
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "Superadmins can update any profile",
+      "check": "check_user_role(auth.uid(), 'superadmin'::text)",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "profiles",
+      "using": "check_user_role(auth.uid(), 'superadmin'::text)"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "Drivers can insert own profile",
+      "check": "(user_id = auth.uid())",
+      "roles": [
+        "public"
+      ],
+      "table": "drivers",
+      "using": null
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Drivers can view their own locations",
+      "check": null,
+      "roles": [
+        "public"
+      ],
+      "table": "driver_locations",
+      "using": "(auth.uid() = driver_id)"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "Drivers can insert their own locations",
+      "check": "(auth.uid() = driver_id)",
+      "roles": [
+        "public"
+      ],
+      "table": "driver_locations",
+      "using": null
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "Drivers can update their own locations",
+      "check": null,
+      "roles": [
+        "public"
+      ],
+      "table": "driver_locations",
+      "using": "(auth.uid() = driver_id)"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Admins can view all transactions",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "transactions",
+      "using": "(EXISTS ( SELECT 1\n   FROM profiles\n  WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::text, 'superadmin'::text])))))"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Superadmin can view all driver locations",
+      "check": null,
+      "roles": [
+        "public"
+      ],
+      "table": "driver_locations",
+      "using": "(EXISTS ( SELECT 1\n   FROM profiles\n  WHERE ((profiles.id = auth.uid()) AND (profiles.role = 'superadmin'::text))))"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "Drivers can create own rejections",
+      "check": "(driver_user_id = auth.uid())",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "order_rejections",
+      "using": null
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Drivers can view own rejections",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "order_rejections",
+      "using": "(driver_user_id = auth.uid())"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Superadmins can view all rejections",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "order_rejections",
+      "using": "check_user_role(auth.uid(), 'superadmin'::text)"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "Авторизованные пользователи могу",
+      "check": "((bucket_id = 'avatars'::text) AND (auth.uid() IS NOT NULL))",
+      "roles": [
+        "public"
+      ],
+      "table": "objects",
+      "using": null
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Публичный доступ к аватаркам",
+      "check": null,
+      "roles": [
+        "public"
+      ],
+      "table": "objects",
+      "using": "(bucket_id = 'avatars'::text)"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "Пользователи могут загружать свои",
+      "check": "((bucket_id = 'avatars'::text) AND (((auth.uid())::text = (string_to_array((string_to_array(name, '/'::text))[array_length(string_to_array(name, '/'::text), 1)], '-'::text))[1]) OR (auth.role() = 'service_role'::text)))",
+      "roles": [
+        "public"
+      ],
+      "table": "objects",
+      "using": null
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "Пользователи могут обновлять свои",
+      "check": "((bucket_id = 'avatars'::text) AND (((auth.uid())::text = (string_to_array((string_to_array(name, '/'::text))[array_length(string_to_array(name, '/'::text), 1)], '-'::text))[1]) OR (auth.role() = 'service_role'::text)))",
+      "roles": [
+        "public"
+      ],
+      "table": "objects",
+      "using": "((bucket_id = 'avatars'::text) AND (((auth.uid())::text = (string_to_array((string_to_array(name, '/'::text))[array_length(string_to_array(name, '/'::text), 1)], '-'::text))[1]) OR (auth.role() = 'service_role'::text)))"
+    },
+    {
+      "cmd": "DELETE",
+      "name": "Пользователи могут удалять свои а",
+      "check": null,
+      "roles": [
+        "public"
+      ],
+      "table": "objects",
+      "using": "((bucket_id = 'avatars'::text) AND (((auth.uid())::text = (string_to_array((string_to_array(name, '/'::text))[array_length(string_to_array(name, '/'::text), 1)], '-'::text))[1]) OR (auth.role() = 'service_role'::text)))"
+    },
+    {
+      "cmd": "ALL",
+      "name": "Users can manage own push subscriptions",
+      "check": "(user_id = auth.uid())",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "push_subscriptions",
+      "using": "(user_id = auth.uid())"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Superadmins can view all push subscriptions",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "push_subscriptions",
+      "using": "check_user_role(auth.uid(), 'superadmin'::text)"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Organizations can view their drivers profiles",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "profiles",
+      "using": "((auth.uid() = id) OR ((organization_id = auth.uid()) AND (role = 'driver'::text) AND check_user_role(auth.uid(), 'customer'::text)))"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Organizations can view their drivers orders",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "orders",
+      "using": "((customer_id = auth.uid()) OR (check_user_role(auth.uid(), 'customer'::text) AND (executor_user_id IS NOT NULL) AND is_driver_organization(executor_user_id, auth.uid())))"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Organizations can view their drivers balances",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "balances",
+      "using": "(check_user_role(auth.uid(), 'customer'::text) AND (EXISTS ( SELECT 1\n   FROM profiles d\n  WHERE ((d.id = balances.user_id) AND (d.role = 'driver'::text) AND (d.organization_id = auth.uid())))))"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Admins can view all profiles",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "profiles",
+      "using": "((auth.uid() = id) OR (check_user_role(auth.uid(), 'admin'::text) OR check_user_role(auth.uid(), 'superadmin'::text)))"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Organizations can view receivables for their drivers' orders",
+      "check": null,
+      "roles": [
+        "public"
+      ],
+      "table": "receivables",
+      "using": "((organization_id = auth.uid()) OR (EXISTS ( SELECT 1\n   FROM (orders o\n     JOIN profiles d ON ((o.executor_user_id = d.id)))\n  WHERE ((o.id = receivables.order_id) AND (d.organization_id = auth.uid())))))"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Users can view messages for their orders",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "order_messages",
+      "using": "(EXISTS ( SELECT 1\n   FROM orders o\n  WHERE ((o.id = order_messages.order_id) AND ((o.customer_id = auth.uid()) OR (o.client_id = auth.uid()) OR (o.executor_user_id = auth.uid())))))"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "Users can send messages for their orders",
+      "check": "((sender_id = auth.uid()) AND (EXISTS ( SELECT 1\n   FROM orders o\n  WHERE ((o.id = order_messages.order_id) AND ((o.customer_id = auth.uid()) OR (o.client_id = auth.uid()) OR (o.executor_user_id = auth.uid()))))))",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "order_messages",
+      "using": null
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "Users can update read_at for messages addressed to them",
+      "check": "((sender_id <> auth.uid()) AND (EXISTS ( SELECT 1\n   FROM orders o\n  WHERE ((o.id = order_messages.order_id) AND ((o.customer_id = auth.uid()) OR (o.client_id = auth.uid()) OR (o.executor_user_id = auth.uid()))))))",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "order_messages",
+      "using": "((sender_id <> auth.uid()) AND (EXISTS ( SELECT 1\n   FROM orders o\n  WHERE ((o.id = order_messages.order_id) AND ((o.customer_id = auth.uid()) OR (o.client_id = auth.uid()) OR (o.executor_user_id = auth.uid()))))))"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Drivers can view their cash deposit requests",
+      "check": null,
+      "roles": [
+        "public"
+      ],
+      "table": "cash_deposit_requests",
+      "using": "(driver_user_id = auth.uid())"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "Drivers can create cash deposit requests",
+      "check": "(driver_user_id = auth.uid())",
+      "roles": [
+        "public"
+      ],
+      "table": "cash_deposit_requests",
+      "using": null
+    },
+    {
+      "cmd": "INSERT",
+      "name": "Drivers can send organization messages",
+      "check": "((sender_id = auth.uid()) AND (EXISTS ( SELECT 1\n   FROM profiles p\n  WHERE ((p.id = auth.uid()) AND (p.role = 'driver'::text) AND (((driver_organization_messages.driver_id IS NULL) AND (driver_organization_messages.organization_id = p.organization_id)) OR (driver_organization_messages.driver_id = auth.uid()))))))",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "driver_organization_messages",
+      "using": null
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Drivers can view receivables for their orders",
+      "check": null,
+      "roles": [
+        "public"
+      ],
+      "table": "receivables",
+      "using": "(EXISTS ( SELECT 1\n   FROM orders o\n  WHERE ((o.id = receivables.order_id) AND (o.executor_user_id = auth.uid()))))"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Organizations can view their drivers locations",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "driver_locations",
+      "using": "(check_user_role(auth.uid(), 'customer'::text) AND (EXISTS ( SELECT 1\n   FROM profiles d\n  WHERE ((d.id = driver_locations.driver_id) AND (d.role = 'driver'::text) AND (d.organization_id = auth.uid())))))"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Superadmins can view all receivables",
+      "check": null,
+      "roles": [
+        "public"
+      ],
+      "table": "receivables",
+      "using": "(EXISTS ( SELECT 1\n   FROM profiles p\n  WHERE ((p.id = auth.uid()) AND (p.role = 'superadmin'::text))))"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Organizations can view their drivers' balances",
+      "check": null,
+      "roles": [
+        "public"
+      ],
+      "table": "balances",
+      "using": "(EXISTS ( SELECT 1\n   FROM profiles p\n  WHERE ((p.id = balances.user_id) AND (p.role = 'driver'::text) AND (p.organization_id = auth.uid()))))"
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "Drivers can cancel their pending requests",
+      "check": "((driver_user_id = auth.uid()) AND (status = 'cancelled'::text))",
+      "roles": [
+        "public"
+      ],
+      "table": "cash_deposit_requests",
+      "using": "((driver_user_id = auth.uid()) AND (status = 'pending'::text))"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Organizations can view their drivers' cash deposit requests",
+      "check": null,
+      "roles": [
+        "public"
+      ],
+      "table": "cash_deposit_requests",
+      "using": "(organization_id = auth.uid())"
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "Organizations can approve/reject cash deposit requests",
+      "check": "((organization_id = auth.uid()) AND (status = ANY (ARRAY['approved'::text, 'rejected'::text])))",
+      "roles": [
+        "public"
+      ],
+      "table": "cash_deposit_requests",
+      "using": "((organization_id = auth.uid()) AND (status = 'pending'::text))"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Drivers can view organization messages",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "driver_organization_messages",
+      "using": "(EXISTS ( SELECT 1\n   FROM profiles p\n  WHERE ((p.id = auth.uid()) AND (p.role = 'driver'::text) AND (((driver_organization_messages.driver_id IS NULL) AND (driver_organization_messages.organization_id = p.organization_id)) OR (driver_organization_messages.driver_id = auth.uid())))))"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Organizations can view driver messages",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "driver_organization_messages",
+      "using": "(EXISTS ( SELECT 1\n   FROM profiles p\n  WHERE ((p.id = auth.uid()) AND (p.role = 'customer'::text) AND (driver_organization_messages.organization_id = auth.uid()) AND ((driver_organization_messages.driver_id IS NULL) OR (EXISTS ( SELECT 1\n           FROM profiles d\n          WHERE ((d.id = driver_organization_messages.driver_id) AND (d.organization_id = auth.uid()))))))))"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "Organizations can send driver messages",
+      "check": "((sender_id = auth.uid()) AND (EXISTS ( SELECT 1\n   FROM profiles p\n  WHERE ((p.id = auth.uid()) AND (p.role = 'customer'::text) AND (driver_organization_messages.organization_id = auth.uid()) AND ((driver_organization_messages.driver_id IS NULL) OR (EXISTS ( SELECT 1\n           FROM profiles d\n          WHERE ((d.id = driver_organization_messages.driver_id) AND (d.organization_id = auth.uid())))))))))",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "driver_organization_messages",
+      "using": null
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "Users can update their own driver org messages",
+      "check": "(sender_id = auth.uid())",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "driver_organization_messages",
+      "using": "(sender_id = auth.uid())"
+    }
+  ],
+  "functions": [
+    {
+      "name": "complete_order",
+      "definition": "CREATE OR REPLACE FUNCTION public.complete_order(order_uuid uuid)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE\n  order_record RECORD;\n  driver_user_id UUID;\n  existing_receivable_id UUID;\n  result JSONB;\nBEGIN\n  -- Получаем заказ\n  SELECT * INTO order_record\n  FROM public.orders\n  WHERE id = order_uuid AND status = 'courier_delivering';\n  \n  IF NOT FOUND THEN\n    RETURN jsonb_build_object(\n      'success', false,\n      'error', 'Заказ не найден или не в статусе \"доставляет\"'\n    );\n  END IF;\n  \n  -- Получаем user_id водителя\n  driver_user_id := order_record.executor_user_id;\n  \n  IF driver_user_id IS NULL THEN\n    RETURN jsonb_build_object(\n      'success', false,\n      'error', 'Водитель не назначен на заказ'\n    );\n  END IF;\n  \n  -- Проверяем статус оплаты\n  -- Если is_paid = false или NULL, проверяем наличие записи в receivables\n  IF order_record.is_paid = false OR order_record.is_paid IS NULL THEN\n    -- Проверяем, есть ли запись в receivables\n    SELECT id INTO existing_receivable_id\n    FROM public.receivables\n    WHERE order_id = order_uuid\n    LIMIT 1;\n    \n    -- Если нет записи в receivables, возвращаем ошибку с требованием обработки оплаты\n    IF existing_receivable_id IS NULL THEN\n      RETURN jsonb_build_object(\n        'success', false,\n        'error', 'payment_required',\n        'message', 'Необходимо обработать оплату перед завершением заказа'\n      );\n    END IF;\n  END IF;\n  \n  -- Если оплата обработана (is_paid = true) или есть запись в receivables, завершаем заказ\n  UPDATE public.orders\n  SET \n    status = 'completed',\n    completed_at = NOW()\n  WHERE id = order_uuid;\n  \n  RETURN jsonb_build_object(\n    'success', true,\n    'message', 'Заказ успешно завершен'\n  );\nEND;\n$function$\n"
+    },
+    {
+      "name": "start_coming_to_pickup",
+      "definition": "CREATE OR REPLACE FUNCTION public.start_coming_to_pickup(order_uuid uuid)\n RETURNS boolean\n LANGUAGE plpgsql\n SECURITY DEFINER\nAS $function$\nDECLARE\n  order_record RECORD;\nBEGIN\n  -- Получаем заказ со статусом courier_accepted\n  SELECT * INTO order_record\n  FROM public.orders\n  WHERE id = order_uuid AND status = 'courier_accepted';\n  \n  IF NOT FOUND THEN\n    RETURN FALSE;\n  END IF;\n  \n  -- Обновляем заказ - переводим в статус courier_coming и устанавливаем время начала движения\n  UPDATE public.orders\n  SET \n    status = 'courier_coming',\n    started_coming_at = NOW()\n  WHERE id = order_uuid;\n  \n  RETURN TRUE;\nEND;\n$function$\n"
+    },
+    {
+      "name": "get_organization_receivables",
+      "definition": "CREATE OR REPLACE FUNCTION public.get_organization_receivables(organization_user_id uuid, start_date timestamp with time zone DEFAULT NULL::timestamp with time zone, end_date timestamp with time zone DEFAULT NULL::timestamp with time zone)\n RETURNS TABLE(id uuid, order_id uuid, order_number integer, debtor_type text, debtor_user_id uuid, debtor_name text, debtor_organization_name text, debtor_phone text, amount numeric, currency text, status text, created_at timestamp with time zone, driver_full_name text, pickup_address text, delivery_address text)\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE\n  caller_role TEXT;\nBEGIN\n  -- Проверяем, что вызывающий пользователь является организацией\n  SELECT role INTO caller_role\n  FROM public.profiles\n  WHERE profiles.id = auth.uid();\n  \n  IF NOT FOUND OR caller_role != 'customer' THEN\n    RAISE EXCEPTION 'Доступ запрещен. Только организации могут просматривать дебиторку.';\n  END IF;\n  \n  -- Проверяем, что organization_user_id совпадает с текущим пользователем\n  IF organization_user_id != auth.uid() THEN\n    RAISE EXCEPTION 'Вы можете просматривать только свою дебиторку.';\n  END IF;\n  \n  RETURN QUERY\n  SELECT \n    r.id as id,\n    r.order_id,\n    o.order_number,\n    r.debtor_type,\n    r.debtor_user_id,\n    CASE \n      WHEN r.debtor_type = 'sender' AND o.client_id IS NOT NULL THEN\n        (SELECT p.full_name FROM public.profiles p WHERE p.id = o.client_id)\n      WHEN r.debtor_type = 'recipient' THEN\n        'Получатель (не зарегистрирован)'\n      ELSE\n        'Неизвестно'\n    END as debtor_name,\n    CASE \n      WHEN r.debtor_type = 'sender' AND o.client_id IS NOT NULL THEN\n        (SELECT p.organization_name FROM public.profiles p WHERE p.id = o.client_id)\n      ELSE\n        NULL\n    END as debtor_organization_name,\n    CASE \n      WHEN r.debtor_type = 'sender' THEN o.sender_phone\n      WHEN r.debtor_type = 'recipient' THEN o.recipient_phone\n      ELSE NULL\n    END as debtor_phone,\n    r.amount,\n    r.currency,\n    r.status,\n    r.created_at,\n    d.full_name as driver_full_name,\n    o.pickup_address,\n    o.delivery_address\n  FROM public.receivables r\n  INNER JOIN public.orders o ON o.id = r.order_id\n  LEFT JOIN public.profiles d ON d.id = r.driver_user_id -- Для получения имени водителя\n  WHERE r.status = 'unpaid'\n    AND r.organization_id = organization_user_id -- Фильтруем напрямую по organization_id в receivables\n    AND (start_date IS NULL OR r.created_at >= start_date)\n    AND (end_date IS NULL OR r.created_at <= end_date)\n  ORDER BY r.created_at DESC;\nEND;\n$function$\n"
+    },
+    {
+      "name": "get_all_drivers",
+      "definition": "CREATE OR REPLACE FUNCTION public.get_all_drivers()\n RETURNS TABLE(id uuid, user_id uuid, vehicle_type text, vehicle_number text, license_number text, fleet_id uuid, is_available boolean, rating numeric, total_orders integer, shift_status text, shift_started_at timestamp with time zone, shift_ended_at timestamp with time zone, created_at timestamp with time zone, profile_email text, profile_full_name text, profile_phone text)\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nBEGIN\n  RETURN QUERY\n  SELECT \n    d.id,\n    d.user_id,\n    d.vehicle_type,\n    d.vehicle_number,\n    d.license_number,\n    d.fleet_id,\n    d.is_available,\n    d.rating,\n    d.total_orders,\n    d.shift_status,\n    d.shift_started_at,\n    d.shift_ended_at,\n    d.created_at,\n    p.email as profile_email,\n    p.full_name as profile_full_name,\n    p.phone as profile_phone\n  FROM public.drivers d\n  LEFT JOIN public.profiles p ON d.user_id = p.id\n  ORDER BY d.created_at DESC;\nEND;\n$function$\n"
+    },
+    {
+      "name": "get_organization_orders",
+      "definition": "CREATE OR REPLACE FUNCTION public.get_organization_orders(organization_user_id uuid)\n RETURNS TABLE(id uuid, order_number integer, customer_id uuid, client_id uuid, executor_user_id uuid, status text, pickup_address text, delivery_address text, item_type text, description text, ready_at timestamp with time zone, final_price numeric, created_at timestamp with time zone, accepted_at timestamp with time zone, picked_up_at timestamp with time zone, completed_at timestamp with time zone, driver_full_name text, driver_phone text)\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nBEGIN\n  RETURN QUERY\n  SELECT \n    o.id,\n    o.order_number,\n    o.customer_id,\n    o.client_id,\n    o.executor_user_id,\n    o.status,\n    o.pickup_address,\n    o.delivery_address,\n    o.item_type,\n    o.description,\n    o.ready_at,\n    o.final_price,\n    o.created_at,\n    o.accepted_at,\n    o.picked_up_at,\n    o.completed_at,\n    d.full_name as driver_full_name,\n    d.phone as driver_phone\n  FROM public.orders o\n  INNER JOIN public.profiles d ON o.executor_user_id = d.id\n  INNER JOIN public.driver_organization_history h ON h.driver_user_id = d.id\n    AND h.organization_user_id = organization_user_id\n  WHERE d.role = 'driver'\n    -- Показываем только заказы, которые были приняты ПОСЛЕ привязки водителя к организации\n    AND (\n      o.accepted_at IS NULL \n      OR o.accepted_at >= h.attached_at\n    )\n  ORDER BY o.created_at DESC;\nEXCEPTION\n  WHEN OTHERS THEN\n    RAISE WARNING 'Ошибка в get_organization_orders: %', SQLERRM;\n    RETURN;\nEND;\n$function$\n"
+    },
+    {
+      "name": "get_user_saved_addresses",
+      "definition": "CREATE OR REPLACE FUNCTION public.get_user_saved_addresses(user_uuid uuid)\n RETURNS TABLE(id uuid, address_type text, label text, address text, coordinates text, region_id uuid, region_name text, entrance text, floor text, apartment text, is_default boolean, created_at timestamp with time zone, updated_at timestamp with time zone)\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nBEGIN\n  RETURN QUERY\n  SELECT\n    sa.id,\n    sa.address_type,\n    sa.label,\n    sa.address,\n    ST_AsText(sa.coordinates) AS coordinates, -- Преобразуем GEOGRAPHY в WKT текст\n    sa.region_id,\n    r.name AS region_name,\n    sa.entrance,\n    sa.floor,\n    sa.apartment,\n    sa.is_default,\n    sa.created_at,\n    sa.updated_at\n  FROM public.saved_addresses sa\n  LEFT JOIN public.regions r ON sa.region_id = r.id\n  WHERE sa.user_id = user_uuid\n  ORDER BY sa.is_default DESC, sa.label ASC;\nEND;\n$function$\n"
+    },
+    {
+      "name": "get_organization_drivers_with_active_orders",
+      "definition": "CREATE OR REPLACE FUNCTION public.get_organization_drivers_with_active_orders(organization_user_id uuid)\n RETURNS TABLE(id uuid, email text, full_name text, phone text, vehicle_type text, vehicle_number text, license_number text, current_location point, location_updated_at timestamp with time zone, avatar_url text, created_at timestamp with time zone, active_order_id uuid, active_order_status text)\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nBEGIN\n  -- Проверяем, что organization_user_id не NULL\n  IF organization_user_id IS NULL THEN\n    RETURN;\n  END IF;\n\n  -- Используем LEFT JOIN вместо INNER JOIN, чтобы вернуть всех водителей\n  -- даже если у них нет активных заказов\n  RETURN QUERY\n  SELECT DISTINCT ON (p.id)\n    p.id,\n    COALESCE(p.email, '')::TEXT as email,\n    COALESCE(p.full_name, '')::TEXT as full_name,\n    COALESCE(p.phone, '')::TEXT as phone,\n    COALESCE(p.vehicle_type, '')::TEXT as vehicle_type,\n    COALESCE(p.vehicle_number, '')::TEXT as vehicle_number,\n    COALESCE(p.license_number, '')::TEXT as license_number,\n    -- Возвращаем current_location для всех водителей (не только с активными заказами)\n    p.current_location,\n    -- Возвращаем location_updated_at для всех водителей\n    p.location_updated_at,\n    COALESCE(p.avatar_url, '')::TEXT as avatar_url,\n    p.created_at,\n    -- ID активного заказа (если есть)\n    o.id as active_order_id,\n    -- Статус активного заказа (если есть)\n    COALESCE(o.status, '')::TEXT as active_order_status\n  FROM public.profiles p\n  LEFT JOIN public.orders o ON o.executor_user_id = p.id\n    AND o.status IN ('courier_coming', 'courier_delivering')\n  WHERE p.organization_id = organization_user_id\n    AND p.role = 'driver'\n  ORDER BY p.id, o.created_at DESC NULLS LAST;\nEXCEPTION\n  WHEN OTHERS THEN\n    -- В случае ошибки возвращаем пустой результат\n    RAISE WARNING 'Ошибка в get_organization_drivers_with_active_orders: %', SQLERRM;\n    RETURN;\nEND;\n$function$\n"
+    },
+    {
+      "name": "get_driver_last_location",
+      "definition": "CREATE OR REPLACE FUNCTION public.get_driver_last_location(p_driver_id uuid)\n RETURNS TABLE(id uuid, driver_id uuid, order_id uuid, latitude numeric, longitude numeric, accuracy numeric, heading numeric, speed numeric, updated_at timestamp with time zone)\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nBEGIN\n  RETURN QUERY\n  SELECT\n    dl.id,\n    dl.driver_id,\n    dl.order_id,\n    dl.latitude,\n    dl.longitude,\n    dl.accuracy,\n    dl.heading,\n    dl.speed,\n    dl.updated_at\n  FROM public.driver_locations dl\n  WHERE dl.driver_id = p_driver_id\n  ORDER BY dl.updated_at DESC\n  LIMIT 1;\nEND;\n$function$\n"
+    },
+    {
+      "name": "update_driver_locations_updated_at",
+      "definition": "CREATE OR REPLACE FUNCTION public.update_driver_locations_updated_at()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n  NEW.updated_at = NOW();\n  RETURN NEW;\nEND;\n$function$\n"
+    },
+    {
+      "name": "pickup_order",
+      "definition": "CREATE OR REPLACE FUNCTION public.pickup_order(order_uuid uuid)\n RETURNS boolean\n LANGUAGE plpgsql\n SECURITY DEFINER\nAS $function$\nDECLARE\n  order_record RECORD;\nBEGIN\n  -- Получаем заказ\n  SELECT * INTO order_record\n  FROM public.orders\n  WHERE id = order_uuid AND status = 'courier_coming';\n  \n  IF NOT FOUND THEN\n    RETURN FALSE;\n  END IF;\n  \n  -- Обновляем заказ\n  UPDATE public.orders\n  SET \n    status = 'courier_delivering',\n    picked_up_at = NOW(),\n    started_delivery_at = NOW()\n  WHERE id = order_uuid;\n  \n  RETURN TRUE;\nEND;\n$function$\n"
+    },
+    {
+      "name": "accept_order",
+      "definition": "CREATE OR REPLACE FUNCTION public.accept_order(order_uuid uuid, driver_user_uuid uuid)\n RETURNS boolean\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nBEGIN\n  IF auth.uid() IS NULL OR driver_user_uuid IS DISTINCT FROM auth.uid() THEN\n    RETURN FALSE;\n  END IF;\n  IF NOT EXISTS (\n    SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'driver'\n      AND vehicle_type IS NOT NULL AND license_number IS NOT NULL\n  ) THEN\n    RETURN FALSE;\n  END IF;\n  UPDATE public.orders\n  SET executor_user_id = driver_user_uuid, status = 'courier_accepted', accepted_at = NOW()\n  WHERE id = order_uuid AND status = 'searching_courier' AND executor_user_id IS NULL;\n  RETURN FOUND;\nEND;\n$function$\n"
+    },
+    {
+      "name": "get_driver_profile_for_organization",
+      "definition": "CREATE OR REPLACE FUNCTION public.get_driver_profile_for_organization(driver_user_id uuid)\n RETURNS TABLE(id uuid, role text, organization_id uuid)\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nBEGIN\n  RETURN QUERY\n  SELECT \n    p.id,\n    p.role,\n    p.organization_id\n  FROM public.profiles p\n  WHERE p.id = driver_user_id\n    AND p.role = 'driver';\nEND;\n$function$\n"
+    },
+    {
+      "name": "get_organization_balance",
+      "definition": "CREATE OR REPLACE FUNCTION public.get_organization_balance(organization_user_id uuid)\n RETURNS TABLE(balance_amount numeric, currency text, updated_at timestamp with time zone)\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE\n  org_role TEXT;\nBEGIN\n  -- Проверяем, что пользователь является организацией\n  SELECT role INTO org_role\n  FROM public.profiles\n  WHERE id = organization_user_id;\n  \n  IF NOT FOUND OR org_role != 'customer' THEN\n    RAISE EXCEPTION 'Организация не найдена';\n  END IF;\n  \n  -- Возвращаем баланс организации\n  RETURN QUERY\n  SELECT \n    COALESCE(b.amount, 0.00) as balance_amount,\n    COALESCE(b.currency, 'BYN') as currency,\n    COALESCE(b.updated_at, NOW()) as updated_at\n  FROM public.balances b\n  WHERE b.user_id = organization_user_id;\n  \n  -- Если баланса нет, возвращаем нулевой баланс\n  IF NOT FOUND THEN\n    RETURN QUERY SELECT 0.00::DECIMAL(10, 2), 'BYN'::TEXT, NOW()::TIMESTAMPTZ;\n  END IF;\nEND;\n$function$\n"
+    },
+    {
+      "name": "create_driver_organization_request",
+      "definition": "CREATE OR REPLACE FUNCTION public.create_driver_organization_request(driver_user_id uuid, organization_user_id uuid, request_message text DEFAULT NULL::text)\n RETURNS uuid\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE\n  request_id UUID;\n  driver_role TEXT;\n  driver_org_id UUID;\n  existing_request_id UUID;\n  v_driver_id UUID;\n  v_org_id UUID;\nBEGIN\n  -- Сохраняем параметры в локальные переменные для избежания неоднозначности\n  v_driver_id := create_driver_organization_request.driver_user_id;\n  v_org_id := create_driver_organization_request.organization_user_id;\n  \n  -- Проверяем, что водитель существует и имеет роль driver\n  SELECT p.role, p.organization_id INTO driver_role, driver_org_id\n  FROM public.profiles p\n  WHERE p.id = v_driver_id;\n\n  IF NOT FOUND OR driver_role != 'driver' THEN\n    RAISE EXCEPTION 'Водитель не найден';\n  END IF;\n\n  -- Проверяем, что водитель не привязан к другой организации\n  IF driver_org_id IS NOT NULL THEN\n    RAISE EXCEPTION 'Водитель уже привязан к организации';\n  END IF;\n\n  -- Проверяем, нет ли активного запроса\n  SELECT r.id INTO existing_request_id\n  FROM public.driver_organization_requests r\n  WHERE r.driver_user_id = v_driver_id\n    AND r.organization_user_id = v_org_id\n    AND r.status = 'pending';\n\n  IF existing_request_id IS NOT NULL THEN\n    RAISE EXCEPTION 'Запрос уже существует';\n  END IF;\n\n  -- Создаем запрос\n  INSERT INTO public.driver_organization_requests (\n    driver_user_id,\n    organization_user_id,\n    message,\n    status\n  )\n  VALUES (\n    v_driver_id,\n    v_org_id,\n    request_message,\n    'pending'\n  )\n  RETURNING id INTO request_id;\n\n  RETURN request_id;\nEND;\n$function$\n"
+    },
+    {
+      "name": "get_driver_requests",
+      "definition": "CREATE OR REPLACE FUNCTION public.get_driver_requests(driver_user_id uuid)\n RETURNS TABLE(id uuid, organization_user_id uuid, organization_name text, organization_email text, message text, status text, created_at timestamp with time zone, responded_at timestamp with time zone)\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nBEGIN\n  RETURN QUERY\n  SELECT \n    r.id,\n    r.organization_user_id,\n    o.full_name as organization_name,\n    o.email as organization_email,\n    r.message,\n    r.status,\n    r.created_at,\n    r.responded_at\n  FROM public.driver_organization_requests r\n  LEFT JOIN public.profiles o ON r.organization_user_id = o.id\n  WHERE r.driver_user_id = get_driver_requests.driver_user_id\n    AND r.status = 'pending'\n  ORDER BY r.created_at DESC;\nEND;\n$function$\n"
+    },
+    {
+      "name": "get_organization_drivers",
+      "definition": "CREATE OR REPLACE FUNCTION public.get_organization_drivers(organization_user_id uuid)\n RETURNS TABLE(id uuid, email text, full_name text, phone text, vehicle_type text, vehicle_number text, license_number text, current_location point, location_updated_at timestamp with time zone, avatar_url text, created_at timestamp with time zone)\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nBEGIN\n  RETURN QUERY\n  SELECT \n    p.id,\n    p.email,\n    p.full_name,\n    p.phone,\n    p.vehicle_type,\n    p.vehicle_number,\n    p.license_number,\n    p.current_location,\n    p.location_updated_at,\n    p.avatar_url,\n    p.created_at\n  FROM public.profiles p\n  WHERE p.organization_id = organization_user_id\n    AND p.role = 'driver'\n  ORDER BY p.created_at DESC;\nEND;\n$function$\n"
+    },
+    {
+      "name": "is_driver_organization",
+      "definition": "CREATE OR REPLACE FUNCTION public.is_driver_organization(p_driver_id uuid, p_org_id uuid)\n RETURNS boolean\n LANGUAGE plpgsql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE\n  v_driver_org_id UUID;\nBEGIN\n  -- Временно отключаем RLS для этого SELECT\n  -- Это критически важно для предотвращения рекурсии\n  PERFORM set_config('row_security', 'off', true);\n  \n  -- Получаем organization_id водителя\n  SELECT organization_id INTO v_driver_org_id\n  FROM public.profiles\n  WHERE id = p_driver_id\n    AND role = 'driver';\n  \n  -- Включаем RLS обратно\n  PERFORM set_config('row_security', 'on', true);\n  \n  -- Проверяем, что organization_id совпадает\n  RETURN v_driver_org_id = p_org_id;\nEXCEPTION\n  WHEN OTHERS THEN\n    -- Включаем RLS обратно даже при ошибке\n    PERFORM set_config('row_security', 'on', true);\n    RETURN FALSE;\nEND;\n$function$\n"
+    },
+    {
+      "name": "get_client_receivables",
+      "definition": "CREATE OR REPLACE FUNCTION public.get_client_receivables(client_user_id uuid, start_date timestamp with time zone DEFAULT NULL::timestamp with time zone, end_date timestamp with time zone DEFAULT NULL::timestamp with time zone)\n RETURNS TABLE(id uuid, order_id uuid, order_number integer, debtor_type text, amount numeric, currency text, status text, created_at timestamp with time zone, organization_id uuid, organization_name text, driver_full_name text, pickup_address text, delivery_address text)\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE\n  caller_role TEXT;\nBEGIN\n  -- Проверяем, что вызывающий пользователь является клиентом\n  SELECT p.role INTO caller_role\n  FROM public.profiles p\n  WHERE p.id = auth.uid();\n  \n  IF NOT FOUND OR caller_role != 'client' THEN\n    RAISE EXCEPTION 'Доступ запрещен. Только клиенты могут просматривать свою дебиторку.';\n  END IF;\n  \n  -- Проверяем, что client_user_id совпадает с текущим пользователем\n  IF client_user_id != auth.uid() THEN\n    RAISE EXCEPTION 'Вы можете просматривать только свою дебиторку.';\n  END IF;\n  \n  RETURN QUERY\n  SELECT \n    r.id as id,\n    r.order_id,\n    o.order_number,\n    r.debtor_type,\n    r.amount,\n    r.currency,\n    r.status,\n    r.created_at,\n    r.organization_id,\n    org.full_name as organization_name,\n    d.full_name as driver_full_name,\n    o.pickup_address,\n    o.delivery_address\n  FROM public.receivables r\n  INNER JOIN public.orders o ON o.id = r.order_id\n  LEFT JOIN public.profiles d ON d.id = r.driver_user_id\n  LEFT JOIN public.profiles org ON org.id = r.organization_id\n  WHERE r.status = 'unpaid'\n    AND r.debtor_type = 'sender'\n    AND r.debtor_user_id = client_user_id\n    AND (start_date IS NULL OR r.created_at >= start_date)\n    AND (end_date IS NULL OR r.created_at <= end_date)\n  ORDER BY r.created_at DESC;\nEND;\n$function$\n"
+    },
+    {
+      "name": "reject_cash_deposit_request",
+      "definition": "CREATE OR REPLACE FUNCTION public.reject_cash_deposit_request(request_id uuid)\n RETURNS boolean\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE\n  request_record RECORD;\nBEGIN\n  -- Получаем запрос\n  SELECT * INTO request_record\n  FROM public.cash_deposit_requests\n  WHERE id = request_id\n    AND status = 'pending';\n  \n  IF NOT FOUND THEN\n    RAISE EXCEPTION 'Запрос не найден или уже обработан';\n  END IF;\n  \n  -- Проверяем, что текущий пользователь - организация запроса\n  IF request_record.organization_id != auth.uid() THEN\n    RAISE EXCEPTION 'Вы не можете отклонить этот запрос';\n  END IF;\n  \n  -- Обновляем статус запроса\n  UPDATE public.cash_deposit_requests\n  SET \n    status = 'rejected',\n    rejected_at = NOW(),\n    rejected_by = auth.uid(),\n    updated_at = NOW()\n  WHERE id = request_id;\n  \n  RETURN TRUE;\nEND;\n$function$\n"
+    },
+    {
+      "name": "get_all_users",
+      "definition": "CREATE OR REPLACE FUNCTION public.get_all_users()\n RETURNS TABLE(id uuid, email text, full_name text, phone text, role text, avatar_url text, created_at timestamp with time zone, updated_at timestamp with time zone)\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nBEGIN\n  RETURN QUERY\n  SELECT \n    p.id,\n    p.email,\n    p.full_name,\n    p.phone,\n    p.role,\n    p.avatar_url,\n    p.created_at,\n    p.updated_at\n  FROM public.profiles p\n  ORDER BY p.created_at DESC;\nEND;\n$function$\n"
+    },
+    {
+      "name": "search_available_drivers",
+      "definition": "CREATE OR REPLACE FUNCTION public.search_available_drivers(search_term text DEFAULT NULL::text)\n RETURNS TABLE(id uuid, email text, full_name text, phone text, vehicle_type text, vehicle_number text, license_number text, avatar_url text, organization_id uuid)\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nBEGIN\n  RETURN QUERY\n  SELECT \n    p.id,\n    p.email,\n    p.full_name,\n    p.phone,\n    p.vehicle_type,\n    p.vehicle_number,\n    p.license_number,\n    p.avatar_url,\n    p.organization_id\n  FROM public.profiles p\n  WHERE p.role = 'driver'\n    AND p.organization_id IS NULL\n    AND (\n      search_term IS NULL OR\n      search_term = '' OR\n      p.email ILIKE '%' || search_term || '%' OR\n      p.full_name ILIKE '%' || search_term || '%' OR\n      p.phone ILIKE '%' || search_term || '%'\n    )\n  ORDER BY p.created_at DESC\n  LIMIT 20;\nEND;\n$function$\n"
+    },
+    {
+      "name": "get_user_profile",
+      "definition": "CREATE OR REPLACE FUNCTION public.get_user_profile(user_id uuid)\n RETURNS TABLE(id uuid, email text, full_name text, phone text, role text, avatar_url text, created_at timestamp with time zone, updated_at timestamp with time zone)\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nBEGIN\n  RETURN QUERY\n  SELECT \n    p.id,\n    p.email,\n    p.full_name,\n    p.phone,\n    p.role,\n    p.avatar_url,\n    p.created_at,\n    p.updated_at\n  FROM public.profiles p\n  WHERE p.id = user_id;\nEND;\n$function$\n"
+    },
+    {
+      "name": "get_all_regions",
+      "definition": "CREATE OR REPLACE FUNCTION public.get_all_regions()\n RETURNS TABLE(id uuid, name text, base_price numeric, is_active boolean, created_at timestamp with time zone)\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nBEGIN\n  RETURN QUERY\n  SELECT \n    r.id,\n    r.name,\n    r.base_price,\n    r.is_active,\n    r.created_at\n  FROM public.regions r\n  ORDER BY r.name;\nEND;\n$function$\n"
+    },
+    {
+      "name": "cancel_cash_deposit_request",
+      "definition": "CREATE OR REPLACE FUNCTION public.cancel_cash_deposit_request(request_id uuid)\n RETURNS boolean\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE\n  request_record RECORD;\nBEGIN\n  -- Получаем запрос\n  SELECT * INTO request_record\n  FROM public.cash_deposit_requests\n  WHERE id = request_id\n    AND status = 'pending';\n  \n  IF NOT FOUND THEN\n    RAISE EXCEPTION 'Запрос не найден или уже обработан';\n  END IF;\n  \n  -- Проверяем, что текущий пользователь - водитель запроса\n  IF request_record.driver_user_id != auth.uid() THEN\n    RAISE EXCEPTION 'Вы не можете отменить этот запрос';\n  END IF;\n  \n  -- Обновляем статус запроса\n  UPDATE public.cash_deposit_requests\n  SET \n    status = 'cancelled',\n    cancelled_at = NOW(),\n    updated_at = NOW()\n  WHERE id = request_id;\n  \n  RETURN TRUE;\nEND;\n$function$\n"
+    },
+    {
+      "name": "get_delivery_settings",
+      "definition": "CREATE OR REPLACE FUNCTION public.get_delivery_settings()\n RETURNS TABLE(id uuid, setting_key text, setting_value integer, description text, created_at timestamp with time zone, updated_at timestamp with time zone)\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nBEGIN\n  RETURN QUERY\n  SELECT \n    ds.id,\n    ds.setting_key,\n    ds.setting_value,\n    ds.description,\n    ds.created_at,\n    ds.updated_at\n  FROM public.delivery_settings ds\n  ORDER BY ds.setting_key;\nEND;\n$function$\n"
+    },
+    {
+      "name": "update_driver_location",
+      "definition": "CREATE OR REPLACE FUNCTION public.update_driver_location(p_driver_id uuid, p_longitude numeric, p_latitude numeric)\n RETURNS boolean\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nBEGIN\n  -- Временно отключаем RLS для этого обновления\n  -- Это гарантирует, что обновление пройдет без проверки политик\n  PERFORM set_config('row_security', 'off', true);\n  \n  -- Обновляем местоположение водителя напрямую\n  UPDATE public.profiles\n  SET \n    current_location = POINT(p_longitude, p_latitude),\n    location_updated_at = NOW()\n  WHERE id = p_driver_id;\n  \n  -- Включаем RLS обратно\n  PERFORM set_config('row_security', 'on', true);\n  \n  -- Проверяем, была ли обновлена хотя бы одна строка\n  IF FOUND THEN\n    RETURN TRUE;\n  ELSE\n    RETURN FALSE;\n  END IF;\nEXCEPTION\n  WHEN OTHERS THEN\n    -- Включаем RLS обратно даже при ошибке\n    PERFORM set_config('row_security', 'on', true);\n    RAISE WARNING 'Ошибка обновления местоположения водителя: %', SQLERRM;\n    RETURN FALSE;\nEND;\n$function$\n"
+    },
+    {
+      "name": "create_chat_photos_storage_policies",
+      "definition": "CREATE OR REPLACE FUNCTION public.create_chat_photos_storage_policies()\n RETURNS void\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public', 'storage'\nAS $function$\nBEGIN\n  -- Политика для загрузки водителями\n  IF NOT EXISTS (\n    SELECT 1 FROM pg_policies \n    WHERE schemaname = 'storage' \n    AND tablename = 'objects' \n    AND policyname = 'Drivers can upload chat photos'\n  ) THEN\n    EXECUTE '\n      CREATE POLICY \"Drivers can upload chat photos\"\n      ON storage.objects FOR INSERT\n      TO authenticated\n      WITH CHECK (\n        bucket_id = ''chat-photos''\n        AND name LIKE ''driver-org-chat/%''\n        AND EXISTS (\n          SELECT 1 FROM public.profiles p\n          WHERE p.id = auth.uid()\n            AND p.role = ''driver''\n            AND p.organization_id IS NOT NULL\n            AND (\n              name LIKE ''driver-org-chat/'' || p.organization_id::text || ''/general/%''\n              OR\n              name LIKE ''driver-org-chat/'' || p.organization_id::text || ''/'' || auth.uid()::text || ''/%''\n            )\n        )\n      )\n    ';\n  END IF;\n\n  -- Политика для загрузки организациями\n  IF NOT EXISTS (\n    SELECT 1 FROM pg_policies \n    WHERE schemaname = 'storage' \n    AND tablename = 'objects' \n    AND policyname = 'Organizations can upload chat photos'\n  ) THEN\n    EXECUTE '\n      CREATE POLICY \"Organizations can upload chat photos\"\n      ON storage.objects FOR INSERT\n      TO authenticated\n      WITH CHECK (\n        bucket_id = ''chat-photos''\n        AND name LIKE ''driver-org-chat/%''\n        AND EXISTS (\n          SELECT 1 FROM public.profiles p\n          WHERE p.id = auth.uid()\n            AND p.role = ''customer''\n            AND (\n              name LIKE ''driver-org-chat/'' || auth.uid()::text || ''/general/%''\n              OR\n              (\n                name LIKE ''driver-org-chat/'' || auth.uid()::text || ''/%''\n                AND EXISTS (\n                  SELECT 1 FROM public.profiles d\n                  WHERE d.organization_id = auth.uid()\n                    AND name LIKE ''driver-org-chat/'' || auth.uid()::text || ''/'' || d.id::text || ''/%''\n                )\n              )\n            )\n        )\n      )\n    ';\n  END IF;\n\n  -- Политика для просмотра\n  IF NOT EXISTS (\n    SELECT 1 FROM pg_policies \n    WHERE schemaname = 'storage' \n    AND tablename = 'objects' \n    AND policyname = 'Users can view chat photos'\n  ) THEN\n    EXECUTE '\n      CREATE POLICY \"Users can view chat photos\"\n      ON storage.objects FOR SELECT\n      TO authenticated\n      USING (\n        bucket_id = ''chat-photos''\n        AND name LIKE ''driver-org-chat/%''\n        AND (\n          EXISTS (\n            SELECT 1 FROM public.profiles p\n            WHERE p.id = auth.uid()\n              AND p.role = ''driver''\n              AND p.organization_id IS NOT NULL\n              AND (\n                name LIKE ''driver-org-chat/'' || p.organization_id::text || ''/general/%''\n                OR\n                name LIKE ''driver-org-chat/'' || p.organization_id::text || ''/'' || auth.uid()::text || ''/%''\n              )\n          )\n          OR\n          EXISTS (\n            SELECT 1 FROM public.profiles p\n            WHERE p.id = auth.uid()\n              AND p.role = ''customer''\n              AND (\n                name LIKE ''driver-org-chat/'' || auth.uid()::text || ''/general/%''\n                OR\n                (\n                  name LIKE ''driver-org-chat/'' || auth.uid()::text || ''/%''\n                  AND EXISTS (\n                    SELECT 1 FROM public.profiles d\n                    WHERE d.organization_id = auth.uid()\n                      AND name LIKE ''driver-org-chat/'' || auth.uid()::text || ''/'' || d.id::text || ''/%''\n                  )\n                )\n              )\n          )\n        )\n      )\n    ';\n  END IF;\n\n  -- Политика для удаления\n  IF NOT EXISTS (\n    SELECT 1 FROM pg_policies \n    WHERE schemaname = 'storage' \n    AND tablename = 'objects' \n    AND policyname = 'Users can delete own chat photos'\n  ) THEN\n    EXECUTE '\n      CREATE POLICY \"Users can delete own chat photos\"\n      ON storage.objects FOR DELETE\n      TO authenticated\n      USING (\n        bucket_id = ''chat-photos''\n        AND owner = auth.uid()\n      )\n    ';\n  END IF;\nEND;\n$function$\n"
+    },
+    {
+      "name": "get_organization_requests",
+      "definition": "CREATE OR REPLACE FUNCTION public.get_organization_requests(organization_user_id uuid)\n RETURNS TABLE(id uuid, driver_user_id uuid, driver_name text, driver_email text, driver_phone text, message text, status text, created_at timestamp with time zone, responded_at timestamp with time zone)\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nBEGIN\n  RETURN QUERY\n  SELECT \n    r.id,\n    r.driver_user_id,\n    d.full_name as driver_name,\n    d.email as driver_email,\n    d.phone as driver_phone,\n    r.message,\n    r.status,\n    r.created_at,\n    r.responded_at\n  FROM public.driver_organization_requests r\n  LEFT JOIN public.profiles d ON r.driver_user_id = d.id\n  WHERE r.organization_user_id = get_organization_requests.organization_user_id\n  ORDER BY r.created_at DESC;\nEND;\n$function$\n"
+    },
+    {
+      "name": "get_all_orders_for_admin",
+      "definition": "CREATE OR REPLACE FUNCTION public.get_all_orders_for_admin(limit_count integer DEFAULT 100)\n RETURNS TABLE(id uuid, customer_id uuid, client_id uuid, driver_id uuid, executor_user_id uuid, status text, visibility text, pickup_address text, pickup_coordinates point, delivery_address text, delivery_coordinates point, description text, weight numeric, volume numeric, item_type text, courier_comment text, base_price numeric, region_id uuid, final_price numeric, is_paid boolean, created_at timestamp with time zone, accepted_at timestamp with time zone, picked_up_at timestamp with time zone, started_delivery_at timestamp with time zone, completed_at timestamp with time zone, cancelled_at timestamp with time zone)\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nBEGIN\n  RETURN QUERY\n  SELECT \n    o.id,\n    o.customer_id,\n    o.client_id,\n    o.driver_id,\n    o.executor_user_id,\n    o.status,\n    o.visibility,\n    o.pickup_address,\n    o.pickup_coordinates,\n    o.delivery_address,\n    o.delivery_coordinates,\n    o.description,\n    o.weight,\n    o.volume,\n    o.item_type,\n    o.courier_comment,\n    o.base_price,\n    o.region_id,\n    o.final_price,\n    o.is_paid,\n    o.created_at,\n    o.accepted_at,\n    o.picked_up_at,\n    o.started_delivery_at,\n    o.completed_at,\n    o.cancelled_at\n  FROM public.orders o\n  ORDER BY o.created_at DESC\n  LIMIT limit_count;\nEND;\n$function$\n"
+    },
+    {
+      "name": "update_driver_organization",
+      "definition": "CREATE OR REPLACE FUNCTION public.update_driver_organization(driver_user_id uuid, organization_user_id uuid, action text)\n RETURNS boolean\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE\n  driver_role TEXT;\n  current_org_id UUID;\nBEGIN\n  -- Проверяем, что пользователь существует и является водителем\n  SELECT role, organization_id INTO driver_role, current_org_id\n  FROM public.profiles\n  WHERE id = driver_user_id;\n\n  IF NOT FOUND OR driver_role != 'driver' THEN\n    RETURN FALSE;\n  END IF;\n\n  -- Если action = 'attach', привязываем водителя\n  IF action = 'attach' THEN\n    -- Проверяем, что водитель не привязан к другой организации\n    IF current_org_id IS NOT NULL AND current_org_id != organization_user_id THEN\n      RETURN FALSE;\n    END IF;\n\n    -- Привязываем водителя\n    UPDATE public.profiles\n    SET organization_id = organization_user_id\n    WHERE id = driver_user_id;\n    \n    RETURN TRUE;\n  END IF;\n\n  -- Если action = 'detach', отвязываем водителя\n  IF action = 'detach' THEN\n    -- Проверяем, что водитель привязан к этой организации\n    IF current_org_id != organization_user_id THEN\n      RETURN FALSE;\n    END IF;\n\n    -- Отвязываем водителя\n    UPDATE public.profiles\n    SET organization_id = NULL\n    WHERE id = driver_user_id;\n    \n    RETURN TRUE;\n  END IF;\n\n  RETURN FALSE;\nEND;\n$function$\n"
+    },
+    {
+      "name": "check_driver_role",
+      "definition": "CREATE OR REPLACE FUNCTION public.check_driver_role(p_user_id uuid)\n RETURNS boolean\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE\n  v_role TEXT;\nBEGIN\n  -- Временно отключаем RLS для этого SELECT\n  PERFORM set_config('row_security', 'off', true);\n  \n  -- Получаем роль пользователя\n  SELECT role INTO v_role\n  FROM public.profiles\n  WHERE id = p_user_id;\n  \n  -- Включаем RLS обратно\n  PERFORM set_config('row_security', 'on', true);\n  \n  -- Проверяем, что роль - водитель\n  RETURN v_role = 'driver';\nEXCEPTION\n  WHEN OTHERS THEN\n    -- Включаем RLS обратно даже при ошибке\n    PERFORM set_config('row_security', 'on', true);\n    RETURN FALSE;\nEND;\n$function$\n"
+    },
+    {
+      "name": "get_organization_finances",
+      "definition": "CREATE OR REPLACE FUNCTION public.get_organization_finances(organization_user_id uuid, start_date timestamp with time zone DEFAULT NULL::timestamp with time zone, end_date timestamp with time zone DEFAULT NULL::timestamp with time zone)\n RETURNS TABLE(driver_id uuid, driver_full_name text, completed_orders_count bigint, total_earnings numeric, balance numeric)\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nBEGIN\n  RETURN QUERY\n  SELECT \n    d.id AS driver_id,\n    d.full_name AS driver_full_name,\n    COUNT(DISTINCT o.id) FILTER (WHERE o.status = 'completed') AS completed_orders_count,\n    COALESCE(SUM(o.final_price) FILTER (WHERE o.status = 'completed'), 0) AS total_earnings,\n    COALESCE(b.amount, 0) AS balance\n  FROM public.profiles d\n  LEFT JOIN public.orders o ON o.executor_user_id = d.id\n    AND (start_date IS NULL OR o.completed_at >= start_date)\n    AND (end_date IS NULL OR o.completed_at <= end_date)\n  LEFT JOIN public.balances b ON b.user_id = d.id\n  WHERE d.organization_id = organization_user_id\n    AND d.role = 'driver'\n  GROUP BY d.id, d.full_name, b.amount\n  ORDER BY d.full_name;\nEND;\n$function$\n"
+    },
+    {
+      "name": "get_driver_organization_info",
+      "definition": "CREATE OR REPLACE FUNCTION public.get_driver_organization_info(driver_user_id uuid)\n RETURNS TABLE(organization_id uuid, organization_name text, organization_email text, organization_phone text)\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nBEGIN\n  RETURN QUERY\n  SELECT \n    o.id as organization_id,\n    o.full_name as organization_name,\n    o.email as organization_email,\n    o.phone as organization_phone\n  FROM public.profiles d\n  LEFT JOIN public.profiles o ON d.organization_id = o.id\n  WHERE d.id = driver_user_id\n    AND d.role = 'driver'\n    AND d.organization_id IS NOT NULL;\nEND;\n$function$\n"
+    },
+    {
+      "name": "get_driver_track_period",
+      "definition": "CREATE OR REPLACE FUNCTION public.get_driver_track_period(p_driver_id uuid, p_start_date timestamp with time zone, p_end_date timestamp with time zone)\n RETURNS TABLE(id uuid, latitude numeric, longitude numeric, accuracy numeric, heading numeric, speed numeric, created_at timestamp with time zone, order_id uuid)\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nBEGIN\n  -- Отключаем RLS для чтения из driver_locations\n  PERFORM set_config('row_security', 'off', true);\n  \n  RETURN QUERY\n  SELECT\n    dl.id,\n    dl.latitude,\n    dl.longitude,\n    dl.accuracy,\n    dl.heading,\n    dl.speed,\n    dl.created_at,\n    dl.order_id\n  FROM public.driver_locations dl\n  WHERE dl.driver_id = p_driver_id\n    AND dl.created_at >= p_start_date\n    AND dl.created_at <= p_end_date\n  ORDER BY dl.created_at ASC;\n  \n  -- Включаем RLS обратно\n  PERFORM set_config('row_security', 'on', true);\nEXCEPTION\n  WHEN OTHERS THEN\n    PERFORM set_config('row_security', 'on', true);\n    RAISE WARNING 'Ошибка в get_driver_track_period: %', SQLERRM;\n    RETURN;\nEND;\n$function$\n"
+    },
+    {
+      "name": "withdraw_cash_from_driver",
+      "definition": "CREATE OR REPLACE FUNCTION public.withdraw_cash_from_driver(driver_user_id uuid, amount_to_withdraw numeric)\n RETURNS boolean\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE\n  organization_user_id UUID;\n  driver_balance DECIMAL(10, 2);\n  calculated_balance DECIMAL(10, 2);\n  driver_role TEXT;\nBEGIN\n  -- Получаем роль текущего пользователя\n  SELECT role INTO driver_role FROM public.profiles WHERE id = auth.uid();\n  \n  IF driver_role != 'customer' THEN\n    RAISE EXCEPTION 'Только организации могут забирать кассу у водителей';\n  END IF;\n  \n  organization_user_id := auth.uid();\n  \n  -- Проверяем, что водитель привязан к этой организации\n  IF NOT EXISTS (\n    SELECT 1 FROM public.profiles\n    WHERE id = driver_user_id\n      AND role = 'driver'\n      AND organization_id = organization_user_id\n  ) THEN\n    RAISE EXCEPTION 'Водитель не привязан к вашей организации';\n  END IF;\n  \n  -- Получаем текущий баланс водителя\n  SELECT COALESCE(amount, 0) INTO driver_balance\n  FROM public.balances\n  WHERE user_id = driver_user_id;\n  \n  -- Проверяем, что у водителя достаточно средств\n  IF driver_balance < amount_to_withdraw THEN\n    RAISE EXCEPTION 'Недостаточно средств на балансе водителя. Доступно: %', driver_balance;\n  END IF;\n  \n  -- Создаем баланс для организации, если его нет\n  INSERT INTO public.balances (user_id, amount, currency, updated_at)\n  VALUES (organization_user_id, 0.00, 'BYN', NOW())\n  ON CONFLICT (user_id) DO NOTHING;\n  \n  -- 1. Списываем средства с баланса водителя (debit транзакция)\n  INSERT INTO public.transactions (\n    user_id,\n    amount,\n    type,\n    description,\n    related_user_id,\n    created_at\n  )\n  VALUES (\n    driver_user_id,\n    amount_to_withdraw,\n    'debit',\n    'Изъятие кассы организацией',\n    organization_user_id,\n    NOW()\n  );\n  \n  -- 2. Зачисляем средства на баланс организации (credit транзакция)\n  INSERT INTO public.transactions (\n    user_id,\n    amount,\n    type,\n    description,\n    related_user_id,\n    created_at\n  )\n  VALUES (\n    organization_user_id,\n    amount_to_withdraw,\n    'credit',\n    'Получение кассы от водителя (изъятие организацией)',\n    driver_user_id,\n    NOW()\n  );\n  \n  -- 3. Обновляем баланс водителя (все credit - только debit от сдачи кассы)\n  SELECT public.calculate_driver_balance(driver_user_id) INTO calculated_balance;\n  \n  UPDATE public.balances\n  SET amount = calculated_balance, updated_at = NOW()\n  WHERE user_id = driver_user_id;\n  \n  -- 4. Обновляем баланс организации (все credit - все debit)\n  SELECT \n    COALESCE(SUM(CASE WHEN type = 'credit' THEN amount ELSE 0 END), 0) -\n    COALESCE(SUM(CASE WHEN type = 'debit' THEN amount ELSE 0 END), 0)\n  INTO calculated_balance\n  FROM public.transactions\n  WHERE user_id = organization_user_id;\n  \n  UPDATE public.balances\n  SET amount = calculated_balance, updated_at = NOW()\n  WHERE user_id = organization_user_id;\n  \n  RETURN TRUE;\nEND;\n$function$\n"
+    },
+    {
+      "name": "get_driver_track_with_time",
+      "definition": "CREATE OR REPLACE FUNCTION public.get_driver_track_with_time(p_driver_id uuid, p_date date DEFAULT CURRENT_DATE, p_start_time time without time zone DEFAULT NULL::time without time zone, p_end_time time without time zone DEFAULT NULL::time without time zone)\n RETURNS TABLE(id uuid, latitude numeric, longitude numeric, accuracy numeric, heading numeric, speed numeric, created_at timestamp with time zone, order_id uuid)\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nBEGIN\n  -- Отключаем RLS для чтения из driver_locations\n  PERFORM set_config('row_security', 'off', true);\n  \n  RETURN QUERY\n  SELECT\n    dl.id,\n    dl.latitude,\n    dl.longitude,\n    dl.accuracy,\n    dl.heading,\n    dl.speed,\n    dl.created_at,\n    dl.order_id\n  FROM public.driver_locations dl\n  WHERE dl.driver_id = p_driver_id\n    AND DATE(dl.created_at) = p_date\n    AND (p_start_time IS NULL OR CAST(dl.created_at AS TIME) >= p_start_time)\n    AND (p_end_time IS NULL OR CAST(dl.created_at AS TIME) <= p_end_time)\n  ORDER BY dl.created_at ASC;\n  \n  -- Включаем RLS обратно\n  PERFORM set_config('row_security', 'on', true);\nEXCEPTION\n  WHEN OTHERS THEN\n    PERFORM set_config('row_security', 'on', true);\n    RAISE WARNING 'Ошибка в get_driver_track_with_time: %', SQLERRM;\n    RETURN;\nEND;\n$function$\n"
+    },
+    {
+      "name": "deposit_cash_to_organization",
+      "definition": "CREATE OR REPLACE FUNCTION public.deposit_cash_to_organization(driver_user_id uuid, amount_to_deposit numeric)\n RETURNS uuid\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE\n  v_driver_org_id UUID;\n  v_driver_balance DECIMAL(10, 2);\n  v_driver_role TEXT;\n  v_request_id UUID;\nBEGIN\n  -- Проверяем, что пользователь является водителем\n  SELECT role, organization_id INTO v_driver_role, v_driver_org_id\n  FROM public.profiles\n  WHERE id = deposit_cash_to_organization.driver_user_id;\n  \n  IF NOT FOUND OR v_driver_role != 'driver' THEN\n    RAISE EXCEPTION 'Пользователь не является водителем';\n  END IF;\n  \n  IF v_driver_org_id IS NULL THEN\n    RAISE EXCEPTION 'Водитель не привязан к организации';\n  END IF;\n  \n  -- Проверяем сумму\n  IF deposit_cash_to_organization.amount_to_deposit <= 0 THEN\n    RAISE EXCEPTION 'Сумма должна быть больше нуля';\n  END IF;\n  \n  -- Получаем текущий баланс водителя\n  SELECT COALESCE(amount, 0) INTO v_driver_balance\n  FROM public.balances\n  WHERE user_id = deposit_cash_to_organization.driver_user_id;\n  \n  -- Проверяем, что у водителя достаточно средств\n  IF v_driver_balance < deposit_cash_to_organization.amount_to_deposit THEN\n    RAISE EXCEPTION 'Недостаточно средств на балансе. Доступно: %', v_driver_balance;\n  END IF;\n  \n  -- Проверяем, нет ли уже pending запроса от этого водителя\n  -- Используем алиас таблицы и явно указываем параметр функции\n  IF EXISTS (\n    SELECT 1 FROM public.cash_deposit_requests cdr\n    WHERE cdr.driver_user_id = deposit_cash_to_organization.driver_user_id\n      AND cdr.organization_id = v_driver_org_id\n      AND cdr.status = 'pending'\n  ) THEN\n    RAISE EXCEPTION 'У вас уже есть активный запрос на сдачу кассы. Дождитесь его обработки.';\n  END IF;\n  \n  -- Создаем запрос на сдачу кассы\n  INSERT INTO public.cash_deposit_requests (\n    driver_user_id,\n    organization_id,\n    amount,\n    currency,\n    status\n  )\n  VALUES (\n    deposit_cash_to_organization.driver_user_id,\n    v_driver_org_id,\n    deposit_cash_to_organization.amount_to_deposit,\n    'BYN',\n    'pending'\n  )\n  RETURNING id INTO v_request_id;\n  \n  RETURN v_request_id;\nEND;\n$function$\n"
+    },
+    {
+      "name": "get_driver_profile_for_client",
+      "definition": "CREATE OR REPLACE FUNCTION public.get_driver_profile_for_client(p_driver_id uuid, p_order_id uuid DEFAULT NULL::uuid)\n RETURNS TABLE(id uuid, email text, full_name text, phone text, role text, avatar_url text, vehicle_type text, vehicle_brand text, vehicle_model text, vehicle_number text, license_number text, current_location point, location_updated_at timestamp with time zone, created_at timestamp with time zone, updated_at timestamp with time zone)\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE\n  v_user_id UUID;\n  v_user_role TEXT;\n  v_has_access BOOLEAN := FALSE;\nBEGIN\n  -- Получаем текущего пользователя\n  v_user_id := auth.uid();\n  \n  IF v_user_id IS NULL THEN\n    RETURN;\n  END IF;\n\n  -- Получаем роль пользователя\n  SELECT p.role INTO v_user_role\n  FROM public.profiles p\n  WHERE p.id = v_user_id;\n\n  -- Проверяем доступ\n  -- 1. Водитель может видеть свой профиль\n  IF v_user_id = p_driver_id THEN\n    v_has_access := TRUE;\n  END IF;\n\n  -- 2. Клиент/Организация может видеть профиль водителя для своего активного заказа\n  IF NOT v_has_access AND p_order_id IS NOT NULL THEN\n    SELECT EXISTS (\n      SELECT 1 FROM public.orders\n      WHERE id = p_order_id\n        AND executor_user_id = p_driver_id\n        AND (client_id = v_user_id OR customer_id = v_user_id)\n        AND status IN ('courier_coming', 'courier_delivering', 'completed')\n    ) INTO v_has_access;\n  END IF;\n\n  -- 3. Клиент/Организация может видеть профиль водителя для любого своего активного заказа\n  IF NOT v_has_access THEN\n    SELECT EXISTS (\n      SELECT 1 FROM public.orders\n      WHERE executor_user_id = p_driver_id\n        AND (client_id = v_user_id OR customer_id = v_user_id)\n        AND status IN ('courier_coming', 'courier_delivering')\n    ) INTO v_has_access;\n  END IF;\n\n  -- 4. Суперадмин может видеть все\n  IF NOT v_has_access AND v_user_role = 'superadmin' THEN\n    v_has_access := TRUE;\n  END IF;\n\n  IF NOT v_has_access THEN\n    RETURN;\n  END IF;\n\n  -- Возвращаем профиль водителя\n  RETURN QUERY\n  SELECT\n    p.id,\n    p.email,\n    p.full_name,\n    p.phone,\n    p.role,\n    p.avatar_url,\n    p.vehicle_type,\n    p.vehicle_brand,\n    p.vehicle_model,\n    p.vehicle_number,\n    p.license_number,\n    p.current_location,\n    p.location_updated_at,\n    p.created_at,\n    p.updated_at\n  FROM public.profiles p\n  WHERE p.id = p_driver_id;\nEND;\n$function$\n"
+    },
+    {
+      "name": "get_driver_rejected_orders",
+      "definition": "CREATE OR REPLACE FUNCTION public.get_driver_rejected_orders(p_driver_user_id uuid)\n RETURNS TABLE(id uuid, order_number integer, pickup_address text, delivery_address text, final_price numeric, item_type text, description text, created_at timestamp with time zone, cancelled_at timestamp with time zone, status text)\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nBEGIN\n  -- Временно отключаем RLS для этого SELECT\n  PERFORM set_config('row_security', 'off', true);\n\n  RETURN QUERY\n  SELECT DISTINCT\n    o.id,\n    o.order_number,\n    o.pickup_address,\n    o.delivery_address,\n    o.final_price,\n    o.item_type,\n    o.description,\n    o.created_at,\n    o.cancelled_at,\n    o.status\n  FROM public.orders o\n  INNER JOIN public.order_rejections r ON r.order_id = o.id\n  WHERE r.driver_user_id = p_driver_user_id\n    AND o.status = 'searching_courier'  -- Только активные заказы, от которых отказались\n  ORDER BY r.created_at DESC\n  LIMIT 10;\n\n  -- Включаем RLS обратно\n  PERFORM set_config('row_security', 'on', true);\nEXCEPTION\n  WHEN OTHERS THEN\n    -- Включаем RLS обратно даже при ошибке\n    PERFORM set_config('row_security', 'on', true);\n    RAISE WARNING 'Ошибка в get_driver_rejected_orders: %', SQLERRM;\n    RETURN;\nEND;\n$function$\n"
+    },
+    {
+      "name": "get_admin_stats",
+      "definition": "CREATE OR REPLACE FUNCTION public.get_admin_stats()\n RETURNS TABLE(users_count bigint, drivers_count bigint, orders_count bigint)\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nBEGIN\n  RETURN QUERY\n  SELECT \n    (SELECT COUNT(*) FROM public.profiles)::BIGINT as users_count,\n    (SELECT COUNT(*) FROM public.drivers)::BIGINT as drivers_count,\n    (SELECT COUNT(*) FROM public.orders)::BIGINT as orders_count;\nEND;\n$function$\n"
+    },
+    {
+      "name": "is_admin",
+      "definition": "CREATE OR REPLACE FUNCTION public.is_admin(user_id uuid)\n RETURNS boolean\n LANGUAGE plpgsql\n STABLE SECURITY DEFINER\nAS $function$\nBEGIN\n  RETURN EXISTS (\n    SELECT 1 FROM public.profiles\n    WHERE id = user_id AND role IN ('admin', 'superadmin')\n  );\nEND;\n$function$\n"
+    },
+    {
+      "name": "approve_cash_deposit_request",
+      "definition": "CREATE OR REPLACE FUNCTION public.approve_cash_deposit_request(request_id uuid)\n RETURNS boolean\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE\n  request_record RECORD;\n  driver_balance DECIMAL(10, 2);\n  calculated_balance DECIMAL(10, 2);\nBEGIN\n  -- Получаем запрос\n  SELECT * INTO request_record\n  FROM public.cash_deposit_requests\n  WHERE id = request_id\n    AND status = 'pending';\n  \n  IF NOT FOUND THEN\n    RAISE EXCEPTION 'Запрос не найден или уже обработан';\n  END IF;\n  \n  -- Проверяем, что текущий пользователь - организация запроса\n  IF request_record.organization_id != auth.uid() THEN\n    RAISE EXCEPTION 'Вы не можете принять этот запрос';\n  END IF;\n  \n  -- Проверяем баланс водителя\n  SELECT COALESCE(amount, 0) INTO driver_balance\n  FROM public.balances\n  WHERE user_id = request_record.driver_user_id;\n  \n  IF driver_balance < request_record.amount THEN\n    RAISE EXCEPTION 'У водителя недостаточно средств. Доступно: %', driver_balance;\n  END IF;\n  \n  -- Создаем баланс для организации, если его нет\n  INSERT INTO public.balances (user_id, amount, currency, updated_at)\n  VALUES (request_record.organization_id, 0.00, 'BYN', NOW())\n  ON CONFLICT (user_id) DO NOTHING;\n  \n  -- 1. Списываем средства с баланса водителя (debit транзакция)\n  INSERT INTO public.transactions (\n    user_id,\n    amount,\n    type,\n    description,\n    related_user_id,\n    created_at\n  )\n  VALUES (\n    request_record.driver_user_id,\n    request_record.amount,\n    'debit',\n    'Сдача кассы организации (запрос №' || request_record.id::TEXT || ')',\n    request_record.organization_id,\n    NOW()\n  );\n  \n  -- 2. Зачисляем средства на баланс организации (credit транзакция)\n  INSERT INTO public.transactions (\n    user_id,\n    amount,\n    type,\n    description,\n    related_user_id,\n    created_at\n  )\n  VALUES (\n    request_record.organization_id,\n    request_record.amount,\n    'credit',\n    'Получение кассы от водителя (запрос №' || request_record.id::TEXT || ')',\n    request_record.driver_user_id,\n    NOW()\n  );\n  \n  -- 3. Обновляем баланс водителя (все credit - только debit от сдачи кассы)\n  SELECT public.calculate_driver_balance(request_record.driver_user_id) INTO calculated_balance;\n  \n  UPDATE public.balances\n  SET amount = calculated_balance, updated_at = NOW()\n  WHERE user_id = request_record.driver_user_id;\n  \n  -- 4. Обновляем баланс организации (все credit - все debit)\n  SELECT \n    COALESCE(SUM(CASE WHEN type = 'credit' THEN amount ELSE 0 END), 0) -\n    COALESCE(SUM(CASE WHEN type = 'debit' THEN amount ELSE 0 END), 0)\n  INTO calculated_balance\n  FROM public.transactions\n  WHERE user_id = request_record.organization_id;\n  \n  UPDATE public.balances\n  SET amount = calculated_balance, updated_at = NOW()\n  WHERE user_id = request_record.organization_id;\n  \n  -- Обновляем статус запроса\n  UPDATE public.cash_deposit_requests\n  SET \n    status = 'approved',\n    approved_at = NOW(),\n    approved_by = auth.uid(),\n    updated_at = NOW()\n  WHERE id = request_id;\n  \n  RETURN TRUE;\nEND;\n$function$\n"
+    },
+    {
+      "name": "get_driver_location_for_order",
+      "definition": "CREATE OR REPLACE FUNCTION public.get_driver_location_for_order(p_driver_id uuid, p_order_id uuid DEFAULT NULL::uuid)\n RETURNS TABLE(latitude numeric, longitude numeric, accuracy numeric, heading numeric, speed numeric, updated_at timestamp with time zone, source text)\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE\n  v_user_id UUID;\n  v_user_role TEXT;\n  v_has_access BOOLEAN := FALSE;\nBEGIN\n  -- Получаем текущего пользователя\n  v_user_id := auth.uid();\n  \n  IF v_user_id IS NULL THEN\n    RETURN;\n  END IF;\n\n  -- Получаем роль пользователя (отключаем RLS для предотвращения рекурсии)\n  PERFORM set_config('row_security', 'off', true);\n  SELECT role INTO v_user_role\n  FROM public.profiles\n  WHERE id = v_user_id;\n  PERFORM set_config('row_security', 'on', true);\n\n  -- Проверяем доступ\n  -- 1. Водитель может видеть свое местоположение\n  IF v_user_id = p_driver_id THEN\n    v_has_access := TRUE;\n  END IF;\n\n  -- 2. Клиент может видеть местоположение водителя для своего заказа\n  IF NOT v_has_access AND p_order_id IS NOT NULL THEN\n    SELECT EXISTS (\n      SELECT 1 FROM public.orders\n      WHERE id = p_order_id\n        AND executor_user_id = p_driver_id\n        AND (client_id = v_user_id OR customer_id = v_user_id)\n    ) INTO v_has_access;\n  END IF;\n\n  -- 3. Организация может видеть местоположение своих водителей ВСЕГДА (без ограничения на активные заказы)\n  IF NOT v_has_access AND v_user_role = 'customer' THEN\n    PERFORM set_config('row_security', 'off', true);\n    SELECT EXISTS (\n      SELECT 1 FROM public.profiles\n      WHERE id = p_driver_id\n        AND organization_id = v_user_id\n        AND role = 'driver'\n    ) INTO v_has_access;\n    PERFORM set_config('row_security', 'on', true);\n  END IF;\n\n  -- 4. Суперадмин может видеть все\n  IF NOT v_has_access AND v_user_role = 'superadmin' THEN\n    v_has_access := TRUE;\n  END IF;\n\n  IF NOT v_has_access THEN\n    RETURN;\n  END IF;\n\n  -- Возвращаем последнее местоположение из driver_locations\n  RETURN QUERY\n  SELECT\n    dl.latitude,\n    dl.longitude,\n    dl.accuracy,\n    dl.heading,\n    dl.speed,\n    dl.updated_at,\n    'driver_locations'::TEXT as source\n  FROM public.driver_locations dl\n  WHERE dl.driver_id = p_driver_id\n    AND (p_order_id IS NULL OR dl.order_id = p_order_id)\n  ORDER BY dl.updated_at DESC\n  LIMIT 1;\n\n  -- Если нет в driver_locations, возвращаем из profiles\n  IF NOT FOUND THEN\n    DECLARE\n      v_location_text TEXT;\n      v_lat DECIMAL;\n      v_lon DECIMAL;\n    BEGIN\n      PERFORM set_config('row_security', 'off', true);\n      SELECT current_location::TEXT INTO v_location_text\n      FROM public.profiles\n      WHERE id = p_driver_id\n        AND current_location IS NOT NULL;\n      PERFORM set_config('row_security', 'on', true);\n      \n      IF v_location_text IS NOT NULL THEN\n        -- Парсим формат \"(lon,lat)\" или \"POINT(lon lat)\"\n        v_location_text := REPLACE(REPLACE(v_location_text, 'POINT(', ''), ')', '');\n        v_location_text := REPLACE(REPLACE(v_location_text, '(', ''), ')', '');\n        \n        -- Разделяем по пробелу или запятой\n        IF POSITION(' ' IN v_location_text) > 0 THEN\n          v_lon := SPLIT_PART(v_location_text, ' ', 1)::DECIMAL;\n          v_lat := SPLIT_PART(v_location_text, ' ', 2)::DECIMAL;\n        ELSIF POSITION(',' IN v_location_text) > 0 THEN\n          v_lon := SPLIT_PART(v_location_text, ',', 1)::DECIMAL;\n          v_lat := SPLIT_PART(v_location_text, ',', 2)::DECIMAL;\n        END IF;\n        \n        IF v_lat IS NOT NULL AND v_lon IS NOT NULL THEN\n          PERFORM set_config('row_security', 'off', true);\n          RETURN QUERY\n          SELECT\n            v_lat as latitude,\n            v_lon as longitude,\n            NULL::DECIMAL as accuracy,\n            NULL::DECIMAL as heading,\n            NULL::DECIMAL as speed,\n            (SELECT location_updated_at FROM public.profiles WHERE id = p_driver_id) as updated_at,\n            'profiles'::TEXT as source;\n          PERFORM set_config('row_security', 'on', true);\n        END IF;\n      END IF;\n    END;\n  END IF;\nEND;\n$function$\n"
+    },
+    {
+      "name": "handle_order_payment",
+      "definition": "CREATE OR REPLACE FUNCTION public.handle_order_payment()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE\n  calculated_balance NUMERIC(10,2);\nBEGIN\n  IF NEW.is_paid IS TRUE AND OLD.is_paid IS DISTINCT FROM TRUE\n     AND NEW.executor_user_id IS NOT NULL THEN\n    IF EXISTS (SELECT 1 FROM public.transactions WHERE order_id = NEW.id AND type = 'credit') THEN\n      RETURN NEW;\n    END IF;\n    INSERT INTO public.balances(user_id,amount,currency,updated_at)\n    VALUES (NEW.executor_user_id,0,'BYN',NOW()) ON CONFLICT (user_id) DO NOTHING;\n    PERFORM 1 FROM public.balances WHERE user_id = NEW.executor_user_id FOR UPDATE;\n    INSERT INTO public.transactions(user_id,order_id,amount,type,description,created_at,related_user_id)\n    VALUES (NEW.executor_user_id,NEW.id,NEW.final_price,'credit',\n      'Начисление за оплату Заказа №' || NEW.order_number::TEXT,\n      COALESCE(NEW.completed_at,NOW()),NEW.executor_user_id);\n    SELECT public.calculate_driver_balance(NEW.executor_user_id) INTO calculated_balance;\n    UPDATE public.balances SET amount=calculated_balance,updated_at=NOW()\n    WHERE user_id=NEW.executor_user_id;\n    DELETE FROM public.receivables WHERE order_id=NEW.id;\n  END IF;\n  RETURN NEW;\nEND;\n$function$\n"
+    },
+    {
+      "name": "calculate_driver_balance",
+      "definition": "CREATE OR REPLACE FUNCTION public.calculate_driver_balance(driver_user_id uuid)\n RETURNS numeric\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE\n  calculated_balance DECIMAL(10, 2);\nBEGIN\n  -- Баланс = все credit транзакции - только те debit транзакции, которые связаны со сдачей кассы организации\n  SELECT \n    COALESCE(SUM(CASE WHEN type = 'credit' THEN amount ELSE 0 END), 0) -\n    COALESCE(SUM(CASE \n      WHEN type = 'debit' AND (\n        description LIKE '%Сдача кассы%' OR \n        description LIKE '%Изъятие кассы%' OR\n        (related_user_id IS NOT NULL AND EXISTS (\n          SELECT 1 FROM public.profiles p \n          WHERE p.id = related_user_id AND p.role = 'customer'\n        ))\n      ) THEN amount \n      ELSE 0 \n    END), 0)\n  INTO calculated_balance\n  FROM public.transactions\n  WHERE user_id = driver_user_id;\n  \n  RETURN calculated_balance;\nEND;\n$function$\n"
+    },
+    {
+      "name": "assign_order_number",
+      "definition": "CREATE OR REPLACE FUNCTION public.assign_order_number()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n  -- Если order_number не задан, присваиваем следующий номер из последовательности\n  IF NEW.order_number IS NULL THEN\n    NEW.order_number := nextval('public.order_number_seq');\n  END IF;\n  \n  RETURN NEW;\nEND;\n$function$\n"
+    },
+    {
+      "name": "get_client_transactions",
+      "definition": "CREATE OR REPLACE FUNCTION public.get_client_transactions(client_user_id uuid, start_date timestamp with time zone DEFAULT NULL::timestamp with time zone, end_date timestamp with time zone DEFAULT NULL::timestamp with time zone)\n RETURNS TABLE(id uuid, user_id uuid, order_id uuid, amount numeric, type text, description text, created_at timestamp with time zone, related_user_id uuid, order_number integer, order_final_price numeric, order_customer_id uuid, order_client_id uuid)\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE\n  caller_role TEXT;\nBEGIN\n  -- Проверяем, что вызывающий пользователь является клиентом\n  SELECT p.role INTO caller_role\n  FROM public.profiles p\n  WHERE p.id = auth.uid();\n  \n  IF NOT FOUND OR caller_role != 'client' THEN\n    RAISE EXCEPTION 'Доступ запрещен. Только клиенты могут просматривать свои транзакции.';\n  END IF;\n  \n  -- Проверяем, что client_user_id совпадает с текущим пользователем\n  IF client_user_id != auth.uid() THEN\n    RAISE EXCEPTION 'Вы можете просматривать только свои транзакции.';\n  END IF;\n  \n  RETURN QUERY\n  SELECT \n    t.id,\n    t.user_id,\n    t.order_id,\n    t.amount,\n    t.type,\n    t.description,\n    t.created_at,\n    t.related_user_id,\n    o.order_number,\n    o.final_price as order_final_price,\n    o.customer_id as order_customer_id,\n    o.client_id as order_client_id\n  FROM public.transactions t\n  INNER JOIN public.orders o ON o.id = t.order_id\n  WHERE (o.customer_id = client_user_id OR o.client_id = client_user_id)\n    AND (start_date IS NULL OR t.created_at >= start_date)\n    AND (end_date IS NULL OR t.created_at <= end_date)\n  ORDER BY t.created_at DESC;\nEND;\n$function$\n"
+    },
+    {
+      "name": "get_driver_cancelled_orders",
+      "definition": "CREATE OR REPLACE FUNCTION public.get_driver_cancelled_orders(p_driver_user_id uuid)\n RETURNS TABLE(id uuid, order_number integer, pickup_address text, delivery_address text, final_price numeric, item_type text, description text, created_at timestamp with time zone, cancelled_at timestamp with time zone, status text)\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nBEGIN\n  -- Временно отключаем RLS для этого SELECT\n  PERFORM set_config('row_security', 'off', true);\n\n  RETURN QUERY\n  SELECT\n    o.id,\n    o.order_number,\n    o.pickup_address,\n    o.delivery_address,\n    o.final_price,\n    o.item_type,\n    o.description,\n    o.created_at,\n    o.cancelled_at,\n    o.status\n  FROM public.orders o\n  WHERE o.status = 'cancelled'\n    AND o.cancelled_at IS NOT NULL\n  ORDER BY o.cancelled_at DESC\n  LIMIT 10;\n\n  -- Включаем RLS обратно\n  PERFORM set_config('row_security', 'on', true);\nEXCEPTION\n  WHEN OTHERS THEN\n    -- Включаем RLS обратно даже при ошибке\n    PERFORM set_config('row_security', 'on', true);\n    RAISE WARNING 'Ошибка в get_driver_cancelled_orders: %', SQLERRM;\n    RETURN;\nEND;\n$function$\n"
+    },
+    {
+      "name": "cleanup_old_driver_tracks",
+      "definition": "CREATE OR REPLACE FUNCTION public.cleanup_old_driver_tracks()\n RETURNS integer\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE\n  deleted_count INTEGER;\nBEGIN\n  -- Удаляем записи старше 7 дней\n  DELETE FROM public.driver_locations\n  WHERE created_at < NOW() - INTERVAL '7 days';\n  \n  GET DIAGNOSTICS deleted_count = ROW_COUNT;\n  \n  RETURN deleted_count;\nEXCEPTION\n  WHEN OTHERS THEN\n    RAISE WARNING 'Ошибка при очистке старых записей трека: %', SQLERRM;\n    RETURN 0;\nEND;\n$function$\n"
+    },
+    {
+      "name": "respond_to_organization_request",
+      "definition": "CREATE OR REPLACE FUNCTION public.respond_to_organization_request(request_id uuid, driver_user_id uuid, response text)\n RETURNS boolean\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE\n  request_record RECORD;\n  organization_user_id UUID;\nBEGIN\n  -- Получаем запрос\n  SELECT * INTO request_record\n  FROM public.driver_organization_requests\n  WHERE driver_organization_requests.id = request_id\n    AND driver_organization_requests.driver_user_id = respond_to_organization_request.driver_user_id\n    AND driver_organization_requests.status = 'pending';\n\n  IF NOT FOUND THEN\n    RETURN FALSE;\n  END IF;\n\n  organization_user_id := request_record.organization_user_id;\n\n  -- Обновляем статус запроса\n  UPDATE public.driver_organization_requests\n  SET \n    status = response,\n    responded_at = NOW()\n  WHERE driver_organization_requests.id = request_id;\n\n  -- Если водитель принял запрос, привязываем его к организации\n  IF response = 'accepted' THEN\n    UPDATE public.profiles\n    SET organization_id = organization_user_id\n    WHERE profiles.id = respond_to_organization_request.driver_user_id;\n  END IF;\n\n  RETURN TRUE;\nEND;\n$function$\n"
+    },
+    {
+      "name": "check_user_role",
+      "definition": "CREATE OR REPLACE FUNCTION public.check_user_role(p_user_id uuid, p_role text)\n RETURNS boolean\n LANGUAGE plpgsql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE\n  v_user_role TEXT;\nBEGIN\n  -- Временно отключаем RLS для этого SELECT\n  -- Это критически важно для предотвращения рекурсии\n  PERFORM set_config('row_security', 'off', true);\n  \n  -- Получаем роль пользователя\n  SELECT role INTO v_user_role\n  FROM public.profiles\n  WHERE id = p_user_id;\n  \n  -- Включаем RLS обратно\n  PERFORM set_config('row_security', 'on', true);\n  \n  -- Проверяем, что роль совпадает\n  RETURN v_user_role = p_role;\nEXCEPTION\n  WHEN OTHERS THEN\n    -- Включаем RLS обратно даже при ошибке\n    PERFORM set_config('row_security', 'on', true);\n    RETURN FALSE;\nEND;\n$function$\n"
+    },
+    {
+      "name": "process_order_payment",
+      "definition": "CREATE OR REPLACE FUNCTION public.process_order_payment(order_uuid uuid, payment_status boolean)\n RETURNS boolean\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE\n  order_record RECORD;\n  driver_user_id UUID;\n  driver_org_id UUID;\n  debtor_user_id UUID;\n  existing_receivable_id UUID;\n  recipient_user_id UUID;\n  calculated_balance DECIMAL(10, 2);\n  transaction_id UUID;\n  caller_role TEXT;\nBEGIN\n  RAISE NOTICE 'process_order_payment вызвана: order_uuid = %, payment_status = %', \n    order_uuid, payment_status;\n  IF order_uuid IS NULL OR payment_status IS NULL THEN\n    RAISE EXCEPTION 'order_uuid и payment_status обязательны';\n  END IF;\n  SELECT role INTO caller_role FROM public.profiles WHERE id = auth.uid();\n  IF caller_role IS NULL THEN\n    RAISE EXCEPTION 'Пользователь не найден в профилях';\n  END IF;\n  SELECT * INTO order_record\n  FROM public.orders o\n  WHERE o.id = order_uuid\n    AND (o.status = 'courier_delivering' OR o.status = 'completed')\n  FOR UPDATE;\n  IF NOT FOUND THEN\n    RAISE EXCEPTION 'Заказ не найден или не в правильном статусе. Заказ должен быть в статусе \"доставляет\" или \"завершен\"';\n  END IF;\n  driver_user_id := order_record.executor_user_id;\n  IF driver_user_id IS NULL THEN\n    RAISE EXCEPTION 'Водитель не назначен на заказ';\n  END IF;\n  IF caller_role = 'driver' THEN\n    IF driver_user_id != auth.uid() THEN\n      RAISE EXCEPTION 'Водитель может провести оплату только для своих заказов';\n    END IF;\n    recipient_user_id := driver_user_id;\n  ELSIF caller_role = 'customer' THEN\n    SELECT organization_id INTO driver_org_id FROM public.profiles WHERE id = driver_user_id;\n    IF driver_org_id IS NULL OR driver_org_id != auth.uid() THEN\n      RAISE EXCEPTION 'Организация может провести оплату только для заказов своих водителей';\n    END IF;\n    recipient_user_id := auth.uid();\n  ELSE\n    RAISE EXCEPTION 'Только водители и организации могут проводить оплату';\n  END IF;\n  IF payment_status THEN\n    IF order_record.is_paid = true THEN\n      DELETE FROM public.receivables WHERE order_id = order_uuid;\n      RAISE NOTICE 'Заказ % уже оплачен. Дебиторка удалена, если существовала.', order_uuid;\n      RETURN TRUE;\n    END IF;\n    IF EXISTS (SELECT 1 FROM public.transactions WHERE order_id = order_uuid AND type = 'credit') THEN\n      RAISE EXCEPTION 'У заказа уже есть начисление: требуется сверка оплаты';\n    END IF;\n    INSERT INTO public.balances (user_id, amount, currency, updated_at)\n    VALUES (recipient_user_id, 0, 'BYN', NOW()) ON CONFLICT (user_id) DO NOTHING;\n    PERFORM 1 FROM public.balances WHERE user_id = recipient_user_id FOR UPDATE;\n    INSERT INTO public.transactions (user_id, order_id, amount, type, description, created_at, related_user_id)\n    VALUES (\n      recipient_user_id,\n      order_uuid,\n      order_record.final_price,\n      'credit',\n      'Начисление за оплату Заказа №' || order_record.order_number::TEXT || \n        CASE \n          WHEN recipient_user_id = driver_user_id THEN ' (оплата водителем)'\n          ELSE ' (оплата организацией)'\n        END,\n      COALESCE(order_record.completed_at, NOW()),\n      driver_user_id  -- related_user_id всегда указывает на водителя, даже если оплата принята организацией\n    )\n    RETURNING id INTO transaction_id;\n    UPDATE public.orders SET is_paid = true WHERE id = order_uuid;\n    IF recipient_user_id = driver_user_id THEN\n      SELECT public.calculate_driver_balance(recipient_user_id) INTO calculated_balance;\n    ELSE\n      SELECT \n        COALESCE(SUM(CASE WHEN type = 'credit' THEN amount ELSE 0 END), 0) -\n        COALESCE(SUM(CASE WHEN type = 'debit' THEN amount ELSE 0 END), 0)\n      INTO calculated_balance\n      FROM public.transactions\n      WHERE user_id = recipient_user_id;\n    END IF;\n    INSERT INTO public.balances (user_id, amount, currency, updated_at)\n    VALUES (recipient_user_id, calculated_balance, 'BYN', NOW())\n    ON CONFLICT (user_id) DO UPDATE\n    SET \n      amount = calculated_balance,\n      updated_at = NOW();\n    RAISE NOTICE 'Транзакция создана для пользователя %: %, баланс обновлен: %', \n      recipient_user_id, transaction_id, calculated_balance;\n    DELETE FROM public.receivables WHERE order_id = order_uuid;\n    RAISE NOTICE 'Дебиторка для заказа % удалена после оплаты', order_uuid;\n  ELSE\n    IF order_record.is_paid IS TRUE THEN\n      RAISE EXCEPTION 'Оплаченный заказ нельзя пометить неоплаченным';\n    END IF;\n    SELECT id INTO existing_receivable_id\n    FROM public.receivables\n    WHERE order_id = order_uuid\n    LIMIT 1;\n    IF existing_receivable_id IS NOT NULL THEN\n      RAISE NOTICE 'Дебиторка для заказа % уже существует (id: %). Пропускаем создание.', order_uuid, existing_receivable_id;\n      RETURN TRUE;\n    END IF;\n    UPDATE public.orders\n    SET is_paid = false\n    WHERE orders.id = order_uuid;\n    IF order_record.paid_by = 'sender' THEN\n      debtor_user_id := order_record.client_id;\n    ELSE\n      debtor_user_id := NULL;\n    END IF;\n    SELECT organization_id INTO driver_org_id FROM public.profiles WHERE id = driver_user_id;\n    INSERT INTO public.receivables (\n      order_id,\n      driver_user_id,\n      organization_id,\n      debtor_type,\n      debtor_user_id,\n      amount,\n      currency,\n      status,\n      created_at,\n      updated_at\n    )\n    VALUES (\n      order_uuid,\n      driver_user_id,\n      driver_org_id,\n      COALESCE(order_record.paid_by, 'sender'),\n      debtor_user_id,\n      order_record.final_price,\n      'BYN',\n      'unpaid',\n      NOW(),\n      NOW()\n    )\n    ON CONFLICT (order_id) DO NOTHING; -- Защита от дубликатов\n    RAISE NOTICE 'Создана дебиторка для заказа %', order_uuid;\n  END IF;\n  RETURN TRUE;\nEND;\n$function$\n"
+    },
+    {
+      "name": "withdraw_cash_from_driver",
+      "definition": "CREATE OR REPLACE FUNCTION public.withdraw_cash_from_driver(organization_user_id uuid, driver_user_id uuid, amount_to_withdraw numeric)\n RETURNS boolean\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE\n  driver_org_id UUID;\n  driver_balance DECIMAL(10, 2);\n  driver_role TEXT;\n  org_role TEXT;\nBEGIN\n  -- Проверяем, что вызывающий пользователь является организацией\n  SELECT role INTO org_role\n  FROM public.profiles\n  WHERE id = organization_user_id;\n  \n  IF NOT FOUND OR org_role != 'customer' THEN\n    RAISE EXCEPTION 'Пользователь не является организацией';\n  END IF;\n  \n  -- Проверяем, что водитель существует и привязан к этой организации\n  SELECT role, organization_id INTO driver_role, driver_org_id\n  FROM public.profiles\n  WHERE id = driver_user_id;\n  \n  IF NOT FOUND OR driver_role != 'driver' THEN\n    RAISE EXCEPTION 'Водитель не найден';\n  END IF;\n  \n  IF driver_org_id IS NULL OR driver_org_id != organization_user_id THEN\n    RAISE EXCEPTION 'Водитель не привязан к вашей организации';\n  END IF;\n  \n  -- Проверяем сумму перевода\n  IF amount_to_withdraw <= 0 THEN\n    RAISE EXCEPTION 'Сумма должна быть больше нуля';\n  END IF;\n  \n  -- Получаем текущий баланс водителя\n  SELECT COALESCE(amount, 0) INTO driver_balance\n  FROM public.balances\n  WHERE user_id = driver_user_id;\n  \n  -- Проверяем, что у водителя достаточно средств\n  IF driver_balance < amount_to_withdraw THEN\n    RAISE EXCEPTION 'Недостаточно средств на балансе водителя. Доступно: %', driver_balance;\n  END IF;\n  \n  -- Создаем баланс для организации, если его нет\n  INSERT INTO public.balances (user_id, amount, currency, updated_at)\n  VALUES (organization_user_id, 0.00, 'BYN', NOW())\n  ON CONFLICT (user_id) DO NOTHING;\n  \n  -- 1. Списываем средства с баланса водителя (debit транзакция)\n  INSERT INTO public.transactions (\n    user_id,\n    amount,\n    type,\n    description,\n    related_user_id,\n    created_at\n  )\n  VALUES (\n    driver_user_id,\n    amount_to_withdraw,\n    'debit',\n    'Изъятие кассы организацией',\n    organization_user_id,\n    NOW()\n  );\n  \n  -- 2. Зачисляем средства на баланс организации (credit транзакция)\n  INSERT INTO public.transactions (\n    user_id,\n    amount,\n    type,\n    description,\n    related_user_id,\n    created_at\n  )\n  VALUES (\n    organization_user_id,\n    amount_to_withdraw,\n    'credit',\n    'Получение кассы от водителя (изъятие организацией)',\n    driver_user_id,\n    NOW()\n  );\n  \n  -- 3. Обновляем баланс водителя (сумма всех credit транзакций минус все debit транзакции)\n  UPDATE public.balances\n  SET \n    amount = (\n      SELECT COALESCE(SUM(CASE WHEN type = 'credit' THEN amount ELSE 0 END), 0) -\n             COALESCE(SUM(CASE WHEN type = 'debit' THEN amount ELSE 0 END), 0)\n      FROM public.transactions\n      WHERE user_id = driver_user_id\n    ),\n    updated_at = NOW()\n  WHERE user_id = driver_user_id;\n  \n  -- 4. Обновляем баланс организации (сумма всех credit транзакций минус все debit транзакции)\n  UPDATE public.balances\n  SET \n    amount = (\n      SELECT COALESCE(SUM(CASE WHEN type = 'credit' THEN amount ELSE 0 END), 0) -\n             COALESCE(SUM(CASE WHEN type = 'debit' THEN amount ELSE 0 END), 0)\n      FROM public.transactions\n      WHERE user_id = organization_user_id\n    ),\n    updated_at = NOW()\n  WHERE user_id = organization_user_id;\n  \n  RETURN TRUE;\nEXCEPTION\n  WHEN OTHERS THEN\n    RAISE EXCEPTION 'Ошибка при изъятии кассы: %', SQLERRM;\nEND;\n$function$\n"
+    },
+    {
+      "name": "get_driver_track",
+      "definition": "CREATE OR REPLACE FUNCTION public.get_driver_track(p_driver_id uuid, p_date date DEFAULT CURRENT_DATE)\n RETURNS TABLE(id uuid, latitude numeric, longitude numeric, accuracy numeric, heading numeric, speed numeric, created_at timestamp with time zone, order_id uuid)\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nBEGIN\n  -- Отключаем RLS для чтения из driver_locations\n  PERFORM set_config('row_security', 'off', true);\n  \n  RETURN QUERY\n  SELECT\n    dl.id,\n    dl.latitude,\n    dl.longitude,\n    dl.accuracy,\n    dl.heading,\n    dl.speed,\n    dl.created_at,\n    dl.order_id\n  FROM public.driver_locations dl\n  WHERE dl.driver_id = p_driver_id\n    AND DATE(dl.created_at) = p_date\n  ORDER BY dl.created_at ASC;\n  \n  -- Включаем RLS обратно\n  PERFORM set_config('row_security', 'on', true);\nEXCEPTION\n  WHEN OTHERS THEN\n    PERFORM set_config('row_security', 'on', true);\n    RAISE WARNING 'Ошибка в get_driver_track: %', SQLERRM;\n    RETURN;\nEND;\n$function$\n"
+    },
+    {
+      "name": "prevent_paid_order_reset",
+      "definition": "CREATE OR REPLACE FUNCTION public.prevent_paid_order_reset()\n RETURNS trigger\n LANGUAGE plpgsql\n SET search_path TO 'public'\nAS $function$\nBEGIN\n  IF OLD.is_paid IS TRUE AND NEW.is_paid IS DISTINCT FROM TRUE THEN\n    RAISE EXCEPTION 'Оплаченный заказ нельзя пометить неоплаченным';\n  END IF;\n  RETURN NEW;\nEND;\n$function$\n"
+    },
+    {
+      "name": "handle_new_user",
+      "definition": "CREATE OR REPLACE FUNCTION public.handle_new_user()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\nAS $function$\nBEGIN\n  INSERT INTO public.profiles (id, email, role)\n  VALUES (NEW.id, NEW.email, 'client');\n  \n  INSERT INTO public.balances (user_id)\n  VALUES (NEW.id);\n  \n  RETURN NEW;\nEND;\n$function$\n"
+    },
+    {
+      "name": "rls_auto_enable",
+      "definition": "CREATE OR REPLACE FUNCTION public.rls_auto_enable()\n RETURNS event_trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'pg_catalog'\nAS $function$\nDECLARE\n  cmd record;\nBEGIN\n  FOR cmd IN\n    SELECT *\n    FROM pg_event_trigger_ddl_commands()\n    WHERE command_tag IN ('CREATE TABLE', 'CREATE TABLE AS', 'SELECT INTO')\n      AND object_type IN ('table','partitioned table')\n  LOOP\n     IF cmd.schema_name IS NOT NULL AND cmd.schema_name IN ('public') AND cmd.schema_name NOT IN ('pg_catalog','information_schema') AND cmd.schema_name NOT LIKE 'pg_toast%' AND cmd.schema_name NOT LIKE 'pg_temp%' THEN\n      BEGIN\n        EXECUTE format('alter table if exists %s enable row level security', cmd.object_identity);\n        RAISE LOG 'rls_auto_enable: enabled RLS on %', cmd.object_identity;\n      EXCEPTION\n        WHEN OTHERS THEN\n          RAISE LOG 'rls_auto_enable: failed to enable RLS on %', cmd.object_identity;\n      END;\n     ELSE\n        RAISE LOG 'rls_auto_enable: skip % (either system schema or not in enforced list: %.)', cmd.object_identity, cmd.schema_name;\n     END IF;\n  END LOOP;\nEND;\n$function$\n"
+    },
+    {
+      "name": "auto_confirm_user_email",
+      "definition": "CREATE OR REPLACE FUNCTION public.auto_confirm_user_email()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\nAS $function$\nBEGIN\n  -- Автоматически подтверждаем email при создании пользователя\n  -- confirmed_at - это generated column, обновляется автоматически на основе email_confirmed_at\n  NEW.email_confirmed_at = COALESCE(NEW.email_confirmed_at, NOW());\n  RETURN NEW;\nEND;\n$function$\n"
+    },
+    {
+      "name": "update_updated_at_column",
+      "definition": "CREATE OR REPLACE FUNCTION public.update_updated_at_column()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n  NEW.updated_at = NOW();\n  RETURN NEW;\nEND;\n$function$\n"
+    },
+    {
+      "name": "cancel_organization_request",
+      "definition": "CREATE OR REPLACE FUNCTION public.cancel_organization_request(request_id uuid, organization_user_id uuid)\n RETURNS boolean\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nBEGIN\n  -- Отменяем запрос\n  UPDATE public.driver_organization_requests\n  SET status = 'cancelled'\n  WHERE driver_organization_requests.id = request_id\n    AND driver_organization_requests.organization_user_id = cancel_organization_request.organization_user_id\n    AND driver_organization_requests.status = 'pending';\n\n  RETURN FOUND;\nEND;\n$function$\n"
+    }
+  ],
+  "constraints": [
+    {
+      "name": "driver_organization_requests_driver_user_id_fkey",
+      "table": "driver_organization_requests",
+      "definition": "FOREIGN KEY (driver_user_id) REFERENCES profiles(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "driver_organization_requests_organization_user_id_fkey",
+      "table": "driver_organization_requests",
+      "definition": "FOREIGN KEY (organization_user_id) REFERENCES profiles(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "driver_organization_requests_pkey",
+      "table": "driver_organization_requests",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "driver_organization_requests_status_check",
+      "table": "driver_organization_requests",
+      "definition": "CHECK ((status = ANY (ARRAY['pending'::text, 'accepted'::text, 'rejected'::text, 'cancelled'::text])))"
+    },
+    {
+      "name": "driver_organization_messages_driver_id_fkey",
+      "table": "driver_organization_messages",
+      "definition": "FOREIGN KEY (driver_id) REFERENCES profiles(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "driver_organization_messages_organization_id_fkey",
+      "table": "driver_organization_messages",
+      "definition": "FOREIGN KEY (organization_id) REFERENCES profiles(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "driver_organization_messages_pkey",
+      "table": "driver_organization_messages",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "driver_organization_messages_sender_id_fkey",
+      "table": "driver_organization_messages",
+      "definition": "FOREIGN KEY (sender_id) REFERENCES profiles(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "order_rejections_driver_user_id_fkey",
+      "table": "order_rejections",
+      "definition": "FOREIGN KEY (driver_user_id) REFERENCES profiles(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "order_rejections_order_id_driver_user_id_key",
+      "table": "order_rejections",
+      "definition": "UNIQUE (order_id, driver_user_id)"
+    },
+    {
+      "name": "order_rejections_order_id_fkey",
+      "table": "order_rejections",
+      "definition": "FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "order_rejections_pkey",
+      "table": "order_rejections",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "order_messages_order_id_fkey",
+      "table": "order_messages",
+      "definition": "FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "order_messages_pkey",
+      "table": "order_messages",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "order_messages_sender_id_fkey",
+      "table": "order_messages",
+      "definition": "FOREIGN KEY (sender_id) REFERENCES profiles(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "balances_pkey",
+      "table": "balances",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "balances_user_id_fkey",
+      "table": "balances",
+      "definition": "FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "balances_user_id_key",
+      "table": "balances",
+      "definition": "UNIQUE (user_id)"
+    },
+    {
+      "name": "transactions_order_id_fkey",
+      "table": "transactions",
+      "definition": "FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE SET NULL"
+    },
+    {
+      "name": "transactions_pkey",
+      "table": "transactions",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "transactions_related_user_id_fkey",
+      "table": "transactions",
+      "definition": "FOREIGN KEY (related_user_id) REFERENCES profiles(id) ON DELETE SET NULL"
+    },
+    {
+      "name": "transactions_type_check",
+      "table": "transactions",
+      "definition": "CHECK ((type = ANY (ARRAY['credit'::text, 'debit'::text, 'transfer'::text])))"
+    },
+    {
+      "name": "transactions_user_id_fkey",
+      "table": "transactions",
+      "definition": "FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "delivery_settings_pkey",
+      "table": "delivery_settings",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "delivery_settings_setting_key_key",
+      "table": "delivery_settings",
+      "definition": "UNIQUE (setting_key)"
+    },
+    {
+      "name": "push_subscriptions_pkey",
+      "table": "push_subscriptions",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "push_subscriptions_user_id_fkey",
+      "table": "push_subscriptions",
+      "definition": "FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "push_subscriptions_user_id_key",
+      "table": "push_subscriptions",
+      "definition": "UNIQUE (user_id)"
+    },
+    {
+      "name": "profiles_email_key",
+      "table": "profiles",
+      "definition": "UNIQUE (email)"
+    },
+    {
+      "name": "profiles_id_fkey",
+      "table": "profiles",
+      "definition": "FOREIGN KEY (id) REFERENCES auth.users(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "profiles_organization_id_fkey",
+      "table": "profiles",
+      "definition": "FOREIGN KEY (organization_id) REFERENCES profiles(id) ON DELETE SET NULL"
+    },
+    {
+      "name": "profiles_pkey",
+      "table": "profiles",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "profiles_role_check",
+      "table": "profiles",
+      "definition": "CHECK ((role = ANY (ARRAY['customer'::text, 'client'::text, 'driver'::text, 'fleet'::text, 'admin'::text, 'superadmin'::text])))"
+    },
+    {
+      "name": "fleets_pkey",
+      "table": "fleets",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "fleets_user_id_fkey",
+      "table": "fleets",
+      "definition": "FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "fleets_user_id_key",
+      "table": "fleets",
+      "definition": "UNIQUE (user_id)"
+    },
+    {
+      "name": "drivers_fleet_id_fkey",
+      "table": "drivers",
+      "definition": "FOREIGN KEY (fleet_id) REFERENCES fleets(id) ON DELETE SET NULL"
+    },
+    {
+      "name": "drivers_pkey",
+      "table": "drivers",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "drivers_shift_status_check",
+      "table": "drivers",
+      "definition": "CHECK ((shift_status = ANY (ARRAY['offline'::text, 'online'::text, 'break'::text, 'shift_closed'::text])))"
+    },
+    {
+      "name": "drivers_user_id_fkey",
+      "table": "drivers",
+      "definition": "FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "drivers_user_id_key",
+      "table": "drivers",
+      "definition": "UNIQUE (user_id)"
+    },
+    {
+      "name": "regions_name_key",
+      "table": "regions",
+      "definition": "UNIQUE (name)"
+    },
+    {
+      "name": "regions_pkey",
+      "table": "regions",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "receivables_debtor_type_check",
+      "table": "receivables",
+      "definition": "CHECK ((debtor_type = ANY (ARRAY['sender'::text, 'recipient'::text])))"
+    },
+    {
+      "name": "receivables_debtor_user_id_fkey",
+      "table": "receivables",
+      "definition": "FOREIGN KEY (debtor_user_id) REFERENCES profiles(id) ON DELETE SET NULL"
+    },
+    {
+      "name": "receivables_driver_user_id_fkey",
+      "table": "receivables",
+      "definition": "FOREIGN KEY (driver_user_id) REFERENCES profiles(id) ON DELETE SET NULL"
+    },
+    {
+      "name": "receivables_order_id_fkey",
+      "table": "receivables",
+      "definition": "FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "receivables_order_id_unique",
+      "table": "receivables",
+      "definition": "UNIQUE (order_id)"
+    },
+    {
+      "name": "receivables_organization_id_fkey",
+      "table": "receivables",
+      "definition": "FOREIGN KEY (organization_id) REFERENCES profiles(id) ON DELETE SET NULL"
+    },
+    {
+      "name": "receivables_pkey",
+      "table": "receivables",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "receivables_status_check",
+      "table": "receivables",
+      "definition": "CHECK ((status = ANY (ARRAY['unpaid'::text, 'paid'::text, 'cancelled'::text])))"
+    },
+    {
+      "name": "saved_addresses_address_type_check",
+      "table": "saved_addresses",
+      "definition": "CHECK ((address_type = ANY (ARRAY['pickup'::text, 'delivery'::text, 'both'::text])))"
+    },
+    {
+      "name": "saved_addresses_pkey",
+      "table": "saved_addresses",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "saved_addresses_region_id_fkey",
+      "table": "saved_addresses",
+      "definition": "FOREIGN KEY (region_id) REFERENCES regions(id) ON DELETE SET NULL"
+    },
+    {
+      "name": "saved_addresses_user_id_fkey",
+      "table": "saved_addresses",
+      "definition": "FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "orders_client_id_fkey",
+      "table": "orders",
+      "definition": "FOREIGN KEY (client_id) REFERENCES profiles(id) ON DELETE SET NULL"
+    },
+    {
+      "name": "orders_customer_id_fkey",
+      "table": "orders",
+      "definition": "FOREIGN KEY (customer_id) REFERENCES profiles(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "orders_driver_id_fkey",
+      "table": "orders",
+      "definition": "FOREIGN KEY (driver_id) REFERENCES drivers(id) ON DELETE SET NULL"
+    },
+    {
+      "name": "orders_executor_user_id_fkey",
+      "table": "orders",
+      "definition": "FOREIGN KEY (executor_user_id) REFERENCES profiles(id) ON DELETE SET NULL"
+    },
+    {
+      "name": "orders_item_type_check",
+      "table": "orders",
+      "definition": "CHECK ((item_type = ANY (ARRAY['documents'::text, 'parcel'::text, 'flowers'::text, 'food'::text])))"
+    },
+    {
+      "name": "orders_paid_by_check",
+      "table": "orders",
+      "definition": "CHECK ((paid_by = ANY (ARRAY['sender'::text, 'recipient'::text])))"
+    },
+    {
+      "name": "orders_pkey",
+      "table": "orders",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "orders_region_id_fkey",
+      "table": "orders",
+      "definition": "FOREIGN KEY (region_id) REFERENCES regions(id)"
+    },
+    {
+      "name": "orders_status_check",
+      "table": "orders",
+      "definition": "CHECK ((status = ANY (ARRAY['searching_courier'::text, 'courier_accepted'::text, 'courier_coming'::text, 'courier_delivering'::text, 'completed'::text, 'cancelled'::text])))"
+    },
+    {
+      "name": "orders_visibility_check",
+      "table": "orders",
+      "definition": "CHECK ((visibility = ANY (ARRAY['public'::text, 'assigned'::text])))"
+    },
+    {
+      "name": "driver_locations_driver_id_fkey",
+      "table": "driver_locations",
+      "definition": "FOREIGN KEY (driver_id) REFERENCES profiles(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "driver_locations_order_id_fkey",
+      "table": "driver_locations",
+      "definition": "FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE SET NULL"
+    },
+    {
+      "name": "driver_locations_pkey",
+      "table": "driver_locations",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "cash_deposit_requests_approved_by_fkey",
+      "table": "cash_deposit_requests",
+      "definition": "FOREIGN KEY (approved_by) REFERENCES profiles(id) ON DELETE SET NULL"
+    },
+    {
+      "name": "cash_deposit_requests_driver_user_id_fkey",
+      "table": "cash_deposit_requests",
+      "definition": "FOREIGN KEY (driver_user_id) REFERENCES profiles(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "cash_deposit_requests_organization_id_fkey",
+      "table": "cash_deposit_requests",
+      "definition": "FOREIGN KEY (organization_id) REFERENCES profiles(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "cash_deposit_requests_pkey",
+      "table": "cash_deposit_requests",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "cash_deposit_requests_rejected_by_fkey",
+      "table": "cash_deposit_requests",
+      "definition": "FOREIGN KEY (rejected_by) REFERENCES profiles(id) ON DELETE SET NULL"
+    },
+    {
+      "name": "cash_deposit_requests_status_check",
+      "table": "cash_deposit_requests",
+      "definition": "CHECK ((status = ANY (ARRAY['pending'::text, 'approved'::text, 'rejected'::text, 'cancelled'::text])))"
+    }
+  ]
+}

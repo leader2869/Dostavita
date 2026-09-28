@@ -6,7 +6,7 @@ import { rejectOrderSchema } from '@/lib/api/validate'
 
 export async function POST(request: Request) {
   try {
-    const supabase = createServerSupabaseClient()
+    const supabase = await createServerSupabaseClient()
     const bodyResult = await parseBody(request, rejectOrderSchema)
     if (!bodyResult.ok) return bodyResult.response
     const { orderId } = bodyResult.data

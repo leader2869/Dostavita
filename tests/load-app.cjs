@@ -11,7 +11,7 @@ function load(file, mocks = {}) {
   }).outputText
   const module = { exports: {} }
   vm.runInNewContext(js, {
-    module, exports: module.exports, process, console: { error() {} },
+    module, exports: module.exports, process, URL, console: { error() {} },
     require(name) {
       if (name in mocks) return mocks[name]
       if (name === 'server-only') return {}
