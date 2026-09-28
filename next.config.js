@@ -21,12 +21,14 @@ if (fs.existsSync(envPath)) {
 
 const nextConfig = {
   reactStrictMode: true,
+  output: 'standalone',
   images: {
     remotePatterns: [
       {
         protocol: 'https',
         hostname: '**.supabase.co',
       },
+      { protocol: 'https', hostname: 'api.dostavita.by' },
     ],
   },
   env: {

@@ -1,0 +1,11 @@
+.git
+.next
+node_modules
+.env*
+!.env.example
+backups
+android
+www
+*.log
+*.pem
+*.tsbuildinfo
