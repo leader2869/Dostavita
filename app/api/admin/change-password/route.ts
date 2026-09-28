@@ -13,7 +13,8 @@ const schema = z.object({
 export async function POST(request: Request) {
   try {
     const origin = request.headers.get('origin')
-    if (origin && origin !== new URL(request.url).origin) {
+    const expectedOrigin = new URL(process.env.NEXT_PUBLIC_APP_URL || request.url).origin
+    if (origin && origin !== expectedOrigin) {
       return NextResponse.json({ error: 'Недопустимый источник запроса' }, { status: 403 })
     }
     const auth = await requireSuperadmin(await createServerSupabaseClient())
