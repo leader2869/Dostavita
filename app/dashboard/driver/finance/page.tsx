@@ -1,5 +1,7 @@
 'use client'
 
+import { PayrollPanel } from '@/components/payroll/PayrollPanel'
+
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useDateFilter } from '@/hooks/useDateFilter'
@@ -275,6 +277,7 @@ export default function DriverFinancePage() {
 
   return (
     <div className="pb-20">
+      <PayrollPanel />
 
       {/* Выбор периода */}
       <div className="bg-gray-50 rounded-lg shadow p-4 mb-6">

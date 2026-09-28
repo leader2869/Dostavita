@@ -2,7 +2,7 @@
 \set ON_ERROR_STOP on
 DO $$ DECLARE t text; op text; f record;
 BEGIN
- FOREACH t IN ARRAY ARRAY['transactions','receivables','cash_deposit_requests','driver_organization_requests','driver_org_message_reads'] LOOP
+ FOREACH t IN ARRAY ARRAY['transactions','receivables','cash_deposit_requests','driver_organization_requests','driver_org_message_reads','driver_payroll_terms','driver_payroll_current','driver_payroll_orders','driver_payroll_ledger'] LOOP
   FOREACH op IN ARRAY ARRAY['INSERT','UPDATE','DELETE','TRUNCATE'] LOOP
    IF has_table_privilege('authenticated','public.'||t,op) THEN RAISE EXCEPTION 'Unsafe % grant on %',op,t; END IF;
   END LOOP;
@@ -20,5 +20,7 @@ BEGIN
  IF NOT EXISTS(SELECT 1 FROM storage.buckets WHERE id='chat-photos' AND public=false AND file_size_limit=5242880) THEN RAISE EXCEPTION 'Private chat photo bucket missing/misconfigured'; END IF;
  IF EXISTS(SELECT 1 FROM pg_constraint WHERE conrelid='public.push_subscriptions'::regclass AND conname='push_subscriptions_user_id_key') THEN RAISE EXCEPTION 'Push still limited to one device'; END IF;
  IF NOT EXISTS(SELECT 1 FROM pg_index WHERE indrelid='public.push_subscriptions'::regclass AND indexrelid=to_regclass('public.idx_push_subscriptions_endpoint') AND indisunique AND indisvalid) THEN RAISE EXCEPTION 'Unique push endpoint index missing'; END IF;
+ IF NOT EXISTS(SELECT 1 FROM pg_trigger WHERE tgrelid='public.orders'::regclass AND tgname='capture_driver_payroll' AND tgenabled='O') THEN RAISE EXCEPTION 'Payroll accrual trigger missing'; END IF;
+ IF NOT has_function_privilege('authenticated','public.get_my_payroll()','EXECUTE') THEN RAISE EXCEPTION 'Payroll read RPC missing'; END IF;
  RAISE NOTICE 'Deployment database invariants passed';
 END $$;

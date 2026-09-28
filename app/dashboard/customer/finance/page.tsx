@@ -1,5 +1,7 @@
 'use client'
 
+import { PayrollPanel } from '@/components/payroll/PayrollPanel'
+
 import { useState, useEffect, useCallback, type ComponentProps } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
@@ -337,6 +339,7 @@ export default function CustomerFinancePage() {
       />
 
       <CustomerFinanceBalance balance={balance} />
+      <PayrollPanel />
 
       <CashDepositRequestsSection
         requests={cashDepositRequests as unknown as ComponentProps<typeof CashDepositRequestsSection>['requests']}

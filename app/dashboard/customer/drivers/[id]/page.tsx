@@ -1,3 +1,4 @@
+import { PayrollPanel } from '@/components/payroll/PayrollPanel'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
@@ -157,6 +158,8 @@ export default async function DriverDetailsPage({ params }: { params: Promise<{ 
           </div>
         </div>
       </div>
+
+      <PayrollPanel driverId={driverId} />
 
       {/* Финансы */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">

@@ -17,6 +17,16 @@ GRANT UPDATE(read_at) ON public.order_messages TO authenticated;
 REVOKE UPDATE ON public.drivers FROM authenticated;
 GRANT UPDATE(vehicle_type,vehicle_number,license_number,is_available,current_location,shift_status,shift_started_at,shift_ended_at) ON public.drivers TO authenticated;
 
+-- Payroll tables are added by migration 127; keep re-running this restore safe.
+DO $$ DECLARE t text; BEGIN
+ FOREACH t IN ARRAY ARRAY['driver_payroll_terms','driver_payroll_current','driver_payroll_orders','driver_payroll_ledger'] LOOP
+  IF to_regclass('public.'||t) IS NOT NULL THEN
+   EXECUTE format('REVOKE ALL ON public.%I FROM authenticated',t);
+   EXECUTE format('GRANT SELECT ON public.%I TO authenticated',t);
+  END IF;
+ END LOOP;
+END $$;
+
 -- Restrictive policies also protect a restored database with overly broad grants.
 DO $policies$
 DECLARE t text; operation text;
@@ -44,7 +54,7 @@ DO $acl$ DECLARE f record; BEGIN
  LOOP EXECUTE format('REVOKE ALL ON FUNCTION %s FROM PUBLIC, anon, authenticated',f.signature); END LOOP;
 END $acl$;
 
-DO $acl$ DECLARE f record; BEGIN FOR f IN SELECT oid::regprocedure AS signature FROM pg_proc WHERE pronamespace='public'::regnamespace AND proname IN ('accept_order','approve_cash_deposit_request','cancel_cash_deposit_request','cancel_organization_request','check_driver_role','check_user_role','complete_order','create_driver_organization_request','deposit_cash_to_organization','get_admin_stats','get_all_drivers','get_all_orders_for_admin','get_all_regions','get_all_users','get_client_receivables','get_client_transactions','get_delivery_settings','get_driver_cancelled_orders','get_driver_last_location','get_driver_location_for_order','get_driver_organization_info','get_driver_profile_for_client','get_driver_profile_for_organization','get_driver_rejected_orders','get_driver_requests','get_driver_track','get_driver_track_period','get_driver_track_with_time','get_organization_balance','get_organization_drivers','get_organization_drivers_with_active_orders','get_organization_finances','get_organization_orders','get_organization_receivables','get_organization_requests','get_user_profile','get_user_saved_addresses','is_admin','is_driver_organization','pickup_order','process_order_payment','reject_cash_deposit_request','respond_to_organization_request','search_available_drivers','security_actor_role','security_assert','security_can_view_profile','security_owns_driver','start_coming_to_pickup','update_driver_location','update_driver_organization','withdraw_cash_from_driver','security_region_price','mark_org_messages_read','record_driver_location','security_chat_photo_access') LOOP EXECUTE format('GRANT EXECUTE ON FUNCTION %s TO authenticated',f.signature); END LOOP; END $acl$;
+DO $acl$ DECLARE f record; BEGIN FOR f IN SELECT oid::regprocedure AS signature FROM pg_proc WHERE pronamespace='public'::regnamespace AND proname IN ('accept_order','approve_cash_deposit_request','cancel_cash_deposit_request','cancel_organization_request','check_driver_role','check_user_role','complete_order','create_driver_organization_request','deposit_cash_to_organization','get_admin_stats','get_all_drivers','get_all_orders_for_admin','get_all_regions','get_all_users','get_client_receivables','get_client_transactions','get_delivery_settings','get_driver_cancelled_orders','get_driver_last_location','get_driver_location_for_order','get_driver_organization_info','get_driver_profile_for_client','get_driver_profile_for_organization','get_driver_rejected_orders','get_driver_requests','get_driver_track','get_driver_track_period','get_driver_track_with_time','get_organization_balance','get_organization_drivers','get_organization_drivers_with_active_orders','get_organization_finances','get_organization_orders','get_organization_receivables','get_organization_requests','get_user_profile','get_user_saved_addresses','is_admin','is_driver_organization','pickup_order','process_order_payment','reject_cash_deposit_request','respond_to_organization_request','search_available_drivers','security_actor_role','security_assert','security_can_view_profile','security_owns_driver','start_coming_to_pickup','update_driver_location','update_driver_organization','withdraw_cash_from_driver','security_region_price','mark_org_messages_read','record_driver_location','security_chat_photo_access','set_driver_payroll_terms','record_driver_payroll','get_my_payroll') LOOP EXECUTE format('GRANT EXECUTE ON FUNCTION %s TO authenticated',f.signature); END LOOP; END $acl$;
 
 
 NOTIFY pgrst, 'reload schema';
