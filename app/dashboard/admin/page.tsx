@@ -1,5 +1,6 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import type { User } from '@/lib/types'
 import { getCachedUserAndProfile } from '@/lib/supabase/cached-auth'
 import { formatDistanceToNow } from 'date-fns'
@@ -272,41 +273,41 @@ export default async function AdminDashboard() {
 
       {/* Навигация */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <a
+        <Link
           href="/dashboard/admin/orders"
           className="bg-gray-50 rounded-lg shadow p-6 hover:shadow-lg transition"
         >
           <h3 className="font-semibold text-gray-900">Управление заказами</h3>
-        </a>
+        </Link>
 
-        <a
+        <Link
           href="/dashboard/admin/users"
           className="bg-gray-50 rounded-lg shadow p-6 hover:shadow-lg transition"
         >
           <h3 className="font-semibold text-gray-900">Управление пользователями</h3>
-        </a>
+        </Link>
 
-        <a
+        <Link
           href="/dashboard/admin/personnel"
           className="bg-gray-50 rounded-lg shadow p-6 hover:shadow-lg transition"
         >
           <h3 className="font-semibold text-gray-900">Управление персоналом</h3>
-        </a>
+        </Link>
 
         {(profile as User).role === 'superadmin' && (
           <>
-            <a
+            <Link
               href="/dashboard/admin/tariffs"
               className="bg-gray-50 rounded-lg shadow p-6 hover:shadow-lg transition"
             >
               <h3 className="font-semibold text-gray-900">Управление тарифами</h3>
-            </a>
-            <a
+            </Link>
+            <Link
               href="/dashboard/admin/delivery-settings"
               className="bg-gray-50 rounded-lg shadow p-6 hover:shadow-lg transition"
             >
               <h3 className="font-semibold text-gray-900">Настройки доставки</h3>
-            </a>
+            </Link>
           </>
         )}
       </div>

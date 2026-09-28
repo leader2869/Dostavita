@@ -1,5 +1,6 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import { BackButton } from '@/components/ui/BackButton'
 import type { User } from '@/lib/types'
 import { getCachedUserAndProfile } from '@/lib/supabase/cached-auth'
@@ -17,9 +18,14 @@ export default async function AdminPersonnelPage() {
   // This query uses the caller's session and retains the database's RLS checks.
   const { data: drivers, error: driversError } = await supabase
     .from('profiles')
-    .select('id, email, full_name, phone, vehicle_type, vehicle_brand, vehicle_model, vehicle_number, organization_name')
+    .select('id, email, full_name, phone, vehicle_type, vehicle_brand, vehicle_model, vehicle_number, organization_id')
     .eq('role', 'driver')
     .order('created_at', { ascending: false })
+
+  const organizationIds = Array.from(new Set((drivers || []).map(driver => driver.organization_id).filter(Boolean)))
+  const organizations = organizationIds.length ? await supabase.from('profiles')
+    .select('id, organization_name, full_name, email').in('id', organizationIds) : { data: [], error: null }
+  const companyNames = new Map((organizations.data || []).map(company => [company.id, company.organization_name || company.full_name || company.email]))
 
   const vehicleLabels: Record<string, string> = {
     car: 'Автомобиль', motorcycle: 'Мотоцикл', bicycle: 'Велосипед', walking: 'Пешком',
@@ -63,7 +69,8 @@ export default async function AdminPersonnelPage() {
                     {driver.vehicle_number || '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    {driver.organization_name || '—'}
+                    {!driver.organization_id ? 'Не привязан' : organizations.error ? 'Ошибка загрузки компании' : companyNames.get(driver.organization_id) || 'Компания недоступна'}
+                    {role === 'superadmin' && <Link href={`/dashboard/admin/users/${driver.id}`} className="mt-2 block text-sky-700 underline">Карточка и баланс</Link>}
                   </td>
                 </tr>
               ))
