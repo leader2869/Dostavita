@@ -39,7 +39,8 @@ const nextConfig = {
   async headers() {
     return [{ source: '/:path*', headers: [
       { key: 'X-Content-Type-Options', value: 'nosniff' },
-      { key: 'X-Frame-Options', value: 'DENY' },
+      // Permit Telegram Web to embed the app, while blocking unrelated sites.
+      { key: 'Content-Security-Policy', value: "frame-ancestors 'self' https://web.telegram.org https://*.web.telegram.org" },
       { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
     ] }]
   },

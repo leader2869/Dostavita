@@ -1,3 +1,4 @@
+import { TelegramBridge } from '@/components/telegram/TelegramBridge'
 import type { Metadata } from 'next'
 import './globals.css'
 import { RegisterServiceWorker } from '@/components/pwa/RegisterServiceWorker'
@@ -55,6 +56,7 @@ export default function RootLayout({
       </head>
       <body style={{ backgroundColor: '#ffffff', margin: 0, padding: 0 }}>
         <SupabaseEnvLoader>
+          <TelegramBridge />
           <RegisterServiceWorker />
           {children}
           <Toaster />
