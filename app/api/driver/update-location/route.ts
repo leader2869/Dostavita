@@ -15,42 +15,15 @@ export async function POST(request: Request) {
     if (!auth.ok) return auth.response
     const { user } = auth
 
-    // Сохраняем точку трека в driver_locations
-    // Каждая запись - это точка трека водителя, сохраняемая каждую минуту
-    // Это позволяет отслеживать маршрут движения водителя в течение дня
-    const { data: locationData, error: locationError } = await supabase
-      .from('driver_locations')
-      .insert({
-        driver_id: user.id,
-        order_id: order_id ?? null,
-        latitude: String(latitude),
-        longitude: String(longitude),
-        accuracy: accuracy ?? null,
-        heading: heading ?? null,
-        speed: speed ?? null,
-      })
-      .select()
-      .single()
-
-    if (locationError) {
-      console.error('Ошибка сохранения местоположения:', locationError)
-      return NextResponse.json(
-        { error: locationError.message },
-        { status: 500 }
-      )
-    }
-
-    // Также обновляем current_location в profiles для быстрого доступа
-    // Используем RPC функцию для обхода RLS
-    const { error: updateProfileError } = await supabase.rpc('update_driver_location', {
-      p_driver_id: user.id,
-      p_longitude: Number(longitude),
-      p_latitude: Number(latitude),
+    const { data: locationData, error } = await supabase.rpc('record_driver_location', {
+      p_latitude: latitude, p_longitude: longitude,
+      p_accuracy: accuracy ?? null, p_heading: heading ?? null,
+      p_speed: speed ?? null, p_order_id: order_id ?? null,
     })
-
-    if (updateProfileError) {
-      console.error('Ошибка обновления current_location в profiles:', updateProfileError)
-      // Не возвращаем ошибку, так как основное сохранение в driver_locations прошло успешно
+    if (error) {
+      const status = error.code === '42501' ? 403 : error.code === '22023' ? 400 : 500
+      return NextResponse.json({ error: status === 403 ? 'Нет доступа к этому заказу' :
+        status === 400 ? 'Некорректная геопозиция' : 'Не удалось сохранить геопозицию' }, { status })
     }
 
     return NextResponse.json({

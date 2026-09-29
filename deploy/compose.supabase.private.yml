@@ -1,0 +1,10 @@
+# Requires Docker Compose 2.24.4+; combine with the pinned upstream configuration.
+# Only the local reverse proxy may reach the gateway. Databases stay off the public network.
+services:
+  api-gw:
+    ports: !override
+      - '127.0.0.1:8000:8000'
+  supavisor:
+    ports: !override
+      - '127.0.0.1:5432:5432'
+      - '127.0.0.1:6543:6543'

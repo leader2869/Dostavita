@@ -7,7 +7,7 @@ export function isTrustedPushEndpoint(endpoint: string): boolean {
       (!url.port || url.port === '443') && (
         host === 'fcm.googleapis.com' ||
         host === 'updates.push.services.mozilla.com' ||
-        host === 'web.push.apple.com' ||
+        host.endsWith('.push.apple.com') ||
         host.endsWith('.notify.windows.com')
       )
   } catch { return false }

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
+import { toastError } from '@/lib/utils/toast'
 import { createClient } from '@/lib/supabase/client'
 import type { Region } from '@/lib/types'
 import { AddressAutocomplete } from '@/components/ui/AddressAutocomplete'
@@ -495,10 +496,14 @@ export default function CreateOrderPage() {
             orderId: order.id,
           }),
         })
-        if (!notifyResponse.ok) console.error('Заказ создан, но push-рассылка не выполнена:', notifyResponse.status)
+        const notification = await notifyResponse.json().catch(() => null)
+        if (!notifyResponse.ok || notification?.data?.failed > 0) {
+          toastError('Заказ создан, но часть уведомлений не доставлена. Заказ доступен водителям в списке.')
+        }
       } catch (notifyError) {
         // Не блокируем создание заказа, если уведомления не отправились
         console.error('Ошибка отправки push-уведомлений:', notifyError)
+        toastError('Заказ создан, но уведомления не отправлены. Заказ доступен водителям в списке.')
       }
 
       // Успешно создан заказ
@@ -512,6 +517,7 @@ export default function CreateOrderPage() {
   return (
     <div className="pb-20">
 
+      <p className="text-sm text-gray-600 mb-3">Стоимость фиксирована по выбранному региону. Расстояние и время маршрута справочные и не меняют тариф.</p>
       <form onSubmit={handleSubmit} className="bg-gray-50 rounded-lg shadow p-6 space-y-4">
         <div>
           <div className="flex justify-between items-center mb-1">

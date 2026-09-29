@@ -47,7 +47,10 @@ export default async function CustomerOrderDetailsPage({ params }: { params: Pro
   const isOrganizationOrder = orderData.customer_id === user.id
   const isDriverOrder = orderData.executor_user_id && driverIds.includes(orderData.executor_user_id)
 
-  if (!isOrganizationOrder && !isDriverOrder) {
+  const isPublicAvailable = orderData.status === 'searching_courier' && orderData.visibility === 'public'
+  const isHistoricalCompanyOrder = orderData.payment_organization_id === user.id
+
+  if (!isOrganizationOrder && !isDriverOrder && !isPublicAvailable && !isHistoricalCompanyOrder) {
     notFound()
   }
 

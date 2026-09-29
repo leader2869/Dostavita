@@ -13,52 +13,29 @@ export async function POST(request: Request) {
     const { user } = auth
 
     const bodyResult = await parseBody(request, pushRegisterSchema)
-    if (!bodyResult.ok) return bodyResult.response
+    if (!bodyResult.ok) return apiError('Браузер передал неполную подписку. Отключите уведомления для сайта и включите снова.', 400, 'PUSH_INVALID_SUBSCRIPTION')
     const { subscription } = bodyResult.data
-    if (!isTrustedPushEndpoint(subscription.endpoint)) return apiError('Недопустимый push-провайдер', 400)
-
-    // Сохраняем подписку в базе данных
-    // Проверяем, существует ли уже подписка для этого пользователя и endpoint
-    const { data: existingSubscription, error: fetchError } = await supabase
-      .from('push_subscriptions')
-      .select('*')
-      .eq('user_id', user.id)
-      .eq('endpoint', subscription.endpoint)
-      .maybeSingle()
-
-    if (fetchError) {
-      console.error('Ошибка получения существующей подписки:', fetchError)
-      return apiError(maskInternalMessage(fetchError.message), 500)
+    if (!isTrustedPushEndpoint(subscription.endpoint)) {
+      let host = 'invalid-url'
+      try { host = new URL(subscription.endpoint).hostname.slice(0, 253) } catch {}
+      console.warn('Push provider rejected:', host)
+      return apiError('Служба уведомлений этого браузера пока не поддерживается. Откройте сайт в Safari, Chrome или Firefox.', 400, 'PUSH_UNSUPPORTED_PROVIDER')
     }
 
-    if (existingSubscription) {
-      const { error: updateError } = await supabase
-        .from('push_subscriptions')
-        .update({
-          p256dh_key: subscription.keys.p256dh,
-          auth_key: subscription.keys.auth,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', existingSubscription.id)
-
-      if (updateError) {
-        console.error('Ошибка обновления push-подписки:', updateError)
-        return apiError(maskInternalMessage(updateError.message), 500)
+    // Atomic per-device upsert. RLS never transfers another account's endpoint.
+    const { error } = await supabase.from('push_subscriptions').upsert({
+      user_id: user.id,
+      endpoint: subscription.endpoint,
+      p256dh_key: subscription.keys.p256dh,
+      auth_key: subscription.keys.auth,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'endpoint' })
+    if (error) {
+      if (error.code === '42501' || error.code === '23505') {
+        return apiError('Подписка принадлежит другой сессии. Включите уведомления заново.', 409)
       }
-    } else {
-      const { error: insertError } = await supabase
-        .from('push_subscriptions')
-        .insert({
-          user_id: user.id,
-          endpoint: subscription.endpoint,
-          p256dh_key: subscription.keys.p256dh,
-          auth_key: subscription.keys.auth,
-        })
-
-      if (insertError) {
-        console.error('Ошибка сохранения push-подписки:', insertError)
-        return apiError(maskInternalMessage(insertError.message), 500)
-      }
+      console.error('Push subscription save failed:', error.code)
+      return apiError('Не удалось сохранить подписку. Попробуйте ещё раз.', 500, 'PUSH_SAVE_FAILED')
     }
 
     return apiSuccess()

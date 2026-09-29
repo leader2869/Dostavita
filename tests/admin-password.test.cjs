@@ -38,6 +38,23 @@ test('cross-origin password change rejected before mutation', async () => {
   assert.equal((await POST(request({ userId: id, password: 'new-password-12345' }, 'https://foreign.test'))).status, 403)
   assert.equal(calls.length, 0)
 })
+test('configured public origin works behind a proxy without trusting forwarded headers', async () => {
+  const previous = process.env.NEXT_PUBLIC_APP_URL
+  process.env.NEXT_PUBLIC_APP_URL = 'https://www.dostavita.by'
+  try {
+    const { POST, calls } = handler()
+    const makeRequest = (origin) => new Request('http://localhost:3000/api/admin/change-password', {
+      method: 'POST', headers: { origin, 'x-forwarded-host': 'foreign.test', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: id, password: 'new-password-12345' }),
+    })
+    assert.equal((await POST(makeRequest('https://www.dostavita.by'))).status, 200)
+    assert.equal((await POST(makeRequest('https://foreign.test'))).status, 403)
+    assert.equal(calls.length, 1)
+  } finally {
+    if (previous === undefined) delete process.env.NEXT_PUBLIC_APP_URL
+    else process.env.NEXT_PUBLIC_APP_URL = previous
+  }
+})
 for (const failConfig of [false, true]) {
   test(`password failure does not expose internal error (${failConfig})`, async () => {
     const { POST } = handler({ message: 'private upstream error' }, failConfig)

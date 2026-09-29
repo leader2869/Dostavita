@@ -1,5 +1,7 @@
 'use client'
 
+import { removeDevicePushSubscription } from '@/lib/browser-push'
+
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
@@ -114,6 +116,7 @@ export default function ClientProfilePage() {
 
   const handleSignOut = async () => {
     try {
+      await removeDevicePushSubscription().catch(() => console.warn('Не удалось очистить подписку на сервере'))
       await supabase.auth.signOut()
       // Используем window.location для полной перезагрузки страницы
       window.location.href = '/login'

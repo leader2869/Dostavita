@@ -1,165 +1,70 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { readyPushRegistration, removeDevicePushSubscription, saveDevicePushSubscription, vapidBytes } from '@/lib/browser-push'
 
-interface PushSubscriptionData {
-  endpoint: string
-  keys: {
-    p256dh: string
-    auth: string
-  }
-}
-
-export function usePushNotifications() {
+export function usePushNotifications(userId: string) {
   const [isSupported, setIsSupported] = useState(false)
   const [isSubscribed, setIsSubscribed] = useState(false)
-  const [subscription, setSubscription] = useState<PushSubscription | null>(null)
-  const supabase = createClient()
+  const [isBusy, setIsBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const busy = useRef(false)
 
   useEffect(() => {
-    // Проверяем поддержку push-уведомлений
-    if (
-      typeof window !== 'undefined' &&
-      'serviceWorker' in navigator &&
-      'PushManager' in window
-    ) {
-      setIsSupported(true)
-      checkSubscription()
+    let active = true
+    const supported = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window
+    setIsSupported(supported)
+    setIsSubscribed(false)
+    if (supported && Notification.permission === 'granted') {
+      void (async () => {
+        try {
+          const registration = await readyPushRegistration()
+          const existing = await registration.pushManager.getSubscription()
+          if (existing) {
+            await saveDevicePushSubscription(existing)
+            if (active) setIsSubscribed(true)
+          }
+        } catch (err) { if (active) setError(err instanceof Error ? err.message : 'Не удалось проверить уведомления') }
+      })()
     }
+    return () => { active = false }
+  }, [userId])
+
+  const subscribe = useCallback(async () => {
+    if (!isSupported || busy.current) return false
+    const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+    if (!vapidKey) { setError('Отправка уведомлений пока не настроена'); return false }
+    busy.current = true
+    setIsBusy(true)
+    setError(null)
+    setIsSubscribed(false)
+    try {
+      // Keep the permission request in the button's user gesture (required on mobile).
+      const permission = await Notification.requestPermission()
+      if (permission !== 'granted') throw new Error('Разрешите уведомления для сайта в настройках браузера')
+      const registration = await readyPushRegistration()
+      const existing = await registration.pushManager.getSubscription()
+      const subscription = existing || await registration.pushManager.subscribe({
+        userVisibleOnly: true, applicationServerKey: vapidBytes(vapidKey),
+      })
+      await saveDevicePushSubscription(subscription)
+      setIsSubscribed(true)
+      return true
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Не удалось включить уведомления')
+      return false
+    } finally { busy.current = false; setIsBusy(false) }
+  }, [isSupported])
+
+  const unsubscribe = useCallback(async () => {
+    if (busy.current) return false
+    busy.current = true
+    setIsBusy(true)
+    setError(null)
+    try { await removeDevicePushSubscription(); return true }
+    catch (err) { setError(err instanceof Error ? err.message : 'Не удалось отключить уведомления'); return false }
+    finally { setIsSubscribed(false); busy.current = false; setIsBusy(false) }
   }, [])
 
-  const checkSubscription = async () => {
-    try {
-      const registration = await navigator.serviceWorker.ready
-      const sub = await registration.pushManager.getSubscription()
-      setSubscription(sub)
-      setIsSubscribed(!!sub)
-    } catch (error) {
-      console.error('Ошибка проверки подписки:', error)
-    }
-  }
-
-  const subscribe = async () => {
-    if (!isSupported) {
-      console.warn('Push-уведомления не поддерживаются')
-      return false
-    }
-
-    try {
-      // Регистрируем Service Worker
-      const registration = await navigator.serviceWorker.register('/sw.js')
-      await navigator.serviceWorker.ready
-
-      // Запрашиваем разрешение
-      const permission = await Notification.requestPermission()
-      if (permission !== 'granted') {
-        console.warn('Разрешение на уведомления не предоставлено')
-        return false
-      }
-
-      // Проверяем наличие VAPID ключа
-      const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
-      if (process.env.NODE_ENV === 'development') console.log('VAPID ключ проверка:', vapidKey ? 'найден' : 'не найден', vapidKey ? `(${vapidKey.substring(0, 20)}...)` : '')
-      
-      if (!vapidKey || vapidKey.trim() === '') {
-        console.warn('VAPID ключ не настроен. Push-подписка недоступна, но уведомления через Service Worker будут работать.')
-        console.warn('Убедитесь, что:')
-        console.warn('1. Переменная NEXT_PUBLIC_VAPID_PUBLIC_KEY добавлена в .env.local')
-        console.warn('2. Сервер разработки перезапущен после добавления переменной')
-        // Уведомления через Service Worker будут работать без push-подписки
-        setIsSubscribed(true) // Помечаем как подписанного, чтобы не запрашивать снова
-        return true
-      }
-
-      // Создаем подписку с VAPID ключом
-      const subscribeOptions: PushSubscriptionOptionsInit = {
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(vapidKey),
-      }
-
-      const sub = await registration.pushManager.subscribe(subscribeOptions)
-
-      setSubscription(sub)
-      setIsSubscribed(true)
-
-      // Отправляем подписку на сервер
-      const subscriptionData: PushSubscriptionData = {
-        endpoint: sub.endpoint,
-        keys: {
-          p256dh: arrayBufferToBase64(sub.getKey('p256dh')!),
-          auth: arrayBufferToBase64(sub.getKey('auth')!),
-        },
-      }
-
-      const response = await fetch('/api/push/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ subscription: subscriptionData }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Ошибка регистрации подписки на сервере')
-      }
-
-      return true
-    } catch (error) {
-      console.error('Ошибка подписки на push-уведомления:', error)
-      // Даже если push-подписка не удалась, уведомления через Service Worker будут работать
-      setIsSubscribed(true) // Помечаем как подписанного, чтобы не запрашивать снова
-      return false
-    }
-  }
-
-  const unsubscribe = async () => {
-    if (!subscription) return false
-
-    try {
-      await subscription.unsubscribe()
-      setSubscription(null)
-      setIsSubscribed(false)
-
-      // Удаляем подписку с сервера
-      await fetch('/api/push/unregister', {
-        method: 'POST',
-      })
-
-      return true
-    } catch (error) {
-      console.error('Ошибка отписки от push-уведомлений:', error)
-      return false
-    }
-  }
-
-  return {
-    isSupported,
-    isSubscribed,
-    subscribe,
-    unsubscribe,
-  }
+  return { isSupported, isSubscribed, isBusy, error, subscribe, unsubscribe }
 }
-
-// Вспомогательные функции
-function urlBase64ToUint8Array(base64String: string): BufferSource {
-  const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
-  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
-  const rawData = window.atob(base64)
-  const outputArray = new Uint8Array(rawData.length)
-
-  for (let i = 0; i < rawData.length; ++i) {
-    outputArray[i] = rawData.charCodeAt(i)
-  }
-  return outputArray.buffer
-}
-
-function arrayBufferToBase64(buffer: ArrayBuffer): string {
-  const bytes = new Uint8Array(buffer)
-  let binary = ''
-  for (let i = 0; i < bytes.byteLength; i++) {
-    binary += String.fromCharCode(bytes[i])
-  }
-  return window.btoa(binary)
-}
-

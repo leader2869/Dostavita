@@ -1,3 +1,5 @@
+import { CompanyOrderBoard } from '@/components/customer/CompanyOrderBoard'
+import { loadCompanyOrderBoard } from '@/lib/company-order-board'
 import Link from 'next/link'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
@@ -35,65 +37,11 @@ export default async function CustomerDashboard() {
     }
   }
 
-  // Получаем статистику по заказам напрямую из таблицы orders
-  // Используем прямую загрузку с учетом RLS политик
-  
-  // Получаем заказы водителей организации и заказы, созданные самой организацией
-  let allOrders: any[] = []
-  
-  // Заказы, созданные организацией
-  const { data: orgCreatedOrders } = await supabase
-    .from('orders')
-    .select('id, status')
-    .eq('customer_id', user.id)
-  
-  // Заказы водителей организации
-  let driverOrders: any[] = []
-  if (driverIds.length > 0) {
-    const { data: driverOrdersData } = await supabase
-      .from('orders')
-      .select('id, status')
-      .in('executor_user_id', driverIds)
-    
-    driverOrders = driverOrdersData || []
-  }
-  
-  // Объединяем и убираем дубликаты
-  const allOrderIds = new Set([
-    ...(orgCreatedOrders?.map((o: any) => o.id) || []),
-    ...(driverOrders.map((o: any) => o.id))
-  ])
-  
-  allOrders = [
-    ...(orgCreatedOrders || []),
-    ...driverOrders.filter((o: any) => !orgCreatedOrders?.some((oc: any) => oc.id === o.id))
-  ]
-
-  // Подсчитываем статистику
-  const activeOrdersCount = allOrders.filter((o: any) => 
-    o.status !== 'completed' && o.status !== 'cancelled'
-  ).length
-  const completedOrdersCount = allOrders.filter((o: any) => 
-    o.status === 'completed'
-  ).length
+  const boardData = await loadCompanyOrderBoard(supabase,user.id,true)
 
   return (
-    <div className="pb-20">
-      {/* Статистика */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        <div className="bg-gray-50 rounded-lg shadow p-6">
-          <h3 className="text-sm text-gray-600 mb-2">Водителей в организации</h3>
-          <p className="text-3xl font-bold text-gray-900">{drivers?.length || 0}</p>
-        </div>
-        <div className="bg-gray-50 rounded-lg shadow p-6">
-          <h3 className="text-sm text-gray-600 mb-2">Активных заказов</h3>
-          <p className="text-3xl font-bold text-green-600">{activeOrdersCount}</p>
-        </div>
-        <div className="bg-gray-50 rounded-lg shadow p-6">
-          <h3 className="text-sm text-gray-600 mb-2">Завершенных заказов</h3>
-          <p className="text-3xl font-bold text-blue-400">{completedOrdersCount}</p>
-        </div>
-      </div>
+    <div className="min-w-0 pb-20">
+      <CompanyOrderBoard initialData={boardData} organizationId={user.id} />
 
       {/* Водители */}
       <div className="bg-gray-50 rounded-lg shadow p-6 mb-6">
@@ -151,7 +99,7 @@ export default async function CustomerDashboard() {
                     </p>
                   )}
                   <p className="text-gray-700 mt-2">
-                    <span className="text-gray-600">Баланс:</span> 
+                    <span className="text-gray-600">Касса:</span>
                     <span className="font-semibold text-green-600 ml-1">
                       {driverBalances[driver.id]?.amount?.toFixed(2) || '0.00'} {driverBalances[driver.id]?.currency || 'BYN'}
                     </span>

@@ -74,7 +74,7 @@ export function DashboardNav({ profile: initialProfile, userId }: DashboardNavPr
   }, [userId, supabase])
 
   return (
-    <div className="flex items-center space-x-4">
+    <div className="flex shrink-0 items-center space-x-2 md:space-x-4">
       {/* Уведомления о сообщениях */}
       <ChatNotifications userId={userId} userRole={profile.role} />
       
@@ -97,7 +97,7 @@ export function DashboardNav({ profile: initialProfile, userId }: DashboardNavPr
             </svg>
           </div>
         )}
-        <span className="text-sm text-gray-900">
+        <span className="hidden text-sm text-gray-900 md:inline">
           {profile.full_name || profile.email}
         </span>
       </div>
@@ -105,4 +105,3 @@ export function DashboardNav({ profile: initialProfile, userId }: DashboardNavPr
     </div>
   )
 }
-

@@ -20,8 +20,9 @@ function harness(overrides = {}, route = 'app/api/orders/notify-drivers/route.ts
         calls.filters.push([table, column, value])
         return query
       },
+      in(column, value) { calls.filters.push([table, column, value]); return query },
       then(resolve, reject) {
-        const result = table === 'order_rejections'
+        const result = table === 'orders' ? { data: overrides.busy ? [{ executor_user_id: 'driver' }] : [], error: overrides.activeError } : table === 'order_rejections'
           ? { data: [{ driver_user_id: 'rejected' }], error: overrides.rejectionError }
           : { data: [{ user_id: 'driver', endpoint: 'allowed' }, { user_id: 'rejected', endpoint: 'excluded' }], error: null }
         return Promise.resolve(result).then(resolve, reject)
@@ -115,4 +116,15 @@ test('middleware propagates refreshed cookies to request and browser response', 
   assert.equal(response.cookies.get('session').value, 'refreshed')
   assert.equal(response.cookies.get('session').httpOnly, true)
   assert.match(response.headers.get('x-middleware-request-cookie'), /session=refreshed/)
+})
+
+test('busy drivers are excluded from new order push', async () => {
+  const { handler, calls } = harness({ busy: true })
+  assert.equal((await handler(request())).status, 200)
+  assert.equal(calls.sent[0].recipients.length, 0)
+})
+test('failed active-order lookup does not notify busy drivers by accident', async () => {
+  const { handler, calls } = harness({ activeError: { message: 'unavailable' } })
+  assert.equal((await handler(request())).status, 500)
+  assert.equal(calls.sent.length, 0)
 })

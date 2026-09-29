@@ -95,9 +95,8 @@ export function PageTitle() {
   if (!pageTitle) return null
 
   return (
-    <span className="text-4xl font-bold text-brand-light ml-2 font-amatic-sc">
+    <span className="min-w-0 text-3xl leading-tight font-bold text-brand-light font-amatic-sc md:ml-2 md:text-4xl">
       {pageTitle}
     </span>
   )
 }
-

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import Image from 'next/image'
+import { ChatPhoto } from './ChatPhoto'
 import { toastError } from '@/lib/utils/toast'
 import { MAX_CHAT_PHOTO_SIZE_BYTES } from '@/lib/constants'
 import { markOrgMessagesRead } from '@/lib/org-chat'
@@ -365,7 +365,7 @@ export function DriverOrganizationChat({
   }
 
   const handlePhotoUpload = async (file: File) => {
-    if (!file.type.startsWith('image/')) {
+    if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(file.type)) {
       toastError('Пожалуйста, выберите изображение')
       return
     }
@@ -379,8 +379,8 @@ export function DriverOrganizationChat({
 
     try {
       // Загружаем фото в Supabase Storage
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${organizationId}/${driverId || 'general'}/${Date.now()}.${fileExt}`
+      const fileExt = file.type === 'image/jpeg' ? 'jpg' : file.type.split('/')[1]
+      const fileName = `${organizationId}/${driverId || 'general'}/${currentUserId}/${crypto.randomUUID()}.${fileExt}`
       const filePath = `driver-org-chat/${fileName}`
 
       const { data: uploadData, error: uploadError } = await supabase.storage
@@ -392,11 +392,6 @@ export function DriverOrganizationChat({
 
       if (uploadError) throw uploadError
 
-      // Получаем публичный URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('chat-photos')
-        .getPublicUrl(filePath)
-
       // Отправляем сообщение с фото
       const { data, error } = await supabase
         .from('driver_organization_messages')
@@ -405,7 +400,7 @@ export function DriverOrganizationChat({
           driver_id: driverId,
           sender_id: currentUserId,
           message: newMessage.trim() || null,
-          photo_url: publicUrl,
+          photo_url: filePath,
         })
         .select()
         .single()
@@ -500,14 +495,7 @@ export function DriverOrganizationChat({
                     </div>
                     {message.photo_url && (
                       <div className="mb-2">
-                        <Image
-                          src={message.photo_url}
-                          alt="Фото"
-                          width={300}
-                          height={300}
-                          className="rounded-lg max-w-full h-auto"
-                          unoptimized
-                        />
+                        <ChatPhoto path={message.photo_url} />
                       </div>
                     )}
                     {message.message && (

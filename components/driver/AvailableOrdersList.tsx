@@ -7,6 +7,7 @@ import { formatDistanceToNow } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { formatAddressForOrder } from '@/lib/utils/formatAddress'
 import { formatReadyTime } from '@/lib/utils/formatReadyTime'
+import { toast } from 'sonner'
 import { AcceptOrderModal } from './AcceptOrderModal'
 
 interface Order {
@@ -129,7 +130,7 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
       const data = await response.json()
 
       if (!response.ok) {
-        console.error('Ошибка сохранения отказа:', data.error || 'Неизвестная ошибка')
+        toast.error('Не удалось скрыть заказ. Попробуйте ещё раз.')
         // Если ошибка, убираем из списка отказов (заказ вернется)
         setRejectedOrderIds(prev => {
           const updated = new Set(prev)
@@ -140,9 +141,10 @@ export function AvailableOrdersList({ orders: initialOrders, driverUserId, cance
       } else {
         // Подтверждаем, что отказ сохранен - обновляем ref
         rejectedOrderIdsRef.current = new Set([...rejectedOrderIdsRef.current, orderId])
+        router.refresh()
       }
     } catch (error) {
-      console.error('Ошибка сохранения отказа:', error)
+      toast.error('Не удалось скрыть заказ. Проверьте связь и повторите.')
       // Если ошибка, убираем из списка отказов (заказ вернется)
       setRejectedOrderIds(prev => {
         const updated = new Set(prev)

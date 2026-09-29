@@ -160,11 +160,11 @@ export async function POST(request: Request) {
     // Создаем баланс для водителя (используем admin клиент)
     await supabaseAdmin
       .from('balances')
-      .insert({
+      .upsert({
         user_id: newUser.user.id,
         amount: 0,
         currency: 'BYN',
-      })
+      }, { onConflict: 'user_id', ignoreDuplicates: true })
 
     return NextResponse.json({
       success: true,
